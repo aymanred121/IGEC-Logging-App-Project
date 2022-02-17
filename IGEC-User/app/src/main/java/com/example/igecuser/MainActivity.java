@@ -16,26 +16,36 @@ import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
 
-    TextInputEditText email;
-    TextInputEditText password;
-    TextInputLayout email_layout;
-    MaterialButton sign_in;
+    // Views
+    TextInputEditText vEmail;
+    TextInputLayout vEmailLayout;
+    TextInputEditText vPassword;
+    MaterialButton vSignIn;
+
+    // Vars
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        email = findViewById(R.id.TextInput_email);
-        password = findViewById(R.id.TextInput_password);
-        email_layout = findViewById(R.id.textInputLayout_Email);
-        sign_in = findViewById(R.id.Button_SignIn);
+        Initialize();
 
-        email.addTextChangedListener(email_watcher);
-        sign_in.setOnClickListener(sign_in_listener);
-
-
+        // Listeners
+        vEmail.addTextChangedListener(twEmail);
+        vSignIn.setOnClickListener(clSignIn);
     }
-    TextWatcher email_watcher = new TextWatcher() {
+
+    // Functions
+    private void Initialize()
+    {
+        vEmail = findViewById(R.id.TextInput_email);
+        vPassword = findViewById(R.id.TextInput_password);
+        vEmailLayout = findViewById(R.id.textInputLayout_Email);
+        vSignIn = findViewById(R.id.Button_SignIn);
+    }
+
+    // Listeners
+    TextWatcher twEmail = new TextWatcher() {
         private Pattern mPattern = Pattern.compile("(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])");
 
         private boolean isValid(CharSequence s)
@@ -56,15 +66,15 @@ public class MainActivity extends AppCompatActivity {
         public void afterTextChanged(Editable s) {
             if(!isValid(s))
             {
-                email_layout.setError("Wrong E-mail form");
+                vEmailLayout.setError("Wrong E-mail form");
             }
             else
             {
-                email_layout.setError(null);
+                vEmailLayout.setError(null);
             }
         }
     };
-    View.OnClickListener sign_in_listener = new View.OnClickListener() {
+    View.OnClickListener clSignIn = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             Toast.makeText(MainActivity.this, "Pressed", Toast.LENGTH_SHORT).show();

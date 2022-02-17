@@ -26,7 +26,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="First Name"
-            android:padding="20dp" />
+            android:singleLine="true"
+            android:padding="14dp" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -40,6 +41,7 @@
         android:layout_marginEnd="32dp"
         app:boxBackgroundMode="outline"
         app:helperTextEnabled="true"
+
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/textInputLayout_FirstName"
         app:layout_constraintTop_toTopOf="parent">
@@ -49,9 +51,64 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Second Name"
-            android:padding="20dp" />
+            android:singleLine="true"
+            android:padding="14dp" />
 
     </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textInputLayout_Email"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="32dp"
+        app:boxBackgroundMode="outline"
+        app:helperTextEnabled="true"
+        app:helperText="Example@gmail.com"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout_FirstName">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/TextInput_Email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="E-mail"
+            android:singleLine="true"
+            android:inputType="textEmailAddress"
+            android:padding="14dp" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textInputLayout_Password"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="32dp"
+        app:boxBackgroundMode="outline"
+        app:helperTextEnabled="true"
+        app:endIconMode="password_toggle"
+        app:endIconTint="@color/Primary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout_Email">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/TextInput_Password"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Password"
+            android:singleLine="true"
+            android:inputType="textPassword"
+            android:padding="14dp" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textInputLayout_Title"
@@ -65,14 +122,15 @@
         app:helperTextEnabled="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textInputLayout_FirstName">
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout_Password">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/TextInput_Title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Title"
-            android:padding="20dp" />
+            android:singleLine="true"
+            android:padding="14dp" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -96,33 +154,11 @@
             android:layout_height="wrap_content"
             android:hint="Salary"
             android:inputType="numberDecimal"
-            android:padding="20dp" />
+            android:singleLine="true"
+            android:padding="14dp" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/textInputLayout_SNN"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="32dp"
-        app:boxBackgroundMode="outline"
-        app:helperTextEnabled="true"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textInputLayout_Salary">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/TextInput_SNN"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="SNN"
-            android:inputType="number"
-            android:padding="20dp" />
-
-    </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textInputLayout_Area"
@@ -131,19 +167,20 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="32dp"
+        android:layout_marginEnd="8dp"
         app:boxBackgroundMode="outline"
         app:helperTextEnabled="true"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/textInputLayout_City"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textInputLayout_SNN">
+        app:layout_constraintTop_toBottomOf="@id/textInputLayout_Salary">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/TextInput_Area"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Area"
-            android:padding="20dp" />
+            android:singleLine="true"
+            android:padding="14dp" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -152,21 +189,22 @@
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="32dp"
+        android:layout_marginEnd="8dp"
         app:boxBackgroundMode="outline"
         app:helperTextEnabled="true"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textInputLayout_Area">
+        app:layout_constraintEnd_toStartOf="@+id/textInputLayout_Street"
+        app:layout_constraintStart_toEndOf="@+id/textInputLayout_Area"
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout_Salary">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/TextInput_City"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="City"
-            android:padding="20dp" />
+            android:singleLine="true"
+            android:padding="14dp" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -175,21 +213,22 @@
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="32dp"
         app:boxBackgroundMode="outline"
         app:helperTextEnabled="true"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textInputLayout_City">
+        app:layout_constraintStart_toEndOf="@+id/textInputLayout_City"
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout_Salary">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/TextInput_Street"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Street"
-            android:padding="20dp" />
+            android:singleLine="true"
+            android:padding="14dp" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -213,7 +252,38 @@
             android:layout_height="wrap_content"
             android:hint="Hire Date"
             android:inputType="date"
-            android:padding="20dp" />
+            android:padding="14dp"
+            android:singleLine="true" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textInputLayout_SNN"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="80dp"
+        app:boxBackgroundMode="outline"
+        app:counterEnabled="true"
+        app:counterMaxLength="14"
+        app:helperTextEnabled="true"
+        app:layout_constraintBottom_toTopOf="@+id/button_register"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textInputLayout_HireDate">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/TextInput_SNN"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="SNN"
+            android:inputType="number"
+            android:maxLength="14"
+            android:padding="14dp"
+            android:singleLine="true" />
 
     </com.google.android.material.textfield.TextInputLayout>
 

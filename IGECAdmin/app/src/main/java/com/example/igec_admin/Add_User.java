@@ -13,13 +13,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.example.igec_admin.fireBase.Employees;
+import com.example.igec_admin.fireBase.operation;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Objects;
 
 public class Add_User extends Fragment {
@@ -30,6 +41,7 @@ public class Add_User extends Fragment {
     TextInputEditText dateFormat;
     TextInputEditText FirstName , LastName , Title , Salary , SSN ,Area , City , Street ;
     DatePickerDialog.OnDateSetListener onDateSetListener;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -78,31 +90,98 @@ public class Add_User extends Fragment {
             Toast.makeText(getActivity(), "Hi", Toast.LENGTH_SHORT).show();
             if(!TextUtils.isEmpty(Objects.requireNonNull(FirstName.getText()).toString()) && !TextUtils.isEmpty(Objects.requireNonNull(LastName.getText()).toString())) {
 
-                AddRecord(db, "3");
+                addRecord(operation.employee);
             }
             else
-                deleteRecord(db, "3");
+                deleteRecord(db, "123");
 
         }
+
     };
-void AddRecord (FirebaseFirestore db , String path )
+void addRecord(operation op)
 {
-    user newUser = new user(Objects.requireNonNull(FirstName.getText()).toString() ,
-            Objects.requireNonNull(LastName.getText()).toString() , Objects.requireNonNull(Title.getText()).toString(), Objects.requireNonNull(Area.getText()).toString()
-            , Objects.requireNonNull(City.getText()).toString() , Objects.requireNonNull(Street.getText()).toString(),2,
-            Integer.parseInt(Objects.requireNonNull(Salary.getText()).toString()),Integer.parseInt(Objects.requireNonNull(SSN.getText()).toString()));
-    db.collection("users").document(path)
-            .set(newUser)
+    switch (op){
+        case machine:
+            addMachine();
+            break;
+        case project:
+            addProject();
+            break;
+        case employee:
+            addEmployee();
+            break;
+    }
+
+}
+void addProject(){
+    //TODO add project code
+}
+void addMachine(){
+    //TODO add machine code
+
+
+}
+void addEmployee(){
+    //TODO add account collection
+    Employees newUser = new Employees((FirstName.getText()).toString(),
+            (LastName.getText()).toString(), (Title.getText()).toString(), (Area.getText()).toString()
+            , (City.getText()).toString() , (Street.getText()).toString(),"2",
+            Double.parseDouble(Salary.getText().toString()),((SSN.getText()).toString()), convertStringDate(dateFormat.getText().toString()));
+    db.collection("employees")
+            .add(newUser)
             .addOnSuccessListener(aVoid -> Log.d(TAG, "DocumentSnapshot successfully added!"))
             .addOnFailureListener(e -> Log.w(TAG, "Error adding document", e));
 
 }
-void deleteRecord(FirebaseFirestore db , String path )
+void deleteRecord(FirebaseFirestore db,String ID)
 {
-    db.collection("users").document(path)
-            .delete()
-            .addOnSuccessListener(aVoid -> Log.d(TAG, "DocumentSnapshot successfully deleted!"))
-            .addOnFailureListener(e -> Log.w(TAG, "Error deleting document", e));
+    db.collection("employees").whereEqualTo("id",ID).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+        @Override
+        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+            for(DocumentSnapshot ds : queryDocumentSnapshots){
+                db.collection("employees").document(ds.getId()).delete();
+
+            }
+        }
+    });
+
+}
+void updateRecord(String Collection,String id,String field,Object value){
+    Task updateDB = db.collection(Collection).document(id).update(field,value).addOnFailureListener(new OnFailureListener() {
+        @Override
+        public void onFailure(@NonNull Exception e) {
+            Toast.makeText(getActivity(), "Error while updating record", Toast.LENGTH_SHORT).show();
+        }
+    });
+}
+Employees getEmployee(String id){
+    /**
+     * This is a dummy solution
+     * */
+   Task dbTask= db.collection("employees").document(id).get();
+   while (true){
+       if(dbTask.isComplete()){
+           DocumentSnapshot documentSnapshot =(DocumentSnapshot) dbTask.getResult();
+           if(documentSnapshot.exists())
+           return documentSnapshot.toObject(Employees.class);
+           else
+               return null;
+       }
+   }
+}
+
+
+
+
+Date convertStringDate(String sDate){
+    SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+    try {
+        Date date = format.parse(sDate);
+       return date;
+    } catch (ParseException e) {
+        e.printStackTrace();
+    }
+    return null;
 }
 
 }

@@ -24,6 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Name"
+            android:inputType="text"
             android:padding="14dp"
             android:singleLine="true" />
 
@@ -48,6 +49,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Location"
+            android:inputType="text"
             android:padding="14dp"
             android:singleLine="true" />
 
@@ -72,6 +74,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Start Time"
+            android:inputType="date"
             android:padding="14dp"
             android:singleLine="true" />
 
@@ -96,6 +99,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="End Time"
+            android:inputType="date"
             android:padding="14dp"
             android:singleLine="true" />
 
@@ -109,10 +113,10 @@
         android:layout_marginStart="32dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        app:boxBackgroundMode="outline"
-        app:helperTextEnabled="true"
-        app:endIconMode="dropdown_menu"
         android:enabled="false"
+        app:boxBackgroundMode="outline"
+        app:endIconMode="dropdown_menu"
+        app:helperTextEnabled="true"
         app:layout_constraintEnd_toStartOf="@+id/textInputLayout_ManagerName"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/textInputLayout_StartTime">
@@ -122,6 +126,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Manager ID"
+            android:inputType="text"
             android:padding="14dp"
             android:singleLine="true" />
 
@@ -147,6 +152,7 @@
             android:layout_height="wrap_content"
             android:enabled="false"
             android:hint="Manager Name"
+            android:inputType="text"
             android:padding="14dp"
             android:singleLine="true" />
 
@@ -162,9 +168,22 @@
         android:layout_marginBottom="32dp"
         android:overScrollMode="never"
         android:scrollbars="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/button_register"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textInputLayout_ManagerID"
         tools:listitem="@layout/employee_item" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_register"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp"
+        android:text="Register"
+        android:textAllCaps="false"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

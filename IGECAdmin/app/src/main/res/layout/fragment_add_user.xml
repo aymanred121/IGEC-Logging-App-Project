@@ -26,6 +26,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="First Name"
+            android:inputType="text"
             android:singleLine="true"
             android:padding="14dp" />
 
@@ -51,6 +52,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Second Name"
+            android:inputType="text"
             android:singleLine="true"
             android:padding="14dp" />
 
@@ -129,6 +131,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Title"
+            android:inputType="text"
             android:singleLine="true"
             android:padding="14dp" />
 
@@ -179,6 +182,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Area"
+            android:inputType="text"
             android:singleLine="true"
             android:padding="14dp" />
 
@@ -203,6 +207,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="City"
+            android:inputType="text"
             android:singleLine="true"
             android:padding="14dp" />
 
@@ -227,6 +232,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Street"
+            android:inputType="text"
             android:singleLine="true"
             android:padding="14dp" />
 
@@ -261,11 +267,11 @@
         android:id="@+id/textInputLayout_SNN"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="32dp"
-        android:layout_marginBottom="80dp"
+        android:layout_marginBottom="32dp"
         app:boxBackgroundMode="outline"
         app:counterEnabled="true"
         app:counterMaxLength="14"

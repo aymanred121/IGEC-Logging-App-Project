@@ -18,6 +18,7 @@ import android.widget.Toast;
 import com.example.igec_admin.fireBase.EmployeeOverview;
 import com.example.igec_admin.fireBase.Employees;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.textfield.TextInputEditText;
@@ -34,9 +35,9 @@ import java.util.regex.Pattern;
 
 public class Add_Project extends Fragment {
 
-
     // Views
     private TextInputEditText vName, vLocation, vStartTime, vEndTime, vManagerName;
+    private MaterialButton vRegister;
     private AutoCompleteTextView vManagerID;
     private TextInputLayout vManagerIDLayout;
     private RecyclerView recyclerView;
@@ -48,47 +49,20 @@ public class Add_Project extends Fragment {
     MaterialDatePicker vStartDatePicker;
     MaterialDatePicker.Builder<Long> vEndDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     MaterialDatePicker vEndDatePicker;
-    ArrayList<EmployeeOverview> employees =new ArrayList();
+    ArrayList<EmployeeOverview> employees = new ArrayList();
     ArrayList<String> TeamID = new ArrayList<>();
     ArrayList<EmployeeOverview> Team = new ArrayList<>();
     FirebaseFirestore db = FirebaseFirestore.getInstance();
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_add_project, container,false);
+        View view = inflater.inflate(R.layout.fragment_add_project, container, false);
+        Initialize(view);
 
-        vName = view.findViewById(R.id.TextInput_ProjectName);
-        vLocation = view.findViewById(R.id.TextInput_Location);
-        vStartTime = view.findViewById(R.id.TextInput_StartTime);
-        vEndTime = view.findViewById(R.id.TextInput_EndTime);
-        vManagerID = view.findViewById(R.id.TextInput_ManagerID);
-        vManagerIDLayout = view.findViewById(R.id.textInputLayout_ManagerID);
-        vManagerName = view.findViewById(R.id.TextInput_ManagerName);
-        vStartDatePickerBuilder.setTitleText("Start Date");
-        vStartDatePicker = vStartDatePickerBuilder.build();
-        vEndDatePickerBuilder.setTitleText("End Date");
-        vEndDatePicker = vEndDatePickerBuilder.build();
-        employees=getEmployee();
-
-        recyclerView = view.findViewById(R.id.recyclerview);
-        recyclerView.setHasFixedSize(true);
-        layoutManager = new LinearLayoutManager(getActivity());
-        adapter = new EmployeeAdapter(employees);
-
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(adapter);
-
-        adapter.setOnItemClickListener(new EmployeeAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(int position) {
-               ChangeSelectedTeam(position);
-            }
-
-            @Override
-            public void onCheckboxClick(int position) {
-                ChangeSelectedTeam(position);
-            }
-        });
+        // listeners
+        vRegister.setOnClickListener(clRegister);
+        adapter.setOnItemClickListener(itclEmployeeAdapter);
         vManagerID.addTextChangedListener(twManagerID);
         vStartDatePicker.addOnPositiveButtonClickListener(pclStartDatePicker);
         vEndDatePicker.addOnPositiveButtonClickListener(pclEndDatePicker);
@@ -98,23 +72,40 @@ public class Add_Project extends Fragment {
         vEndTime.setOnClickListener(clEndDate);
 
 
-
-
         // Inflate the layout for this fragment
         return view;
     }
+
     // Functions
-    void ChangeSelectedTeam(int position)
-    {
+    private void Initialize(View view) {
+        vName = view.findViewById(R.id.TextInput_ProjectName);
+        vLocation = view.findViewById(R.id.TextInput_Location);
+        vStartTime = view.findViewById(R.id.TextInput_StartTime);
+        vEndTime = view.findViewById(R.id.TextInput_EndTime);
+        vManagerID = view.findViewById(R.id.TextInput_ManagerID);
+        vManagerIDLayout = view.findViewById(R.id.textInputLayout_ManagerID);
+        vManagerName = view.findViewById(R.id.TextInput_ManagerName);
+        vRegister = view.findViewById(R.id.button_register);
+        vStartDatePickerBuilder.setTitleText("Start Date");
+        vStartDatePicker = vStartDatePickerBuilder.build();
+        vEndDatePickerBuilder.setTitleText("End Date");
+        vEndDatePicker = vEndDatePickerBuilder.build();
+        employees = getEmployee();
+        recyclerView = view.findViewById(R.id.recyclerview);
+        recyclerView.setHasFixedSize(true);
+        layoutManager = new LinearLayoutManager(getActivity());
+        adapter = new EmployeeAdapter(employees);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(adapter);
+    }
+
+    void ChangeSelectedTeam(int position) {
         employees.get(position).isSelected = !employees.get(position).isSelected;
-        if(employees.get(position).isSelected)
-        {
+        if (employees.get(position).isSelected) {
             Team.add(employees.get(position));
             TeamID.add(String.valueOf(employees.get(position).getId()));
-        }
-        else
-        {
-            if(!vManagerID.getText().toString().isEmpty() && vManagerID.getText().toString().equals(TeamID.get(position).toString()))
+        } else {
+            if (!vManagerID.getText().toString().isEmpty() && vManagerID.getText().toString().equals(TeamID.get(position).toString()))
                 vManagerID.setText("");
             Team.remove(employees.get(position));
             TeamID.remove(String.valueOf(employees.get(position).getId()));
@@ -122,37 +113,38 @@ public class Add_Project extends Fragment {
 
         }
         vManagerIDLayout.setEnabled(Team.size() >= 2);
-        if(!vManagerIDLayout.isEnabled())
+        if (!vManagerIDLayout.isEnabled())
             vManagerID.setText("");
-        if(TeamID.size() > 0) {
+        if (TeamID.size() > 0) {
             ArrayAdapter<String> idAdapter = new ArrayAdapter<>(getActivity(), R.layout.dropdown_item, TeamID);
             vManagerID.setAdapter(idAdapter);
 
         }
         adapter.notifyItemChanged(position);
     }
-    ArrayList<EmployeeOverview> getEmployee(){
+
+    ArrayList<EmployeeOverview> getEmployee() {
         /**
          * This is a dummy solution
          * */
         ArrayList<EmployeeOverview> employeeArray = new ArrayList();
-        Map<String,ArrayList<String>> empMap = new HashMap();
-        Task dbTask= db.collection("EmployeeOverview").document("emp").get();
-        while (true){
-            if(dbTask.isComplete()){
-                DocumentSnapshot documentSnapshot =(DocumentSnapshot) dbTask.getResult();
-                if(documentSnapshot.exists()){
+        Map<String, ArrayList<String>> empMap = new HashMap();
+        Task dbTask = db.collection("EmployeeOverview").document("emp").get();
+        while (true) {
+            if (dbTask.isComplete()) {
+                DocumentSnapshot documentSnapshot = (DocumentSnapshot) dbTask.getResult();
+                if (documentSnapshot.exists()) {
                     empMap = (HashMap) documentSnapshot.getData();
                     break;
                 }
             }
         }
-        for(String key : empMap.keySet()){
+        for (String key : empMap.keySet()) {
             String firstName = empMap.get(key).get(0);
             String lastName = empMap.get(key).get(1);
             String title = empMap.get(key).get(2);
-            String id =(key);
-            employeeArray.add(new EmployeeOverview(firstName,lastName,title,id));
+            String id = (key);
+            employeeArray.add(new EmployeeOverview(firstName, lastName, title, id));
         }
         return employeeArray;
     }
@@ -171,33 +163,28 @@ public class Add_Project extends Fragment {
 
         @Override
         public void afterTextChanged(Editable s) {
-            if(vManagerID.getText().length() > 0)
-            {
+            if (vManagerID.getText().length() > 0) {
                 int position = 0;
-                for(int i = 0 ; i < Team.size() ; i++)
-                {
-                    if(String.valueOf(Team.get(i).getId()).equals(s.toString()))
-                    {
+                for (int i = 0; i < Team.size(); i++) {
+                    if (String.valueOf(Team.get(i).getId()).equals(s.toString())) {
                         position = i;
 
                     }
                 }
                 vManagerName.setText(Team.get(position).getFirstName() + " " + Team.get(position).getLastName());
-            }
-            else
+            } else
                 vManagerName.setText(null);
         }
     };
     View.OnFocusChangeListener fclStartDate = new View.OnFocusChangeListener() {
         @Override
         public void onFocusChange(View v, boolean hasFocus) {
-            if(hasFocus)
-            {
-                vStartDatePicker.show(getFragmentManager(),"DATE_PICKER");
+            if (hasFocus) {
+                vStartDatePicker.show(getFragmentManager(), "DATE_PICKER");
             }
         }
     };
-    MaterialPickerOnPositiveButtonClickListener pclStartDatePicker =  new MaterialPickerOnPositiveButtonClickListener() {
+    MaterialPickerOnPositiveButtonClickListener pclStartDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
         @Override
         public void onPositiveButtonClick(Object selection) {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
@@ -209,13 +196,12 @@ public class Add_Project extends Fragment {
     View.OnFocusChangeListener fclEndDate = new View.OnFocusChangeListener() {
         @Override
         public void onFocusChange(View v, boolean hasFocus) {
-            if(hasFocus)
-            {
-                vEndDatePicker.show(getFragmentManager(),"DATE_PICKER");
+            if (hasFocus) {
+                vEndDatePicker.show(getFragmentManager(), "DATE_PICKER");
             }
         }
     };
-    MaterialPickerOnPositiveButtonClickListener pclEndDatePicker =  new MaterialPickerOnPositiveButtonClickListener() {
+    MaterialPickerOnPositiveButtonClickListener pclEndDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
         @Override
         public void onPositiveButtonClick(Object selection) {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
@@ -224,19 +210,35 @@ public class Add_Project extends Fragment {
             vEndTime.setText(simpleDateFormat.format(calendar.getTime()));
         }
     };
-    View.OnClickListener clStartDate =  new View.OnClickListener() {
+    View.OnClickListener clStartDate = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            if(!vStartDatePicker.isVisible())
-                vStartDatePicker.show(getFragmentManager(),"DATE_PICKER");
+            if (!vStartDatePicker.isVisible())
+                vStartDatePicker.show(getFragmentManager(), "DATE_PICKER");
         }
     };
-
-    View.OnClickListener clEndDate =  new View.OnClickListener() {
+    View.OnClickListener clEndDate = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            if(!vEndDatePicker.isVisible())
-                vEndDatePicker.show(getFragmentManager(),"DATE_PICKER");
+            if (!vEndDatePicker.isVisible())
+                vEndDatePicker.show(getFragmentManager(), "DATE_PICKER");
+        }
+    };
+    View.OnClickListener clRegister = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+
+        }
+    };
+    EmployeeAdapter.OnItemClickListener itclEmployeeAdapter = new EmployeeAdapter.OnItemClickListener() {
+        @Override
+        public void onItemClick(int position) {
+            ChangeSelectedTeam(position);
+        }
+
+        @Override
+        public void onCheckboxClick(int position) {
+            ChangeSelectedTeam(position);
         }
     };
 

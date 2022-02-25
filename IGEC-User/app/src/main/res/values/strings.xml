@@ -5,6 +5,29 @@
     <string name="vacation_date">Vacation Date*</string>
     <string name="vacation_reason">Vacation Reason*</string>
     <string name="send_request">Send Request</string>
-    <string name="Check_In_Out">Check In/Out</string>
-    <string name="Vacation_Request">Vacation Request</string>
+    <string name="check_in_out">Check In/Out</string>
+    <string name="vacation_request">Vacation Request</string>
+    <string name="vacation_days">Vacation Days*</string>
+    <string name="vacations_log">Vacations Log</string>
+    <string name="vacation_requests">Vacation Requests</string>
+    <!-- Preference Titles -->
+    <string name="messages_header">Messages</string>
+    <string name="sync_header">Sync</string>
+
+    <!-- Messages Preferences -->
+    <string name="signature_title">Your signature</string>
+    <string name="reply_title">Default reply action</string>
+
+    <!-- Sync Preferences -->
+    <string name="sync_title">Sync email periodically</string>
+    <string name="attachment_title">Download incoming attachments</string>
+    <string name="attachment_summary_on">Automatically download attachments for incoming emails
+    </string>
+    <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="employee_id">Employee ID</string>
+    <string name="employee_name">Employee Name</string>
+    <string name="accept_request">Accept</string>
+    <string name="Decline_request">Decline</string>
 </resources>

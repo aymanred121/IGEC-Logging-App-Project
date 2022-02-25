@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
             // TODO: Add authentication
             // if employee
             {
-                Intent intent = new Intent(MainActivity.this, EmployeeDashboard.class);
+                Intent intent = new Intent(MainActivity.this, ManagerDashboard.class);
                 startActivity(intent);
             }
             // if Manager

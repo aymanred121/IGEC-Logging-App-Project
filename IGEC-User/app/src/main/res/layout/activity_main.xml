@@ -66,7 +66,7 @@
         android:padding="8dp"
         android:text="Sign In"
         android:textAllCaps="false"
-        android:textSize="20sp"
+        android:textSize="16sp"
         app:cornerRadius="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

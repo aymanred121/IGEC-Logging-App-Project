@@ -2,6 +2,7 @@ package com.example.igecuser;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -77,7 +78,20 @@ public class MainActivity extends AppCompatActivity {
     View.OnClickListener clSignIn = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            Toast.makeText(MainActivity.this, "Pressed", Toast.LENGTH_SHORT).show();
+            // TODO: Add authentication
+            // if employee
+            {
+                Intent intent = new Intent(MainActivity.this, EmployeeDashboard.class);
+                startActivity(intent);
+            }
+            // if Manager
+            {
+
+            }
+            // else
+            {
+                // notify user that either e-mail or password are wrong
+            }
         }
     };
 }

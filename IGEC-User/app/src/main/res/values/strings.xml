@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">IGEC User</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="vacation_date">Vacation Date*</string>
+    <string name="vacation_reason">Vacation Reason*</string>
+    <string name="send_request">Send Request</string>
+    <string name="Check_In_Out">Check In/Out</string>
+    <string name="Vacation_Request">Vacation Request</string>
 </resources>

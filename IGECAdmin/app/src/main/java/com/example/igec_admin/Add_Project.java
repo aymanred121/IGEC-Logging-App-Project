@@ -13,16 +13,23 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.Toast;
 
+import com.example.igec_admin.fireBase.EmployeeOverview;
 import com.example.igec_admin.fireBase.Employees;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public class Add_Project extends Fragment {
@@ -41,9 +48,10 @@ public class Add_Project extends Fragment {
     MaterialDatePicker vStartDatePicker;
     MaterialDatePicker.Builder<Long> vEndDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     MaterialDatePicker vEndDatePicker;
-    ArrayList<Employees> employees = new ArrayList<>();
+    ArrayList<EmployeeOverview> employees =new ArrayList();
     ArrayList<String> TeamID = new ArrayList<>();
-    ArrayList<Employees> Team = new ArrayList<>();
+    ArrayList<EmployeeOverview> Team = new ArrayList<>();
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -60,13 +68,7 @@ public class Add_Project extends Fragment {
         vStartDatePicker = vStartDatePickerBuilder.build();
         vEndDatePickerBuilder.setTitleText("End Date");
         vEndDatePicker = vEndDatePickerBuilder.build();
-        employees.add(new Employees("Badr","Mohamed","1"));
-        employees.add(new Employees("Ayman","Hassan","2"));
-        employees.add(new Employees("Marwan","Fawzy","3"));
-        employees.add(new Employees("Badr","Mohamed","4"));
-        employees.add(new Employees("Ayman","Hassan","5"));
-        employees.add(new Employees("Marwan","Fawzy","6"));
-
+        employees=getEmployee();
 
         recyclerView = view.findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
@@ -128,6 +130,31 @@ public class Add_Project extends Fragment {
 
         }
         adapter.notifyItemChanged(position);
+    }
+    ArrayList<EmployeeOverview> getEmployee(){
+        /**
+         * This is a dummy solution
+         * */
+        ArrayList<EmployeeOverview> employeeArray = new ArrayList();
+        Map<String,ArrayList<String>> empMap = new HashMap();
+        Task dbTask= db.collection("EmployeeOverview").document("emp").get();
+        while (true){
+            if(dbTask.isComplete()){
+                DocumentSnapshot documentSnapshot =(DocumentSnapshot) dbTask.getResult();
+                if(documentSnapshot.exists()){
+                    empMap = (HashMap) documentSnapshot.getData();
+                    break;
+                }
+            }
+        }
+        for(String key : empMap.keySet()){
+            String firstName = empMap.get(key).get(0);
+            String lastName = empMap.get(key).get(1);
+            String title = empMap.get(key).get(2);
+            String id =(key);
+            employeeArray.add(new EmployeeOverview(firstName,lastName,title,id));
+        }
+        return employeeArray;
     }
 
     // Listeners

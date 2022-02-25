@@ -8,13 +8,14 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.igec_admin.fireBase.EmployeeOverview;
 import com.example.igec_admin.fireBase.Employees;
 import com.google.android.material.checkbox.MaterialCheckBox;
 
 import java.util.ArrayList;
 
 public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.EmployeeViewHolder> {
-    private ArrayList<Employees> employeesList;
+    private ArrayList<EmployeeOverview> employeesList;
     private OnItemClickListener listener;
 
     public interface OnItemClickListener{
@@ -66,7 +67,7 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
         }
     }
 
-    public EmployeeAdapter(ArrayList<Employees> employeesList) {
+    public EmployeeAdapter(ArrayList<EmployeeOverview> employeesList) {
         this.employeesList = employeesList;
     }
 
@@ -80,7 +81,7 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
 
     @Override
     public void onBindViewHolder(@NonNull EmployeeViewHolder holder, int position) {
-        Employees employee = employeesList.get(position);
+        EmployeeOverview employee = employeesList.get(position);
         holder.vName.setText("Name: " + employee.getFirstName()+ " " + employee.getLastName());
         holder.vID.setText("ID: " + employee.getId());
         holder.vSelected.setChecked(employee.isSelected);

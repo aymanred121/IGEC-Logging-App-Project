@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.example.igec_admin.fireBase.EmployeeOverview;
 import com.example.igec_admin.fireBase.Employees;
 import com.example.igec_admin.fireBase.operation;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -24,15 +25,22 @@ import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.WriteBatch;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
 import java.util.regex.Pattern;
 
 public class Add_User extends Fragment {
@@ -106,7 +114,7 @@ public class Add_User extends Fragment {
                 addRecord(operation.employee);
             }
             else
-                deleteRecord(db, "123");
+                deleteRecord("employee","123");
         }
     };
     View.OnClickListener clHireDate =  new View.OnClickListener() {
@@ -190,19 +198,37 @@ public class Add_User extends Fragment {
     }
     void addEmployee(){
         //TODO add account collection
-        Employees newUser = new Employees((vFirstName.getText()).toString(),
+        DocumentReference employeeOverviewCounterRef= db.collection("EmployeeOverview").document("--stamp--");
+        DocumentReference employeeOverviewRef =  db.collection("EmployeeOverview").document("emp");
+        ArrayList<String> empInfo=new ArrayList<>();
+        Map<String,Object> info= new HashMap<>();
+        empInfo.add((vFirstName.getText()).toString());
+        empInfo.add((vSecondName.getText()).toString());
+        empInfo.add((vTitle.getText()).toString());
+        Employees emp = new Employees((vFirstName.getText()).toString(),
                 (vSecondName.getText()).toString(), (vTitle.getText()).toString(), (vArea.getText()).toString()
                 , (vCity.getText()).toString() , (vStreet.getText()).toString(),"2",
                 Double.parseDouble(vSalary.getText().toString()),((vSSN.getText()).toString()), convertStringDate(vHireDate.getText().toString()));
-        db.collection("employees")
-                .add(newUser)
-                .addOnSuccessListener(aVoid -> Log.d(TAG, "DocumentSnapshot successfully added!"))
-                .addOnFailureListener(e -> Log.w(TAG, "Error adding document", e));
+
+
+        //Update emp Counter
+        employeeOverviewCounterRef.update("counter", FieldValue.increment(1));
+
+       employeeOverviewCounterRef
+               .get().addOnSuccessListener(documentSnapshot -> {
+                   String id = documentSnapshot.get("counter").toString();
+                   info.put(id,empInfo);
+                   employeeOverviewRef
+                           .update(info);
+                   db.collection("employees").document(id)
+                           .set(emp);
+       });
+
 
     }
-    void deleteRecord(FirebaseFirestore db,String ID)
+    void deleteRecord(String collection,String ID)
     {
-        db.collection("employees").whereEqualTo("id",ID).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+        db.collection(collection).whereEqualTo("id",ID).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                 for(DocumentSnapshot ds : queryDocumentSnapshots){

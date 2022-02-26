@@ -3,7 +3,7 @@ package com.example.igec_admin.fireBase;
 import java.util.Date;
 
 public class Employee {
-    private String firstName, lastName, title, area, city, street,SSN,projectID,managerID,email,password;
+    private String firstName, lastName, title, area, city, street,SSN,projectID,managerID,email,password,id;
     private double salary;
     private Date hireDate;
 
@@ -126,5 +126,13 @@ public class Employee {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

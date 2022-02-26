@@ -7,9 +7,7 @@ import java.util.Date;
 import java.util.Map;
 
 public class Project {
-    private String managerID;
-    private String managerName;
-    private String name;
+    private String managerID,managerName,name,id;
     private Date startDate, estimatedEndDate;
   private ArrayList<EmployeeOverview>  employees;
     private String location;
@@ -68,6 +66,14 @@ public class Project {
 
     public Date getEstimatedEndDate() {
         return estimatedEndDate;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public void setEstimatedEndDate(Date estimatedEndDate) {

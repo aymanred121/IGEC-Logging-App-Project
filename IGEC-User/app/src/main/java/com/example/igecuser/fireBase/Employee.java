@@ -4,9 +4,11 @@ import java.io.Serializable;
 import java.util.Date;
 @SuppressWarnings("serial")
 public class Employee  implements Serializable {
-    private String firstName, lastName, title, area, city, street,SSN,projectID,managerID,email,password;
+    private String firstName, lastName, title, area, city, street,SSN,projectID,managerID,email,password,id;
     private double salary;
     private Date hireDate;
+
+
 
     public  Employee(){
 
@@ -127,5 +129,12 @@ public class Employee  implements Serializable {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

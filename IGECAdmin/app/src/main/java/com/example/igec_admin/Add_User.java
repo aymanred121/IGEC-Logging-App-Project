@@ -185,29 +185,12 @@ public class Add_User extends Fragment {
 
     void addRecord(operation op)
     {
-        switch (op){
-            case machine:
-                addMachine();
-                break;
-            case project:
-                addProject();
-                break;
-            case employee:
-                addEmployee();
-                break;
-        }
-
+        addEmployee();
     }
-    void addProject(){
-        //TODO add project code
-    }
-    void addMachine(){
-        //TODO add machine code
 
 
-    }
+
     void addEmployee(){
-        //TODO add account collection
         DocumentReference employeeOverviewCounterRef= db.collection("EmployeeOverview").document("--stamp--");
         DocumentReference employeeOverviewRef =  db.collection("EmployeeOverview").document("emp");
         ArrayList<String> empInfo=new ArrayList<>();
@@ -220,7 +203,6 @@ public class Add_User extends Fragment {
                 , (vCity.getText()).toString() , (vStreet.getText()).toString(),"2",
                 Double.parseDouble(vSalary.getText().toString()),((vSSN.getText()).toString()), convertStringDate(vHireDate.getText().toString()),vEmail.getText().toString(),vPassword.getText().toString());
 
-
         //Update emp Counter
         employeeOverviewCounterRef.update("counter", FieldValue.increment(1));
 
@@ -230,6 +212,7 @@ public class Add_User extends Fragment {
                    empInfoMap.put(id,empInfo);
                    employeeOverviewRef
                            .update(empInfoMap);
+                   emp.setId(id);
                    db.collection("employees").document(id)
                            .set(emp);
        });

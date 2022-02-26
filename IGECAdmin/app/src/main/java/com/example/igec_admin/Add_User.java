@@ -15,7 +15,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.example.igec_admin.fireBase.EmployeeOverview;
-import com.example.igec_admin.fireBase.Employees;
+import com.example.igec_admin.fireBase.Employee;
 import com.example.igec_admin.fireBase.operation;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -102,6 +102,16 @@ public class Add_User extends Fragment {
         vDatePickerBuilder.setTitleText("Hire Date");
         vDatePicker = vDatePickerBuilder.build();
         vRegister = view.findViewById(R.id.button_register);
+    }
+    Date convertStringDate(String sDate){
+        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+        try {
+            Date date = format.parse(sDate);
+            return date;
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     // Listeners
@@ -201,14 +211,14 @@ public class Add_User extends Fragment {
         DocumentReference employeeOverviewCounterRef= db.collection("EmployeeOverview").document("--stamp--");
         DocumentReference employeeOverviewRef =  db.collection("EmployeeOverview").document("emp");
         ArrayList<String> empInfo=new ArrayList<>();
-        Map<String,Object> info= new HashMap<>();
         empInfo.add((vFirstName.getText()).toString());
         empInfo.add((vSecondName.getText()).toString());
         empInfo.add((vTitle.getText()).toString());
-        Employees emp = new Employees((vFirstName.getText()).toString(),
+        Map<String,Object> empInfoMap= new HashMap<>();
+        Employee emp = new Employee((vFirstName.getText()).toString(),
                 (vSecondName.getText()).toString(), (vTitle.getText()).toString(), (vArea.getText()).toString()
                 , (vCity.getText()).toString() , (vStreet.getText()).toString(),"2",
-                Double.parseDouble(vSalary.getText().toString()),((vSSN.getText()).toString()), convertStringDate(vHireDate.getText().toString()));
+                Double.parseDouble(vSalary.getText().toString()),((vSSN.getText()).toString()), convertStringDate(vHireDate.getText().toString()),vEmail.getText().toString(),vPassword.getText().toString());
 
 
         //Update emp Counter
@@ -217,9 +227,9 @@ public class Add_User extends Fragment {
        employeeOverviewCounterRef
                .get().addOnSuccessListener(documentSnapshot -> {
                    String id = documentSnapshot.get("counter").toString();
-                   info.put(id,empInfo);
+                   empInfoMap.put(id,empInfo);
                    employeeOverviewRef
-                           .update(info);
+                           .update(empInfoMap);
                    db.collection("employees").document(id)
                            .set(emp);
        });
@@ -247,34 +257,9 @@ public class Add_User extends Fragment {
             }
         });
     }
-    Employees getEmployee(String id){
-        /**
-         * This is a dummy solution
-         * */
-        Task dbTask= db.collection("employees").document(id).get();
-        while (true){
-            if(dbTask.isComplete()){
-                DocumentSnapshot documentSnapshot =(DocumentSnapshot) dbTask.getResult();
-                if(documentSnapshot.exists())
-                    return documentSnapshot.toObject(Employees.class);
-                else
-                    return null;
-            }
-        }
-    }
 
 
 
 
-    Date convertStringDate(String sDate){
-        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
-        try {
-            Date date = format.parse(sDate);
-            return date;
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
 }

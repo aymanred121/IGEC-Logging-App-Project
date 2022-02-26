@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.igec_admin.fireBase.EmployeeOverview;
-import com.example.igec_admin.fireBase.Employees;
+import com.example.igec_admin.fireBase.Employee;
 import com.google.android.material.checkbox.MaterialCheckBox;
 
 import java.util.ArrayList;
@@ -84,7 +84,23 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
         EmployeeOverview employee = employeesList.get(position);
         holder.vName.setText("Name: " + employee.getFirstName()+ " " + employee.getLastName());
         holder.vID.setText("ID: " + employee.getId());
-        holder.vSelected.setChecked(employee.isSelected);
+        holder.vSelected.setChecked(employee.getSelected());
+    }
+
+    public ArrayList<EmployeeOverview> getEmployeesList() {
+        return employeesList;
+    }
+
+    public void setEmployeesList(ArrayList<EmployeeOverview> employeesList) {
+        this.employeesList = employeesList;
+    }
+
+    public OnItemClickListener getListener() {
+        return listener;
+    }
+
+    public void setListener(OnItemClickListener listener) {
+        this.listener = listener;
     }
 
     @Override

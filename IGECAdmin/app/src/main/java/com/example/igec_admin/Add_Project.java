@@ -1,6 +1,9 @@
 package com.example.igec_admin;
 
+import static android.content.ContentValues.TAG;
+
 import android.os.Bundle;
+
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -8,30 +11,33 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.Toast;
 
 import com.example.igec_admin.fireBase.EmployeeOverview;
-import com.example.igec_admin.fireBase.Employees;
-import com.google.android.gms.tasks.Task;
+import com.example.igec_admin.fireBase.Project;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 public class Add_Project extends Fragment {
 
@@ -53,6 +59,9 @@ public class Add_Project extends Fragment {
     ArrayList<String> TeamID = new ArrayList<>();
     ArrayList<EmployeeOverview> Team = new ArrayList<>();
     FirebaseFirestore db = FirebaseFirestore.getInstance();
+  DocumentReference employeeOverviewRef = db.collection("EmployeeOverview")
+            .document("emp");
+  CollectionReference employeeCol = db.collection("employees");
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -62,7 +71,6 @@ public class Add_Project extends Fragment {
 
         // listeners
         vRegister.setOnClickListener(clRegister);
-        adapter.setOnItemClickListener(itclEmployeeAdapter);
         vManagerID.addTextChangedListener(twManagerID);
         vStartDatePicker.addOnPositiveButtonClickListener(pclStartDatePicker);
         vEndDatePicker.addOnPositiveButtonClickListener(pclEndDatePicker);
@@ -90,22 +98,23 @@ public class Add_Project extends Fragment {
         vStartDatePicker = vStartDatePickerBuilder.build();
         vEndDatePickerBuilder.setTitleText("End Date");
         vEndDatePicker = vEndDatePickerBuilder.build();
-        employees = getEmployee();
         recyclerView = view.findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
         adapter = new EmployeeAdapter(employees);
+        adapter.setOnItemClickListener(itclEmployeeAdapter);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
+        getEmployees();
     }
 
     void ChangeSelectedTeam(int position) {
-        employees.get(position).isSelected = !employees.get(position).isSelected;
-        if (employees.get(position).isSelected) {
+        employees.get(position).setSelected(!employees.get(position).getSelected());
+        if (employees.get(position).getSelected()) {
             Team.add(employees.get(position));
             TeamID.add(String.valueOf(employees.get(position).getId()));
         } else {
-            if (!vManagerID.getText().toString().isEmpty() && vManagerID.getText().toString().equals(TeamID.get(position).toString()))
+            if (!vManagerID.getText().toString().isEmpty() && vManagerID.getText().toString().equals(employees.get(position).getId().toString()))
                 vManagerID.setText("");
             Team.remove(employees.get(position));
             TeamID.remove(String.valueOf(employees.get(position).getId()));
@@ -123,32 +132,73 @@ public class Add_Project extends Fragment {
         adapter.notifyItemChanged(position);
     }
 
-    ArrayList<EmployeeOverview> getEmployee() {
-        /**
-         * This is a dummy solution
-         * */
+   void getEmployees() {
         ArrayList<EmployeeOverview> employeeArray = new ArrayList();
-        Map<String, ArrayList<String>> empMap = new HashMap();
-        Task dbTask = db.collection("EmployeeOverview").document("emp").get();
-        while (true) {
-            if (dbTask.isComplete()) {
-                DocumentSnapshot documentSnapshot = (DocumentSnapshot) dbTask.getResult();
-                if (documentSnapshot.exists()) {
-                    empMap = (HashMap) documentSnapshot.getData();
-                    break;
+      employeeOverviewRef
+                .addSnapshotListener((documentSnapshot, e) -> {
+                    if (e != null) {
+                        Log.w(TAG, "Listen failed.", e);
+                        return;
+                    }
+
+                    String source = documentSnapshot != null && documentSnapshot.getMetadata().hasPendingWrites()
+                            ? "Local" : "Server";
+
+                    if (documentSnapshot.exists()) {
+                        Map<String, ArrayList<String>> empMap;
+                        empMap = (HashMap) documentSnapshot.getData();
+                        retrieveEmployees(empMap);
                 }
+            });
+    }
+
+    private void updateEmployeesDetails(String projectID) {
+        for(String id : TeamID){
+            if(id.equals(vManagerID.getText().toString())){
+                //TODO make the managerid = adminid
+                continue;
             }
+            employeeCol.document(id)
+                    .update("managerID",vManagerID.getText().toString(),"projectID",projectID);
         }
+    }
+    private void addProject() {
+        Date startDate = convertStringDate(vStartTime.getText().toString());
+        Date endDate = convertStringDate(vEndTime.getText().toString());
+        Project curProject = new Project(vManagerName.getText().toString(),vManagerID.getText().toString(),vName.getText().toString(),startDate,endDate,Team,vLocation.getText().toString());
+        db.collection("projects").add(curProject).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+            @Override
+            public void onSuccess(DocumentReference documentReference) {
+                updateEmployeesDetails(documentReference.getId());
+            }
+        });
+    }
+
+
+
+    Date convertStringDate(String sDate){
+        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+        try {
+            Date date = format.parse(sDate);
+            return date;
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    void retrieveEmployees(Map<String, ArrayList<String>> empMap){
+        employees.clear();
         for (String key : empMap.keySet()) {
             String firstName = empMap.get(key).get(0);
             String lastName = empMap.get(key).get(1);
             String title = empMap.get(key).get(2);
             String id = (key);
-            employeeArray.add(new EmployeeOverview(firstName, lastName, title, id));
+            employees.add(new EmployeeOverview(firstName, lastName, title, id));
         }
-        return employeeArray;
-    }
+        adapter.setEmployeesList(employees);
+        adapter.notifyDataSetChanged();
 
+    }
     // Listeners
     TextWatcher twManagerID = new TextWatcher() {
         @Override
@@ -227,8 +277,11 @@ public class Add_Project extends Fragment {
     View.OnClickListener clRegister = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-
+            addProject();
         }
+
+
+
     };
     EmployeeAdapter.OnItemClickListener itclEmployeeAdapter = new EmployeeAdapter.OnItemClickListener() {
         @Override

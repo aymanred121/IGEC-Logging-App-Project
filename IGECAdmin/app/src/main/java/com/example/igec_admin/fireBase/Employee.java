@@ -2,17 +2,16 @@ package com.example.igec_admin.fireBase;
 
 import java.util.Date;
 
-public class Employees {
-    private String firstName, lastName, title, area, city, street,SSN,projectID,managerID,id;
+public class Employee {
+    private String firstName, lastName, title, area, city, street,SSN,projectID,managerID,email,password;
     private double salary;
     private Date hireDate;
-    public boolean isSelected;
 
-    public  Employees(){
+    public  Employee(){
 
     }
 
-    public Employees(String firstName, String lastName, String Title, String area, String City, String Street, String projectID, double salary, String SSN, Date hireDate) {
+    public Employee(String firstName, String lastName, String Title, String area, String City, String Street, String projectID, double salary, String SSN, Date hireDate,String email,String password) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.title = Title;
@@ -23,12 +22,8 @@ public class Employees {
         this.salary = salary;
         this.SSN = SSN;
         this.hireDate=hireDate;
-    }
-
-    public Employees(String firstName, String lastName,String id) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.id = id;
+        this.email=email;
+        this.password=password;
     }
 
     public Date getHireDate() {
@@ -107,9 +102,6 @@ public class Employees {
         return SSN;
     }
 
-    public String getId() {
-        return id;
-    }
     public void setSSN(String SSN) {
         this.SSN = SSN;
     }
@@ -118,5 +110,21 @@ public class Employees {
     }
     public void setManagerID(String managerID) {
         this.managerID = managerID;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

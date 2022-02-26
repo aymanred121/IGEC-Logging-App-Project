@@ -1,9 +1,9 @@
 package com.example.igec_admin.fireBase;
 
-public class Machines {
+public class Machine {
     private String id,codeName,buyingDate;
 
-    public Machines() {
+    public Machine() {
     }
 
     public String getId() {
@@ -30,7 +30,7 @@ public class Machines {
         this.buyingDate = buyingDate;
     }
 
-    public Machines(String id, String codeName, String buyingDate) {
+    public Machine(String id, String codeName, String buyingDate) {
         this.id = id;
         this.codeName = codeName;
         this.buyingDate = buyingDate;

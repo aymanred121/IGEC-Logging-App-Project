@@ -4,9 +4,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
 
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Toast;
 
 import com.example.igecuser.Fragments.CheckInOut;
 import com.example.igecuser.Fragments.VacationRequest;
+import com.example.igecuser.fireBase.Employee;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.tabs.TabLayout;
 
 public class EmployeeDashboard extends AppCompatActivity {
@@ -14,10 +18,13 @@ public class EmployeeDashboard extends AppCompatActivity {
     // Views
     ViewPager viewPager;
     TabLayout tabLayout;
-
+    MaterialButton sendRequestButton;
     // Vars
     CheckInOut checkInOut;
     VacationRequest vacationRequest;
+    Employee currEmployee;
+    Bundle bundle;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,17 +34,20 @@ public class EmployeeDashboard extends AppCompatActivity {
         tabLayout = findViewById(R.id.tabLayout);
         vacationRequest = new VacationRequest();
         checkInOut = new CheckInOut();
-
+        currEmployee = (Employee)getIntent().getSerializableExtra("emp");
+        bundle = new Bundle();
+        bundle.putSerializable("emp",currEmployee);
+        vacationRequest.setArguments(bundle);
         tabLayout.setupWithViewPager(viewPager);
         ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), 0);
         viewPagerAdapter.addFragment(checkInOut, getString(R.string.check_in_out));
         viewPagerAdapter.addFragment(vacationRequest, getString(R.string.vacation_request));
         viewPager.setAdapter(viewPagerAdapter);
-
         tabLayout.getTabAt(0).setIcon(R.drawable.ic_baseline_access_time_24);
         tabLayout.getTabAt(1).setIcon(R.drawable.ic_baseline_near_me_24);
 
     }
+    //listener
 
 
 }

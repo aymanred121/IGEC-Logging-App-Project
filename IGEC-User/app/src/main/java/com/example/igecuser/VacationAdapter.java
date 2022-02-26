@@ -1,5 +1,6 @@
 package com.example.igecuser;
 
+import android.provider.ContactsContract;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,12 +11,13 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 
+import com.example.igecuser.fireBase.VacationRequest;
 import com.google.android.material.checkbox.MaterialCheckBox;
 
 import java.util.ArrayList;
 
 public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.VacationViewHolder> {
-    private ArrayList<dummyVacation> vacationsList;
+    private ArrayList<VacationRequest> vacationsList;
     private OnItemClickListener listener;
 
     public interface OnItemClickListener{
@@ -61,7 +63,7 @@ public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.Vacati
         }
     }
 
-    public VacationAdapter(ArrayList<dummyVacation> vacationslist) {
+    public VacationAdapter(ArrayList<VacationRequest> vacationslist) {
         this.vacationsList = vacationslist;
     }
 
@@ -75,12 +77,27 @@ public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.Vacati
 
     @Override
     public void onBindViewHolder(@NonNull VacationViewHolder holder, int position) {
-        dummyVacation vacation = vacationsList.get(position);
-        holder.vName.setText("Name: " + vacation.getName());
-        holder.vID.setText("ID: " + vacation.getId());
+        VacationRequest vacation = vacationsList.get(position);
+        holder.vName.setText("Name: " + vacation.getEmployee().getFirstName()+" "+vacation.getEmployee().getLastName());
+        holder.vID.setText("ID: ");
         holder.vVacationStartDate.setText("Start Date: " + vacation.getStartDate());
-        holder.vVacationsStatus.setImageResource(vacation.getStatus());
-        holder.vVacationDays.setText("for : " + vacation.getDays() + " days");
+        //Todo fix missing img
+        //holder.vVacationsStatus.setImageResource(vacation.getVacationStatus());
+        holder.vVacationDays.setText("for : " + getDays(vacation) + " days");
+    }
+
+    private String getDays(VacationRequest vacation) {
+        long days= vacation.getEndDate().getTime()-vacation.getStartDate().getTime();
+        days /=(24*3600*1000);
+        return String.valueOf(days);
+    }
+
+    public ArrayList<VacationRequest> getVacationsList() {
+        return vacationsList;
+    }
+
+    public void setVacationsList(ArrayList<VacationRequest> vacationsList) {
+        this.vacationsList = vacationsList;
     }
 
     @Override

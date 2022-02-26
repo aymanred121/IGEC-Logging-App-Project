@@ -1,18 +1,28 @@
 package com.example.igecuser;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.igecuser.fireBase.Employee;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
+import java.io.Serializable;
 import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
@@ -24,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     MaterialButton vSignIn;
 
     // Vars
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,10 +91,32 @@ public class MainActivity extends AppCompatActivity {
         public void onClick(View v) {
             // TODO: Add authentication
             // if employee
-            {
-                Intent intent = new Intent(MainActivity.this, ManagerDashboard.class);
-                startActivity(intent);
-            }
+            db.collection("employees")
+                    .whereEqualTo("email",vEmail.getText().toString())
+                    .whereEqualTo("password",vPassword.getText().toString())
+                    .limit(1)
+                    .get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                @Override
+                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                    if( queryDocumentSnapshots.size()==0){
+                        Toast.makeText(MainActivity.this, "please enter a valid email or password", Toast.LENGTH_SHORT).show();
+                       return;
+                    }
+                    DocumentSnapshot d = queryDocumentSnapshots.getDocuments().get(0);
+                       if(d.exists()){
+                           Employee emp = d.toObject(Employee.class);
+                           Intent intent;
+                           if(emp.getManagerID()==null){
+                                intent = new Intent(MainActivity.this, ManagerDashboard.class);
+                           }else{
+                                intent = new Intent(MainActivity.this, EmployeeDashboard.class);
+                           }
+                           intent.putExtra("emp", emp);
+                           startActivity(intent);
+                       }
+                }
+            });
+
             // if Manager
             {
 

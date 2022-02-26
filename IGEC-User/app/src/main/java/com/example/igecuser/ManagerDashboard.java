@@ -4,9 +4,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
 
 import android.os.Bundle;
+import android.widget.Toast;
 
 import com.example.igecuser.Fragments.VacationRequests;
 import com.example.igecuser.Fragments.VacationsLog;
+import com.example.igecuser.fireBase.Employee;
 import com.google.android.material.badge.BadgeDrawable;
 import com.google.android.material.tabs.TabLayout;
 
@@ -19,6 +21,8 @@ public class ManagerDashboard extends AppCompatActivity {
     // Vars
     VacationRequests vacationRequests;
     VacationsLog vacationsLog;
+    Employee currManager;
+    Bundle bundle;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,7 +32,11 @@ public class ManagerDashboard extends AppCompatActivity {
         tabLayout = findViewById(R.id.tabLayout);
         vacationRequests = new VacationRequests();
         vacationsLog = new VacationsLog();
-
+        currManager=(Employee)getIntent().getSerializableExtra("emp");
+        bundle=new Bundle();
+        bundle.putSerializable("mgr",currManager);
+        vacationRequests.setArguments(bundle);
+        vacationsLog.setArguments(bundle);
         tabLayout.setupWithViewPager(viewPager);
         ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), 0);
         viewPagerAdapter.addFragment(vacationRequests, getString(R.string.vacation_requests));

@@ -191,8 +191,8 @@ public class Add_User extends Fragment {
 
 
     void addEmployee(){
-        DocumentReference employeeOverviewCounterRef= db.collection("EmployeeOverview").document("--stamp--");
         DocumentReference employeeOverviewRef =  db.collection("EmployeeOverview").document("emp");
+        String id =  db.collection("EmployeeOverview").document().getId();
         ArrayList<String> empInfo=new ArrayList<>();
         empInfo.add((vFirstName.getText()).toString());
         empInfo.add((vSecondName.getText()).toString());
@@ -203,19 +203,12 @@ public class Add_User extends Fragment {
                 , (vCity.getText()).toString() , (vStreet.getText()).toString(),"2",
                 Double.parseDouble(vSalary.getText().toString()),((vSSN.getText()).toString()), convertStringDate(vHireDate.getText().toString()),vEmail.getText().toString(),vPassword.getText().toString());
 
-        //Update emp Counter
-        employeeOverviewCounterRef.update("counter", FieldValue.increment(1));
-
-       employeeOverviewCounterRef
-               .get().addOnSuccessListener(documentSnapshot -> {
-                   String id = documentSnapshot.get("counter").toString();
                    empInfoMap.put(id,empInfo);
                    employeeOverviewRef
                            .update(empInfoMap);
                    emp.setId(id);
                    db.collection("employees").document(id)
                            .set(emp);
-       });
 
 
     }

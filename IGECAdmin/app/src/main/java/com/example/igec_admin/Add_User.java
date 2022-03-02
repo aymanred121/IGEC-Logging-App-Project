@@ -192,7 +192,8 @@ public class Add_User extends Fragment {
 
     void addEmployee(){
         DocumentReference employeeOverviewRef =  db.collection("EmployeeOverview").document("emp");
-        String id =  db.collection("EmployeeOverview").document().getId();
+        DocumentReference employeeOverviewCounterRef = db.collection("EmployeeOverview").document("counter");
+
         ArrayList<String> empInfo=new ArrayList<>();
         empInfo.add((vFirstName.getText()).toString());
         empInfo.add((vSecondName.getText()).toString());
@@ -200,16 +201,22 @@ public class Add_User extends Fragment {
         Map<String,Object> empInfoMap= new HashMap<>();
         Employee emp = new Employee((vFirstName.getText()).toString(),
                 (vSecondName.getText()).toString(), (vTitle.getText()).toString(), (vArea.getText()).toString()
-                , (vCity.getText()).toString() , (vStreet.getText()).toString(),"2",
+                , (vCity.getText()).toString() , (vStreet.getText()).toString(),
                 Double.parseDouble(vSalary.getText().toString()),((vSSN.getText()).toString()), convertStringDate(vHireDate.getText().toString()),vEmail.getText().toString(),vPassword.getText().toString());
+        Map<String,Object> increment = new HashMap<>();
+        increment.put("counter", FieldValue.increment(1));
+        employeeOverviewCounterRef.set(increment);
 
-                   empInfoMap.put(id,empInfo);
-                   employeeOverviewRef
-                           .update(empInfoMap);
-                   emp.setId(id);
-                   db.collection("employees").document(id)
-                           .set(emp);
-
+        employeeOverviewCounterRef
+                .get().addOnSuccessListener(documentSnapshot -> {
+            String id = documentSnapshot.get("counter").toString();
+            empInfoMap.put(id,empInfo);
+            employeeOverviewRef
+                    .update(empInfoMap);
+            emp.setId(id);
+            db.collection("employees").document(id)
+                    .set(emp);
+        });
 
     }
     void deleteRecord(String collection,String ID)

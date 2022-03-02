@@ -14,7 +14,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.igecuser.fireBase.VacationRequest;
 import com.google.android.material.checkbox.MaterialCheckBox;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.VacationViewHolder> {
     private ArrayList<VacationRequest> vacationsList;
@@ -80,12 +83,20 @@ public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.Vacati
         VacationRequest vacation = vacationsList.get(position);
         holder.vName.setText("Name: " + vacation.getEmployee().getFirstName()+" "+vacation.getEmployee().getLastName());
         holder.vID.setText("ID: ");
-        holder.vVacationStartDate.setText("Start Date: " + vacation.getStartDate());
+
+        holder.vVacationStartDate.setText("Start Date: " + formatDate(vacation.getStartDate()) );
         //Todo fix missing img
         //holder.vVacationsStatus.setImageResource(vacation.getVacationStatus());
         holder.vVacationDays.setText("for : " + getDays(vacation) + " days");
     }
 
+    private String formatDate(Date Date)
+    {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis((long) Date.getTime());
+        return simpleDateFormat.format(calendar.getTime());
+    }
     private String getDays(VacationRequest vacation) {
         long days= vacation.getEndDate().getTime()-vacation.getStartDate().getTime();
         days /=(24*3600*1000);

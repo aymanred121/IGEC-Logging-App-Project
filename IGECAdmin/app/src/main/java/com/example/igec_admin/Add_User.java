@@ -1,21 +1,22 @@
 package com.example.igec_admin;
 
-import android.os.Bundle;
+import static com.example.igec_admin.fireBase.RSAUtil.encrypt;
+import static com.example.igec_admin.fireBase.RSAUtil.publicKey;
 
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import static android.content.ContentValues.TAG;
+import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.example.igec_admin.fireBase.EmployeeOverview;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+
 import com.example.igec_admin.fireBase.Employee;
+import com.example.igec_admin.fireBase.RSAKeyPairGenerator;
 import com.example.igec_admin.fireBase.operation;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -27,21 +28,25 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.WriteBatch;
 
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Random;
 import java.util.regex.Pattern;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 public class Add_User extends Fragment {
 
@@ -66,13 +71,13 @@ public class Add_User extends Fragment {
 
     // Vars
     FirebaseFirestore db = FirebaseFirestore.getInstance();
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_add_user, container,false);
 
         Initialize(view);
-
         // Listeners
         vEmail.addTextChangedListener(twEmail);
         vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);
@@ -153,7 +158,7 @@ public class Add_User extends Fragment {
         }
     };
     TextWatcher twEmail = new TextWatcher() {
-        private Pattern mPattern = Pattern.compile("(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])");
+        private final Pattern mPattern = Pattern.compile("(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])");
 
         private boolean isValid(CharSequence s)
         {
@@ -190,33 +195,53 @@ public class Add_User extends Fragment {
 
 
 
-    void addEmployee(){
-        DocumentReference employeeOverviewRef =  db.collection("EmployeeOverview").document("emp");
-        DocumentReference employeeOverviewCounterRef = db.collection("EmployeeOverview").document("counter");
-
-        ArrayList<String> empInfo=new ArrayList<>();
+    void addEmployee() {
+        RSAKeyPairGenerator keyPairGenerator = null;
+        try {
+            keyPairGenerator = new RSAKeyPairGenerator();
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        System.out.println(Base64.getEncoder().encodeToString(keyPairGenerator.getPublicKey().getEncoded()));
+        System.out.println(Base64.getEncoder().encodeToString(keyPairGenerator.getPrivateKey().getEncoded()));
+        String encryptedString = "";
+        try {
+            encryptedString = Base64.getEncoder().encodeToString(encrypt(vPassword.getText().toString(), publicKey));
+//            System.out.println(encryptedString);
+//            String decryptedString = RSAUtil.decrypt(encryptedString, privateKey);
+//            System.out.println(decryptedString);
+        } catch (NoSuchAlgorithmException e) {
+            System.err.println(e.getMessage());
+        } catch (IllegalBlockSizeException e) {
+            e.printStackTrace();
+        } catch (NoSuchPaddingException e) {
+            e.printStackTrace();
+        } catch (BadPaddingException e) {
+            e.printStackTrace();
+        } catch (InvalidKeyException e) {
+            e.printStackTrace();
+        }
+        DocumentReference employeeOverviewRef = db.collection("EmployeeOverview").document("emp");
+        String id = db.collection("EmployeeOverview").document().getId();
+        ArrayList<String> empInfo = new ArrayList<>();
         empInfo.add((vFirstName.getText()).toString());
         empInfo.add((vSecondName.getText()).toString());
         empInfo.add((vTitle.getText()).toString());
-        Map<String,Object> empInfoMap= new HashMap<>();
+        Map<String, Object> empInfoMap = new HashMap<>();
         Employee emp = new Employee((vFirstName.getText()).toString(),
                 (vSecondName.getText()).toString(), (vTitle.getText()).toString(), (vArea.getText()).toString()
-                , (vCity.getText()).toString() , (vStreet.getText()).toString(),
-                Double.parseDouble(vSalary.getText().toString()),((vSSN.getText()).toString()), convertStringDate(vHireDate.getText().toString()),vEmail.getText().toString(),vPassword.getText().toString());
-        Map<String,Object> increment = new HashMap<>();
-        increment.put("counter", FieldValue.increment(1));
-        employeeOverviewCounterRef.set(increment);
+                , (vCity.getText()).toString(), (vStreet.getText()).toString(), "2",
+                Double.parseDouble(vSalary.getText().toString()), ((vSSN.getText()).toString()),
+                convertStringDate(vHireDate.getText().toString()),
+                vEmail.getText().toString(), encryptedString);
 
-        employeeOverviewCounterRef
-                .get().addOnSuccessListener(documentSnapshot -> {
-            String id = documentSnapshot.get("counter").toString();
-            empInfoMap.put(id,empInfo);
-            employeeOverviewRef
-                    .update(empInfoMap);
-            emp.setId(id);
-            db.collection("employees").document(id)
-                    .set(emp);
-        });
+                   empInfoMap.put(id,empInfo);
+                   employeeOverviewRef
+                           .update(empInfoMap);
+                   emp.setId(id);
+                   db.collection("employees").document(id)
+                           .set(emp);
+
 
     }
     void deleteRecord(String collection,String ID)

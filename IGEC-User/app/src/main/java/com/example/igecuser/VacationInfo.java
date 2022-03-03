@@ -8,9 +8,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.igecuser.Fragments.VacationsLog;
 import com.example.igecuser.R;
 import com.example.igecuser.fireBase.VacationRequest;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.textfield.TextInputEditText;
@@ -66,12 +68,13 @@ public class VacationInfo extends AppCompatActivity {
         public void onClick(View v) {
             db.collection("Vacation")
                     .document(currVacation.getId())
-                    .update("vacationStatus",1).addOnFailureListener(new OnFailureListener() {
+                    .update("vacationStatus",1).addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
-                public void onFailure(@NonNull Exception e) {
-                    Log.d("eeeeeeeeeee",e.toString());
+                public void onSuccess(Void unused) {
+                    finish();
                 }
             });
+
         }
     };
     private View.OnClickListener clDeclineRequest = new View.OnClickListener() {
@@ -79,7 +82,18 @@ public class VacationInfo extends AppCompatActivity {
         public void onClick(View v) {
             db.collection("Vacation")
                     .document(currVacation.getId())
-                    .update("vacationStatus",-1);
+                    .update("vacationStatus",-1).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void unused) {
+                    finish();
+                }
+            });
         }
     };
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        VacationsLog.loadVacations();
+    }
 }

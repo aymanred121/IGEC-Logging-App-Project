@@ -26,14 +26,14 @@ import java.util.ArrayList;
 public class VacationsLog extends Fragment {
 
     private RecyclerView recyclerView;
-    private VacationAdapter adapter;
+    private static VacationAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
 
     private ArrayList<VacationRequest> vacations = new ArrayList<>();
-    private Employee user;
-    private String query;
+    private static Employee user;
+    private static String query;
     private final boolean isEmployee;
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private static FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     public VacationsLog(boolean isEmployee) {
         this.isEmployee = isEmployee;
@@ -60,7 +60,7 @@ public class VacationsLog extends Fragment {
         recyclerView.setAdapter(adapter);
         loadVacations();
     }
-    private void loadVacations(){
+    public static void loadVacations(){
 
         db.collection("Vacation")
                 .whereEqualTo(query,user.getId())

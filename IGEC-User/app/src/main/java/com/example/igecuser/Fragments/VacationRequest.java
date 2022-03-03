@@ -7,6 +7,7 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.example.igecuser.R;
 import com.example.igecuser.fireBase.Employee;
@@ -36,6 +37,7 @@ public class VacationRequest extends Fragment {
     Employee currEmployee;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     com.example.igecuser.fireBase.VacationRequest vacationRequest;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -61,8 +63,9 @@ public class VacationRequest extends Fragment {
         vDatePicker = vDatePickerBuilder.build();
         currEmployee = (Employee) getArguments().getSerializable("emp");
     }
+
     private void uploadVacationRequest() {
-        String vacationID =db.collection("Vacation").document().getId().substring(0,5);
+        String vacationID = db.collection("Vacation").document().getId().substring(0, 5);
         db.collection("employees")
                 .document(currEmployee.getManagerID())
                 .get()
@@ -70,7 +73,7 @@ public class VacationRequest extends Fragment {
                     @Override
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
                         Date startDate = convertStringDate(vVacationDate.getText().toString());
-                        duration = ((long) Integer.parseInt(vVacationDays.getText().toString()) *24*3600*1000)+ startDateMileSecond;
+                        duration = ((long) Integer.parseInt(vVacationDays.getText().toString()) * 24 * 3600 * 1000) + startDateMileSecond;
                         Date endDate = convertStringDate(convertLongDate(duration));
                         vacationRequest = new com.example.igecuser.fireBase.VacationRequest(
                                 startDate,
@@ -82,15 +85,38 @@ public class VacationRequest extends Fragment {
                         );
                         vacationRequest.setId(vacationID);
                         db.collection("Vacation").document(vacationID).set(vacationRequest);
+                        ClearInputs();
                     }
                 });
     }
+
+    private void ClearInputs() {
+        vVacationDate.setText(null);
+        vVacationDays.setText(null);
+        vVacationNote.setText(null);
+    }
+
+    private boolean ValidateInputs() {
+        return !(vVacationNote.getText().toString().isEmpty()
+                        ||
+                vVacationDate.getText().toString().isEmpty()
+                        ||
+                vVacationDays.getText().toString().isEmpty());
+    }
+
 
     // Listeners
     private View.OnClickListener clSendRequest = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            uploadVacationRequest();
+            if(ValidateInputs()) {
+                uploadVacationRequest();
+
+            }
+            else
+            {
+                Toast.makeText(getActivity(), "please, fill vacation request data", Toast.LENGTH_SHORT).show();
+            }
         }
 
 
@@ -114,10 +140,11 @@ public class VacationRequest extends Fragment {
         @Override
         public void onPositiveButtonClick(Object selection) {
 
-           vVacationDate.setText(convertLongDate(selection));
+            vVacationDate.setText(convertLongDate(selection));
         }
 
     };
+
     private String convertLongDate(Object selection) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
         Calendar calendar = Calendar.getInstance();
@@ -125,7 +152,8 @@ public class VacationRequest extends Fragment {
         calendar.setTimeInMillis((long) selection);
         return simpleDateFormat.format(calendar.getTime());
     }
-    Date convertStringDate(String sDate){
+
+    Date convertStringDate(String sDate) {
         SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
         try {
             Date date = format.parse(sDate);

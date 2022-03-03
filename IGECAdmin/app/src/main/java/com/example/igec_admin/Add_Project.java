@@ -5,6 +5,7 @@ import static android.content.ContentValues.TAG;
 import android.os.Bundle;
 
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,6 +23,7 @@ import android.widget.Toast;
 import com.example.igec_admin.fireBase.Employee;
 import com.example.igec_admin.fireBase.EmployeeOverview;
 import com.example.igec_admin.fireBase.Project;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
@@ -170,7 +172,12 @@ public class Add_Project extends Fragment {
                         Map<String, Object> empInfoMap = new HashMap<>();
                         empInfoMap.put(id, empInfo);
                         employeeOverviewRef.update(empInfoMap);
-                        employeeCol.document(id).update("managerID", "adminID", "projectID", projectID);
+                        employeeCol.document(id).update("managerID", "adminID", "projectID", projectID).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unused) {
+                                ClearInputs();
+                            }
+                        });
                     }
                 });
 
@@ -189,7 +196,12 @@ public class Add_Project extends Fragment {
                     Map<String, Object> empInfoMap = new HashMap<>();
                     empInfoMap.put(id, empInfo);
                     employeeOverviewRef.update(empInfoMap);
-                    employeeCol.document(id).update("managerID", vManagerID.getText().toString(), "projectID", projectID);
+                    employeeCol.document(id).update("managerID", vManagerID.getText().toString(), "projectID", projectID).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void unused) {
+                            ClearInputs();
+                        }
+                    });
                 }
             });
         }
@@ -346,7 +358,6 @@ public class Add_Project extends Fragment {
         public void onClick(View v) {
             if(ValidateInputs()) {
                 addProject();
-                ClearInputs();
             }
             else
             {

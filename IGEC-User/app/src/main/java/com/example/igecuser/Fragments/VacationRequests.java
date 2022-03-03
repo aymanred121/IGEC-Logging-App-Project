@@ -67,7 +67,7 @@ public class VacationRequests extends Fragment {
     }
     private void loadVacations(){
         db.collection("Vacation")
-                .whereEqualTo("manager.ssn",currManager.getSSN())
+                .whereEqualTo("manager.id",currManager.getId())
                 .whereEqualTo("vacationStatus",0)
                 .addSnapshotListener((queryDocumentSnapshots, e) -> {
                     if (e != null) {

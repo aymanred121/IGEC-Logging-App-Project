@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -196,6 +197,8 @@ public class Add_User extends Fragment {
 
 
     void addEmployee() {
+        DocumentReference employeeOverviewRef = db.collection("EmployeeOverview").document("emp");
+        String id = db.collection("EmployeeOverview").document().getId().substring(0,5);
         RSAKeyPairGenerator keyPairGenerator = null;
         try {
             keyPairGenerator = new RSAKeyPairGenerator();
@@ -204,46 +207,49 @@ public class Add_User extends Fragment {
         }
         System.out.println(Base64.getEncoder().encodeToString(keyPairGenerator.getPublicKey().getEncoded()));
         System.out.println(Base64.getEncoder().encodeToString(keyPairGenerator.getPrivateKey().getEncoded()));
-        String encryptedString = "";
-        try {
-            encryptedString = Base64.getEncoder().encodeToString(encrypt(vPassword.getText().toString(), publicKey));
-//            System.out.println(encryptedString);
-//            String decryptedString = RSAUtil.decrypt(encryptedString, privateKey);
-//            System.out.println(decryptedString);
-        } catch (NoSuchAlgorithmException e) {
-            System.err.println(e.getMessage());
-        } catch (IllegalBlockSizeException e) {
-            e.printStackTrace();
-        } catch (NoSuchPaddingException e) {
-            e.printStackTrace();
-        } catch (BadPaddingException e) {
-            e.printStackTrace();
-        } catch (InvalidKeyException e) {
-            e.printStackTrace();
-        }
-        DocumentReference employeeOverviewRef = db.collection("EmployeeOverview").document("emp");
-        String id = db.collection("EmployeeOverview").document().getId();
+
         ArrayList<String> empInfo = new ArrayList<>();
         empInfo.add((vFirstName.getText()).toString());
         empInfo.add((vSecondName.getText()).toString());
         empInfo.add((vTitle.getText()).toString());
+        empInfo.add(null);
         Map<String, Object> empInfoMap = new HashMap<>();
-        Employee emp = new Employee((vFirstName.getText()).toString(),
-                (vSecondName.getText()).toString(), (vTitle.getText()).toString(), (vArea.getText()).toString()
-                , (vCity.getText()).toString(), (vStreet.getText()).toString(), "2",
-                Double.parseDouble(vSalary.getText().toString()), ((vSSN.getText()).toString()),
+        empInfoMap.put(id,empInfo);
+        employeeOverviewRef.update(empInfoMap).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                employeeOverviewRef.set(empInfoMap);
+            }
+        });
+        Employee newEmployee = fillEmployeeData();
+        newEmployee.setId(id);
+        db.collection("employees").document(id).set(newEmployee);
+}
+
+    private Employee fillEmployeeData() {
+        return new Employee(
+                (vFirstName.getText()).toString(),
+                (vSecondName.getText()).toString(),
+                (vTitle.getText()).toString(),
+                (vArea.getText()).toString(),
+                (vCity.getText()).toString(),
+                (vStreet.getText()).toString(),
+                Double.parseDouble(vSalary.getText().toString()),
+                ((vSSN.getText()).toString()),
                 convertStringDate(vHireDate.getText().toString()),
-                vEmail.getText().toString(), encryptedString);
-
-                   empInfoMap.put(id,empInfo);
-                   employeeOverviewRef
-                           .update(empInfoMap);
-                   emp.setId(id);
-                   db.collection("employees").document(id)
-                           .set(emp);
-
-
+                vEmail.getText().toString(),
+                encryptedPassword());
     }
+
+    private String encryptedPassword() {
+        try {
+            return Base64.getEncoder().encodeToString(encrypt(vPassword.getText().toString()));
+        } catch (Exception e) {
+            Log.e("error in encryption",e.toString());
+            return null;
+        }
+    }
+
     void deleteRecord(String collection,String ID)
     {
         db.collection(collection).whereEqualTo("id",ID).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {

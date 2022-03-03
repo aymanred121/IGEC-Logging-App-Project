@@ -11,14 +11,13 @@ public class Employee {
 
     }
 
-    public Employee(String firstName, String lastName, String Title, String area, String City, String Street, String projectID, double salary, String SSN, Date hireDate, String email, String password) {
+    public Employee(String firstName, String lastName, String Title, String area, String City, String Street, double salary, String SSN, Date hireDate, String email, String password) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.title = Title;
         this.area = area;
         this.city = City;
         this.street = Street;
-        this.projectID = projectID;
         this.salary = salary;
         this.SSN = SSN;
         this.hireDate = hireDate;

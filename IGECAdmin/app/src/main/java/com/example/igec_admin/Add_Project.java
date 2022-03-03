@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 
+import com.example.igec_admin.fireBase.Employee;
 import com.example.igec_admin.fireBase.EmployeeOverview;
 import com.example.igec_admin.fireBase.Project;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -29,6 +30,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.ParseException;
@@ -155,25 +157,65 @@ public class Add_Project extends Fragment {
     private void updateEmployeesDetails(String projectID) {
         for(String id : TeamID){
             if(id.equals(vManagerID.getText().toString())){
-                //TODO make the managerid = adminid
+                employeeCol.document(id).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        Employee emp = documentSnapshot.toObject(Employee.class);
+                        ArrayList<String> empInfo = new ArrayList<>();
+                        empInfo.add(emp.getFirstName());
+                        empInfo.add(emp.getLastName());
+                        empInfo.add(emp.getTitle());
+                        empInfo.add("adminID");
+                        Map<String, Object> empInfoMap = new HashMap<>();
+                        empInfoMap.put(id,empInfo);
+                        employeeOverviewRef.update(empInfoMap);
+                        employeeCol.document(id).update("managerID","adminID","projectID",projectID);
+                    }
+                });
+
                 continue;
             }
             employeeCol.document(id)
-                    .update("managerID",vManagerID.getText().toString(),"projectID",projectID);
+                    .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    Employee emp = documentSnapshot.toObject(Employee.class);
+                    ArrayList<String> empInfo = new ArrayList<>();
+                    empInfo.add(emp.getFirstName());
+                    empInfo.add(emp.getLastName());
+                    empInfo.add(emp.getTitle());
+                    empInfo.add(vManagerID.getText().toString());
+                    Map<String, Object> empInfoMap = new HashMap<>();
+                    empInfoMap.put(id,empInfo);
+                    employeeOverviewRef.update(empInfoMap);
+                    employeeCol.document(id).update("managerID",vManagerID.getText().toString(),"projectID",projectID);
+                }
+            });
         }
     }
     private void addProject() {
         Date startDate = convertStringDate(vStartTime.getText().toString());
         Date endDate = convertStringDate(vEndTime.getText().toString());
-        Project curProject = new Project(vManagerName.getText().toString(),vManagerID.getText().toString(),vName.getText().toString(),startDate,endDate,Team,vLocation.getText().toString());
-        db.collection("projects").add(curProject).addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+        String projectID= db.collection("projects").document().getId().substring(0,5);
+        updateTeam();
+        Project newProject = new Project(vManagerName.getText().toString(),vManagerID.getText().toString(),vName.getText().toString(),startDate,endDate,Team,vLocation.getText().toString());
+        newProject.setId(projectID);
+        db.collection("projects").document(projectID).set(newProject).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
-            public void onSuccess(DocumentReference documentReference) {
-                updateEmployeesDetails(documentReference.getId());
+            public void onSuccess(Void unused) {
+                updateEmployeesDetails(projectID);
             }
         });
     }
 
+    private void updateTeam() {
+        for(EmployeeOverview emp :Team ){
+            if(emp.getId().equals(vManagerID.getText().toString())){
+                emp.setManagerID("adminID");
+            }else
+                emp.setManagerID(vManagerID.getText().toString());
+        }
+    }
 
 
     Date convertStringDate(String sDate){
@@ -192,7 +234,9 @@ public class Add_Project extends Fragment {
             String firstName = empMap.get(key).get(0);
             String lastName = empMap.get(key).get(1);
             String title = empMap.get(key).get(2);
+            String managerID =  empMap.get(key).get(3);
             String id = (key);
+            if((managerID == null))
             employees.add(new EmployeeOverview(firstName, lastName, title, id));
         }
         adapter.setEmployeesList(employees);

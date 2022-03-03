@@ -4,7 +4,7 @@ import com.google.firebase.database.Exclude;
 
 public class EmployeeOverview {
   @Exclude  private Boolean isSelected=false;
-    private String firstName,lastName,title,id;
+    private String firstName,lastName,title,id,managerID;
 
     public EmployeeOverview(String firstName, String lastName, String title, String id) {
         this.firstName = firstName;
@@ -51,5 +51,13 @@ public class EmployeeOverview {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getManagerID() {
+        return managerID;
+    }
+
+    public void setManagerID(String managerID) {
+        this.managerID = managerID;
     }
 }

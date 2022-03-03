@@ -62,6 +62,19 @@ public class MainActivity extends AppCompatActivity {
         vEmailLayout = findViewById(R.id.textInputLayout_Email);
         vSignIn = findViewById(R.id.Button_SignIn);
     }
+    private boolean isPasswordRight(String password) {
+        try {
+            String decryptedPassword = RSAUtil.decrypt(password, RSAUtil.privateKey);
+            if (!vPassword.getText().toString().equals(decryptedPassword)) {
+                Toast.makeText(MainActivity.this, "please enter a valid email or password", Toast.LENGTH_SHORT).show();
+                return false;
+            }
+        } catch (Exception e) {
+            Toast.makeText(MainActivity.this, "please enter a valid email or password", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
+    }
 
     // Listeners
     TextWatcher twEmail = new TextWatcher() {
@@ -93,8 +106,6 @@ public class MainActivity extends AppCompatActivity {
     View.OnClickListener clSignIn = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            // TODO: Add authentication
-            // if employee
             db.collection("employees")
                     .whereEqualTo("email", vEmail.getText().toString())
                     .limit(1)
@@ -107,36 +118,23 @@ public class MainActivity extends AppCompatActivity {
                     }
                     DocumentSnapshot d = queryDocumentSnapshots.getDocuments().get(0);
                     if (d.exists()) {
-                        Employee emp = d.toObject(Employee.class);
-                        try {
-                            String decryptedPassword = RSAUtil.decrypt(emp.getPassword(), RSAUtil.privateKey);
-                            if (!vPassword.getText().toString().equals(decryptedPassword)) {
-                                Toast.makeText(MainActivity.this, "please enter a valid email or password", Toast.LENGTH_SHORT).show();
-                                return;
-                            }
-                        } catch (IllegalBlockSizeException | InvalidKeyException | BadPaddingException | NoSuchAlgorithmException | NoSuchPaddingException e) {
-                            e.printStackTrace();
+                        Employee currEmployee = d.toObject(Employee.class);
+                        if( !isPasswordRight(currEmployee.getPassword())){
+                            return;
                         }
                         Intent intent;
-                        if (emp.getManagerID() == null) {
+                        if (currEmployee.getManagerID().equals("adminID")) {
                             intent = new Intent(MainActivity.this, ManagerDashboard.class);
                         } else {
                             intent = new Intent(MainActivity.this, EmployeeDashboard.class);
                         }
-                        intent.putExtra("emp", emp);
+                        intent.putExtra("emp", currEmployee);
                         startActivity(intent);
                     }
                 }
             });
-
-            // if Manager
-            {
-
-            }
-            // else
-            {
-                // notify user that either e-mail or password are wrong
-            }
         }
+
+
     };
 }

@@ -62,6 +62,7 @@ public class VacationRequest extends Fragment {
         currEmployee = (Employee) getArguments().getSerializable("emp");
     }
     private void uploadVacationRequest() {
+        String vacationID =db.collection("Vacation").document().getId().substring(0,5);
         db.collection("employees")
                 .document(currEmployee.getManagerID())
                 .get()
@@ -79,8 +80,8 @@ public class VacationRequest extends Fragment {
                                 currEmployee,
                                 vVacationNote.getText().toString()
                         );
-                        vacationRequest.setId(documentSnapshot.getId());
-                        db.collection("Vacation").add(vacationRequest);
+                        vacationRequest.setId(vacationID);
+                        db.collection("Vacation").document(vacationID).set(vacationRequest);
                     }
                 });
     }

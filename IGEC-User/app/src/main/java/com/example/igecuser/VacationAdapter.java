@@ -1,5 +1,6 @@
 package com.example.igecuser;
 
+import android.graphics.Color;
 import android.provider.ContactsContract;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -82,11 +83,18 @@ public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.Vacati
     public void onBindViewHolder(@NonNull VacationViewHolder holder, int position) {
         VacationRequest vacation = vacationsList.get(position);
         holder.vName.setText("Name: " + vacation.getEmployee().getFirstName()+" "+vacation.getEmployee().getLastName());
-        holder.vID.setText("ID: ");
+        holder.vID.setText("ID: " + vacation.getEmployee().getId());
 
         holder.vVacationStartDate.setText("Start Date: " + formatDate(vacation.getStartDate()) );
         //Todo fix missing img
-        //holder.vVacationsStatus.setImageResource(vacation.getVacationStatus());
+        switch (vacation.getVacationStatus()) {
+            case 1:
+            holder.vVacationsStatus.setColorFilter(Color.rgb(0, 153, 0));
+            break;
+            case -1:
+            holder.vVacationsStatus.setColorFilter(Color.rgb(153,0,0));
+            break;
+        }
         holder.vVacationDays.setText("for : " + getDays(vacation) + " days");
     }
 

@@ -30,8 +30,15 @@ public class VacationsLog extends Fragment {
     private RecyclerView.LayoutManager layoutManager;
 
     private ArrayList<VacationRequest> vacations = new ArrayList<>();
-    private Employee currManager;
+    private Employee user;
+    private String query;
+    private final boolean isEmployee;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+    public VacationsLog(boolean isEmployee) {
+        this.isEmployee = isEmployee;
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -46,7 +53,8 @@ public class VacationsLog extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
-        currManager=(Employee) getArguments().getSerializable("mgr");
+        user= (Employee) getArguments().getSerializable((isEmployee)?"emp":"mgr");
+        query = (isEmployee)?"employee.id":"manager.id";
         adapter = new VacationAdapter(vacations);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
@@ -55,7 +63,7 @@ public class VacationsLog extends Fragment {
     private void loadVacations(){
 
         db.collection("Vacation")
-                .whereEqualTo("manager.ssn",currManager.getSSN())
+                .whereEqualTo(query,user.getId())
                 .whereNotEqualTo("vacationStatus",0)
                 .addSnapshotListener((queryDocumentSnapshots, e) -> {
                     if (e != null) {

@@ -49,7 +49,7 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_alignParentEnd="true"
-            android:src="@color/Primary" />
+            android:src="@drawable/ic_baseline_circle_24" />
 
 
     </RelativeLayout>

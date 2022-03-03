@@ -4,7 +4,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
 
 import android.os.Bundle;
-import android.widget.Toast;
 
 import com.example.igecuser.Fragments.VacationRequests;
 import com.example.igecuser.Fragments.VacationsLog;
@@ -31,7 +30,7 @@ public class ManagerDashboard extends AppCompatActivity {
         viewPager = findViewById(R.id.viewPager);
         tabLayout = findViewById(R.id.tabLayout);
         vacationRequests = new VacationRequests();
-        vacationsLog = new VacationsLog();
+        vacationsLog = new VacationsLog(false);
         currManager=(Employee)getIntent().getSerializableExtra("emp");
         bundle=new Bundle();
         bundle.putSerializable("mgr",currManager);

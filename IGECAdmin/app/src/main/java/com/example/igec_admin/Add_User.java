@@ -1,11 +1,9 @@
 package com.example.igec_admin;
 
 import static com.example.igec_admin.cryptography.RSAUtil.encrypt;
-import static com.example.igec_admin.cryptography.RSAUtil.publicKey;
 
 import android.os.Bundle;
 import android.text.Editable;
-import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,7 +16,6 @@ import androidx.fragment.app.Fragment;
 
 import com.example.igec_admin.cryptography.RSAKeyPairGenerator;
 import com.example.igec_admin.fireBase.Employee;
-import com.example.igec_admin.fireBase.operation;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -32,7 +29,6 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -42,12 +38,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.regex.Pattern;
-
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 
 public class Add_User extends Fragment {
 
@@ -124,13 +115,14 @@ public class Add_User extends Fragment {
     View.OnClickListener clRegister = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            Toast.makeText(getActivity(), "Hi", Toast.LENGTH_SHORT).show();
-            if(!TextUtils.isEmpty(Objects.requireNonNull(vFirstName.getText()).toString()) && !TextUtils.isEmpty(Objects.requireNonNull(vSecondName.getText()).toString())) {
-
-                addRecord(operation.employee);
+            if(ValidateInputs()) {
+                addRecord();
+                ClearInputs();
             }
             else
-                deleteRecord("employee","123");
+            {
+                Toast.makeText(getActivity(), "please, fill the user data", Toast.LENGTH_SHORT).show();
+            }
         }
     };
     View.OnClickListener clHireDate =  new View.OnClickListener() {
@@ -189,12 +181,10 @@ public class Add_User extends Fragment {
     };
 
 
-    void addRecord(operation op)
+    void addRecord()
     {
         addEmployee();
     }
-
-
 
     void addEmployee() {
         DocumentReference employeeOverviewRef = db.collection("EmployeeOverview").document("emp");
@@ -270,6 +260,35 @@ public class Add_User extends Fragment {
                 Toast.makeText(getActivity(), "Error while updating record", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    void ClearInputs() {
+        vFirstName.setText(null);
+        vSecondName.setText(null);
+        vEmail.setText(null);
+        vPassword.setText(null);
+        vTitle.setText(null);
+        vSalary.setText(null);
+        vArea.setText(null);
+        vCity.setText(null);
+        vStreet.setText(null);
+        vHireDate.setText(null);
+        vSSN.setText(null);
+    }
+
+    boolean ValidateInputs() {
+        return
+                !(vFirstName.getText().toString().isEmpty() ||
+                        vSecondName.getText().toString().isEmpty() ||
+                        vEmail.toString().isEmpty() ||
+                        vPassword.toString().isEmpty() ||
+                        vTitle.toString().isEmpty() ||
+                        vSalary.getText().toString().isEmpty() ||
+                        vArea.getText().toString().isEmpty() ||
+                        vCity.toString().isEmpty() ||
+                        vStreet.toString().isEmpty() ||
+                        vHireDate.toString().isEmpty() ||
+                        vSSN.toString().isEmpty());
     }
 
 

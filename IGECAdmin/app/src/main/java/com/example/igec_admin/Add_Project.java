@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.Toast;
 
 import com.example.igec_admin.fireBase.Employee;
 import com.example.igec_admin.fireBase.EmployeeOverview;
@@ -61,9 +62,9 @@ public class Add_Project extends Fragment {
     ArrayList<String> TeamID = new ArrayList<>();
     ArrayList<EmployeeOverview> Team = new ArrayList<>();
     FirebaseFirestore db = FirebaseFirestore.getInstance();
-  DocumentReference employeeOverviewRef = db.collection("EmployeeOverview")
+    DocumentReference employeeOverviewRef = db.collection("EmployeeOverview")
             .document("emp");
-  CollectionReference employeeCol = db.collection("employees");
+    CollectionReference employeeCol = db.collection("employees");
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -134,9 +135,9 @@ public class Add_Project extends Fragment {
         adapter.notifyItemChanged(position);
     }
 
-   void getEmployees() {
+    void getEmployees() {
         ArrayList<EmployeeOverview> employeeArray = new ArrayList();
-      employeeOverviewRef
+        employeeOverviewRef
                 .addSnapshotListener((documentSnapshot, e) -> {
                     if (e != null) {
                         Log.w(TAG, "Listen failed.", e);
@@ -150,13 +151,13 @@ public class Add_Project extends Fragment {
                         Map<String, ArrayList<String>> empMap;
                         empMap = (HashMap) documentSnapshot.getData();
                         retrieveEmployees(empMap);
-                }
-            });
+                    }
+                });
     }
 
     private void updateEmployeesDetails(String projectID) {
-        for(String id : TeamID){
-            if(id.equals(vManagerID.getText().toString())){
+        for (String id : TeamID) {
+            if (id.equals(vManagerID.getText().toString())) {
                 employeeCol.document(id).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                     @Override
                     public void onSuccess(DocumentSnapshot documentSnapshot) {
@@ -167,9 +168,9 @@ public class Add_Project extends Fragment {
                         empInfo.add(emp.getTitle());
                         empInfo.add("adminID");
                         Map<String, Object> empInfoMap = new HashMap<>();
-                        empInfoMap.put(id,empInfo);
+                        empInfoMap.put(id, empInfo);
                         employeeOverviewRef.update(empInfoMap);
-                        employeeCol.document(id).update("managerID","adminID","projectID",projectID);
+                        employeeCol.document(id).update("managerID", "adminID", "projectID", projectID);
                     }
                 });
 
@@ -186,19 +187,20 @@ public class Add_Project extends Fragment {
                     empInfo.add(emp.getTitle());
                     empInfo.add(vManagerID.getText().toString());
                     Map<String, Object> empInfoMap = new HashMap<>();
-                    empInfoMap.put(id,empInfo);
+                    empInfoMap.put(id, empInfo);
                     employeeOverviewRef.update(empInfoMap);
-                    employeeCol.document(id).update("managerID",vManagerID.getText().toString(),"projectID",projectID);
+                    employeeCol.document(id).update("managerID", vManagerID.getText().toString(), "projectID", projectID);
                 }
             });
         }
     }
+
     private void addProject() {
         Date startDate = convertStringDate(vStartTime.getText().toString());
         Date endDate = convertStringDate(vEndTime.getText().toString());
-        String projectID= db.collection("projects").document().getId().substring(0,5);
+        String projectID = db.collection("projects").document().getId().substring(0, 5);
         updateTeam();
-        Project newProject = new Project(vManagerName.getText().toString(),vManagerID.getText().toString(),vName.getText().toString(),startDate,endDate,Team,vLocation.getText().toString());
+        Project newProject = new Project(vManagerName.getText().toString(), vManagerID.getText().toString(), vName.getText().toString(), startDate, endDate, Team, vLocation.getText().toString());
         newProject.setId(projectID);
         db.collection("projects").document(projectID).set(newProject).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
@@ -209,16 +211,16 @@ public class Add_Project extends Fragment {
     }
 
     private void updateTeam() {
-        for(EmployeeOverview emp :Team ){
-            if(emp.getId().equals(vManagerID.getText().toString())){
+        for (EmployeeOverview emp : Team) {
+            if (emp.getId().equals(vManagerID.getText().toString())) {
                 emp.setManagerID("adminID");
-            }else
+            } else
                 emp.setManagerID(vManagerID.getText().toString());
         }
     }
 
 
-    Date convertStringDate(String sDate){
+    Date convertStringDate(String sDate) {
         SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
         try {
             Date date = format.parse(sDate);
@@ -228,21 +230,42 @@ public class Add_Project extends Fragment {
         }
         return null;
     }
-    void retrieveEmployees(Map<String, ArrayList<String>> empMap){
+
+    void retrieveEmployees(Map<String, ArrayList<String>> empMap) {
         employees.clear();
         for (String key : empMap.keySet()) {
             String firstName = empMap.get(key).get(0);
             String lastName = empMap.get(key).get(1);
             String title = empMap.get(key).get(2);
-            String managerID =  empMap.get(key).get(3);
+            String managerID = empMap.get(key).get(3);
             String id = (key);
-            if((managerID == null))
-            employees.add(new EmployeeOverview(firstName, lastName, title, id));
+            if ((managerID == null))
+                employees.add(new EmployeeOverview(firstName, lastName, title, id));
         }
         adapter.setEmployeesList(employees);
         adapter.notifyDataSetChanged();
 
     }
+
+    void ClearInputs() {
+        vName.setText(null);
+        vLocation.setText(null);
+        vManagerID.setText(null);
+        vManagerName.setText(null);
+        vStartTime.setText(null);
+        vEndTime.setText(null);
+    }
+
+    boolean ValidateInputs() {
+        return
+                !(vName.getText().toString().isEmpty() ||
+                        vLocation.getText().toString().isEmpty() ||
+                        vManagerID.toString().isEmpty() ||
+                        vManagerName.toString().isEmpty() ||
+                        vStartTime.toString().isEmpty() ||
+                        vEndTime.toString().isEmpty());
+    }
+
     // Listeners
     TextWatcher twManagerID = new TextWatcher() {
         @Override
@@ -321,9 +344,15 @@ public class Add_Project extends Fragment {
     View.OnClickListener clRegister = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            addProject();
+            if(ValidateInputs()) {
+                addProject();
+                ClearInputs();
+            }
+            else
+            {
+                Toast.makeText(getActivity(), "please, fill the project data", Toast.LENGTH_SHORT).show();
+            }
         }
-
 
 
     };

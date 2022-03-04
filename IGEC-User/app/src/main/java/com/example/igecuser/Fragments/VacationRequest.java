@@ -16,6 +16,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -28,6 +29,7 @@ public class VacationRequest extends Fragment {
 
     // Views
     private TextInputEditText vVacationDate, vVacationNote, vVacationDays;
+    TextInputLayout vVacationDateLayout;
     private MaterialButton vSendRequest;
     MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     MaterialDatePicker vDatePicker;
@@ -44,8 +46,7 @@ public class VacationRequest extends Fragment {
         View view = inflater.inflate(R.layout.fragment_vacation_request, container, false);
         Initialize(view);
 
-        vVacationDate.setOnClickListener(clVacationDate);
-        vVacationDate.setOnFocusChangeListener(fclVacationDate);
+        vVacationDateLayout.setEndIconOnClickListener(clVacationDate);
         vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);
         vSendRequest.setOnClickListener(clSendRequest);
 
@@ -58,6 +59,7 @@ public class VacationRequest extends Fragment {
         vVacationDate = view.findViewById(R.id.TextInput_VacationDate);
         vVacationNote = view.findViewById(R.id.TextInput_VacationNote);
         vVacationDays = view.findViewById(R.id.TextInput_VacationDays);
+        vVacationDateLayout = view.findViewById(R.id.textInputLayout_VacationDate);
         vSendRequest = view.findViewById(R.id.Button_SendRequest);
         vDatePickerBuilder.setTitleText("Vacation Date");
         vDatePicker = vDatePickerBuilder.build();
@@ -126,14 +128,6 @@ public class VacationRequest extends Fragment {
         public void onClick(View v) {
             if (!vDatePicker.isVisible())
                 vDatePicker.show(getParentFragmentManager(), "DATE_PICKER");
-        }
-    };
-    View.OnFocusChangeListener fclVacationDate = new View.OnFocusChangeListener() {
-        @Override
-        public void onFocusChange(View v, boolean hasFocus) {
-            if (hasFocus) {
-                vDatePicker.show(getParentFragmentManager(), "DATE_PICKER");
-            }
         }
     };
     MaterialPickerOnPositiveButtonClickListener pclDatePicker = new MaterialPickerOnPositiveButtonClickListener() {

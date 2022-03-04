@@ -13,4 +13,14 @@
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
     </style>
+
+    <style name="DatePicker"  parent="Base.Widget.MaterialComponents.TextInputLayout">
+        <item name="endIconMode">custom</item>
+        <item name ="endIconTint">@color/Primary</item>
+        <item name ="endIconDrawable" > @drawable/ic_baseline_calendar_month_24</item>
+        <item name="materialThemeOverlay">
+            @style/ThemeOverlay.MaterialComponents.TextInputEditText.OutlinedBox
+        </item>
+        <item name="boxCollapsedPaddingTop">0dp</item>
+    </style>
 </resources>

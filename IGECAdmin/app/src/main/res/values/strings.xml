@@ -13,6 +13,8 @@
     <string name="second_name">Second Name*</string>
     <string name="e_mail">E-mail*</string>
     <string name="machine_id">Machine ID*</string>
+    <string name="machine_code_name">Machine Code Name*</string>
+    <string name="machine_purchase_date">Machine Purchase Date*</string>
     <string name="password">Password*</string>
     <string name="title">Title*</string>
     <string name="salary">Salary*</string>
@@ -24,4 +26,5 @@
     <string name="add_user">User</string>
     <string name="add_project">Project</string>
     <string name="add_machine">Machine</string>
+    <string name="summary">Summary</string>
 </resources>

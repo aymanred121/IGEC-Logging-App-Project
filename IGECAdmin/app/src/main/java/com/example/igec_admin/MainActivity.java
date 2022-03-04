@@ -24,6 +24,7 @@ public class MainActivity extends AppCompatActivity {
     Add_User add_user;
     Add_Project add_project;
     Add_Machine add_machine;
+    Summary summary;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
         add_user = new Add_User();
         add_project = new Add_Project();
         add_machine = new Add_Machine();
+        summary = new Summary();
 
 
         tabLayout.setupWithViewPager(viewPager);
@@ -44,12 +46,14 @@ public class MainActivity extends AppCompatActivity {
         viewPagerAdapter.addFragment(add_user, getString(R.string.add_user));
         viewPagerAdapter.addFragment(add_project, getString(R.string.add_project));
         viewPagerAdapter.addFragment(add_machine, getString(R.string.add_machine));
+        viewPagerAdapter.addFragment(summary,getString(R.string.summary));
         viewPager.setAdapter(viewPagerAdapter);
 
 
         tabLayout.getTabAt(0).setIcon(R.drawable.ic_baseline_person_add_24);
         tabLayout.getTabAt(1).setIcon(R.drawable.ic_baseline_group_add_24);
-        tabLayout.getTabAt(2).setIcon(R.drawable.ic_baseline_build_24);
+        tabLayout.getTabAt(2).setIcon(R.drawable.ic_baseline_construction_24);
+        tabLayout.getTabAt(3).setIcon(R.drawable.ic_baseline_feed_24);
     }
 
     private class ViewPagerAdapter extends FragmentPagerAdapter {

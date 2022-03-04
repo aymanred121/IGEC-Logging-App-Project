@@ -58,6 +58,7 @@ public class Add_User extends Fragment {
     TextInputEditText vCity;
     TextInputEditText vStreet;
     TextInputEditText vHireDate;
+    TextInputLayout vHireDateLayout;
     MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     MaterialDatePicker vDatePicker;
 
@@ -73,8 +74,7 @@ public class Add_User extends Fragment {
         // Listeners
         vEmail.addTextChangedListener(twEmail);
         vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);
-        vHireDate.setOnFocusChangeListener(fclHireDate);
-        vHireDate.setOnClickListener(clHireDate);
+        vHireDateLayout.setEndIconOnClickListener(oclHireDate);
         vRegister.setOnClickListener(clRegister);
 
         return view;
@@ -96,6 +96,7 @@ public class Add_User extends Fragment {
         vCity = view.findViewById(R.id.TextInput_City);
         vStreet = view.findViewById(R.id.TextInput_Street);
         vHireDate = view.findViewById(R.id.TextInput_HireDate);
+        vHireDateLayout = view.findViewById(R.id.textInputLayout_HireDate);
         vDatePickerBuilder.setTitleText("Hire Date");
         vDatePicker = vDatePickerBuilder.build();
         vRegister = view.findViewById(R.id.button_register);
@@ -125,20 +126,11 @@ public class Add_User extends Fragment {
             }
         }
     };
-    View.OnClickListener clHireDate =  new View.OnClickListener() {
+    View.OnClickListener oclHireDate =  new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             if(!vDatePicker.isVisible())
             vDatePicker.show(getFragmentManager(),"DATE_PICKER");
-        }
-    };
-    View.OnFocusChangeListener fclHireDate = new View.OnFocusChangeListener() {
-        @Override
-        public void onFocusChange(View v, boolean hasFocus) {
-            if(hasFocus)
-            {
-                vDatePicker.show(getFragmentManager(),"DATE_PICKER");
-            }
         }
     };
     MaterialPickerOnPositiveButtonClickListener pclDatePicker =  new MaterialPickerOnPositiveButtonClickListener() {

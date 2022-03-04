@@ -50,7 +50,7 @@ public class Add_Project extends Fragment {
     private TextInputEditText vName, vLocation, vStartTime, vEndTime, vManagerName;
     private MaterialButton vRegister;
     private AutoCompleteTextView vManagerID;
-    private TextInputLayout vManagerIDLayout;
+    private TextInputLayout vManagerIDLayout, vStartTimeLayout, vEndTimeLayout;
     private RecyclerView recyclerView;
     private EmployeeAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
@@ -79,10 +79,8 @@ public class Add_Project extends Fragment {
         vManagerID.addTextChangedListener(twManagerID);
         vStartDatePicker.addOnPositiveButtonClickListener(pclStartDatePicker);
         vEndDatePicker.addOnPositiveButtonClickListener(pclEndDatePicker);
-        vStartTime.setOnFocusChangeListener(fclStartDate);
-        vStartTime.setOnClickListener(clStartDate);
-        vEndTime.setOnFocusChangeListener(fclEndDate);
-        vEndTime.setOnClickListener(clEndDate);
+        vStartTimeLayout.setEndIconOnClickListener(oclStartDate);
+        vEndTimeLayout.setEndIconOnClickListener(oclEndDate);
 
 
         // Inflate the layout for this fragment
@@ -95,6 +93,8 @@ public class Add_Project extends Fragment {
         vLocation = view.findViewById(R.id.TextInput_Location);
         vStartTime = view.findViewById(R.id.TextInput_StartTime);
         vEndTime = view.findViewById(R.id.TextInput_EndTime);
+        vStartTimeLayout = view.findViewById(R.id.textInputLayout_StartTime);
+        vEndTimeLayout = view.findViewById(R.id.textInputLayout_EndTime);
         vManagerID = view.findViewById(R.id.TextInput_ManagerID);
         vManagerIDLayout = view.findViewById(R.id.textInputLayout_ManagerID);
         vManagerName = view.findViewById(R.id.TextInput_ManagerName);
@@ -305,12 +305,16 @@ public class Add_Project extends Fragment {
                 vManagerName.setText(null);
         }
     };
-    View.OnFocusChangeListener fclStartDate = new View.OnFocusChangeListener() {
+    View.OnClickListener oclStartDate = new View.OnClickListener() {
         @Override
-        public void onFocusChange(View v, boolean hasFocus) {
-            if (hasFocus) {
-                vStartDatePicker.show(getFragmentManager(), "DATE_PICKER");
-            }
+        public void onClick(View v) {
+            vStartDatePicker.show(getFragmentManager(),"DATE_PICKER");
+        }
+    };
+    View.OnClickListener oclEndDate = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            vEndDatePicker.show(getFragmentManager(),"DATE_PICKER");
         }
     };
     MaterialPickerOnPositiveButtonClickListener pclStartDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
@@ -322,14 +326,6 @@ public class Add_Project extends Fragment {
             vStartTime.setText(simpleDateFormat.format(calendar.getTime()));
         }
     };
-    View.OnFocusChangeListener fclEndDate = new View.OnFocusChangeListener() {
-        @Override
-        public void onFocusChange(View v, boolean hasFocus) {
-            if (hasFocus) {
-                vEndDatePicker.show(getFragmentManager(), "DATE_PICKER");
-            }
-        }
-    };
     MaterialPickerOnPositiveButtonClickListener pclEndDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
         @Override
         public void onPositiveButtonClick(Object selection) {
@@ -337,20 +333,6 @@ public class Add_Project extends Fragment {
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis((long) selection);
             vEndTime.setText(simpleDateFormat.format(calendar.getTime()));
-        }
-    };
-    View.OnClickListener clStartDate = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (!vStartDatePicker.isVisible())
-                vStartDatePicker.show(getFragmentManager(), "DATE_PICKER");
-        }
-    };
-    View.OnClickListener clEndDate = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (!vEndDatePicker.isVisible())
-                vEndDatePicker.show(getFragmentManager(), "DATE_PICKER");
         }
     };
     View.OnClickListener clRegister = new View.OnClickListener() {

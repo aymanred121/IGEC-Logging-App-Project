@@ -4,6 +4,7 @@ import static android.content.ContentValues.TAG;
 
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,7 +17,11 @@ import android.view.ViewGroup;
 import com.example.igec_admin.fireBase.EmployeeOverview;
 import com.example.igec_admin.fireBase.Project;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,7 +37,7 @@ public class Summary extends Fragment {
     private RecyclerView.LayoutManager layoutManager;
     ArrayList<Project> projects = new ArrayList();
     FirebaseFirestore db = FirebaseFirestore.getInstance();
-    CollectionReference projectRef = db.collection("Project");
+    CollectionReference projectRef = db.collection("projects");
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -51,22 +56,19 @@ public class Summary extends Fragment {
         adapter = new ProjectAdapter(projects);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
-
+        getProjects();
 
     }
 
     void getProjects() {
-        ArrayList<Project> employeeArray = new ArrayList();
-        projectRef
-                .addSnapshotListener((documentSnapshot, e) -> {
-                    if (e != null) {
-                        Log.w(TAG, "Listen failed.", e);
-                        return;
-                    }
-
-                    String source = documentSnapshot != null && documentSnapshot.getMetadata().hasPendingWrites()
-                            ? "Local" : "Server";
-                });
+        projectRef.addSnapshotListener((queryDocumentSnapshots, e) -> {
+            projects.clear();
+            for(DocumentSnapshot d : queryDocumentSnapshots){
+                projects.add(d.toObject(Project.class));
+            }
+            adapter.setProjectsList(projects);
+            adapter.notifyDataSetChanged();
+        });
     }
 
 

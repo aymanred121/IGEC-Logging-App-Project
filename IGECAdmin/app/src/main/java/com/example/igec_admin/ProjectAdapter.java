@@ -30,7 +30,7 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectV
         public TextView vName,vNEmployee,vNMachine,vNHEmployee,vNHMachine;
         public ProjectViewHolder(@NonNull View itemView, ProjectAdapter.OnItemClickListener listener) {
             super(itemView);
-            vName = itemView.findViewById(R.id.TextView_Name);
+            vName = itemView.findViewById(R.id.TextView_ProjectName);
             vNEmployee = itemView.findViewById(R.id.TextView_nEmployee);
             vNMachine = itemView.findViewById(R.id.TextView_nMachine);
             vNHMachine = itemView.findViewById(R.id.TextView_nHourMachine);
@@ -61,7 +61,7 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectV
     @NonNull
     @Override
     public ProjectAdapter.ProjectViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.employee_item,parent,false);
+        View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.project_item,parent,false);
         ProjectAdapter.ProjectViewHolder evh = new ProjectAdapter.ProjectViewHolder(v,listener);
         return evh;
     }
@@ -69,11 +69,14 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectV
     @Override
     public void onBindViewHolder(@NonNull ProjectAdapter.ProjectViewHolder holder, int position) {
         Project project = projectsList.get(position);
-        holder.vName.setText(project.getName());
-        holder.vNEmployee.setText(project.getEmployees().size());
-        holder.vNMachine.setText(0);
-        holder.vNHEmployee.setText(0);
-        holder.vNHMachine.setText(0);
+
+            holder.vName.setText(project.getName());
+            holder.vNEmployee.setText("# Employee "+(project.getEmployees().size()));
+            holder.vNMachine.setText("# Machine");
+            holder.vNHEmployee.setText("# Hours by Employee ");
+            holder.vNHMachine.setText("# Hours by Machine ");
+
+
     }
 
     public ArrayList<Project> getProjectsList() {

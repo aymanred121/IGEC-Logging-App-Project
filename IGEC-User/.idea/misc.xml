@@ -8,7 +8,7 @@
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.15364583333333334" />
         <entry key="app/src/main/res/layout/activity_manager_dashboard.xml" value="0.10144927536231885" />
         <entry key="app/src/main/res/layout/activity_vacation_info.xml" value="0.25" />
-        <entry key="app/src/main/res/layout/fragment_check_in_out.xml" value="0.10144927536231885" />
+        <entry key="app/src/main/res/layout/fragment_check_in_out.xml" value="0.22" />
         <entry key="app/src/main/res/layout/fragment_fullscreen.xml" value="0.10144927536231885" />
         <entry key="app/src/main/res/layout/fragment_vacation_request.xml" value="0.33" />
         <entry key="app/src/main/res/layout/fragment_vacation_requests.xml" value="0.25" />

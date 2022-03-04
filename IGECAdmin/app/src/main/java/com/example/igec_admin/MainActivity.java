@@ -23,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
     TabLayout tabLayout;
     Add_User add_user;
     Add_Project add_project;
+    Add_Machine add_machine;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,29 +36,32 @@ public class MainActivity extends AppCompatActivity {
 
         add_user = new Add_User();
         add_project = new Add_Project();
-
+        add_machine = new Add_Machine();
 
 
         tabLayout.setupWithViewPager(viewPager);
-        ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(),0);
+        ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), 0);
         viewPagerAdapter.addFragment(add_user, getString(R.string.add_user));
         viewPagerAdapter.addFragment(add_project, getString(R.string.add_project));
+        viewPagerAdapter.addFragment(add_machine, getString(R.string.add_machine));
         viewPager.setAdapter(viewPagerAdapter);
+
 
         tabLayout.getTabAt(0).setIcon(R.drawable.ic_baseline_person_add_24);
         tabLayout.getTabAt(1).setIcon(R.drawable.ic_baseline_group_add_24);
+        tabLayout.getTabAt(2).setIcon(R.drawable.ic_baseline_build_24);
     }
 
     private class ViewPagerAdapter extends FragmentPagerAdapter {
 
         private List<Fragment> fragments = new ArrayList<>();
         private List<String> fragmentTitles = new ArrayList<>();
+
         public ViewPagerAdapter(@NonNull FragmentManager fm, int behavior) {
             super(fm, behavior);
         }
 
-        public void addFragment(Fragment fragment, String title)
-        {
+        public void addFragment(Fragment fragment, String title) {
             fragments.add(fragment);
             fragmentTitles.add(title);
         }

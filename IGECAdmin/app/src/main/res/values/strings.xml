@@ -12,6 +12,7 @@
     <string name="first_name">First Name*</string>
     <string name="second_name">Second Name*</string>
     <string name="e_mail">E-mail*</string>
+    <string name="machine_id">Machine ID*</string>
     <string name="password">Password*</string>
     <string name="title">Title*</string>
     <string name="salary">Salary*</string>
@@ -20,6 +21,7 @@
     <string name="street">Street*</string>
     <string name="hire_date">Hire Date*</string>
     <string name="snn">SNN*</string>
-    <string name ="add_user">Add User</string>
-    <string name="add_project">Add Project</string>
+    <string name="add_user">User</string>
+    <string name="add_project">Project</string>
+    <string name="add_machine">Machine</string>
 </resources>

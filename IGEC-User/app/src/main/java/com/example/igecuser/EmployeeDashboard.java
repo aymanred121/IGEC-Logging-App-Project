@@ -41,6 +41,8 @@ public class EmployeeDashboard extends AppCompatActivity {
         bundle = new Bundle();
         bundle.putSerializable("emp", currEmployee);
         vacationRequest.setArguments(bundle);
+        vacationsLog.setArguments(bundle);
+        checkInOut.setArguments(bundle);
         // TODO: vacationsLog doesn't update correctly
         vacationsLog.setArguments(bundle);
         tabLayout.setupWithViewPager(viewPager);

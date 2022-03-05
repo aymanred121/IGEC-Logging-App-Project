@@ -2,6 +2,7 @@ package com.example.igecuser.fireBase;
 
 import com.firebase.geofire.GeoFireUtils;
 import com.firebase.geofire.GeoLocation;
+import com.google.firebase.firestore.Exclude;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -9,7 +10,7 @@ import java.util.Map;
 
 public class Machine_Employee {
     private String machineID,employeeID;
-    private double lat,lng;
+   @Exclude private double lat,lng;
     private Map<Date,Map<String,Object>>checkIn,CheckOut=new HashMap();
 
     public Machine_Employee() {
@@ -18,7 +19,7 @@ public class Machine_Employee {
         /**
          * TODO move this function to where gps function will be
          * */
-        Map<String, Object> updates = new HashMap<>();
+      Map<String, Object> updates = new HashMap<>();
         String hash = GeoFireUtils.getGeoHashForLocation(new GeoLocation(lat, lng));
         updates.put("geohash", hash);
         updates.put("lat", lat);

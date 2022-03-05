@@ -26,7 +26,6 @@ public class qrCameraActivity extends AppCompatActivity {
         mCodeScanner.setDecodeCallback(result -> runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(qrCameraActivity.this, result.getText(), Toast.LENGTH_SHORT).show();
                 Intent resultIntent = new Intent();
                 resultIntent.putExtra("qrCamera", result.getText());
                 setResult(Activity.RESULT_OK, resultIntent);

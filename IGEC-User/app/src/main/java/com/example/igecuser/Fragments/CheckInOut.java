@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.icu.util.LocaleData;
 import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
@@ -40,6 +41,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -58,6 +60,7 @@ public class CheckInOut extends Fragment {
     String machineID;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     double latitude,longitude;
+    Machine currMachine;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -150,23 +153,35 @@ public class CheckInOut extends Fragment {
             case (55) : {
                 if (resultCode == Activity.RESULT_OK) {
                     machineID = data.getStringExtra("qrCamera");
-                    Toast.makeText(getContext(), machineID, Toast.LENGTH_SHORT).show();
-                    db.collection("machine").document(machineID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                        @Override
-                        public void onSuccess(DocumentSnapshot documentSnapshot) {
-                            Machine currMachine = documentSnapshot.toObject(Machine.class);
-                            Summary machineCheckIn = new Summary(latitude,longitude);
+                    try{
+
+                        db.collection("machine").document(machineID).get().addOnSuccessListener(documentSnapshot -> {
+                             currMachine = documentSnapshot.toObject(Machine.class);
+                            Summary machineCheckOut = new Summary(latitude,longitude);
                             Map<String,Object>machineEmployee = new HashMap();
                             machineEmployee.put("Machine",currMachine);
                             machineEmployee.put("Employee",currEmployee);
-                            machineEmployee.put("check In",machineCheckIn);
-                            db.collection("Machine_Employee").add(machineEmployee);
-                            //TODO handle check out
-                        }
-                    });
+                            machineEmployee.put("check Out",machineCheckOut);
+                            db.collection("Machine_Employee").document( LocalDate.now().toString() +currEmployee.getId()+currMachine.getId()).update(machineEmployee)
+                                    .addOnSuccessListener(unused -> Toast.makeText(getContext(), "Machine: "+currMachine.getCodeName()+" checked In successfully", Toast.LENGTH_SHORT).show())
+                                    .addOnFailureListener(e -> {
+                                Summary machineCheckIn = new Summary(latitude,longitude);
+                                Map<String,Object> machineEmployee1 = new HashMap();
+                                machineEmployee1.put("Machine",currMachine);
+                                machineEmployee1.put("Employee",currEmployee);
+                                machineEmployee1.put("check In",machineCheckIn);
+                                db.collection("Machine_Employee").document( LocalDate.now().toString() +currEmployee.getId()+currMachine.getId()).set(machineEmployee1);
+                                Toast.makeText(getContext(), "Machine: "+currMachine.getCodeName()+" checked Out successfully", Toast.LENGTH_SHORT).show();
+                            });
+                        });
+
+                    }catch (Exception e){
+                        Toast.makeText(getContext(), "invalid Machine ID", Toast.LENGTH_SHORT).show();
+                    }
                 }
                 break;
             }
+
         }
     }
 }

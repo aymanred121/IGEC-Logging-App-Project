@@ -1,5 +1,7 @@
 package com.example.igecuser.fireBase;
 
+import androidx.annotation.Nullable;
+
 public class Machine {
     private String id,codeName,buyingDate;
 
@@ -35,4 +37,6 @@ public class Machine {
         this.codeName = codeName;
         this.buyingDate = buyingDate;
     }
+
+
 }

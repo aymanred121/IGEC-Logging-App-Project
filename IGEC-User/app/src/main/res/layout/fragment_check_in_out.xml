@@ -57,6 +57,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|right"
+            android:visibility="gone"
             android:layout_margin="32dp"
             android:src="@drawable/ic_baseline_construction_24" />
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

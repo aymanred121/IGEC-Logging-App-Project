@@ -118,6 +118,7 @@ public class CheckInOut extends Fragment {
             isIn = !isIn;
             vCheckInOut.setBackgroundColor((isIn) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
             vCheckInOut.setText(isIn ? "Out" : "In");
+            vAddMachine.setVisibility(isIn? View.VISIBLE:View.GONE);
 
         }
 

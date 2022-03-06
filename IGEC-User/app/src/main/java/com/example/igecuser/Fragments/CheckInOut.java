@@ -28,6 +28,7 @@ import com.example.igecuser.fireBase.Machine;
 import com.example.igecuser.fireBase.Summary;
 import com.example.igecuser.qrCameraActivity;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -45,9 +46,9 @@ public class CheckInOut extends Fragment {
 
 
     boolean isIn = false;
-    String id;
     Employee currEmployee;
     String machineID;
+    String id;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     double latitude, longitude;
     Machine currMachine;
@@ -68,9 +69,27 @@ public class CheckInOut extends Fragment {
         vCheckInOut = view.findViewById(R.id.Button_CheckInOut);
         vAddMachine = view.findViewById(R.id.Button_AddMachine);
         currEmployee = (Employee) getArguments().getSerializable("emp");
-        id = db.collection("summary").document().getId();
+        id = LocalDate.now().toString()+currEmployee.getId();
     }
+    private Location getLocation() {
+        LocationManager lm = (LocationManager) getContext().getSystemService(LOCATION_SERVICE);
+        List<String> providers = lm.getProviders(true);
+        Location bestLocation = null;
+        for (String provider : providers) {
+            if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return null;
+            }
+            Location l = lm.getLastKnownLocation(provider);
+            if (l == null) {
+                continue;
+            }
+            if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
+                bestLocation = l;
+            }
+        }
+        return bestLocation;
 
+    }
     View.OnClickListener oclCheckInOut = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -81,28 +100,21 @@ public class CheckInOut extends Fragment {
             }
             longitude = location.getLongitude();
             latitude = location.getLatitude();
-            Summary summary = new Summary(latitude, longitude);
-            Map<String, Object> checkInOut = new HashMap<>();
-            if (!isIn) {
-                checkInOut.put("Employee", currEmployee);
-                checkInOut.put("Check In", summary);
-                db.collection("summary").document(id).update(checkInOut).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        db.collection("summary").document(id).set(checkInOut);
-                    }
-                });
 
-            } else {
-                checkInOut.put("Employee", currEmployee);
-                checkInOut.put("Check Out", summary);
-                db.collection("summary").document(id).update(checkInOut).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(getActivity(), "loooooooooool", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
+            Map<String, Object> checkOut = new HashMap<>();
+                checkOut.put("Employee", currEmployee);
+                checkOut.put("Check Out",new Summary(latitude, longitude));
+                db.collection("summary").document(id).update(checkOut)
+                        .addOnSuccessListener(unused -> {
+                            Toast.makeText(getContext(), "Checked Out successfully!", Toast.LENGTH_SHORT).show();
+                        })
+                        .addOnFailureListener(e -> {
+                            Map<String, Object> checkIn = new HashMap<>();
+                            checkIn.put("Employee", currEmployee);
+                            checkIn.put("Check In", new Summary(latitude, longitude));
+                            db.collection("summary").document(id).set(checkIn);
+                            Toast.makeText(getContext(), "Checked In successfully!", Toast.LENGTH_SHORT).show();
+                        });
             isIn = !isIn;
             vCheckInOut.setBackgroundColor((isIn) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
             vCheckInOut.setText(isIn ? "Out" : "In");
@@ -138,6 +150,13 @@ public class CheckInOut extends Fragment {
                 if (resultCode == Activity.RESULT_OK) {
                     machineID = data.getStringExtra("qrCamera");
                     try{
+                        Location location = getLocation();
+                        if(location ==null){
+                            Toast.makeText(getContext(), "Please enable GPS!", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        longitude = location.getLongitude();
+                        latitude = location.getLatitude();
 
                         db.collection("machine").document(machineID).get().addOnSuccessListener(documentSnapshot -> {
                              currMachine = documentSnapshot.toObject(Machine.class);
@@ -168,31 +187,5 @@ public class CheckInOut extends Fragment {
 
         }
     }
-    private Location getLocation() {
-        LocationManager lm = (LocationManager) getContext().getSystemService(LOCATION_SERVICE);
-        List<String> providers = lm.getProviders(true);
-        Location bestLocation = null;
-        for (String provider : providers) {
-            if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return null;
-            }
-            Location l = lm.getLastKnownLocation(provider);
-            if (l == null) {
-                continue;
-            }
-            if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
-                // Found best last known location: %s", l);
-                bestLocation = l;
-            }
-        }
-        return bestLocation;
 
-    }
 }

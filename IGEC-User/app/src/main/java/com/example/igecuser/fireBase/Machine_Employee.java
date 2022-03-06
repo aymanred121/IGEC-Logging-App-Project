@@ -16,9 +16,6 @@ public class Machine_Employee {
     public Machine_Employee() {
     }
     private Map geoPoint(){
-        /**
-         * TODO move this function to where gps function will be
-         * */
       Map<String, Object> updates = new HashMap<>();
         String hash = GeoFireUtils.getGeoHashForLocation(new GeoLocation(lat, lng));
         updates.put("geohash", hash);

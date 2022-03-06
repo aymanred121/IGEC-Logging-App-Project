@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import com.example.igecuser.R;
 import com.example.igecuser.fireBase.Employee;
+import com.example.igecuser.fireBase.VacationRequest;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
@@ -25,20 +26,20 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-public class VacationRequest extends Fragment {
+public class VacationRequestFragment extends Fragment {
 
     // Views
     private TextInputEditText vVacationDate, vVacationNote, vVacationDays;
-    TextInputLayout vVacationDateLayout;
+    private TextInputLayout vVacationDateLayout;
     private MaterialButton vSendRequest;
-    MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
-    MaterialDatePicker vDatePicker;
+    private MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
+    private MaterialDatePicker vDatePicker;
 
     // Vars
-    long duration, startDateMileSecond;
-    Employee currEmployee;
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
-    com.example.igecuser.fireBase.VacationRequest vacationRequest;
+    private long duration, startDateMileSecond;
+    private Employee currEmployee;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private VacationRequest vacationRequest;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -77,7 +78,7 @@ public class VacationRequest extends Fragment {
                         Date startDate = convertStringDate(vVacationDate.getText().toString());
                         duration = ((long) Integer.parseInt(vVacationDays.getText().toString()) * 24 * 3600 * 1000) + startDateMileSecond;
                         Date endDate = convertStringDate(convertLongDate(duration));
-                        vacationRequest = new com.example.igecuser.fireBase.VacationRequest(
+                        vacationRequest = new VacationRequest(
                                 startDate,
                                 endDate,
                                 (new Date()),
@@ -106,6 +107,23 @@ public class VacationRequest extends Fragment {
                 vVacationDays.getText().toString().isEmpty());
     }
 
+    private String convertLongDate(Object selection) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        Calendar calendar = Calendar.getInstance();
+        startDateMileSecond = (long) selection;
+        calendar.setTimeInMillis((long) selection);
+        return simpleDateFormat.format(calendar.getTime());
+    }
+    private Date convertStringDate(String sDate) {
+        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+        try {
+            Date date = format.parse(sDate);
+            return date;
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     // Listeners
     private View.OnClickListener clSendRequest = new View.OnClickListener() {
@@ -123,14 +141,14 @@ public class VacationRequest extends Fragment {
 
 
     };
-    View.OnClickListener clVacationDate = new View.OnClickListener() {
+    private View.OnClickListener clVacationDate = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             if (!vDatePicker.isVisible())
                 vDatePicker.show(getParentFragmentManager(), "DATE_PICKER");
         }
     };
-    MaterialPickerOnPositiveButtonClickListener pclDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
+    private MaterialPickerOnPositiveButtonClickListener pclDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
         @Override
         public void onPositiveButtonClick(Object selection) {
 
@@ -139,22 +157,4 @@ public class VacationRequest extends Fragment {
 
     };
 
-    private String convertLongDate(Object selection) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
-        Calendar calendar = Calendar.getInstance();
-        startDateMileSecond = (long) selection;
-        calendar.setTimeInMillis((long) selection);
-        return simpleDateFormat.format(calendar.getTime());
-    }
-
-    Date convertStringDate(String sDate) {
-        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
-        try {
-            Date date = format.parse(sDate);
-            return date;
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 }

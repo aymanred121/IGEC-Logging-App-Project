@@ -1,6 +1,5 @@
-package com.example.igecuser;
+package com.example.igecuser.Adapters;
 
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +8,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.igecuser.R;
 import com.example.igecuser.fireBase.Machine;
 import com.google.android.material.button.MaterialButton;
 

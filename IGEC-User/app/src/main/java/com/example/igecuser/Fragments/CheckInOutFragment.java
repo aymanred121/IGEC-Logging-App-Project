@@ -11,7 +11,6 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 
-import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
@@ -21,14 +20,12 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.igecuser.MachineAdapter;
+import com.example.igecuser.Adapters.MachineAdapter;
 import com.example.igecuser.R;
 import com.example.igecuser.fireBase.Employee;
 import com.example.igecuser.fireBase.Machine;
 import com.example.igecuser.fireBase.Summary;
-import com.example.igecuser.qrCameraActivity;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.example.igecuser.Activities.qrCameraActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -38,33 +35,36 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class CheckInOut extends Fragment {
+public class CheckInOutFragment extends Fragment {
 
-    TextView vGreeting;
-    MaterialButton vCheckInOut;
-    FloatingActionButton vAddMachine;
+    //Views
+    private TextView vGreeting;
+    private MaterialButton vCheckInOut;
+    private FloatingActionButton vAddMachine;
 
-
-    boolean isIn = false;
-    Employee currEmployee;
-    String machineID;
-    String id;
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
-    double latitude, longitude;
-    Machine currMachine;
+    // Vars
+    private boolean isIn = false;
+    private Employee currEmployee;
+    private String machineID;
+    private String id;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private double latitude, longitude;
+    private Machine currMachine;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_check_in_out, container, false);
-        Initialize(view);
+        initialize(view);
 
+
+        // Listeners
         vCheckInOut.setOnClickListener(oclCheckInOut);
         vAddMachine.setOnClickListener(oclMachine);
         return view;
     }
 
-    private void Initialize(View view) {
+    private void initialize(View view) {
         vGreeting = view.findViewById(R.id.TextView_Greeting);
         vCheckInOut = view.findViewById(R.id.Button_CheckInOut);
         vAddMachine = view.findViewById(R.id.Button_AddMachine);
@@ -90,7 +90,54 @@ public class CheckInOut extends Fragment {
         return bestLocation;
 
     }
-    View.OnClickListener oclCheckInOut = new View.OnClickListener() {
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch(requestCode) {
+            case (55) : {
+                if (resultCode == Activity.RESULT_OK) {
+                    machineID = data.getStringExtra("qrCamera");
+                    try{
+                        Location location = getLocation();
+                        if(location ==null){
+                            Toast.makeText(getContext(), "Please enable GPS!", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        longitude = location.getLongitude();
+                        latitude = location.getLatitude();
+
+                        db.collection("machine").document(machineID).get().addOnSuccessListener(documentSnapshot -> {
+                            currMachine = documentSnapshot.toObject(Machine.class);
+                            Summary machineCheckOut = new Summary(latitude,longitude);
+                            Map<String,Object>machineEmployee = new HashMap();
+                            machineEmployee.put("Machine",currMachine);
+                            machineEmployee.put("Employee",currEmployee);
+                            machineEmployee.put("check Out",machineCheckOut);
+                            db.collection("Machine_Employee").document( LocalDate.now().toString() +currEmployee.getId()+currMachine.getId()).update(machineEmployee)
+                                    .addOnSuccessListener(unused -> Toast.makeText(getContext(), "Machine: "+currMachine.getCodeName()+" checked In successfully", Toast.LENGTH_SHORT).show())
+                                    .addOnFailureListener(e -> {
+                                        Summary machineCheckIn = new Summary(latitude,longitude);
+                                        Map<String,Object> machineEmployee1 = new HashMap();
+                                        machineEmployee1.put("Machine",currMachine);
+                                        machineEmployee1.put("Employee",currEmployee);
+                                        machineEmployee1.put("check In",machineCheckIn);
+                                        db.collection("Machine_Employee").document( LocalDate.now().toString() +currEmployee.getId()+currMachine.getId()).set(machineEmployee1);
+                                        Toast.makeText(getContext(), "Machine: "+currMachine.getCodeName()+" checked Out successfully", Toast.LENGTH_SHORT).show();
+                                    });
+                        });
+
+                    }catch (Exception e){
+                        Toast.makeText(getContext(), "invalid Machine ID", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                break;
+            }
+
+        }
+    }
+
+    // Listeners
+    private View.OnClickListener oclCheckInOut = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             Location location = getLocation();
@@ -124,7 +171,7 @@ public class CheckInOut extends Fragment {
 
 
     };
-    MachineAdapter.OnItemClickListener iclMachine = new MachineAdapter.OnItemClickListener() {
+    private MachineAdapter.OnItemClickListener iclMachine = new MachineAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position) {
 
@@ -135,7 +182,7 @@ public class CheckInOut extends Fragment {
 
         }
     };
-    View.OnClickListener oclMachine = new View.OnClickListener() {
+    private View.OnClickListener oclMachine = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
             Intent intent = new Intent(getActivity(), qrCameraActivity.class);
@@ -143,50 +190,5 @@ public class CheckInOut extends Fragment {
 
         }
     };
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        switch(requestCode) {
-            case (55) : {
-                if (resultCode == Activity.RESULT_OK) {
-                    machineID = data.getStringExtra("qrCamera");
-                    try{
-                        Location location = getLocation();
-                        if(location ==null){
-                            Toast.makeText(getContext(), "Please enable GPS!", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-                        longitude = location.getLongitude();
-                        latitude = location.getLatitude();
-
-                        db.collection("machine").document(machineID).get().addOnSuccessListener(documentSnapshot -> {
-                             currMachine = documentSnapshot.toObject(Machine.class);
-                            Summary machineCheckOut = new Summary(latitude,longitude);
-                            Map<String,Object>machineEmployee = new HashMap();
-                            machineEmployee.put("Machine",currMachine);
-                            machineEmployee.put("Employee",currEmployee);
-                            machineEmployee.put("check Out",machineCheckOut);
-                            db.collection("Machine_Employee").document( LocalDate.now().toString() +currEmployee.getId()+currMachine.getId()).update(machineEmployee)
-                                    .addOnSuccessListener(unused -> Toast.makeText(getContext(), "Machine: "+currMachine.getCodeName()+" checked In successfully", Toast.LENGTH_SHORT).show())
-                                    .addOnFailureListener(e -> {
-                                Summary machineCheckIn = new Summary(latitude,longitude);
-                                Map<String,Object> machineEmployee1 = new HashMap();
-                                machineEmployee1.put("Machine",currMachine);
-                                machineEmployee1.put("Employee",currEmployee);
-                                machineEmployee1.put("check In",machineCheckIn);
-                                db.collection("Machine_Employee").document( LocalDate.now().toString() +currEmployee.getId()+currMachine.getId()).set(machineEmployee1);
-                                Toast.makeText(getContext(), "Machine: "+currMachine.getCodeName()+" checked Out successfully", Toast.LENGTH_SHORT).show();
-                            });
-                        });
-
-                    }catch (Exception e){
-                        Toast.makeText(getContext(), "invalid Machine ID", Toast.LENGTH_SHORT).show();
-                    }
-                }
-                break;
-            }
-
-        }
-    }
 
 }

@@ -14,7 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.igecuser.R;
-import com.example.igecuser.VacationAdapter;
+import com.example.igecuser.Adapters.VacationAdapter;
 import com.example.igecuser.fireBase.Employee;
 import com.example.igecuser.fireBase.VacationRequest;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -23,7 +23,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 
 
-public class VacationsLog extends Fragment {
+public class VacationsLogFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private static VacationAdapter adapter;
@@ -35,7 +35,7 @@ public class VacationsLog extends Fragment {
     private final boolean isEmployee;
     private static FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-    public VacationsLog(boolean isEmployee) {
+    public VacationsLogFragment(boolean isEmployee) {
         this.isEmployee = isEmployee;
     }
 

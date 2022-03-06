@@ -2,7 +2,6 @@ package com.example.igecuser.Fragments;
 
 import static android.content.ContentValues.TAG;
 
-import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -15,8 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.igecuser.R;
-import com.example.igecuser.VacationAdapter;
-import com.example.igecuser.VacationInfo;
+import com.example.igecuser.Adapters.VacationAdapter;
 import com.example.igecuser.fireBase.Employee;
 import com.example.igecuser.fireBase.VacationRequest;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -25,7 +23,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 
 
-public class VacationRequests extends Fragment {
+public class VacationRequestsFragment extends Fragment {
 
     private RecyclerView recyclerView;
     private VacationAdapter adapter;
@@ -39,7 +37,8 @@ public class VacationRequests extends Fragment {
         View view = inflater.inflate(R.layout.fragment_vacation_requests, container, false);
         Initialize(view);
 
-        // Inflate the layout for this fragment
+        adapter.setOnItemClickListener(itclVacationAdapter);
+
         return view;
     }
 
@@ -55,15 +54,7 @@ public class VacationRequests extends Fragment {
         recyclerView.setAdapter(adapter);
         loadVacations();
 
-        adapter.setOnItemClickListener(new VacationAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(int position) {
-                Intent intent = new Intent(getActivity(), VacationInfo.class);
-                if(adapter.getVacationsList().size()>0)
-                intent.putExtra("request",adapter.getVacationsList().get(position));
-                startActivity(intent);
-            }
-        });
+
     }
     private void loadVacations(){
         db.collection("Vacation")
@@ -84,5 +75,17 @@ public class VacationRequests extends Fragment {
                     adapter.notifyDataSetChanged();
                 });
     }
+
+    VacationAdapter.OnItemClickListener itclVacationAdapter =  new VacationAdapter.OnItemClickListener() {
+        @Override
+        public void onItemClick(int position) {
+//            Intent intent = new Intent(getActivity(), VacationInfo.class);
+//            if(adapter.getVacationsList().size()>0)
+//                intent.putExtra("request",adapter.getVacationsList().get(position));
+//            startActivity(intent);
+            VacationRequestFragmentDialog vacationRequestFragmentDialog = new VacationRequestFragmentDialog(adapter.getVacationsList().get(position));
+            vacationRequestFragmentDialog.show(getParentFragmentManager(),"");
+        }
+    };
 
 }

@@ -1,7 +1,6 @@
-package com.example.igecuser;
+package com.example.igecuser.Adapters;
 
 import android.graphics.Color;
-import android.provider.ContactsContract;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,8 +11,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 
+import com.example.igecuser.R;
 import com.example.igecuser.fireBase.VacationRequest;
-import com.google.android.material.checkbox.MaterialCheckBox;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

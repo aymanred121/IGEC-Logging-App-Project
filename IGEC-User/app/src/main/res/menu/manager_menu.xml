@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/item_CheckInOut"
+            android:icon="@drawable/ic_baseline_access_time_24"
+            android:title="@string/check_in_out"></item>
+        <item
+            android:id="@+id/item_VacationRequests"
+            android:icon="@drawable/ic_baseline_mail_24"
+            android:title="@string/vacation_requests"></item>
+        <item
+            android:id="@+id/item_VacationsLog"
+            android:icon="@drawable/ic_baseline_history_24"
+            android:title="@string/vacations_log"></item>
+    </group>
+</menu>

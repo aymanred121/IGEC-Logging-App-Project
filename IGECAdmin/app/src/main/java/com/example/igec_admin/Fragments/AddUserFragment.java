@@ -1,4 +1,4 @@
-package com.example.igec_admin;
+package com.example.igec_admin.Fragments;
 
 import static com.example.igec_admin.cryptography.RSAUtil.encrypt;
 
@@ -14,6 +14,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.example.igec_admin.R;
 import com.example.igec_admin.cryptography.RSAKeyPairGenerator;
 import com.example.igec_admin.fireBase.Employee;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -40,7 +41,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-public class Add_User extends Fragment {
+public class AddUserFragment extends Fragment {
 
 
 

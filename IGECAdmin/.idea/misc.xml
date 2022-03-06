@@ -3,13 +3,28 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="app/src/main/res/drawable/ic_baseline_group_24.xml" value="0.127" />
+        <entry key="app/src/main/res/drawable/ic_baseline_group_add_24.xml" value="0.127" />
+        <entry key="app/src/main/res/drawable/ic_baseline_image_24.xml" value="0.127" />
+        <entry key="app/src/main/res/drawable/ic_baseline_person_24.xml" value="0.127" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.12612227447627192" />
         <entry key="app/src/main/res/layout/dropdown_item.xml" value="0.9" />
         <entry key="app/src/main/res/layout/employee_item.xml" value="0.33" />
         <entry key="app/src/main/res/layout/fragment_add_machine.xml" value="0.21" />
         <entry key="app/src/main/res/layout/fragment_add_project.xml" value="0.21377672209026127" />
         <entry key="app/src/main/res/layout/fragment_add_user.xml" value="0.21" />
+        <entry key="app/src/main/res/layout/fragment_machines.xml" value="0.10144927536231885" />
+        <entry key="app/src/main/res/layout/fragment_projects.xml" value="0.10144927536231885" />
+        <entry key="app/src/main/res/layout/fragment_users.xml" value="0.10144927536231885" />
+        <entry key="app/src/main/res/layout/machine_item.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/machines.xml" value="0.10144927536231885" />
+        <entry key="app/src/main/res/layout/modify_machines.xml" value="0.10144927536231885" />
+        <entry key="app/src/main/res/layout/modify_project.xml" value="0.10144927536231885" />
+        <entry key="app/src/main/res/layout/modify_user.xml" value="0.10144927536231885" />
         <entry key="app/src/main/res/layout/project_item.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/projects.xml" value="0.10144927536231885" />
+        <entry key="app/src/main/res/layout/users.xml" value="0.10144927536231885" />
+        <entry key="app/src/main/res/menu/admin_menu.xml" value="0.5" />
       </map>
     </option>
   </component>

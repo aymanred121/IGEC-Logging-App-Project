@@ -1,4 +1,4 @@
-package com.example.igec_admin;
+package com.example.igec_admin.Adatpers;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,8 +8,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Project;
-import com.google.android.material.checkbox.MaterialCheckBox;
 
 import java.util.ArrayList;
 

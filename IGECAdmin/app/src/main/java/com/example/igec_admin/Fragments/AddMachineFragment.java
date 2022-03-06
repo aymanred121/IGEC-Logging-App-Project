@@ -1,4 +1,4 @@
-package com.example.igec_admin;
+package com.example.igec_admin.Fragments;
 
 import android.os.Bundle;
 
@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Machine;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.datepicker.MaterialDatePicker;
@@ -28,7 +29,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-public class Add_Machine extends Fragment {
+public class AddMachineFragment extends Fragment {
 
 
     // Views

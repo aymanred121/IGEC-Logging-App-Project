@@ -23,8 +23,13 @@
     <string name="street">Street*</string>
     <string name="hire_date">Hire Date*</string>
     <string name="snn">SNN*</string>
-    <string name="add_user">User</string>
-    <string name="add_project">Project</string>
-    <string name="add_machine">Machine</string>
+    <string name="add_user">Add User</string>
+    <string name="add_project">Add Project</string>
+    <string name="add_machine">Add Machine</string>
     <string name="summary">Summary</string>
+    <string name="openNavBar">Open navigation drawer</string>
+    <string name="closeNavBar">Close navigation drawer</string>
+    <string name="users">Users</string>
+    <string name="projects">Projects</string>
+    <string name="machines">Machines</string>
 </resources>

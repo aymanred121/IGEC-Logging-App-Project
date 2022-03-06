@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+    <group android:checkableBehavior="single">
+        <item
+            android:checkable="true"
+            android:id="@+id/item_addUser"
+            android:icon="@drawable/ic_baseline_person_add_24"
+            android:title="@string/add_user"></item>
+        <item
+            android:checkable="true"
+            android:id="@+id/item_addProject"
+            android:icon="@drawable/ic_baseline_group_add_24"
+            android:title="@string/add_project"></item>
+        <item
+            android:checkable="true"
+            android:id="@+id/item_addMachine"
+            android:icon="@drawable/ic_baseline_build_24"
+            android:title="@string/add_machine"></item>
+
+
+        <item
+            android:checkable="true"
+            android:id="@+id/item_Users"
+            android:icon="@drawable/ic_baseline_person_add_24"
+            android:title="@string/users"></item>
+        <item
+            android:checkable="true"
+            android:id="@+id/item_Projects"
+            android:icon="@drawable/ic_baseline_group_add_24"
+            android:title="@string/projects"></item>
+        <item
+            android:checkable="true"
+            android:id="@+id/item_Machines"
+            android:icon="@drawable/ic_baseline_construction_24"
+            android:title="@string/machines"></item>
+
+
+        <item
+            android:checkable="true"
+            android:id="@+id/item_summary"
+            android:icon="@drawable/ic_baseline_feed_24"
+            android:title="@string/summary"></item>
+
+    </group>
+</menu>

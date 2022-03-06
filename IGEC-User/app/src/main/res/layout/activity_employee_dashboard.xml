@@ -33,8 +33,6 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        app:itemIconTint="@color/nav_item"
-        app:itemTextColor="@color/nav_item"
         app:menu="@menu/employee_menu" />
 
 

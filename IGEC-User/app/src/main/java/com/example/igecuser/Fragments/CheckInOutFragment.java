@@ -28,6 +28,7 @@ import com.example.igecuser.fireBase.Employee;
 import com.example.igecuser.fireBase.Machine;
 import com.example.igecuser.fireBase.Summary;
 import com.example.igecuser.Activities.qrCameraActivity;
+import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -105,6 +106,7 @@ public class CheckInOutFragment extends Fragment {
                             Toast.makeText(getContext(), "Please enable GPS!", Toast.LENGTH_SHORT).show();
                             return;
                         }
+
                         longitude = location.getLongitude();
                         latitude = location.getLatitude();
 
@@ -137,6 +139,8 @@ public class CheckInOutFragment extends Fragment {
 
         }
     }
+
+
 
     // Listeners
     private View.OnClickListener oclCheckInOut = new View.OnClickListener() {
@@ -192,5 +196,6 @@ public class CheckInOutFragment extends Fragment {
 
         }
     };
+
 
 }

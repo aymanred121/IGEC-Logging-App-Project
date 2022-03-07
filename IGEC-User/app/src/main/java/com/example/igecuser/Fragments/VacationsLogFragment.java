@@ -21,6 +21,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 
 public class VacationsLogFragment extends Fragment {
@@ -76,6 +77,7 @@ public class VacationsLogFragment extends Fragment {
                     for(DocumentSnapshot vacations: queryDocumentSnapshots){
                         vacationRequests.add(vacations.toObject(VacationRequest.class));
                     }
+                    Collections.reverse(vacationRequests);
                     adapter.setVacationsList(vacationRequests);
                     adapter.notifyDataSetChanged();
                 });

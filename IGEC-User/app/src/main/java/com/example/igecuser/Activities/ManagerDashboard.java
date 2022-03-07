@@ -6,10 +6,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.viewpager.widget.ViewPager;
 
 import android.os.Bundle;
 import android.view.MenuItem;
 
+import com.example.igecuser.Adapters.ViewPagerAdapter;
 import com.example.igecuser.Fragments.CheckInOutFragment;
 import com.example.igecuser.Fragments.VacationRequestsFragment;
 import com.example.igecuser.Fragments.VacationsLogFragment;
@@ -21,14 +23,15 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
 
     // Views
     private Toolbar vToolbar;
+    private ViewPager viewPager;
     private DrawerLayout vDrawerLayout;
     private NavigationView vNavigationView;
 
     // Vars
     private ActionBarDrawerToggle actionBarDrawerToggle;
-    private VacationRequestsFragment vacationRequestsFragment;
-    private VacationsLogFragment vacationsLogFragment;
-    private CheckInOutFragment checkInOutFragment;
+    private VacationRequestsFragment vacationRequestsFragment = new VacationRequestsFragment();
+    private VacationsLogFragment vacationsLogFragment  = new VacationsLogFragment(false);
+    private CheckInOutFragment checkInOutFragment = new CheckInOutFragment();
     private Employee currManager;
     private Bundle bundle;
 
@@ -42,11 +45,7 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
 
         // Listeners
         vDrawerLayout.addDrawerListener(actionBarDrawerToggle);
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, checkInOutFragment).commit();
-            vNavigationView.setCheckedItem(R.id.item_CheckInOut);
-        }
-
+        viewPager.setOnTouchListener((v, event) -> true);
 
     }
 
@@ -55,14 +54,20 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
         vToolbar = findViewById(R.id.toolbar);
         vDrawerLayout = findViewById(R.id.drawer);
         vNavigationView = findViewById(R.id.navView);
+        viewPager = findViewById(R.id.fragment_container);
         setSupportActionBar(vToolbar);
         actionBarDrawerToggle = new ActionBarDrawerToggle(this, vDrawerLayout, vToolbar, R.string.openNavBar, R.string.closeNavBar);
         actionBarDrawerToggle.syncState();
         vNavigationView.setNavigationItemSelectedListener(this);
 
-        vacationRequestsFragment = new VacationRequestsFragment();
-        vacationsLogFragment = new VacationsLogFragment(false);
-        checkInOutFragment = new CheckInOutFragment();
+
+
+        viewPager.setOffscreenPageLimit(2);
+        ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), 0);
+        viewPagerAdapter.addFragment(checkInOutFragment, getString(R.string.check_in_out));
+        viewPagerAdapter.addFragment(vacationRequestsFragment, getString(R.string.vacation_request));
+        viewPagerAdapter.addFragment(vacationsLogFragment, getString(R.string.vacations_log));
+        viewPager.setAdapter(viewPagerAdapter);
 
         currManager = (Employee) getIntent().getSerializableExtra("emp");
         bundle = new Bundle();
@@ -85,13 +90,13 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.item_CheckInOut:
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, checkInOutFragment).commit();
+                viewPager.setCurrentItem(0);
                 break;
             case R.id.item_VacationRequests:
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, vacationRequestsFragment).commit();
+                viewPager.setCurrentItem(1);
                 break;
             case R.id.item_VacationsLog:
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, vacationsLogFragment).commit();
+                viewPager.setCurrentItem(2);
                 break;
         }
         vDrawerLayout.closeDrawer(GravityCompat.START);

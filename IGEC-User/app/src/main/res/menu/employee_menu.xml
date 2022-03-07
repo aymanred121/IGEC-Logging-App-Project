@@ -12,7 +12,7 @@
     <item
         android:checkable="true"
         android:id="@+id/item_VacationRequests"
-        android:icon="@drawable/ic_baseline_near_me_24"
+        android:icon="@drawable/ic_baseline_send_24"
         android:title="@string/send_request"></item>
     <item
         android:checkable="true"

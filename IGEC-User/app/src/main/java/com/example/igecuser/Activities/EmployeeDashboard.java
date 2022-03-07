@@ -6,10 +6,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.viewpager.widget.ViewPager;
 
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
 
+import com.example.igecuser.Adapters.ViewPagerAdapter;
 import com.example.igecuser.Fragments.CheckInOutFragment;
 import com.example.igecuser.Fragments.VacationRequestFragment;
 import com.example.igecuser.Fragments.VacationsLogFragment;
@@ -21,13 +25,14 @@ public class EmployeeDashboard extends AppCompatActivity implements NavigationVi
 
     // Views
     private Toolbar vToolbar;
+    private ViewPager viewPager;
     private DrawerLayout vDrawerLayout;
     private NavigationView vNavigationView;
 
     // Vars
-    private CheckInOutFragment checkInOutFragment;
-    private VacationRequestFragment vacationRequest;
-    private VacationsLogFragment vacationsLogFragment;
+    private CheckInOutFragment checkInOutFragment = new CheckInOutFragment();
+    private VacationRequestFragment vacationRequestFragment = new VacationRequestFragment();
+    private VacationsLogFragment vacationsLogFragment = new VacationsLogFragment(true);
     private Employee currEmployee;
     private Bundle bundle;
     private ActionBarDrawerToggle actionBarDrawerToggle;
@@ -43,11 +48,7 @@ public class EmployeeDashboard extends AppCompatActivity implements NavigationVi
 
         // Listeners
         vDrawerLayout.addDrawerListener(actionBarDrawerToggle);
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, checkInOutFragment).commit();
-            vNavigationView.setCheckedItem(R.id.item_CheckInOut);
-        }
-
+        viewPager.setOnTouchListener((v, event) -> true);
 
     }
 
@@ -56,18 +57,25 @@ public class EmployeeDashboard extends AppCompatActivity implements NavigationVi
         vToolbar = findViewById(R.id.toolbar);
         vDrawerLayout = findViewById(R.id.drawer);
         vNavigationView = findViewById(R.id.navView);
+        viewPager = findViewById(R.id.fragment_container);
         setSupportActionBar(vToolbar);
         actionBarDrawerToggle = new ActionBarDrawerToggle(this, vDrawerLayout, vToolbar, R.string.openNavBar, R.string.closeNavBar);
         actionBarDrawerToggle.syncState();
         vNavigationView.setNavigationItemSelectedListener(this);
 
-        vacationRequest = new VacationRequestFragment();
-        checkInOutFragment = new CheckInOutFragment();
-        vacationsLogFragment = new VacationsLogFragment(true);
+
+
+        viewPager.setOffscreenPageLimit(2);
+        ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), 0);
+        viewPagerAdapter.addFragment(checkInOutFragment, getString(R.string.check_in_out));
+        viewPagerAdapter.addFragment(vacationRequestFragment, getString(R.string.vacation_request));
+        viewPagerAdapter.addFragment(vacationsLogFragment, getString(R.string.vacations_log));
+        viewPager.setAdapter(viewPagerAdapter);
+
         currEmployee = (Employee) getIntent().getSerializableExtra("emp");
         bundle = new Bundle();
         bundle.putSerializable("emp", currEmployee);
-        vacationRequest.setArguments(bundle);
+        vacationRequestFragment.setArguments(bundle);
         vacationsLogFragment.setArguments(bundle);
         checkInOutFragment.setArguments(bundle);
         vacationsLogFragment.setArguments(bundle);
@@ -85,13 +93,13 @@ public class EmployeeDashboard extends AppCompatActivity implements NavigationVi
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.item_CheckInOut:
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, checkInOutFragment).commit();
+                viewPager.setCurrentItem(0);
                 break;
             case R.id.item_VacationRequests:
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, vacationRequest).commit();
+                viewPager.setCurrentItem(1);
                 break;
             case R.id.item_VacationsLog:
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, vacationsLogFragment).commit();
+                viewPager.setCurrentItem(2);
                 break;
         }
         vDrawerLayout.closeDrawer(GravityCompat.START);

@@ -97,6 +97,13 @@ public class UserFragmentDialog  extends DialogFragment {
         vRegister.setVisibility(View.GONE);
         vDelete.setVisibility(View.VISIBLE);
         vUpdate.setVisibility(View.VISIBLE);
+
+
+        //TODO change with employee to get more info
+        vFirstName.setText(employeeOverview.getFirstName());
+        vSecondName.setText(employeeOverview.getLastName());
+        vTitle.setText(employeeOverview.getTitle());
+
     }
 
 

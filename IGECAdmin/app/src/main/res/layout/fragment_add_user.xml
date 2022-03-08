@@ -4,8 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:windowSoftInputMode="adjustPan"
     tools:context=".Fragments.AddUserFragment">
 
+    <!-- TODO bugfix: buttons flow up when typing-->
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textInputLayout_FirstName"
@@ -27,8 +29,8 @@
             android:layout_height="wrap_content"
             android:hint="@string/first_name"
             android:inputType="text"
-            android:singleLine="true"
-            android:padding="14dp" />
+            android:padding="14dp"
+            android:singleLine="true" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -53,8 +55,8 @@
             android:layout_height="wrap_content"
             android:hint="@string/second_name"
             android:inputType="text"
-            android:singleLine="true"
-            android:padding="14dp" />
+            android:padding="14dp"
+            android:singleLine="true" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -67,8 +69,8 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="32dp"
         app:boxBackgroundMode="outline"
-        app:helperTextEnabled="true"
         app:helperText="Example@gmail.com"
+        app:helperTextEnabled="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textInputLayout_FirstName">
@@ -78,9 +80,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/e_mail"
-            android:singleLine="true"
             android:inputType="textEmailAddress"
-            android:padding="14dp" />
+            android:padding="14dp"
+            android:singleLine="true" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -93,9 +95,9 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="32dp"
         app:boxBackgroundMode="outline"
-        app:helperTextEnabled="true"
         app:endIconMode="password_toggle"
         app:endIconTint="@color/Primary"
+        app:helperTextEnabled="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textInputLayout_Email">
@@ -105,9 +107,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/password"
-            android:singleLine="true"
             android:inputType="textPassword"
-            android:padding="14dp" />
+            android:padding="14dp"
+            android:singleLine="true" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -132,8 +134,8 @@
             android:layout_height="wrap_content"
             android:hint="@string/title"
             android:inputType="text"
-            android:singleLine="true"
-            android:padding="14dp" />
+            android:padding="14dp"
+            android:singleLine="true" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -157,8 +159,8 @@
             android:layout_height="wrap_content"
             android:hint="@string/salary"
             android:inputType="numberDecimal"
-            android:singleLine="true"
-            android:padding="14dp" />
+            android:padding="14dp"
+            android:singleLine="true" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -183,8 +185,8 @@
             android:layout_height="wrap_content"
             android:hint="@string/area"
             android:inputType="text"
-            android:singleLine="true"
-            android:padding="14dp" />
+            android:padding="14dp"
+            android:singleLine="true" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -208,8 +210,8 @@
             android:layout_height="wrap_content"
             android:hint="@string/city"
             android:inputType="text"
-            android:singleLine="true"
-            android:padding="14dp" />
+            android:padding="14dp"
+            android:singleLine="true" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -233,8 +235,8 @@
             android:layout_height="wrap_content"
             android:hint="@string/street"
             android:inputType="text"
-            android:singleLine="true"
-            android:padding="14dp" />
+            android:padding="14dp"
+            android:singleLine="true" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -256,8 +258,8 @@
             android:id="@+id/TextInput_HireDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/hire_date"
             android:enabled="false"
+            android:hint="@string/hire_date"
             android:inputType="date"
             android:padding="14dp"
             android:singleLine="true" />
@@ -306,6 +308,30 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_update"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="32dp"
+        android:text="@string/update"
+        android:textAllCaps="false"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_delete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginBottom="32dp"
+        android:text="@string/delete"
+        android:textAllCaps="false"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

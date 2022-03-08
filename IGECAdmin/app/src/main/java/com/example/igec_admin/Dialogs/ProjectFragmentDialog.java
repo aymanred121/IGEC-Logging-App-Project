@@ -2,7 +2,6 @@ package com.example.igec_admin.Dialogs;
 
 import static android.content.ContentValues.TAG;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -14,6 +13,8 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -21,10 +22,8 @@ import com.example.igec_admin.Adatpers.EmployeeAdapter;
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Employee;
 import com.example.igec_admin.fireBase.EmployeeOverview;
-import com.example.igec_admin.fireBase.Machine;
 import com.example.igec_admin.fireBase.Project;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
@@ -43,7 +42,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ProjectFragmentDialog extends BottomSheetDialogFragment {
+public class ProjectFragmentDialog extends DialogFragment {
     // Views
     private TextInputEditText vName, vLocation, vStartTime, vEndTime, vManagerName;
     private MaterialButton vRegister, vUpdate, vDelete;
@@ -71,7 +70,11 @@ public class ProjectFragmentDialog extends BottomSheetDialogFragment {
         this.project = project;
     }
 
-
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setStyle(DialogFragment.STYLE_NORMAL,R.style.FullscreenDialogTheme);
+    }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -122,28 +125,39 @@ public class ProjectFragmentDialog extends BottomSheetDialogFragment {
         adapter.setOnItemClickListener(itclEmployeeAdapter);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
+
+
+        vName.setText(project.getName());
+        vLocation.setText(project.getLocation());
+        vManagerID.setText(project.getManagerID());
+        vManagerName.setText(project.getManagerName());
+        vStartTime.setText(convertDateToString(project.getStartDate().getTime()));
+        vEndTime.setText(convertDateToString(project.getEstimatedEndDate().getTime()));
+
+        vManagerID.setEnabled(false);
+
         getEmployees();
     }
 
+    String convertDateToString(long selection)
+    {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(selection);
+        return simpleDateFormat.format(calendar.getTime());
+    }
+
     void ChangeSelectedTeam(int position) {
+        //TODO modify to add to the already employeeList for the project
         employees.get(position).setSelected(!employees.get(position).getSelected());
         if (employees.get(position).getSelected()) {
             Team.add(employees.get(position));
             TeamID.add(String.valueOf(employees.get(position).getId()));
         } else {
-            if (!vManagerID.getText().toString().isEmpty() && vManagerID.getText().toString().equals(employees.get(position).getId().toString()))
-                vManagerID.setText("");
+
             Team.remove(employees.get(position));
             TeamID.remove(String.valueOf(employees.get(position).getId()));
 
-
-        }
-        vManagerIDLayout.setEnabled(Team.size() >= 2);
-        if (!vManagerIDLayout.isEnabled())
-            vManagerID.setText("");
-        if (TeamID.size() > 0) {
-            ArrayAdapter<String> idAdapter = new ArrayAdapter<>(getActivity(), R.layout.dropdown_item, TeamID);
-            vManagerID.setAdapter(idAdapter);
 
         }
         adapter.notifyItemChanged(position);

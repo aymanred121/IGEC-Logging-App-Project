@@ -11,8 +11,8 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.igec_admin.Adatpers.MachineAdapter;
 import com.example.igec_admin.Adatpers.ProjectAdapter;
+import com.example.igec_admin.Dialogs.ProjectFragmentDialog;
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Project;
 import com.google.firebase.firestore.CollectionReference;
@@ -34,6 +34,8 @@ public class ProjectsFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_projects,container,false);
         initialize(view);
+
+        adapter.setOnItemClickListener(itclProjectAdapter);
         return view;
     }
     void initialize(View view){
@@ -55,4 +57,13 @@ public class ProjectsFragment extends Fragment {
             adapter.notifyDataSetChanged();
         });
     }
+
+
+    private ProjectAdapter.OnItemClickListener itclProjectAdapter = new ProjectAdapter.OnItemClickListener() {
+        @Override
+        public void onItemClick(int position) {
+            ProjectFragmentDialog projectFragmentDialog = new ProjectFragmentDialog(adapter.getProjectsList().get(position));
+            projectFragmentDialog.show(getParentFragmentManager(),"");
+        }
+    };
 }

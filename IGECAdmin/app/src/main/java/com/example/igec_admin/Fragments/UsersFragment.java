@@ -12,11 +12,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.igec_admin.Adatpers.EmployeeAdapter;
+import com.example.igec_admin.Dialogs.UserFragmentDialog;
 import com.example.igec_admin.R;
-import com.example.igec_admin.fireBase.Employee;
 import com.example.igec_admin.fireBase.EmployeeOverview;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -32,18 +31,21 @@ public class UsersFragment extends Fragment {
     EmployeeAdapter adapter;
     RecyclerView recyclerView;
     RecyclerView.LayoutManager layoutManager;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_users,container,false);
         initialize(view);
+
+        adapter.setOnItemClickListener(itclEmployeeAdapter);
         return view;
     }
     void initialize(View view){
         recyclerView = view.findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
-        adapter = new EmployeeAdapter(employees);
+        adapter = new EmployeeAdapter(employees,false);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
         getEmployees();
@@ -72,4 +74,19 @@ public class UsersFragment extends Fragment {
         adapter.setEmployeesList(employees);
         adapter.notifyDataSetChanged();
     }
+
+
+    private EmployeeAdapter.OnItemClickListener itclEmployeeAdapter = new EmployeeAdapter.OnItemClickListener() {
+        @Override
+        public void onItemClick(int position) {
+            UserFragmentDialog userFragmentDialog = new UserFragmentDialog(adapter.getEmployeesList().get(position));
+            userFragmentDialog.show(getParentFragmentManager(),"");
+        }
+
+        @Override
+        public void onCheckboxClick(int position) {
+
+        }
+    };
+
 }

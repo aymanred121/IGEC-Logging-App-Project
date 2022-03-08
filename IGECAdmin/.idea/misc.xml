@@ -13,8 +13,12 @@
         <entry key="app/src/main/res/layout/fragment_add_machine.xml" value="0.21" />
         <entry key="app/src/main/res/layout/fragment_add_project.xml" value="0.21377672209026127" />
         <entry key="app/src/main/res/layout/fragment_add_user.xml" value="0.21" />
+        <entry key="app/src/main/res/layout/fragment_machine.xml" value="0.21" />
+        <entry key="app/src/main/res/layout/fragment_machine_info.xml" value="0.1082427536231884" />
         <entry key="app/src/main/res/layout/fragment_machines.xml" value="0.10144927536231885" />
+        <entry key="app/src/main/res/layout/fragment_project_info.xml" value="0.1082427536231884" />
         <entry key="app/src/main/res/layout/fragment_projects.xml" value="0.10144927536231885" />
+        <entry key="app/src/main/res/layout/fragment_user_info.xml" value="0.2" />
         <entry key="app/src/main/res/layout/fragment_users.xml" value="0.10144927536231885" />
         <entry key="app/src/main/res/layout/machine_item.xml" value="0.25" />
         <entry key="app/src/main/res/layout/machines.xml" value="0.10144927536231885" />

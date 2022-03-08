@@ -12,19 +12,14 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.igec_admin.Adatpers.MachineAdapter;
-import com.example.igec_admin.Adatpers.ProjectAdapter;
+import com.example.igec_admin.Dialogs.MachineFragmentDialog;
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Machine;
-import com.example.igec_admin.fireBase.Project;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
 public class MachinesFragment extends Fragment {
     FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -38,6 +33,7 @@ public class MachinesFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_machines,container,false);
         initialize(view);
+        adapter.setOnItemClickListener(itclMachineAdapter);
         return view;
     }
     void initialize(View view){
@@ -60,4 +56,12 @@ public class MachinesFragment extends Fragment {
         });
 
     }
+
+    private MachineAdapter.OnItemClickListener itclMachineAdapter = new MachineAdapter.OnItemClickListener() {
+        @Override
+        public void onItemClick(int position) {
+            MachineFragmentDialog machineFragmentDialog = new MachineFragmentDialog(adapter.getMachinesList().get(position));
+            machineFragmentDialog.show(getParentFragmentManager(),"");
+        }
+    };
 }

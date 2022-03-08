@@ -1,14 +1,9 @@
-package com.example.igec_admin.Fragments;
+package com.example.igec_admin.Dialogs;
 
 import static android.content.ContentValues.TAG;
 
+import android.app.Activity;
 import android.os.Bundle;
-
-
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -19,12 +14,17 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Toast;
 
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.igec_admin.Adatpers.EmployeeAdapter;
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Employee;
 import com.example.igec_admin.fireBase.EmployeeOverview;
+import com.example.igec_admin.fireBase.Machine;
 import com.example.igec_admin.fireBase.Project;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
@@ -32,7 +32,6 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
-
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -44,11 +43,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AddProjectFragment extends Fragment {
-
+public class ProjectFragmentDialog extends BottomSheetDialogFragment {
     // Views
     private TextInputEditText vName, vLocation, vStartTime, vEndTime, vManagerName;
-    private MaterialButton vRegister;
+    private MaterialButton vRegister, vUpdate, vDelete;
     private AutoCompleteTextView vManagerID;
     private TextInputLayout vManagerIDLayout, vStartTimeLayout, vEndTimeLayout;
     private RecyclerView recyclerView;
@@ -67,6 +65,12 @@ public class AddProjectFragment extends Fragment {
     DocumentReference employeeOverviewRef = db.collection("EmployeeOverview")
             .document("emp");
     CollectionReference employeeCol = db.collection("employees");
+    Project project;
+
+    public ProjectFragmentDialog(Project project) {
+        this.project = project;
+    }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -75,7 +79,8 @@ public class AddProjectFragment extends Fragment {
         Initialize(view);
 
         // listeners
-        vRegister.setOnClickListener(clRegister);
+        vUpdate.setOnClickListener(clUpdate);
+        vDelete.setOnClickListener(clDelete);
         vManagerID.addTextChangedListener(twManagerID);
         vStartDatePicker.addOnPositiveButtonClickListener(pclStartDatePicker);
         vEndDatePicker.addOnPositiveButtonClickListener(pclEndDatePicker);
@@ -99,6 +104,13 @@ public class AddProjectFragment extends Fragment {
         vManagerIDLayout = view.findViewById(R.id.textInputLayout_ManagerID);
         vManagerName = view.findViewById(R.id.TextInput_ManagerName);
         vRegister = view.findViewById(R.id.button_register);
+        vUpdate = view.findViewById(R.id.button_update);
+        vDelete = view.findViewById(R.id.button_delete);
+
+        vRegister.setVisibility(View.GONE);
+        vDelete.setVisibility(View.VISIBLE);
+        vUpdate.setVisibility(View.VISIBLE);
+
         vStartDatePickerBuilder.setTitleText("Start Date");
         vStartDatePicker = vStartDatePickerBuilder.build();
         vEndDatePickerBuilder.setTitleText("End Date");
@@ -106,7 +118,7 @@ public class AddProjectFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
-        adapter = new EmployeeAdapter(employees,true);
+        adapter = new EmployeeAdapter(employees, true);
         adapter.setOnItemClickListener(itclEmployeeAdapter);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
@@ -308,13 +320,13 @@ public class AddProjectFragment extends Fragment {
     View.OnClickListener oclStartDate = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            vStartDatePicker.show(getFragmentManager(),"DATE_PICKER");
+            vStartDatePicker.show(getFragmentManager(), "DATE_PICKER");
         }
     };
     View.OnClickListener oclEndDate = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            vEndDatePicker.show(getFragmentManager(),"DATE_PICKER");
+            vEndDatePicker.show(getFragmentManager(), "DATE_PICKER");
         }
     };
     MaterialPickerOnPositiveButtonClickListener pclStartDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
@@ -335,20 +347,26 @@ public class AddProjectFragment extends Fragment {
             vEndTime.setText(simpleDateFormat.format(calendar.getTime()));
         }
     };
-    View.OnClickListener clRegister = new View.OnClickListener() {
+    View.OnClickListener clUpdate = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            if(ValidateInputs()) {
-                addProject();
-            }
-            else
-            {
+            if (ValidateInputs()) {
+
+            } else {
                 Toast.makeText(getActivity(), "please, fill the project data", Toast.LENGTH_SHORT).show();
             }
         }
 
 
     };
+    View.OnClickListener clDelete = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+        }
+
+
+    };
+
     EmployeeAdapter.OnItemClickListener itclEmployeeAdapter = new EmployeeAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position) {

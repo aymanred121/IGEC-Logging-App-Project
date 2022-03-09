@@ -1,7 +1,7 @@
 package com.example.igec_admin.fireBase;
 
 public class Machine {
-    private String id,codeName,buyingDate;
+    private String id,codeName, purchaseDate;
 
     public Machine() {
     }
@@ -22,17 +22,17 @@ public class Machine {
         this.codeName = codeName;
     }
 
-    public String getBuyingDate() {
-        return buyingDate;
+    public String getPurchaseDate() {
+        return purchaseDate;
     }
 
-    public void setBuyingDate(String buyingDate) {
-        this.buyingDate = buyingDate;
+    public void setPurchaseDate(String purchaseDate) {
+        this.purchaseDate = purchaseDate;
     }
 
     public Machine(String id, String codeName, String buyingDate) {
         this.id = id;
         this.codeName = codeName;
-        this.buyingDate = buyingDate;
+        this.purchaseDate = buyingDate;
     }
 }

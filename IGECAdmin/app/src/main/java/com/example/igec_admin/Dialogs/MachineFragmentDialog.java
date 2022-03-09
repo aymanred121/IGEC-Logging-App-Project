@@ -1,8 +1,5 @@
 package com.example.igec_admin.Dialogs;
 
-import android.app.Activity;
-import android.app.Dialog;
-import android.app.MediaRouteButton;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -18,18 +15,20 @@ import androidx.fragment.app.DialogFragment;
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Machine;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.zxing.WriterException;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.HashMap;
 
 import androidmads.library.qrgenearator.QRGContents;
 import androidmads.library.qrgenearator.QRGEncoder;
@@ -99,7 +98,7 @@ public class MachineFragmentDialog extends DialogFragment {
 
         vCodeName.setText(machine.getCodeName());
         vID.setText(machine.getId());
-        vPurchaseDate.setText(machine.getBuyingDate());
+        vPurchaseDate.setText(machine.getPurchaseDate());
         qrgEncoder = new QRGEncoder(vID.getText().toString(), null, QRGContents.Type.TEXT, 25 * 25);
         try {
             vQRImg.setImageBitmap(qrgEncoder.encodeAsBitmap());
@@ -108,7 +107,31 @@ public class MachineFragmentDialog extends DialogFragment {
         }
 
     }
+    private void deleteMachine() {
+        /*
+          we can't delete machine from Machine_Employee
+          since this would imply that this machine didn't exist
+          in the first place
+          */
+        machineCol.document(machine.getId()).delete().addOnSuccessListener(unused ->Toast.makeText(getActivity(), "Deleted", Toast.LENGTH_SHORT).show());
+    }
 
+    private void updateMachine() {
+        HashMap<String,Object> modifiedMachine = new HashMap<>();
+        modifiedMachine.put("codeName",vCodeName.getText().toString());
+        modifiedMachine.put("purchaseDate",vPurchaseDate.getText().toString());
+        modifiedMachine.put("id",machine.getId());
+        machineCol.document(machine.getId()).update(modifiedMachine).addOnSuccessListener(unused -> {
+            db.collection("Machine_Employee").whereEqualTo("Machine",machine).get().addOnSuccessListener(queryDocumentSnapshots -> {
+                for (DocumentSnapshot d : queryDocumentSnapshots){
+                    db.collection("Machine_Employee")
+                            .document(d.getId())
+                            .update("Machine",modifiedMachine);
+                }
+            });
+            Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
+        });
+    }
 
     // Listeners
     View.OnClickListener oclDate = new View.OnClickListener() {
@@ -117,19 +140,9 @@ public class MachineFragmentDialog extends DialogFragment {
             vDatePicker.show(getFragmentManager(), "DATE_PICKER");
         }
     };
-    View.OnClickListener oclUpdate = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
-        }
-    };
-    View.OnClickListener oclDelete = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            Toast.makeText(getActivity(), "Deleted", Toast.LENGTH_SHORT).show();
+    View.OnClickListener oclUpdate = v -> updateMachine();
 
-        }
-    };
+    View.OnClickListener oclDelete = v -> deleteMachine();
     TextWatcher atlMachineID = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {

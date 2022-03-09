@@ -15,8 +15,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.igec_admin.Adatpers.EmployeeAdapter;
 import com.example.igec_admin.Dialogs.UserFragmentDialog;
 import com.example.igec_admin.R;
+import com.example.igec_admin.fireBase.Employee;
 import com.example.igec_admin.fireBase.EmployeeOverview;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -25,7 +29,7 @@ import java.util.Map;
 
 public class UsersFragment extends Fragment {
     FirebaseFirestore db = FirebaseFirestore.getInstance();
-    DocumentReference employeeRef = db.collection("EmployeeOverview").document("emp");
+    DocumentReference employeeOverviewRef = db.collection("EmployeeOverview").document("emp");
     ArrayList<EmployeeOverview> employees = new ArrayList<>();
     EmployeeAdapter adapter;
     RecyclerView recyclerView;
@@ -50,7 +54,7 @@ public class UsersFragment extends Fragment {
         getEmployees();
     }
     void getEmployees(){
-        employeeRef.get().addOnSuccessListener(documentSnapshot -> {
+        employeeOverviewRef.get().addOnSuccessListener(documentSnapshot -> {
             HashMap<String,ArrayList<String>> empMap;
             empMap = (HashMap)documentSnapshot.getData();
             retrieveEmployees(empMap);
@@ -76,8 +80,13 @@ public class UsersFragment extends Fragment {
     private final EmployeeAdapter.OnItemClickListener itclEmployeeAdapter = new EmployeeAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position) {
-            UserFragmentDialog userFragmentDialog = new UserFragmentDialog(adapter.getEmployeeOverviewsList().get(position));
-            userFragmentDialog.show(getParentFragmentManager(),"");
+            db.collection("employees").document(adapter.getEmployeeOverviewsList().get(position).getId()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    UserFragmentDialog userFragmentDialog = new UserFragmentDialog(documentSnapshot.toObject(Employee.class),employees);
+                    userFragmentDialog.show(getParentFragmentManager(),"");
+                }
+            });
         }
 
         @Override

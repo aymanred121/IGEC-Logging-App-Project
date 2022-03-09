@@ -1,5 +1,8 @@
 package com.example.igec_admin.fireBase;
 
+import com.example.igec_admin.cryptography.RSAUtil;
+import com.google.firebase.firestore.Exclude;
+
 import java.util.Date;
 
 public class Employee {
@@ -122,7 +125,13 @@ public class Employee {
     public String getPassword() {
         return password;
     }
-
+    @Exclude public String getDecryptedPassword(){
+        try {
+            return RSAUtil.decrypt(password, RSAUtil.privateKey);
+        }catch (Exception e){
+            return null;
+        }
+    }
     public void setPassword(String password) {
         this.password = password;
     }

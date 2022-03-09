@@ -1,31 +1,41 @@
 package com.example.igec_admin.Dialogs;
 
-import android.app.Activity;
+import static com.example.igec_admin.cryptography.RSAUtil.encrypt;
+
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 import com.example.igec_admin.R;
+import com.example.igec_admin.fireBase.Employee;
 import com.example.igec_admin.fireBase.EmployeeOverview;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public class UserFragmentDialog  extends DialogFragment {
@@ -35,6 +45,16 @@ public class UserFragmentDialog  extends DialogFragment {
         super.onCreate(savedInstanceState);
         setStyle(DialogFragment.STYLE_NORMAL,R.style.FullscreenDialogTheme);
     }
+    //Var
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    CollectionReference machineEmployeeCol =  db.collection("Machine_Employee");
+    CollectionReference vacationCol = db.collection("Vacation");
+    CollectionReference projectCol = db.collection("projects");
+    CollectionReference summaryCOl = db.collection("summary");
+    DocumentReference employeeOverviewRef = db.collection("EmployeeOverview").document("emp");
+    Employee employee;
+    ArrayList<EmployeeOverview> employeeOverviewArrayList;
+
 
     // Views
     MaterialButton vUpdate,vDelete,vRegister;
@@ -53,9 +73,9 @@ public class UserFragmentDialog  extends DialogFragment {
     TextInputLayout vHireDateLayout;
     MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     MaterialDatePicker vDatePicker;
-    EmployeeOverview employeeOverview;
-    public UserFragmentDialog(EmployeeOverview employeeOverview) {
-        this.employeeOverview = employeeOverview;
+    public UserFragmentDialog(Employee employee, ArrayList<EmployeeOverview> employeeOverviewArrayList) {
+        this.employee = employee;
+        this.employeeOverviewArrayList = employeeOverviewArrayList;
     }
 
     @Nullable
@@ -98,11 +118,17 @@ public class UserFragmentDialog  extends DialogFragment {
         vDelete.setVisibility(View.VISIBLE);
         vUpdate.setVisibility(View.VISIBLE);
 
-
-        //TODO change with employee to get more info
-        vFirstName.setText(employeeOverview.getFirstName());
-        vSecondName.setText(employeeOverview.getLastName());
-        vTitle.setText(employeeOverview.getTitle());
+        vFirstName.setText(employee.getFirstName());
+        vSecondName.setText(employee.getLastName());
+        vTitle.setText(employee.getTitle());
+        vArea.setText(employee.getArea());
+        vCity.setText(employee.getCity());
+        vStreet.setText(employee.getStreet());
+        vEmail.setText(employee.getEmail());
+        vPassword.setText(employee.getDecryptedPassword());
+        vSalary.setText(String.valueOf(employee.getSalary()));
+        vSSN.setText(employee.getSSN());
+        vHireDate.setText(String.valueOf(employee.getHireDate()));
 
     }
 
@@ -135,22 +161,115 @@ public class UserFragmentDialog  extends DialogFragment {
                         vHireDate.toString().isEmpty() ||
                         vSSN.toString().isEmpty());
     }
+    private void updateEmployeeOverview(Map<String, Object> updatedEmpOverviewMap) {
+        employeeOverviewRef
+                .update(updatedEmpOverviewMap);
+    }
+    private void updateMachineEmployee(HashMap<String,Object>updatedEmployeeMap) {
+        machineEmployeeCol.whereEqualTo("Employee.id",employee.getId()).get().addOnSuccessListener(queryDocumentSnapshots -> {
+            for (QueryDocumentSnapshot d :  queryDocumentSnapshots){
+                machineEmployeeCol.document(d.getId()).update("Employee",updatedEmployeeMap);
+            }
+        });
+    }
+    private void updateVacation(HashMap<String, Object> updatedEmployeeMap) {
+        vacationCol.whereEqualTo("employee.id",employee.getId()).get().addOnSuccessListener(queryDocumentSnapshots ->{
+            for (QueryDocumentSnapshot d :  queryDocumentSnapshots){
+                vacationCol.document(d.getId()).update("employee",updatedEmployeeMap);
+            }
+        } );
+        vacationCol.whereEqualTo("manager.id",employee.getId()).get().addOnSuccessListener(queryDocumentSnapshots ->{
+            for (QueryDocumentSnapshot d :  queryDocumentSnapshots){
+                vacationCol.document(d.getId()).update("manager",updatedEmployeeMap);
+            }
+        } );
+    }
+    private void updateSummary(HashMap<String,Object> updatedEmployeeMap) {
+        summaryCOl.whereEqualTo("Employee.id",employee.getId()).get().addOnSuccessListener(queryDocumentSnapshots ->{
+            for (QueryDocumentSnapshot d :  queryDocumentSnapshots){
+                summaryCOl.document(d.getId()).update("Employee",updatedEmployeeMap);
+            }
+        } );
+    }
+    private void updateProjects() {
+        //TODO fix the bug in updateProjects
+        HashMap<String,Object>updatedProjectEmpInfoMap = new HashMap<>();
+        Iterator<EmployeeOverview> iter = employeeOverviewArrayList.iterator();
+        while (iter.hasNext()) {
+            EmployeeOverview e = iter.next();
 
+            if (e.getId().equals(employee.getId()))
+                iter.remove();
+            EmployeeOverview emp = new EmployeeOverview(vFirstName.getText().toString(),vSecondName.getText().toString(),vTitle.getText().toString(),employee.getId());
+            employeeOverviewArrayList.add(emp);
+        }
+        updatedProjectEmpInfoMap.put("employees",employeeOverviewArrayList);
+        projectCol.document(employee.getProjectID()).update(updatedProjectEmpInfoMap);
+    }
+
+    private HashMap<String, Object> fillEmployeeData() {
+        HashMap<String,Object>empMap = new HashMap<>();
+        empMap.put("area",vArea.getText().toString());
+        empMap.put("street",vStreet.getText().toString());
+        empMap.put("city",vCity.getText().toString());
+        empMap.put("email",vEmail.getText().toString());
+        empMap.put("firstName",vFirstName.getText().toString());
+        empMap.put("lastName",vSecondName.getText().toString());
+        empMap.put("password",encryptedPassword());
+        empMap.put("title",vTitle.getText().toString());
+        empMap.put("salary",Double.parseDouble(vSalary.getText().toString()));
+        empMap.put("SSN",vSSN.getText().toString());
+        empMap.put("hireDate",convertStringDate(vHireDate.getText().toString()));
+        empMap.put("id",employee.getId());
+        return empMap;
+    }
+    private String encryptedPassword() {
+        try {
+            return Base64.getEncoder().encodeToString(encrypt(vPassword.getText().toString()));
+        } catch (Exception e) {
+            Log.e("error in encryption",e.toString());
+            return null;
+        }
+    }
+    Date convertStringDate(String sDate){
+        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+        try {
+            Date date = format.parse(sDate);
+            return date;
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    private void deleteEmployee() {
+        //TODO delte employee from employees and employeesoverview
+    }
 
     // Listeners
-    View.OnClickListener clUpdate = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-
-        }
+    View.OnClickListener clUpdate = v -> {
+        String id = employee.getId();
+        Map<String, Object> updatedEmpOverviewMap = new HashMap<>();
+        ArrayList<String> empInfo = new ArrayList<>();
+        empInfo.add((vFirstName.getText()).toString());
+        empInfo.add((vSecondName.getText()).toString());
+        empInfo.add((vTitle.getText()).toString());
+        empInfo.add((employee.getId()));
+        updatedEmpOverviewMap.put(id,empInfo);
+        HashMap<String,Object> updatedEmployeeMap = fillEmployeeData();
+        db.collection("employees").document(id).update(updatedEmployeeMap).addOnSuccessListener(unused->{
+           updateEmployeeOverview(updatedEmpOverviewMap);
+           updateMachineEmployee(updatedEmployeeMap);
+           updateVacation(updatedEmployeeMap);
+           updateSummary(updatedEmployeeMap);
+        //   updateProjects();
+        });
+    };
+    View.OnClickListener clDelete = v -> {
+        deleteEmployee();
     };
 
-    View.OnClickListener clDelete = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
 
-        }
-    };
+
     View.OnClickListener oclHireDate =  new View.OnClickListener() {
         @Override
         public void onClick(View v) {

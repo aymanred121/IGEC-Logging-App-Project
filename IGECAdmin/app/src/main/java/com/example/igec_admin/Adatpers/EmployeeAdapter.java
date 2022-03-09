@@ -19,7 +19,6 @@ import java.util.ArrayList;
 
 public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.EmployeeViewHolder> {
     private ArrayList<EmployeeOverview> employeeOverviewsList;
-    private ArrayList<Employee> employeesList;
     private OnItemClickListener listener;
     private boolean isAdd;
 
@@ -90,14 +89,6 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
 
     public ArrayList<EmployeeOverview> getEmployeeOverviewsList() {
         return employeeOverviewsList;
-    }
-
-    public ArrayList<Employee> getEmployeesList() {
-        return employeesList;
-    }
-
-    public void setEmployeesList(ArrayList<Employee> employeesList) {
-        this.employeesList = employeesList;
     }
 
     public void setEmployeeOverviewsList(ArrayList<EmployeeOverview> employeeOverviewsList) {

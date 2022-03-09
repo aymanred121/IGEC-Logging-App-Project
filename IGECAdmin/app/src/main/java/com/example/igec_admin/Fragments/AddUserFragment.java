@@ -118,7 +118,7 @@ public class AddUserFragment extends Fragment {
         @Override
         public void onClick(View v) {
             if(ValidateInputs()) {
-                addRecord();
+               addEmployee();
                 ClearInputs();
             }
             else
@@ -174,23 +174,10 @@ public class AddUserFragment extends Fragment {
     };
 
 
-    void addRecord()
-    {
-        addEmployee();
-    }
 
     void addEmployee() {
         DocumentReference employeeOverviewRef = db.collection("EmployeeOverview").document("emp");
         String id = db.collection("EmployeeOverview").document().getId().substring(0,5);
-        RSAKeyPairGenerator keyPairGenerator = null;
-        try {
-            keyPairGenerator = new RSAKeyPairGenerator();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        System.out.println(Base64.getEncoder().encodeToString(keyPairGenerator.getPublicKey().getEncoded()));
-        System.out.println(Base64.getEncoder().encodeToString(keyPairGenerator.getPrivateKey().getEncoded()));
-
         ArrayList<String> empInfo = new ArrayList<>();
         empInfo.add((vFirstName.getText()).toString());
         empInfo.add((vSecondName.getText()).toString());
@@ -198,12 +185,7 @@ public class AddUserFragment extends Fragment {
         empInfo.add(null);
         Map<String, Object> empInfoMap = new HashMap<>();
         empInfoMap.put(id,empInfo);
-        employeeOverviewRef.update(empInfoMap).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                employeeOverviewRef.set(empInfoMap);
-            }
-        });
+        employeeOverviewRef.update(empInfoMap).addOnFailureListener(e -> employeeOverviewRef.set(empInfoMap));
         Employee newEmployee = fillEmployeeData();
         newEmployee.setId(id);
         db.collection("employees").document(id).set(newEmployee);

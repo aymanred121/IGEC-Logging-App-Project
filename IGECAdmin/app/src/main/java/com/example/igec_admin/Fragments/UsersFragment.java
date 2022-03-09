@@ -80,12 +80,9 @@ public class UsersFragment extends Fragment {
     private final EmployeeAdapter.OnItemClickListener itclEmployeeAdapter = new EmployeeAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position) {
-            db.collection("employees").document(adapter.getEmployeeOverviewsList().get(position).getId()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                @Override
-                public void onSuccess(DocumentSnapshot documentSnapshot) {
-                    UserFragmentDialog userFragmentDialog = new UserFragmentDialog(documentSnapshot.toObject(Employee.class),employees);
-                    userFragmentDialog.show(getParentFragmentManager(),"");
-                }
+            db.collection("employees").document(adapter.getEmployeeOverviewsList().get(position).getId()).get().addOnSuccessListener(documentSnapshot -> {
+                UserFragmentDialog userFragmentDialog = new UserFragmentDialog(documentSnapshot.toObject(Employee.class),employees,position);
+                userFragmentDialog.show(getParentFragmentManager(),"");
             });
         }
 

@@ -21,6 +21,7 @@ import androidx.fragment.app.DialogFragment;
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Employee;
 import com.example.igec_admin.fireBase.EmployeeOverview;
+import com.example.igec_admin.fireBase.Project;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
@@ -28,6 +29,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -38,7 +40,6 @@ import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -58,7 +59,7 @@ public class UserFragmentDialog  extends DialogFragment {
     DocumentReference employeeOverviewRef = db.collection("EmployeeOverview").document("emp");
     Employee employee;
     ArrayList<EmployeeOverview> employeeOverviewArrayList;
-
+    int currEmpOverviewPos;
 
     // Views
     MaterialButton vUpdate,vDelete,vRegister;
@@ -77,9 +78,10 @@ public class UserFragmentDialog  extends DialogFragment {
     TextInputLayout vHireDateLayout;
     MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     MaterialDatePicker vDatePicker;
-    public UserFragmentDialog(Employee employee, ArrayList<EmployeeOverview> employeeOverviewArrayList) {
+    public UserFragmentDialog(Employee employee, ArrayList<EmployeeOverview> employeeOverviewArrayList,int currEmpOverviewPos) {
         this.employee = employee;
         this.employeeOverviewArrayList = employeeOverviewArrayList;
+        this.currEmpOverviewPos = currEmpOverviewPos;
     }
     @NonNull
     @Override
@@ -179,8 +181,7 @@ public class UserFragmentDialog  extends DialogFragment {
                         vSSN.toString().isEmpty());
     }
     private void updateEmployeeOverview(Map<String, Object> updatedEmpOverviewMap) {
-        employeeOverviewRef
-                .update(updatedEmpOverviewMap);
+       employeeOverviewRef.update(updatedEmpOverviewMap);
     }
     private void updateMachineEmployee(HashMap<String,Object>updatedEmployeeMap) {
         machineEmployeeCol.whereEqualTo("Employee.id",employee.getId()).get().addOnSuccessListener(queryDocumentSnapshots -> {
@@ -209,19 +210,17 @@ public class UserFragmentDialog  extends DialogFragment {
         } );
     }
     private void updateProjects() {
-        //TODO fix the bug in updateProjects
-        HashMap<String,Object>updatedProjectEmpInfoMap = new HashMap<>();
-        Iterator<EmployeeOverview> iter = employeeOverviewArrayList.iterator();
-        while (iter.hasNext()) {
-            EmployeeOverview e = iter.next();
-
-            if (e.getId().equals(employee.getId()))
-                iter.remove();
-            EmployeeOverview emp = new EmployeeOverview(vFirstName.getText().toString(),vSecondName.getText().toString(),vTitle.getText().toString(),employee.getId());
-            employeeOverviewArrayList.add(emp);
-        }
-        updatedProjectEmpInfoMap.put("employees",employeeOverviewArrayList);
-        projectCol.document(employee.getProjectID()).update(updatedProjectEmpInfoMap);
+        EmployeeOverview tempEmp = new EmployeeOverview(vFirstName.getText().toString(),vSecondName.getText().toString(),vTitle.getText().toString(),employee.getId());
+        tempEmp.setManagerID(employee.getManagerID());
+        employeeOverviewArrayList.set(currEmpOverviewPos,tempEmp);
+        projectCol.document(employee.getProjectID()).get().addOnSuccessListener(documentSnapshot -> {
+            Project currProject = documentSnapshot.toObject(Project.class);
+            ArrayList<EmployeeOverview> temp = currProject.getEmployees();
+            temp.remove(new EmployeeOverview(employee.getFirstName(),employee.getLastName(),employee.getTitle(),employee.getId()));
+            temp.add(tempEmp);
+            currProject.setEmployees(temp);
+            projectCol.document(employee.getProjectID()).update("employees",temp);
+        });
     }
 
     private HashMap<String, Object> fillEmployeeData() {
@@ -267,7 +266,21 @@ public class UserFragmentDialog  extends DialogFragment {
         return simpleDateFormat.format(calendar.getTime());
     }
     private void deleteEmployee() {
-        //TODO delete employee from employees and employeesoverview
+        db.collection("employees").document(employee.getId()).delete().addOnSuccessListener(unused -> {
+           employeeOverviewRef.update(employee.getId(),null);
+           projectCol.document(employee.getProjectID()).get().addOnSuccessListener(documentSnapshot -> {
+               Project currProject = documentSnapshot.toObject(Project.class);
+               ArrayList<EmployeeOverview> temp = currProject.getEmployees();
+               temp.remove(new EmployeeOverview(employee.getFirstName(),employee.getLastName(),employee.getTitle(),employee.getId()));
+               currProject.setEmployees(temp);
+               projectCol.document(employee.getProjectID()).update("employees",temp);
+           });
+           vacationCol.whereEqualTo("employee.id",employee.getId()).whereEqualTo("vacationStatus",0).get().addOnSuccessListener(documentQuerey->{
+               for(QueryDocumentSnapshot d : documentQuerey){
+                   vacationCol.document(d.getId()).delete();
+               }
+           });
+        });
     }
 
     // Listeners
@@ -286,7 +299,7 @@ public class UserFragmentDialog  extends DialogFragment {
            updateMachineEmployee(updatedEmployeeMap);
            updateVacation(updatedEmployeeMap);
            updateSummary(updatedEmployeeMap);
-        //   updateProjects();
+           updateProjects();
         });
     };
     View.OnClickListener clDelete = v -> {

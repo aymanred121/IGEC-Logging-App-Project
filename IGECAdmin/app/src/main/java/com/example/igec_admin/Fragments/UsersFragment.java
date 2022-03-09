@@ -1,5 +1,6 @@
 package com.example.igec_admin.Fragments;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,9 +16,7 @@ import com.example.igec_admin.Adatpers.EmployeeAdapter;
 import com.example.igec_admin.Dialogs.UserFragmentDialog;
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.EmployeeOverview;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -27,7 +26,7 @@ import java.util.Map;
 public class UsersFragment extends Fragment {
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     DocumentReference employeeRef = db.collection("EmployeeOverview").document("emp");
-    ArrayList<EmployeeOverview> employees = new ArrayList();
+    ArrayList<EmployeeOverview> employees = new ArrayList<>();
     EmployeeAdapter adapter;
     RecyclerView recyclerView;
     RecyclerView.LayoutManager layoutManager;
@@ -51,16 +50,14 @@ public class UsersFragment extends Fragment {
         getEmployees();
     }
     void getEmployees(){
-        employeeRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                Map<String, ArrayList<String>> empMap;
-                empMap = (HashMap) documentSnapshot.getData();
-                retrieveEmployees(empMap);
-            }
+        employeeRef.get().addOnSuccessListener(documentSnapshot -> {
+            HashMap<String,ArrayList<String>> empMap;
+            empMap = (HashMap)documentSnapshot.getData();
+            retrieveEmployees(empMap);
         });
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private void retrieveEmployees(Map<String, ArrayList<String>> empMap) {
         employees.clear();
         for (String key : empMap.keySet()) {
@@ -71,15 +68,15 @@ public class UsersFragment extends Fragment {
             String id = (key);
             employees.add(new EmployeeOverview(firstName, lastName, title, id));
         }
-        adapter.setEmployeesList(employees);
+        adapter.setEmployeeOverviewsList(employees);
         adapter.notifyDataSetChanged();
     }
 
 
-    private EmployeeAdapter.OnItemClickListener itclEmployeeAdapter = new EmployeeAdapter.OnItemClickListener() {
+    private final EmployeeAdapter.OnItemClickListener itclEmployeeAdapter = new EmployeeAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position) {
-            UserFragmentDialog userFragmentDialog = new UserFragmentDialog(adapter.getEmployeesList().get(position));
+            UserFragmentDialog userFragmentDialog = new UserFragmentDialog(adapter.getEmployeeOverviewsList().get(position));
             userFragmentDialog.show(getParentFragmentManager(),"");
         }
 

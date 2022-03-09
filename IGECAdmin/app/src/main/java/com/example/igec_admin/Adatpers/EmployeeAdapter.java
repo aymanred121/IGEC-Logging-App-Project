@@ -1,5 +1,6 @@
 package com.example.igec_admin.Adatpers;
 
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,13 +10,16 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.igec_admin.R;
+import com.example.igec_admin.fireBase.Employee;
 import com.example.igec_admin.fireBase.EmployeeOverview;
 import com.google.android.material.checkbox.MaterialCheckBox;
+
 
 import java.util.ArrayList;
 
 public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.EmployeeViewHolder> {
-    private ArrayList<EmployeeOverview> employeesList;
+    private ArrayList<EmployeeOverview> employeeOverviewsList;
+    private ArrayList<Employee> employeesList;
     private OnItemClickListener listener;
     private boolean isAdd;
 
@@ -35,32 +39,27 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
         public TextView vID;
         public MaterialCheckBox vSelected;
 
+
         public EmployeeViewHolder(@NonNull View itemView, OnItemClickListener listener, boolean isAdd) {
             super(itemView);
             vName = itemView.findViewById(R.id.TextView_Name);
             vID = itemView.findViewById(R.id.TextView_ID);
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (listener != null) {
-                        int position = getAdapterPosition();
-                        if (position != RecyclerView.NO_POSITION) {
-                            listener.onItemClick(position);
-                        }
+            itemView.setOnClickListener(v -> {
+                if (listener != null) {
+                    int position = getAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        listener.onItemClick(position);
                     }
                 }
             });
 
             vSelected = itemView.findViewById(R.id.ImageView_EmployeeSelected);
             vSelected.setVisibility(isAdd? View.VISIBLE : View.GONE);
-            vSelected.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (listener != null) {
-                        int position = getAdapterPosition();
-                        if (position != RecyclerView.NO_POSITION) {
-                            listener.onCheckboxClick(position);
-                        }
+            vSelected.setOnClickListener(v -> {
+                if (listener != null) {
+                    int position = getAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        listener.onCheckboxClick(position);
                     }
                 }
             });
@@ -68,8 +67,8 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
         }
     }
 
-    public EmployeeAdapter(ArrayList<EmployeeOverview> employeesList, boolean isAdd) {
-        this.employeesList = employeesList;
+    public EmployeeAdapter(ArrayList<EmployeeOverview> employeeOverviewsList, boolean isAdd) {
+        this.employeeOverviewsList = employeeOverviewsList;
         this.isAdd = isAdd;
     }
 
@@ -77,24 +76,32 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
     @Override
     public EmployeeViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.employee_item, parent, false);
-        EmployeeViewHolder evh = new EmployeeViewHolder(v, listener, isAdd);
-        return evh;
+        return new EmployeeViewHolder(v, listener, isAdd);
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull EmployeeViewHolder holder, int position) {
-        EmployeeOverview employee = employeesList.get(position);
+        EmployeeOverview employee = employeeOverviewsList.get(position);
         holder.vName.setText("Name: " + employee.getFirstName() + " " + employee.getLastName());
         holder.vID.setText("ID: " + employee.getId());
         holder.vSelected.setChecked(employee.getSelected());
     }
 
-    public ArrayList<EmployeeOverview> getEmployeesList() {
+    public ArrayList<EmployeeOverview> getEmployeeOverviewsList() {
+        return employeeOverviewsList;
+    }
+
+    public ArrayList<Employee> getEmployeesList() {
         return employeesList;
     }
 
-    public void setEmployeesList(ArrayList<EmployeeOverview> employeesList) {
+    public void setEmployeesList(ArrayList<Employee> employeesList) {
         this.employeesList = employeesList;
+    }
+
+    public void setEmployeeOverviewsList(ArrayList<EmployeeOverview> employeeOverviewsList) {
+        this.employeeOverviewsList = employeeOverviewsList;
     }
 
     public OnItemClickListener getListener() {
@@ -107,6 +114,6 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
 
     @Override
     public int getItemCount() {
-        return employeesList.size();
+        return employeeOverviewsList.size();
     }
 }

@@ -1,5 +1,6 @@
 package com.example.igec_admin.Fragments;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,7 +26,7 @@ public class ProjectsFragment extends Fragment {
     //vars
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     CollectionReference projectRef = db.collection("projects");
-    ArrayList<Project>projects = new ArrayList();
+    ArrayList<Project>projects = new ArrayList<>();
     ProjectAdapter adapter;
     RecyclerView recyclerView;
     RecyclerView.LayoutManager layoutManager;
@@ -47,9 +48,11 @@ public class ProjectsFragment extends Fragment {
         recyclerView.setAdapter(adapter);
         getProjects();
     }
+    @SuppressLint("NotifyDataSetChanged")
     void getProjects() {
         projectRef.addSnapshotListener((queryDocumentSnapshots, e) -> {
             projects.clear();
+            assert queryDocumentSnapshots != null;
             for(DocumentSnapshot d : queryDocumentSnapshots){
                 projects.add(d.toObject(Project.class));
             }
@@ -59,7 +62,7 @@ public class ProjectsFragment extends Fragment {
     }
 
 
-    private ProjectAdapter.OnItemClickListener itclProjectAdapter = new ProjectAdapter.OnItemClickListener() {
+    private final ProjectAdapter.OnItemClickListener itclProjectAdapter = new ProjectAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position) {
             ProjectFragmentDialog projectFragmentDialog = new ProjectFragmentDialog(adapter.getProjectsList().get(position));

@@ -2,6 +2,7 @@ package com.example.igec_admin.Fragments;
 
 import static android.content.ContentValues.TAG;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 
@@ -53,7 +54,6 @@ public class AddProjectFragment extends Fragment {
     private TextInputLayout vManagerIDLayout, vStartTimeLayout, vEndTimeLayout;
     private RecyclerView recyclerView;
     private EmployeeAdapter adapter;
-    private RecyclerView.LayoutManager layoutManager;
 
     // Vars
     MaterialDatePicker.Builder<Long> vStartDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
@@ -105,7 +105,7 @@ public class AddProjectFragment extends Fragment {
         vEndDatePicker = vEndDatePickerBuilder.build();
         recyclerView = view.findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
-        layoutManager = new LinearLayoutManager(getActivity());
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
         adapter = new EmployeeAdapter(employees,true);
         adapter.setOnItemClickListener(itclEmployeeAdapter);
         recyclerView.setLayoutManager(layoutManager);
@@ -138,7 +138,6 @@ public class AddProjectFragment extends Fragment {
     }
 
     void getEmployees() {
-        ArrayList<EmployeeOverview> employeeArray = new ArrayList();
         employeeOverviewRef
                 .addSnapshotListener((documentSnapshot, e) -> {
                     if (e != null) {
@@ -157,53 +156,25 @@ public class AddProjectFragment extends Fragment {
                 });
     }
 
+
     private void updateEmployeesDetails(String projectID) {
         for (String id : TeamID) {
-            if (id.equals(vManagerID.getText().toString())) {
-                employeeCol.document(id).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                    @Override
-                    public void onSuccess(DocumentSnapshot documentSnapshot) {
-                        Employee emp = documentSnapshot.toObject(Employee.class);
-                        ArrayList<String> empInfo = new ArrayList<>();
-                        empInfo.add(emp.getFirstName());
-                        empInfo.add(emp.getLastName());
-                        empInfo.add(emp.getTitle());
-                        empInfo.add("adminID");
-                        Map<String, Object> empInfoMap = new HashMap<>();
-                        empInfoMap.put(id, empInfo);
-                        employeeOverviewRef.update(empInfoMap);
-                        employeeCol.document(id).update("managerID", "adminID", "projectID", projectID).addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void unused) {
-                                ClearInputs();
-                            }
-                        });
-                    }
-                });
-
-                continue;
-            }
-            employeeCol.document(id)
-                    .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                @Override
-                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                employeeCol.document(id).get().addOnSuccessListener(documentSnapshot -> {
                     Employee emp = documentSnapshot.toObject(Employee.class);
                     ArrayList<String> empInfo = new ArrayList<>();
                     empInfo.add(emp.getFirstName());
                     empInfo.add(emp.getLastName());
                     empInfo.add(emp.getTitle());
-                    empInfo.add(vManagerID.getText().toString());
+                    if (id.equals(vManagerID.getText().toString())) {
+                        empInfo.add("adminID");
+                    } else {
+                        empInfo.add(vManagerID.getText().toString());
+                    }
                     Map<String, Object> empInfoMap = new HashMap<>();
                     empInfoMap.put(id, empInfo);
                     employeeOverviewRef.update(empInfoMap);
-                    employeeCol.document(id).update("managerID", vManagerID.getText().toString(), "projectID", projectID).addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void unused) {
-                            ClearInputs();
-                        }
-                    });
-                }
-            });
+                    employeeCol.document(id).update("managerID", empInfo.get(3), "projectID", projectID).addOnSuccessListener(unused -> ClearInputs());
+                });
         }
     }
 
@@ -214,12 +185,7 @@ public class AddProjectFragment extends Fragment {
         updateTeam();
         Project newProject = new Project(vManagerName.getText().toString(), vManagerID.getText().toString(), vName.getText().toString(), startDate, endDate, Team, vLocation.getText().toString());
         newProject.setId(projectID);
-        db.collection("projects").document(projectID).set(newProject).addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void unused) {
-                updateEmployeesDetails(projectID);
-            }
-        });
+        db.collection("projects").document(projectID).set(newProject).addOnSuccessListener(unused -> updateEmployeesDetails(projectID));
     }
 
     private void updateTeam() {
@@ -243,6 +209,7 @@ public class AddProjectFragment extends Fragment {
         return null;
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     void retrieveEmployees(Map<String, ArrayList<String>> empMap) {
         employees.clear();
         for (String key : empMap.keySet()) {
@@ -254,7 +221,7 @@ public class AddProjectFragment extends Fragment {
             if ((managerID == null))
                 employees.add(new EmployeeOverview(firstName, lastName, title, id));
         }
-        adapter.setEmployeesList(employees);
+        adapter.setEmployeeOverviewsList(employees);
         adapter.notifyDataSetChanged();
 
     }
@@ -320,7 +287,7 @@ public class AddProjectFragment extends Fragment {
     MaterialPickerOnPositiveButtonClickListener pclStartDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
         @Override
         public void onPositiveButtonClick(Object selection) {
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+            @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis((long) selection);
             vStartTime.setText(simpleDateFormat.format(calendar.getTime()));
@@ -329,25 +296,20 @@ public class AddProjectFragment extends Fragment {
     MaterialPickerOnPositiveButtonClickListener pclEndDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
         @Override
         public void onPositiveButtonClick(Object selection) {
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+            @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis((long) selection);
             vEndTime.setText(simpleDateFormat.format(calendar.getTime()));
         }
     };
-    View.OnClickListener clRegister = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if(ValidateInputs()) {
-                addProject();
-            }
-            else
-            {
-                Toast.makeText(getActivity(), "please, fill the project data", Toast.LENGTH_SHORT).show();
-            }
+    View.OnClickListener clRegister = v -> {
+        if(ValidateInputs()) {
+            addProject();
         }
-
-
+        else
+        {
+            Toast.makeText(getActivity(), "please, fill the project data", Toast.LENGTH_SHORT).show();
+        }
     };
     EmployeeAdapter.OnItemClickListener itclEmployeeAdapter = new EmployeeAdapter.OnItemClickListener() {
         @Override

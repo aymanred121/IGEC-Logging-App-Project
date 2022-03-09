@@ -146,28 +146,28 @@ public class CheckInOutFragment extends Fragment {
     private View.OnClickListener oclCheckInOut = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-//            Location location = getLocation();
-//            if(location ==null){
-//                Toast.makeText(getContext(), "Please enable GPS!", Toast.LENGTH_SHORT).show();
-//                return;
-//            }
-//            longitude = location.getLongitude();
-//            latitude = location.getLatitude();
-//
-//            Map<String, Object> checkOut = new HashMap<>();
-//                checkOut.put("Employee", currEmployee);
-//                checkOut.put("Check Out",new Summary(latitude, longitude));
-//                db.collection("summary").document(id).update(checkOut)
-//                        .addOnSuccessListener(unused -> {
-//                            Toast.makeText(getContext(), "Checked Out successfully!", Toast.LENGTH_SHORT).show();
-//                        })
-//                        .addOnFailureListener(e -> {
-//                            Map<String, Object> checkIn = new HashMap<>();
-//                            checkIn.put("Employee", currEmployee);
-//                            checkIn.put("Check In", new Summary(latitude, longitude));
-//                            db.collection("summary").document(id).set(checkIn);
-//                            Toast.makeText(getContext(), "Checked In successfully!", Toast.LENGTH_SHORT).show();
-//                        });
+            Location location = getLocation();
+            if(location ==null){
+                Toast.makeText(getContext(), "Please enable GPS!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            longitude = location.getLongitude();
+            latitude = location.getLatitude();
+
+            Map<String, Object> checkOut = new HashMap<>();
+                checkOut.put("Employee", currEmployee);
+                checkOut.put("Check Out",new Summary(latitude, longitude));
+                db.collection("summary").document(id).update(checkOut)
+                        .addOnSuccessListener(unused -> {
+                            Toast.makeText(getContext(), "Checked Out successfully!", Toast.LENGTH_SHORT).show();
+                        })
+                        .addOnFailureListener(e -> {
+                            Map<String, Object> checkIn = new HashMap<>();
+                            checkIn.put("Employee", currEmployee);
+                            checkIn.put("Check In", new Summary(latitude, longitude));
+                            db.collection("summary").document(id).set(checkIn);
+                            Toast.makeText(getContext(), "Checked In successfully!", Toast.LENGTH_SHORT).show();
+                        });
             isIn = !isIn;
             vCheckInOut.setBackgroundColor((isIn) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
             vCheckInOut.setText(isIn ? "Out" : "In");

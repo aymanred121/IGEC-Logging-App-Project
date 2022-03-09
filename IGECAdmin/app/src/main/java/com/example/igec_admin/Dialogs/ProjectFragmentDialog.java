@@ -2,6 +2,7 @@ package com.example.igec_admin.Dialogs;
 
 import static android.content.ContentValues.TAG;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -9,7 +10,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Toast;
 
@@ -23,7 +23,6 @@ import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Employee;
 import com.example.igec_admin.fireBase.EmployeeOverview;
 import com.example.igec_admin.fireBase.Project;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
@@ -31,7 +30,6 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.ParseException;
@@ -57,7 +55,7 @@ public class ProjectFragmentDialog extends DialogFragment {
     MaterialDatePicker vStartDatePicker;
     MaterialDatePicker.Builder<Long> vEndDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     MaterialDatePicker vEndDatePicker;
-    ArrayList<EmployeeOverview> employees = new ArrayList();
+    ArrayList<EmployeeOverview> employees = new ArrayList<>();
     ArrayList<String> TeamID = new ArrayList<>();
     ArrayList<EmployeeOverview> Team = new ArrayList<>();
     FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -65,6 +63,8 @@ public class ProjectFragmentDialog extends DialogFragment {
             .document("emp");
     CollectionReference employeeCol = db.collection("employees");
     Project project;
+    private Boolean isDeleted = false;
+    private String currProjectID;
 
     public ProjectFragmentDialog(Project project) {
         this.project = project;
@@ -141,7 +141,7 @@ public class ProjectFragmentDialog extends DialogFragment {
 
     String convertDateToString(long selection)
     {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(selection);
         return simpleDateFormat.format(calendar.getTime());
@@ -154,27 +154,19 @@ public class ProjectFragmentDialog extends DialogFragment {
             Team.add(employees.get(position));
             TeamID.add(String.valueOf(employees.get(position).getId()));
         } else {
-
             Team.remove(employees.get(position));
             TeamID.remove(String.valueOf(employees.get(position).getId()));
-
-
         }
         adapter.notifyItemChanged(position);
     }
 
     void getEmployees() {
-        ArrayList<EmployeeOverview> employeeArray = new ArrayList();
         employeeOverviewRef
                 .addSnapshotListener((documentSnapshot, e) -> {
                     if (e != null) {
                         Log.w(TAG, "Listen failed.", e);
                         return;
                     }
-
-                    String source = documentSnapshot != null && documentSnapshot.getMetadata().hasPendingWrites()
-                            ? "Local" : "Server";
-
                     if (documentSnapshot.exists()) {
                         Map<String, ArrayList<String>> empMap;
                         empMap = (HashMap) documentSnapshot.getData();
@@ -182,71 +174,32 @@ public class ProjectFragmentDialog extends DialogFragment {
                     }
                 });
     }
-
     private void updateEmployeesDetails(String projectID) {
+       currProjectID=projectID;
         for (String id : TeamID) {
-            if (id.equals(vManagerID.getText().toString())) {
-                employeeCol.document(id).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                    @Override
-                    public void onSuccess(DocumentSnapshot documentSnapshot) {
-                        Employee emp = documentSnapshot.toObject(Employee.class);
-                        ArrayList<String> empInfo = new ArrayList<>();
-                        empInfo.add(emp.getFirstName());
-                        empInfo.add(emp.getLastName());
-                        empInfo.add(emp.getTitle());
-                        empInfo.add("adminID");
-                        Map<String, Object> empInfoMap = new HashMap<>();
-                        empInfoMap.put(id, empInfo);
-                        employeeOverviewRef.update(empInfoMap);
-                        employeeCol.document(id).update("managerID", "adminID", "projectID", projectID).addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void unused) {
-                                ClearInputs();
-                            }
-                        });
-                    }
-                });
-
-                continue;
-            }
-            employeeCol.document(id)
-                    .get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                @Override
-                public void onSuccess(DocumentSnapshot documentSnapshot) {
-                    Employee emp = documentSnapshot.toObject(Employee.class);
-                    ArrayList<String> empInfo = new ArrayList<>();
-                    empInfo.add(emp.getFirstName());
-                    empInfo.add(emp.getLastName());
-                    empInfo.add(emp.getTitle());
-                    empInfo.add(vManagerID.getText().toString());
-                    Map<String, Object> empInfoMap = new HashMap<>();
-                    empInfoMap.put(id, empInfo);
-                    employeeOverviewRef.update(empInfoMap);
-                    employeeCol.document(id).update("managerID", vManagerID.getText().toString(), "projectID", projectID).addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void unused) {
-                            ClearInputs();
-                        }
-                    });
+            employeeCol.document(id).get().addOnSuccessListener(documentSnapshot -> {
+                Employee emp = documentSnapshot.toObject(Employee.class);
+                ArrayList<String> empInfo = new ArrayList<>();
+                empInfo.add(emp.getFirstName());
+                empInfo.add(emp.getLastName());
+                empInfo.add(emp.getTitle());
+                if(isDeleted){
+                    empInfo.add("");
+                    currProjectID="";
                 }
+               else if (id.equals(vManagerID.getText().toString())) {
+                    empInfo.add("adminID");
+                } else {
+                    empInfo.add(vManagerID.getText().toString());
+                }
+                Map<String, Object> empInfoMap = new HashMap<>();
+                empInfoMap.put(id, empInfo);
+                employeeOverviewRef.update(empInfoMap);
+                employeeCol.document(id).update("managerID", empInfo.get(3), "projectID", currProjectID).addOnSuccessListener(unused -> ClearInputs());
             });
         }
     }
 
-    private void addProject() {
-        Date startDate = convertStringDate(vStartTime.getText().toString());
-        Date endDate = convertStringDate(vEndTime.getText().toString());
-        String projectID = db.collection("projects").document().getId().substring(0, 5);
-        updateTeam();
-        Project newProject = new Project(vManagerName.getText().toString(), vManagerID.getText().toString(), vName.getText().toString(), startDate, endDate, Team, vLocation.getText().toString());
-        newProject.setId(projectID);
-        db.collection("projects").document(projectID).set(newProject).addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void unused) {
-                updateEmployeesDetails(projectID);
-            }
-        });
-    }
 
     private void updateTeam() {
         for (EmployeeOverview emp : Team) {
@@ -259,16 +212,16 @@ public class ProjectFragmentDialog extends DialogFragment {
 
 
     Date convertStringDate(String sDate) {
-        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
         try {
-            Date date = format.parse(sDate);
-            return date;
+            return format.parse(sDate);
         } catch (ParseException e) {
             e.printStackTrace();
         }
         return null;
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     void retrieveEmployees(Map<String, ArrayList<String>> empMap) {
         employees.clear();
         for (String key : empMap.keySet()) {
@@ -280,7 +233,7 @@ public class ProjectFragmentDialog extends DialogFragment {
             if ((managerID == null))
                 employees.add(new EmployeeOverview(firstName, lastName, title, id));
         }
-        adapter.setEmployeesList(employees);
+        adapter.setEmployeeOverviewsList(employees);
         adapter.notifyDataSetChanged();
 
     }
@@ -302,6 +255,31 @@ public class ProjectFragmentDialog extends DialogFragment {
                         vManagerName.toString().isEmpty() ||
                         vStartTime.toString().isEmpty() ||
                         vEndTime.toString().isEmpty());
+    }
+    void updateProject(){
+        Date startDate = convertStringDate(vStartTime.getText().toString());
+        Date endDate = convertStringDate(vEndTime.getText().toString());
+        updateTeam();
+        HashMap<String,Object>updatedProjectData= new HashMap<>();
+        updatedProjectData.put("estimatedEndDate",endDate);
+        updatedProjectData.put("startDate",startDate);
+        updatedProjectData.put("name",vName.getText().toString());
+        updatedProjectData.put("manager",vManagerName.getText().toString());
+        updatedProjectData.put("managerID",vManagerID.getText().toString());
+        updatedProjectData.put("location",vLocation.getText().toString());
+        if(Team.size()!=0)
+        updatedProjectData.put("employees",Team);
+        db.collection("projects").document(project.getId()).update(updatedProjectData).addOnSuccessListener(unused -> updateEmployeesDetails(project.getId()));
+
+    }
+
+    void deleteProject(){
+        currProjectID = project.getId();
+        db.collection("projects").document(project.getId()).delete().addOnSuccessListener(unused -> {
+            isDeleted=true;
+            updateEmployeesDetails(currProjectID);
+        });
+
     }
 
     // Listeners
@@ -334,19 +312,19 @@ public class ProjectFragmentDialog extends DialogFragment {
     View.OnClickListener oclStartDate = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            vStartDatePicker.show(getFragmentManager(), "DATE_PICKER");
+            vStartDatePicker.show(getParentFragmentManager(), "DATE_PICKER");
         }
     };
     View.OnClickListener oclEndDate = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            vEndDatePicker.show(getFragmentManager(), "DATE_PICKER");
+            vEndDatePicker.show(getParentFragmentManager(), "DATE_PICKER");
         }
     };
     MaterialPickerOnPositiveButtonClickListener pclStartDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
         @Override
         public void onPositiveButtonClick(Object selection) {
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+            @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis((long) selection);
             vStartTime.setText(simpleDateFormat.format(calendar.getTime()));
@@ -355,31 +333,20 @@ public class ProjectFragmentDialog extends DialogFragment {
     MaterialPickerOnPositiveButtonClickListener pclEndDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
         @Override
         public void onPositiveButtonClick(Object selection) {
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+            @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis((long) selection);
             vEndTime.setText(simpleDateFormat.format(calendar.getTime()));
         }
     };
-    View.OnClickListener clUpdate = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (ValidateInputs()) {
-
-            } else {
-                Toast.makeText(getActivity(), "please, fill the project data", Toast.LENGTH_SHORT).show();
-            }
+    View.OnClickListener clUpdate = v -> {
+        if (ValidateInputs()) {
+            updateProject();
+        } else {
+            Toast.makeText(getActivity(), "please, fill the project data", Toast.LENGTH_SHORT).show();
         }
-
-
     };
-    View.OnClickListener clDelete = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-        }
-
-
-    };
+    View.OnClickListener clDelete = v -> deleteProject();
 
     EmployeeAdapter.OnItemClickListener itclEmployeeAdapter = new EmployeeAdapter.OnItemClickListener() {
         @Override

@@ -36,16 +36,13 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectV
             vNHMachine = itemView.findViewById(R.id.TextView_nHourMachine);
             vNHEmployee = itemView.findViewById(R.id.TextView_nHourEmployee);
 
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if(listener != null)
+            itemView.setOnClickListener(v -> {
+                if(listener != null)
+                {
+                    int position = getAdapterPosition();
+                    if(position != RecyclerView.NO_POSITION)
                     {
-                        int position = getAdapterPosition();
-                        if(position != RecyclerView.NO_POSITION)
-                        {
-                            listener.onItemClick(position);
-                        }
+                        listener.onItemClick(position);
                     }
                 }
             });
@@ -62,8 +59,7 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectV
     @Override
     public ProjectAdapter.ProjectViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.project_item,parent,false);
-        ProjectAdapter.ProjectViewHolder evh = new ProjectAdapter.ProjectViewHolder(v,listener);
-        return evh;
+        return new ProjectViewHolder(v,listener);
     }
 
     @Override

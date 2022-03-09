@@ -19,7 +19,6 @@ import androidx.fragment.app.DialogFragment;
 
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Machine;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
@@ -28,7 +27,6 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.zxing.WriterException;
 
 import java.text.SimpleDateFormat;
@@ -116,7 +114,7 @@ public class MachineFragmentDialog extends DialogFragment {
 
         vCodeName.setText(machine.getCodeName());
         vID.setText(machine.getId());
-        vPurchaseDate.setText(machine.getPurchaseDate());
+        vPurchaseDate.setText(machine.getPurchaseDate().toString());
         qrgEncoder = new QRGEncoder(vID.getText().toString(), null, QRGContents.Type.TEXT, 25 * 25);
         try {
             vQRImg.setImageBitmap(qrgEncoder.encodeAsBitmap());

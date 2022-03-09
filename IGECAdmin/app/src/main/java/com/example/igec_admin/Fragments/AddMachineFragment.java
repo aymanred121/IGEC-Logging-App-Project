@@ -1,9 +1,6 @@
 package com.example.igec_admin.Fragments;
 
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -12,22 +9,27 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.fragment.app.Fragment;
+
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Machine;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.zxing.WriterException;
-import androidmads.library.qrgenearator.QRGContents;
-import androidmads.library.qrgenearator.QRGEncoder;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+
+import androidmads.library.qrgenearator.QRGContents;
+import androidmads.library.qrgenearator.QRGEncoder;
 
 public class AddMachineFragment extends Fragment {
 
@@ -82,7 +84,7 @@ public class AddMachineFragment extends Fragment {
     View.OnClickListener oclRegister = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            Machine newMachine = new Machine(vID.getText().toString(),vCodeName.getText().toString(),vPurchaseDate.getText().toString());
+            Machine newMachine = new Machine(vID.getText().toString(), vCodeName.getText().toString(), convertStringDate(vPurchaseDate.getText().toString()));
             machineCol.document(vID.getText().toString()).set(newMachine).addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
                 public void onSuccess(Void unused) {
@@ -91,7 +93,20 @@ public class AddMachineFragment extends Fragment {
                 }
             });
         }
+
+        Date convertStringDate(String sDate) {
+            SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+            try {
+                Date date = format.parse(sDate);
+                return date;
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
     };
+
+
     View.OnClickListener oclMachineID = new View.OnClickListener() {
         @Override
         public void onClick(View v) {

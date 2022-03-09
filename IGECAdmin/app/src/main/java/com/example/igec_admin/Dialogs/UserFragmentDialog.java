@@ -29,7 +29,6 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -210,16 +209,27 @@ public class UserFragmentDialog  extends DialogFragment {
         } );
     }
     private void updateProjects() {
-        EmployeeOverview tempEmp = new EmployeeOverview(vFirstName.getText().toString(),vSecondName.getText().toString(),vTitle.getText().toString(),employee.getId());
+        EmployeeOverview tempEmp = new EmployeeOverview(vFirstName.getText().toString(), vSecondName.getText().toString(), vTitle.getText().toString(), employee.getId());
         tempEmp.setManagerID(employee.getManagerID());
-        employeeOverviewArrayList.set(currEmpOverviewPos,tempEmp);
-        projectCol.document(employee.getProjectID()).get().addOnSuccessListener(documentSnapshot -> {
+        employeeOverviewArrayList.set(currEmpOverviewPos, tempEmp);
+        projectCol.document(employee.getProjectID()).get().addOnSuccessListener(documentSnapshot ->
+        {
             Project currProject = documentSnapshot.toObject(Project.class);
             ArrayList<EmployeeOverview> temp = currProject.getEmployees();
-            temp.remove(new EmployeeOverview(employee.getFirstName(),employee.getLastName(),employee.getTitle(),employee.getId()));
+            EmployeeOverview tempemp = null;
+            for (int i = 0; i < temp.size(); i++) {
+                if (employee.getId().equals(temp.get(i).getId())) {
+                    tempemp = temp.get(i);
+                }
+            }
+            temp.remove(tempemp);
             temp.add(tempEmp);
             currProject.setEmployees(temp);
-            projectCol.document(employee.getProjectID()).update("employees",temp);
+            if (tempEmp.getManagerID().equals("adminID")) {
+                projectCol.document(employee.getProjectID()).update("managerName", tempEmp.getFirstName() + " " + tempEmp.getLastName(), "employees", temp);
+            } else {
+                projectCol.document(employee.getProjectID()).update("employees", temp);
+            }
         });
     }
 

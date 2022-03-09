@@ -4,10 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:windowSoftInputMode="adjustPan"
     tools:context=".Fragments.AddUserFragment">
-
-    <!-- TODO bugfix: buttons flow up when typing-->
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textInputLayout_FirstName"

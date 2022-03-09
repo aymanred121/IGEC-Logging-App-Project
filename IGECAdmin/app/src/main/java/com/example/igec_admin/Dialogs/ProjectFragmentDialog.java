@@ -3,6 +3,7 @@ package com.example.igec_admin.Dialogs;
 import static android.content.ContentValues.TAG;
 
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -10,9 +11,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AutoCompleteTextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -70,6 +74,21 @@ public class ProjectFragmentDialog extends DialogFragment {
         this.project = project;
     }
 
+
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+
+
+        Dialog dialog = super.onCreateDialog(savedInstanceState);
+        Window window = dialog.getWindow();
+
+        if (window != null) {
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
+        }
+
+        return dialog;
+    }
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

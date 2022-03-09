@@ -4,9 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:windowSoftInputMode="adjustPan"
     tools:context=".Fragments.AddProjectFragment">
-    <!-- TODO bugfix: buttons flow up when typing-->
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textInputLayout_ProjectName"
@@ -75,8 +73,8 @@
             android:id="@+id/TextInput_StartTime"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/start_time"
             android:enabled="false"
+            android:hint="@string/start_time"
             android:inputType="date"
             android:padding="14dp"
             android:singleLine="true" />
@@ -101,9 +99,9 @@
             android:id="@+id/TextInput_EndTime"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:enabled="false"
             android:hint="@string/end_time"
             android:inputType="date"
-            android:enabled="false"
             android:padding="14dp"
             android:singleLine="true" />
 
@@ -185,10 +183,10 @@
         android:layout_marginBottom="32dp"
         android:text="@string/register"
         android:textAllCaps="false"
-        app:layout_constraintTop_toBottomOf="@id/recyclerview"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/recyclerview" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/button_update"
@@ -197,8 +195,8 @@
         android:layout_marginEnd="32dp"
         android:layout_marginBottom="32dp"
         android:text="@string/update"
-        android:visibility="gone"
         android:textAllCaps="false"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 

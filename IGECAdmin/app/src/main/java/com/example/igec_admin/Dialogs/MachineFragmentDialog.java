@@ -1,14 +1,19 @@
 package com.example.igec_admin.Dialogs;
 
+import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
@@ -54,7 +59,20 @@ public class MachineFragmentDialog extends DialogFragment {
     public MachineFragmentDialog(Machine machine) {
         this.machine = machine;
     }
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
 
+
+        Dialog dialog = super.onCreateDialog(savedInstanceState);
+        Window window = dialog.getWindow();
+
+        if (window != null) {
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
+        }
+
+        return dialog;
+    }
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -131,6 +149,15 @@ public class MachineFragmentDialog extends DialogFragment {
             });
             Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
         });
+    }
+
+
+    String convertDateToString(long selection)
+    {
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(selection);
+        return simpleDateFormat.format(calendar.getTime());
     }
 
     // Listeners

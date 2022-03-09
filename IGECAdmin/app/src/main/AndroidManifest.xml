@@ -11,7 +11,7 @@
         android:theme="@style/Theme.IGECAdmin">
         <activity android:name=".Activities.MainActivity"
             android:exported="true"
-            android:windowSoftInputMode="adjustPan">
+            android:windowSoftInputMode="adjustNothing">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

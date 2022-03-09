@@ -2,6 +2,8 @@ package com.example.igec_admin.Dialogs;
 
 import static com.example.igec_admin.cryptography.RSAUtil.encrypt;
 
+import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -9,6 +11,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -77,7 +81,20 @@ public class UserFragmentDialog  extends DialogFragment {
         this.employee = employee;
         this.employeeOverviewArrayList = employeeOverviewArrayList;
     }
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
 
+
+        Dialog dialog = super.onCreateDialog(savedInstanceState);
+        Window window = dialog.getWindow();
+
+        if (window != null) {
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
+        }
+
+        return dialog;
+    }
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -128,7 +145,7 @@ public class UserFragmentDialog  extends DialogFragment {
         vPassword.setText(employee.getDecryptedPassword());
         vSalary.setText(String.valueOf(employee.getSalary()));
         vSSN.setText(employee.getSSN());
-        vHireDate.setText(String.valueOf(employee.getHireDate()));
+        vHireDate.setText(convertDateToString(employee.getHireDate().getTime()));
 
     }
 
@@ -241,8 +258,16 @@ public class UserFragmentDialog  extends DialogFragment {
         }
         return null;
     }
+
+    String convertDateToString(long selection)
+    {
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(selection);
+        return simpleDateFormat.format(calendar.getTime());
+    }
     private void deleteEmployee() {
-        //TODO delte employee from employees and employeesoverview
+        //TODO delete employee from employees and employeesoverview
     }
 
     // Listeners

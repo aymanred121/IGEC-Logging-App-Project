@@ -24,7 +24,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.igec_admin.Adatpers.EmployeeAdapter;
 import com.example.igec_admin.R;
-import com.example.igec_admin.fireBase.Employee;
 import com.example.igec_admin.fireBase.EmployeeOverview;
 import com.example.igec_admin.fireBase.Project;
 import com.google.android.material.button.MaterialButton;
@@ -36,7 +35,6 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -55,6 +53,7 @@ public class ProjectFragmentDialog extends DialogFragment {
     private RecyclerView.LayoutManager layoutManager;
 
     // Vars
+    long startDate,endDate;
     MaterialDatePicker.Builder<Long> vStartDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     MaterialDatePicker vStartDatePicker;
     MaterialDatePicker.Builder<Long> vEndDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
@@ -230,17 +229,6 @@ public class ProjectFragmentDialog extends DialogFragment {
         }
     }
 
-
-    Date convertStringDate(String sDate) {
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
-        try {
-            return format.parse(sDate);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
     @SuppressLint("NotifyDataSetChanged")
     void retrieveEmployees(Map<String, ArrayList<String>> empMap) {
 
@@ -261,38 +249,32 @@ public class ProjectFragmentDialog extends DialogFragment {
 
     }
 
-    void ClearInputs() {
-        vName.setText(null);
-        vLocation.setText(null);
-        vManagerID.setText(null);
-        vManagerName.setText(null);
-        vStartTime.setText(null);
-        vEndTime.setText(null);
-    }
 
-    boolean ValidateInputs() {
+    boolean validateInputs() {
         return
                 !(vName.getText().toString().isEmpty() ||
                         vLocation.getText().toString().isEmpty() ||
-                        vManagerID.toString().isEmpty() ||
-                        vManagerName.toString().isEmpty() ||
-                        vStartTime.toString().isEmpty() ||
-                        vEndTime.toString().isEmpty());
+                        vManagerID.getText().toString().isEmpty() ||
+                        vManagerName.getText().toString().isEmpty() ||
+                        vStartTime.getText().toString().isEmpty() ||
+                        vEndTime.getText().toString().isEmpty());
     }
     void updateProject(){
-        Date startDate = convertStringDate(vStartTime.getText().toString());
-        Date endDate = convertStringDate(vEndTime.getText().toString());
+
         updateTeam();
         HashMap<String,Object>updatedProjectData= new HashMap<>();
-        updatedProjectData.put("estimatedEndDate",endDate);
-        updatedProjectData.put("startDate",startDate);
+        updatedProjectData.put("estimatedEndDate",new Date(endDate));
+        updatedProjectData.put("startDate",new Date(startDate));
         updatedProjectData.put("name",vName.getText().toString());
         updatedProjectData.put("manager",vManagerName.getText().toString());
         updatedProjectData.put("managerID",vManagerID.getText().toString());
         updatedProjectData.put("location",vLocation.getText().toString());
         updateEmployeesDetails(project.getId());
         updatedProjectData.put("employees",Team);
-        db.collection("projects").document(project.getId()).update(updatedProjectData);
+        db.collection("projects").document(project.getId()).update(updatedProjectData).addOnSuccessListener(unused -> {
+            Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
+            dismiss();
+        });
 
     }
 
@@ -301,6 +283,8 @@ public class ProjectFragmentDialog extends DialogFragment {
         db.collection("projects").document(project.getId()).delete().addOnSuccessListener(unused -> {
             isDeleted=true;
             updateEmployeesDetails(currProjectID);
+            Toast.makeText(getActivity(), "Deleted", Toast.LENGTH_SHORT).show();
+            dismiss();
         });
 
     }
@@ -347,23 +331,19 @@ public class ProjectFragmentDialog extends DialogFragment {
     MaterialPickerOnPositiveButtonClickListener pclStartDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
         @Override
         public void onPositiveButtonClick(Object selection) {
-            @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis((long) selection);
-            vStartTime.setText(simpleDateFormat.format(calendar.getTime()));
+            vStartTime.setText(convertDateToString((long) selection));
+            startDate = (long) selection;
         }
     };
     MaterialPickerOnPositiveButtonClickListener pclEndDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
         @Override
         public void onPositiveButtonClick(Object selection) {
-            @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis((long) selection);
-            vEndTime.setText(simpleDateFormat.format(calendar.getTime()));
+            vEndTime.setText(convertDateToString((long) selection));
+            endDate = (long) selection;
         }
     };
     View.OnClickListener clUpdate = v -> {
-        if (ValidateInputs()) {
+        if (validateInputs()) {
             updateProject();
         } else {
             Toast.makeText(getActivity(), "please, fill the project data", Toast.LENGTH_SHORT).show();

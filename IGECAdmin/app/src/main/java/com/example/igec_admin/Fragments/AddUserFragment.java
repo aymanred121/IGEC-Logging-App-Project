@@ -2,6 +2,7 @@ package com.example.igec_admin.Fragments;
 
 import static com.example.igec_admin.cryptography.RSAUtil.encrypt;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -15,7 +16,6 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.example.igec_admin.R;
-import com.example.igec_admin.cryptography.RSAKeyPairGenerator;
 import com.example.igec_admin.fireBase.Employee;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -30,8 +30,6 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import java.security.NoSuchAlgorithmException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Base64;
@@ -42,7 +40,6 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 public class AddUserFragment extends Fragment {
-
 
 
     // Views
@@ -64,14 +61,15 @@ public class AddUserFragment extends Fragment {
     MaterialDatePicker vDatePicker;
 
     // Vars
+    long hireDate;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_add_user, container,false);
+        View view = inflater.inflate(R.layout.fragment_add_user, container, false);
 
-        Initialize(view);
+        initialize(view);
         // Listeners
         vEmail.addTextChangedListener(twEmail);
         vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);
@@ -83,8 +81,7 @@ public class AddUserFragment extends Fragment {
 
 
     // Functions
-    private void Initialize(View view)
-    {
+    private void initialize(View view) {
         vFirstName = view.findViewById(R.id.TextInput_FirstName);
         vSecondName = view.findViewById(R.id.TextInput_SecondName);
         vEmail = view.findViewById(R.id.TextInput_Email);
@@ -101,55 +98,61 @@ public class AddUserFragment extends Fragment {
         vDatePickerBuilder.setTitleText("Hire Date");
         vDatePicker = vDatePickerBuilder.build();
         vRegister = view.findViewById(R.id.button_register);
-    }
-    Date convertStringDate(String sDate){
-        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
-        try {
-            Date date = format.parse(sDate);
-            return date;
-        } catch (ParseException e) {
-            e.printStackTrace();
+
+        {
+            vFirstName.setText("test");
+            vEmail.setText("t@gmail.com");
+            vTitle.setText("a");
+            vSalary.setText("1");
+            vSSN.setText("11111111111111");
+            vArea.setText("a");
+            vCity.setText("a");
+            vStreet.setText("a");
+            vHireDate.setText(convertDateToString(1000000000));
         }
-        return null;
+
+
+    }
+
+    String convertDateToString(long selection) {
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(selection);
+        return simpleDateFormat.format(calendar.getTime());
     }
 
     // Listeners
     View.OnClickListener clRegister = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            if(ValidateInputs()) {
-               addEmployee();
-                ClearInputs();
-            }
-            else
-            {
+            if (validateInputs()) {
+                addEmployee();
+            } else {
                 Toast.makeText(getActivity(), "please, fill the user data", Toast.LENGTH_SHORT).show();
             }
         }
     };
-    View.OnClickListener oclHireDate =  new View.OnClickListener() {
+    View.OnClickListener oclHireDate = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            if(!vDatePicker.isVisible())
-            vDatePicker.show(getFragmentManager(),"DATE_PICKER");
+            if (!vDatePicker.isVisible())
+                vDatePicker.show(getFragmentManager(), "DATE_PICKER");
         }
     };
-    MaterialPickerOnPositiveButtonClickListener pclDatePicker =  new MaterialPickerOnPositiveButtonClickListener() {
+    MaterialPickerOnPositiveButtonClickListener pclDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
         @Override
         public void onPositiveButtonClick(Object selection) {
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis((long) selection);
-            vHireDate.setText(simpleDateFormat.format(calendar.getTime()));
+            vHireDate.setText(convertDateToString((long) selection));
+            hireDate = (long) selection;
         }
     };
     TextWatcher twEmail = new TextWatcher() {
         private final Pattern mPattern = Pattern.compile("(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])");
 
-        private boolean isValid(CharSequence s)
-        {
+        private boolean isValid(CharSequence s) {
             return s.toString().equals("") || mPattern.matcher(s).matches();
         }
+
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -162,34 +165,33 @@ public class AddUserFragment extends Fragment {
 
         @Override
         public void afterTextChanged(Editable s) {
-            if(!isValid(s))
-            {
+            if (!isValid(s)) {
                 vEmailLayout.setError("Wrong E-mail form");
-            }
-            else
-            {
+            } else {
                 vEmailLayout.setError(null);
             }
         }
     };
 
 
-
     void addEmployee() {
         DocumentReference employeeOverviewRef = db.collection("EmployeeOverview").document("emp");
-        String id = db.collection("EmployeeOverview").document().getId().substring(0,5);
+        String id = db.collection("EmployeeOverview").document().getId().substring(0, 5);
         ArrayList<String> empInfo = new ArrayList<>();
         empInfo.add((vFirstName.getText()).toString());
         empInfo.add((vSecondName.getText()).toString());
         empInfo.add((vTitle.getText()).toString());
         empInfo.add(null);
         Map<String, Object> empInfoMap = new HashMap<>();
-        empInfoMap.put(id,empInfo);
+        empInfoMap.put(id, empInfo);
         employeeOverviewRef.update(empInfoMap).addOnFailureListener(e -> employeeOverviewRef.set(empInfoMap));
         Employee newEmployee = fillEmployeeData();
         newEmployee.setId(id);
-        db.collection("employees").document(id).set(newEmployee);
-}
+        db.collection("employees").document(id).set(newEmployee).addOnSuccessListener(unused -> {
+            clearInputs();
+            Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
+        });
+    }
 
     private Employee fillEmployeeData() {
         return new Employee(
@@ -201,7 +203,7 @@ public class AddUserFragment extends Fragment {
                 (vStreet.getText()).toString(),
                 Double.parseDouble(vSalary.getText().toString()),
                 ((vSSN.getText()).toString()),
-                convertStringDate(vHireDate.getText().toString()),
+                new Date(hireDate),
                 vEmail.getText().toString(),
                 encryptedPassword());
     }
@@ -210,17 +212,16 @@ public class AddUserFragment extends Fragment {
         try {
             return Base64.getEncoder().encodeToString(encrypt(vPassword.getText().toString()));
         } catch (Exception e) {
-            Log.e("error in encryption",e.toString());
+            Log.e("error in encryption", e.toString());
             return null;
         }
     }
 
-    void deleteRecord(String collection,String ID)
-    {
-        db.collection(collection).whereEqualTo("id",ID).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+    void deleteRecord(String collection, String ID) {
+        db.collection(collection).whereEqualTo("id", ID).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                for(DocumentSnapshot ds : queryDocumentSnapshots){
+                for (DocumentSnapshot ds : queryDocumentSnapshots) {
                     db.collection("employees").document(ds.getId()).delete();
 
                 }
@@ -228,8 +229,9 @@ public class AddUserFragment extends Fragment {
         });
 
     }
-    void updateRecord(String Collection,String id,String field,Object value){
-        Task updateDB = db.collection(Collection).document(id).update(field,value).addOnFailureListener(new OnFailureListener() {
+
+    void updateRecord(String Collection, String id, String field, Object value) {
+        Task updateDB = db.collection(Collection).document(id).update(field, value).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
                 Toast.makeText(getActivity(), "Error while updating record", Toast.LENGTH_SHORT).show();
@@ -237,7 +239,7 @@ public class AddUserFragment extends Fragment {
         });
     }
 
-    void ClearInputs() {
+    void clearInputs() {
         vFirstName.setText(null);
         vSecondName.setText(null);
         vEmail.setText(null);
@@ -251,23 +253,21 @@ public class AddUserFragment extends Fragment {
         vSSN.setText(null);
     }
 
-    boolean ValidateInputs() {
+    boolean validateInputs() {
         return
                 !(vFirstName.getText().toString().isEmpty() ||
                         vSecondName.getText().toString().isEmpty() ||
-                        vEmail.toString().isEmpty() ||
-                        vPassword.toString().isEmpty() ||
-                        vTitle.toString().isEmpty() ||
+                        vEmail.getText().toString().isEmpty() ||
+                        vPassword.getText().toString().isEmpty() ||
+                        vTitle.getText().toString().isEmpty() ||
                         vSalary.getText().toString().isEmpty() ||
                         vArea.getText().toString().isEmpty() ||
-                        vCity.toString().isEmpty() ||
-                        vStreet.toString().isEmpty() ||
-                        vHireDate.toString().isEmpty() ||
-                        vSSN.toString().isEmpty());
+                        vCity.getText().toString().isEmpty() ||
+                        vStreet.getText().toString().isEmpty() ||
+                        vHireDate.getText().toString().isEmpty() ||
+                        vSSN.getText().toString().isEmpty() ||
+                        vSSN.getText().toString().length() != 14);
     }
-
-
-
 
 
 }

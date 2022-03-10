@@ -31,6 +31,7 @@ import com.google.zxing.WriterException;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 
 import androidmads.library.qrgenearator.QRGContents;
@@ -46,6 +47,7 @@ public class MachineFragmentDialog extends DialogFragment {
     ImageView vQRImg;
 
     // Vars
+    long purchaseDate;
     QRGEncoder qrgEncoder;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     CollectionReference machineCol = db.collection("machine");
@@ -57,6 +59,7 @@ public class MachineFragmentDialog extends DialogFragment {
     public MachineFragmentDialog(Machine machine) {
         this.machine = machine;
     }
+
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
@@ -71,6 +74,7 @@ public class MachineFragmentDialog extends DialogFragment {
 
         return dialog;
     }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,7 +118,7 @@ public class MachineFragmentDialog extends DialogFragment {
 
         vCodeName.setText(machine.getCodeName());
         vID.setText(machine.getId());
-        vPurchaseDate.setText(machine.getPurchaseDate().toString());
+        vPurchaseDate.setText(convertDateToString(machine.getPurchaseDate().getTime()));
         qrgEncoder = new QRGEncoder(vID.getText().toString(), null, QRGContents.Type.TEXT, 25 * 25);
         try {
             vQRImg.setImageBitmap(qrgEncoder.encodeAsBitmap());
@@ -123,35 +127,46 @@ public class MachineFragmentDialog extends DialogFragment {
         }
 
     }
+
     private void deleteMachine() {
         /*
           we can't delete machine from Machine_Employee
           since this would imply that this machine didn't exist
           in the first place
           */
-        machineCol.document(machine.getId()).delete().addOnSuccessListener(unused ->dismiss());
-    }
-
-    private void updateMachine() {
-        HashMap<String,Object> modifiedMachine = new HashMap<>();
-        modifiedMachine.put("codeName",vCodeName.getText().toString());
-        modifiedMachine.put("purchaseDate",vPurchaseDate.getText().toString());
-        modifiedMachine.put("id",machine.getId());
-        machineCol.document(machine.getId()).update(modifiedMachine).addOnSuccessListener(unused -> {
-            db.collection("Machine_Employee").whereEqualTo("Machine",machine).get().addOnSuccessListener(queryDocumentSnapshots -> {
-                for (DocumentSnapshot d : queryDocumentSnapshots){
-                    db.collection("Machine_Employee")
-                            .document(d.getId())
-                            .update("Machine",modifiedMachine);
-                }
-            });
-            Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
+        machineCol.document(machine.getId()).delete().addOnSuccessListener(unused -> {
+            Toast.makeText(getActivity(), "Deleted", Toast.LENGTH_SHORT).show();
+            dismiss();
         });
     }
 
+    private void updateMachine() {
+        if (!validateInput()) {
+            Toast.makeText(getActivity(), "please, fill the machine data", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        HashMap<String, Object> modifiedMachine = new HashMap<>();
+        modifiedMachine.put("codeName", vCodeName.getText().toString());
+        modifiedMachine.put("purchaseDate", new Date(purchaseDate));
+        modifiedMachine.put("id", machine.getId());
+        machineCol.document(machine.getId()).update(modifiedMachine).addOnSuccessListener(unused -> {
+            db.collection("Machine_Employee").whereEqualTo("Machine", machine).get().addOnSuccessListener(queryDocumentSnapshots -> {
+                for (DocumentSnapshot d : queryDocumentSnapshots) {
+                    db.collection("Machine_Employee")
+                            .document(d.getId())
+                            .update("Machine", modifiedMachine);
+                }
+            });
+            Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
+            dismiss();
+        });
+    }
 
-    String convertDateToString(long selection)
-    {
+    private boolean validateInput() {
+        return !(vID.getText().toString().isEmpty() || vPurchaseDate.getText().toString().isEmpty() || vCodeName.getText().toString().isEmpty());
+    }
+
+    String convertDateToString(long selection) {
         @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(selection);
@@ -168,35 +183,12 @@ public class MachineFragmentDialog extends DialogFragment {
     View.OnClickListener oclUpdate = v -> updateMachine();
 
     View.OnClickListener oclDelete = v -> deleteMachine();
-    TextWatcher atlMachineID = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void afterTextChanged(Editable editable) {
-            qrgEncoder = new QRGEncoder(vID.getText().toString(), null, QRGContents.Type.TEXT, 25 * 25);
-            try {
-                vQRImg.setImageBitmap(qrgEncoder.encodeAsBitmap());
-            } catch (WriterException e) {
-                e.printStackTrace();
-            }
-        }
-    };
 
     MaterialPickerOnPositiveButtonClickListener pclDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
         @Override
         public void onPositiveButtonClick(Object selection) {
-            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis((long) selection);
-            vPurchaseDate.setText(simpleDateFormat.format(calendar.getTime()));
+            vPurchaseDate.setText(convertDateToString((long) selection));
+            purchaseDate = (long) selection;
         }
     };
 }

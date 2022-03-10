@@ -25,7 +25,6 @@ import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Employee;
 import com.example.igec_admin.fireBase.EmployeeOverview;
 import com.example.igec_admin.fireBase.Project;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
@@ -34,10 +33,8 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -56,6 +53,7 @@ public class AddProjectFragment extends Fragment {
     private EmployeeAdapter adapter;
 
     // Vars
+    long startDate, endDate;
     MaterialDatePicker.Builder<Long> vStartDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     MaterialDatePicker vStartDatePicker;
     MaterialDatePicker.Builder<Long> vEndDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
@@ -106,7 +104,7 @@ public class AddProjectFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        adapter = new EmployeeAdapter(employees,true);
+        adapter = new EmployeeAdapter(employees, true);
         adapter.setOnItemClickListener(itclEmployeeAdapter);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
@@ -159,31 +157,32 @@ public class AddProjectFragment extends Fragment {
 
     private void updateEmployeesDetails(String projectID) {
         for (String id : TeamID) {
-                employeeCol.document(id).get().addOnSuccessListener(documentSnapshot -> {
-                    Employee emp = documentSnapshot.toObject(Employee.class);
-                    ArrayList<String> empInfo = new ArrayList<>();
-                    empInfo.add(emp.getFirstName());
-                    empInfo.add(emp.getLastName());
-                    empInfo.add(emp.getTitle());
-                    if (id.equals(vManagerID.getText().toString())) {
-                        empInfo.add("adminID");
-                    } else {
-                        empInfo.add(vManagerID.getText().toString());
-                    }
-                    Map<String, Object> empInfoMap = new HashMap<>();
-                    empInfoMap.put(id, empInfo);
-                    employeeOverviewRef.update(empInfoMap);
-                    employeeCol.document(id).update("managerID", empInfo.get(3), "projectID", projectID).addOnSuccessListener(unused -> ClearInputs());
+            employeeCol.document(id).get().addOnSuccessListener(documentSnapshot -> {
+                Employee emp = documentSnapshot.toObject(Employee.class);
+                ArrayList<String> empInfo = new ArrayList<>();
+                empInfo.add(emp.getFirstName());
+                empInfo.add(emp.getLastName());
+                empInfo.add(emp.getTitle());
+                if (id.equals(vManagerID.getText().toString())) {
+                    empInfo.add("adminID");
+                } else {
+                    empInfo.add(vManagerID.getText().toString());
+                }
+                Map<String, Object> empInfoMap = new HashMap<>();
+                empInfoMap.put(id, empInfo);
+                employeeOverviewRef.update(empInfoMap);
+                employeeCol.document(id).update("managerID", empInfo.get(3), "projectID", projectID).addOnSuccessListener(unused -> {
+                    ClearInputs();
+                    Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
                 });
+            });
         }
     }
 
     private void addProject() {
-        Date startDate = convertStringDate(vStartTime.getText().toString());
-        Date endDate = convertStringDate(vEndTime.getText().toString());
         String projectID = db.collection("projects").document().getId().substring(0, 5);
         updateTeam();
-        Project newProject = new Project(vManagerName.getText().toString(), vManagerID.getText().toString(), vName.getText().toString(), startDate, endDate, Team, vLocation.getText().toString());
+        Project newProject = new Project(vManagerName.getText().toString(), vManagerID.getText().toString(), vName.getText().toString(), new Date(startDate), new Date(endDate), Team, vLocation.getText().toString());
         newProject.setId(projectID);
         db.collection("projects").document(projectID).set(newProject).addOnSuccessListener(unused -> updateEmployeesDetails(projectID));
     }
@@ -198,15 +197,11 @@ public class AddProjectFragment extends Fragment {
     }
 
 
-    Date convertStringDate(String sDate) {
-        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
-        try {
-            Date date = format.parse(sDate);
-            return date;
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return null;
+    private String convertDateToString(long selection) {
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(selection);
+        return simpleDateFormat.format(calendar.getTime());
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -235,14 +230,14 @@ public class AddProjectFragment extends Fragment {
         vEndTime.setText(null);
     }
 
-    boolean ValidateInputs() {
+    boolean validateInputs() {
         return
                 !(vName.getText().toString().isEmpty() ||
                         vLocation.getText().toString().isEmpty() ||
-                        vManagerID.toString().isEmpty() ||
-                        vManagerName.toString().isEmpty() ||
-                        vStartTime.toString().isEmpty() ||
-                        vEndTime.toString().isEmpty());
+                        vManagerID.getText().toString().isEmpty() ||
+                        vManagerName.getText().toString().isEmpty() ||
+                        vStartTime.getText().toString().isEmpty() ||
+                        vEndTime.getText().toString().isEmpty());
     }
 
     // Listeners
@@ -275,39 +270,33 @@ public class AddProjectFragment extends Fragment {
     View.OnClickListener oclStartDate = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            vStartDatePicker.show(getFragmentManager(),"DATE_PICKER");
+            vStartDatePicker.show(getFragmentManager(), "DATE_PICKER");
         }
     };
     View.OnClickListener oclEndDate = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            vEndDatePicker.show(getFragmentManager(),"DATE_PICKER");
+            vEndDatePicker.show(getFragmentManager(), "DATE_PICKER");
         }
     };
     MaterialPickerOnPositiveButtonClickListener pclStartDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
         @Override
         public void onPositiveButtonClick(Object selection) {
-            @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis((long) selection);
-            vStartTime.setText(simpleDateFormat.format(calendar.getTime()));
+            vStartTime.setText(convertDateToString((long) selection));
+            startDate = (long) selection;
         }
     };
     MaterialPickerOnPositiveButtonClickListener pclEndDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
         @Override
         public void onPositiveButtonClick(Object selection) {
-            @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTimeInMillis((long) selection);
-            vEndTime.setText(simpleDateFormat.format(calendar.getTime()));
+            vEndTime.setText(convertDateToString((long) selection));
+            endDate = (long) selection;
         }
     };
     View.OnClickListener clRegister = v -> {
-        if(ValidateInputs()) {
+        if (validateInputs()) {
             addProject();
-        }
-        else
-        {
+        } else {
             Toast.makeText(getActivity(), "please, fill the project data", Toast.LENGTH_SHORT).show();
         }
     };

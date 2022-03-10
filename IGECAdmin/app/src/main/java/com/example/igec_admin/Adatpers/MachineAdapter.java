@@ -65,8 +65,8 @@ public class MachineAdapter extends RecyclerView.Adapter<MachineAdapter.MachineV
     @Override
     public void onBindViewHolder(@NonNull MachineViewHolder holder, int position) {
         Machine machine = machinesList.get(position);
-        holder.vID.setText(machine.getId());
-        holder.vCodeName.setText(machine.getCodeName());
+        holder.vID.setText("ID: " + machine.getId());
+        holder.vCodeName.setText("Code Name: " + machine.getCodeName());
     }
 
 

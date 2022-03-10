@@ -145,7 +145,11 @@ public class MainActivity extends AppCompatActivity {
                                 return;
                             }
                             Intent intent;
-                            if (currEmployee.getManagerID().equals("adminID")) {
+                            if(currEmployee.getManagerID()==null){
+                                Toast.makeText(MainActivity.this, "you are not assigned to any project", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                           else if (currEmployee.getManagerID().equals("adminID")) {
                                 intent = new Intent(MainActivity.this, ManagerDashboard.class);
                             } else {
                                 intent = new Intent(MainActivity.this, EmployeeDashboard.class);

@@ -99,19 +99,6 @@ public class AddUserFragment extends Fragment {
         vDatePicker = vDatePickerBuilder.build();
         vRegister = view.findViewById(R.id.button_register);
 
-        {
-            vFirstName.setText("test");
-            vEmail.setText("t@gmail.com");
-            vTitle.setText("a");
-            vSalary.setText("1");
-            vSSN.setText("11111111111111");
-            vArea.setText("a");
-            vCity.setText("a");
-            vStreet.setText("a");
-            vPassword.setText("123");
-            vHireDate.setText(convertDateToString(1000000000));
-        }
-
 
     }
 
@@ -183,6 +170,7 @@ public class AddUserFragment extends Fragment {
         empInfo.add((vSecondName.getText()).toString());
         empInfo.add((vTitle.getText()).toString());
         empInfo.add(null);
+        empInfo.add(null);
         Map<String, Object> empInfoMap = new HashMap<>();
         empInfoMap.put(id, empInfo);
         employeeOverviewRef.update(empInfoMap).addOnFailureListener(e -> employeeOverviewRef.set(empInfoMap));
@@ -241,17 +229,17 @@ public class AddUserFragment extends Fragment {
     }
 
     void clearInputs() {
-//        vFirstName.setText(null);
-//        vSecondName.setText(null);
-//        vEmail.setText(null);
-//        vPassword.setText(null);
-//        vTitle.setText(null);
-//        vSalary.setText(null);
-//        vArea.setText(null);
-//        vCity.setText(null);
-//        vStreet.setText(null);
-//        vHireDate.setText(null);
-//        vSSN.setText(null);
+        vFirstName.setText(null);
+        vSecondName.setText(null);
+        vEmail.setText(null);
+        vPassword.setText(null);
+        vTitle.setText(null);
+        vSalary.setText(null);
+        vArea.setText(null);
+        vCity.setText(null);
+        vStreet.setText(null);
+        vHireDate.setText(null);
+        vSSN.setText(null);
     }
 
     boolean validateInputs() {

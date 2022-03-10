@@ -293,7 +293,7 @@ public class UserFragmentDialog extends DialogFragment {
                 }
                 EmployeeOverview tEmp = new EmployeeOverview(employee.getFirstName(), employee.getLastName(), employee.getTitle(), employee.getId());
                 tEmp.setManagerID(employee.getManagerID());
-                tEmp.setSelected(true);
+                tEmp.setProjectId(employee.getProjectID());
                 projectCol.document(employee.getProjectID()).update("employees", FieldValue.arrayRemove(tEmp))
                         .addOnSuccessListener(documentSnapshot -> {
                             vacationCol.whereEqualTo("employee.id", employee.getId()).whereEqualTo("vacationStatus", 0).get().addOnSuccessListener(documentQuery -> {
@@ -317,7 +317,8 @@ public class UserFragmentDialog extends DialogFragment {
         empInfo.add((vFirstName.getText()).toString());
         empInfo.add((vSecondName.getText()).toString());
         empInfo.add((vTitle.getText()).toString());
-        empInfo.add((employee.getId()));
+        empInfo.add((employee.getManagerID()));
+        empInfo.add((employee.getProjectID()));
         updatedEmpOverviewMap.put(id, empInfo);
         HashMap<String, Object> updatedEmployeeMap = fillEmployeeData();
         db.collection("employees").document(id).update(updatedEmployeeMap).addOnSuccessListener(unused -> {

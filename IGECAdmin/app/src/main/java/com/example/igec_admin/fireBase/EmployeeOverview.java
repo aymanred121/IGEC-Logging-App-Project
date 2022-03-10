@@ -3,8 +3,8 @@ package com.example.igec_admin.fireBase;
 import com.google.firebase.database.Exclude;
 
 public class EmployeeOverview {
-  @Exclude  private Boolean isSelected=false;
-    private String firstName,lastName,title,id,managerID;
+    @Exclude public boolean isSelected = false;
+    private String firstName, lastName, title, id, managerID, projectId;
 
     public EmployeeOverview() {
     }
@@ -14,6 +14,14 @@ public class EmployeeOverview {
         this.lastName = lastName;
         this.title = title;
         this.id = id;
+    }
+
+    public EmployeeOverview(String firstName, String lastName, String title, String id, String projectId) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.title = title;
+        this.id = id;
+        this.projectId = projectId;
     }
 
     public String getFirstName() {
@@ -44,14 +52,6 @@ public class EmployeeOverview {
         return id;
     }
 
-    @Exclude public Boolean getSelected() {
-        return isSelected;
-    }
-
-    public void setSelected(Boolean selected) {
-        isSelected = selected;
-    }
-
     public void setId(String id) {
         this.id = id;
     }
@@ -62,5 +62,13 @@ public class EmployeeOverview {
 
     public void setManagerID(String managerID) {
         this.managerID = managerID;
+    }
+
+    public String getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(String projectId) {
+        this.projectId = projectId;
     }
 }

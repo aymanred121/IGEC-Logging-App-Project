@@ -53,6 +53,7 @@ public class AddProjectFragment extends Fragment {
     private EmployeeAdapter adapter;
 
     // Vars
+    String projectID;
     long startDate, endDate;
     MaterialDatePicker.Builder<Long> vStartDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     MaterialDatePicker vStartDatePicker;
@@ -108,23 +109,30 @@ public class AddProjectFragment extends Fragment {
         adapter.setOnItemClickListener(itclEmployeeAdapter);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
+        projectID = db.collection("projects").document().getId().substring(0, 5);
         getEmployees();
     }
 
     void ChangeSelectedTeam(int position) {
-        employees.get(position).setSelected(!employees.get(position).getSelected());
-        if (employees.get(position).getSelected()) {
+
+        employees.get(position).isSelected = !employees.get(position).isSelected;
+        if (employees.get(position).isSelected) {
+            employees.get(position).setManagerID(vManagerID.getText().toString());
+            employees.get(position).setProjectId(projectID);
             Team.add(employees.get(position));
             TeamID.add(String.valueOf(employees.get(position).getId()));
+
         } else {
+
             if (!vManagerID.getText().toString().isEmpty() && vManagerID.getText().toString().equals(employees.get(position).getId().toString()))
                 vManagerID.setText("");
             Team.remove(employees.get(position));
             TeamID.remove(String.valueOf(employees.get(position).getId()));
-
-
+            employees.get(position).setManagerID(null);
+            employees.get(position).setProjectId(null);
         }
         vManagerIDLayout.setEnabled(Team.size() >= 2);
+        vManagerID.setEnabled(false);
         if (!vManagerIDLayout.isEnabled())
             vManagerID.setText("");
         if (TeamID.size() > 0) {
@@ -168,6 +176,7 @@ public class AddProjectFragment extends Fragment {
                 } else {
                     empInfo.add(vManagerID.getText().toString());
                 }
+                empInfo.add(projectID);
                 Map<String, Object> empInfoMap = new HashMap<>();
                 empInfoMap.put(id, empInfo);
                 employeeOverviewRef.update(empInfoMap);
@@ -180,7 +189,7 @@ public class AddProjectFragment extends Fragment {
     }
 
     private void addProject() {
-        String projectID = db.collection("projects").document().getId().substring(0, 5);
+
         updateTeam();
         Project newProject = new Project(vManagerName.getText().toString(), vManagerID.getText().toString(), vName.getText().toString(), new Date(startDate), new Date(endDate), Team, vLocation.getText().toString());
         newProject.setId(projectID);
@@ -193,6 +202,7 @@ public class AddProjectFragment extends Fragment {
                 emp.setManagerID("adminID");
             } else
                 emp.setManagerID(vManagerID.getText().toString());
+            emp.setProjectId(projectID);
         }
     }
 
@@ -212,9 +222,10 @@ public class AddProjectFragment extends Fragment {
             String lastName = empMap.get(key).get(1);
             String title = empMap.get(key).get(2);
             String managerID = empMap.get(key).get(3);
+            String projectID = empMap.get(key).get(4);
             String id = (key);
             if ((managerID == null))
-                employees.add(new EmployeeOverview(firstName, lastName, title, id));
+                employees.add(new EmployeeOverview(firstName, lastName, title, id, projectID));
         }
         adapter.setEmployeeOverviewsList(employees);
         adapter.notifyDataSetChanged();

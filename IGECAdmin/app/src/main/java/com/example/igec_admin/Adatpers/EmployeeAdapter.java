@@ -84,7 +84,8 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
         EmployeeOverview employee = employeeOverviewsList.get(position);
         holder.vName.setText("Name: " + employee.getFirstName() + " " + employee.getLastName());
         holder.vID.setText("ID: " + employee.getId());
-        holder.vSelected.setChecked(employee.getSelected());
+        holder.vSelected.setChecked(employee.getProjectId() != null);
+        employee.isSelected = employee.getProjectId() != null;
     }
 
     public ArrayList<EmployeeOverview> getEmployeeOverviewsList() {

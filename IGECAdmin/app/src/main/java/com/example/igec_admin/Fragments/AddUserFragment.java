@@ -108,6 +108,7 @@ public class AddUserFragment extends Fragment {
             vArea.setText("a");
             vCity.setText("a");
             vStreet.setText("a");
+            vPassword.setText("123");
             vHireDate.setText(convertDateToString(1000000000));
         }
 
@@ -240,17 +241,17 @@ public class AddUserFragment extends Fragment {
     }
 
     void clearInputs() {
-        vFirstName.setText(null);
-        vSecondName.setText(null);
-        vEmail.setText(null);
-        vPassword.setText(null);
-        vTitle.setText(null);
-        vSalary.setText(null);
-        vArea.setText(null);
-        vCity.setText(null);
-        vStreet.setText(null);
-        vHireDate.setText(null);
-        vSSN.setText(null);
+//        vFirstName.setText(null);
+//        vSecondName.setText(null);
+//        vEmail.setText(null);
+//        vPassword.setText(null);
+//        vTitle.setText(null);
+//        vSalary.setText(null);
+//        vArea.setText(null);
+//        vCity.setText(null);
+//        vStreet.setText(null);
+//        vHireDate.setText(null);
+//        vSSN.setText(null);
     }
 
     boolean validateInputs() {

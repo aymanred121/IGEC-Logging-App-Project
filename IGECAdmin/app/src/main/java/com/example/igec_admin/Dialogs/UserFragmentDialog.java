@@ -30,8 +30,11 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.text.SimpleDateFormat;
@@ -120,6 +123,9 @@ public class UserFragmentDialog extends DialogFragment {
     }
 
     // Functions
+
+
+
     private void Initialize(View view) {
         vFirstName = view.findViewById(R.id.TextInput_FirstName);
         vSecondName = view.findViewById(R.id.TextInput_SecondName);

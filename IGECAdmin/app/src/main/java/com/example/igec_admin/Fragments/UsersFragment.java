@@ -21,7 +21,9 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,14 +54,16 @@ public class UsersFragment extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
         getEmployees();
+
     }
     void getEmployees(){
-        employeeOverviewRef.get().addOnSuccessListener(documentSnapshot -> {
+        employeeOverviewRef.addSnapshotListener((documentSnapshot, e) -> {
             HashMap<String,ArrayList<String>> empMap;
             empMap = (HashMap)documentSnapshot.getData();
             retrieveEmployees(empMap);
         });
     }
+
 
     @SuppressLint("NotifyDataSetChanged")
     private void retrieveEmployees(Map<String, ArrayList<String>> empMap) {
@@ -89,6 +93,7 @@ public class UsersFragment extends Fragment {
         public void onCheckboxClick(int position) {
 
         }
+
     };
 
 }

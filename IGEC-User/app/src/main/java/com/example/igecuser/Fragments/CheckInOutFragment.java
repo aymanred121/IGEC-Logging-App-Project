@@ -12,6 +12,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
@@ -31,7 +32,10 @@ import com.example.igecuser.Activities.qrCameraActivity;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -110,8 +114,8 @@ public class CheckInOutFragment extends Fragment {
                         longitude = location.getLongitude();
                         latitude = location.getLatitude();
 
-                        db.collection("machine").document(machineID).get().addOnSuccessListener(documentSnapshot -> {
-                            currMachine = documentSnapshot.toObject(Machine.class);
+                        db.collection("machine").document(machineID).addSnapshotListener((value, error) -> {
+                            currMachine = value.toObject(Machine.class);
                             Summary machineCheckOut = new Summary(latitude,longitude);
                             Map<String,Object>machineEmployee = new HashMap();
                             machineEmployee.put("Machine",currMachine);

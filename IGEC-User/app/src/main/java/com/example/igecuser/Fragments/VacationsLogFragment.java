@@ -71,8 +71,6 @@ public class VacationsLogFragment extends Fragment {
                         Log.w(TAG, "Listen failed.", e);
                         return;
                     }
-                    String source = queryDocumentSnapshots != null && queryDocumentSnapshots.getMetadata().hasPendingWrites()
-                            ? "Local" : "Server";
                     ArrayList<VacationRequest>vacationRequests=new ArrayList<>();
                     for(DocumentSnapshot vacations: queryDocumentSnapshots){
                         vacationRequests.add(vacations.toObject(VacationRequest.class));

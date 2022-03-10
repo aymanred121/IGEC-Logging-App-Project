@@ -133,30 +133,27 @@ public class MainActivity extends AppCompatActivity {
             db.collection("employees")
                     .whereEqualTo("email", vEmail.getText().toString())
                     .limit(1)
-                    .get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                @Override
-                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                    if (queryDocumentSnapshots.size() == 0) {
-                        Toast.makeText(MainActivity.this, "please enter a valid email or password", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    DocumentSnapshot d = queryDocumentSnapshots.getDocuments().get(0);
-                    if (d.exists()) {
-                        Employee currEmployee = d.toObject(Employee.class);
-                        if( !isPasswordRight(currEmployee.getPassword())){
+                    .get().addOnSuccessListener(queryDocumentSnapshots -> {
+                        if (queryDocumentSnapshots.size() == 0) {
+                            Toast.makeText(MainActivity.this, "please enter a valid email or password", Toast.LENGTH_SHORT).show();
                             return;
                         }
-                        Intent intent;
-                        if (currEmployee.getManagerID().equals("adminID")) {
-                            intent = new Intent(MainActivity.this, ManagerDashboard.class);
-                        } else {
-                            intent = new Intent(MainActivity.this, EmployeeDashboard.class);
+                        DocumentSnapshot d = queryDocumentSnapshots.getDocuments().get(0);
+                        if (d.exists()) {
+                            Employee currEmployee = d.toObject(Employee.class);
+                            if( !isPasswordRight(currEmployee.getPassword())){
+                                return;
+                            }
+                            Intent intent;
+                            if (currEmployee.getManagerID().equals("adminID")) {
+                                intent = new Intent(MainActivity.this, ManagerDashboard.class);
+                            } else {
+                                intent = new Intent(MainActivity.this, EmployeeDashboard.class);
+                            }
+                            intent.putExtra("emp", currEmployee);
+                            startActivity(intent);
                         }
-                        intent.putExtra("emp", currEmployee);
-                        startActivity(intent);
-                    }
-                }
-            });
+                    });
         }
 
 

@@ -2,6 +2,7 @@ package com.example.igecuser.Fragments;
 
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -19,7 +20,9 @@ import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClic
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -71,25 +74,21 @@ public class VacationRequestFragment extends Fragment {
         String vacationID = db.collection("Vacation").document().getId().substring(0, 5);
         db.collection("employees")
                 .document(currEmployee.getManagerID())
-                .get()
-                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                    @Override
-                    public void onSuccess(DocumentSnapshot documentSnapshot) {
-                        Date startDate = convertStringDate(vVacationDate.getText().toString());
-                        duration = ((long) Integer.parseInt(vVacationDays.getText().toString()) * 24 * 3600 * 1000) + startDateMileSecond;
-                        Date endDate = convertStringDate(convertLongDate(duration));
-                        vacationRequest = new VacationRequest(
-                                startDate,
-                                endDate,
-                                (new Date()),
-                                documentSnapshot.toObject(Employee.class),
-                                currEmployee,
-                                vVacationNote.getText().toString()
-                        );
-                        vacationRequest.setId(vacationID);
-                        db.collection("Vacation").document(vacationID).set(vacationRequest);
-                        ClearInputs();
-                    }
+                .addSnapshotListener((value, error) -> {
+                    Date startDate = convertStringDate(vVacationDate.getText().toString());
+                    duration = ((long) Integer.parseInt(vVacationDays.getText().toString()) * 24 * 3600 * 1000) + startDateMileSecond;
+                    Date endDate = convertStringDate(convertLongDate(duration));
+                    vacationRequest = new VacationRequest(
+                            startDate,
+                            endDate,
+                            (new Date()),
+                            value.toObject(Employee.class),
+                            currEmployee,
+                            vVacationNote.getText().toString()
+                    );
+                    vacationRequest.setId(vacationID);
+                    db.collection("Vacation").document(vacationID).set(vacationRequest);
+                    ClearInputs();
                 });
     }
 

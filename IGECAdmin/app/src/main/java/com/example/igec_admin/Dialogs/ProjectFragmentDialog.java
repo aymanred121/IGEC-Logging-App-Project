@@ -168,6 +168,7 @@ public class ProjectFragmentDialog extends DialogFragment {
 
     void ChangeSelectedTeam(int position) {
         //TODO modify to add to the already employeeList for the project
+
         employees.get(position).setSelected(!employees.get(position).getSelected());
         if (employees.get(position).getSelected()) {
             Team.add(employees.get(position));
@@ -180,6 +181,7 @@ public class ProjectFragmentDialog extends DialogFragment {
     }
 
     void getEmployees() {
+        employees = project.getEmployees();
         employeeOverviewRef
                 .addSnapshotListener((documentSnapshot, e) -> {
                     if (e != null) {
@@ -189,33 +191,32 @@ public class ProjectFragmentDialog extends DialogFragment {
                     if (documentSnapshot.exists()) {
                         Map<String, ArrayList<String>> empMap;
                         empMap = (HashMap) documentSnapshot.getData();
-                        retrieveEmployees(empMap);
+                            retrieveEmployees(empMap);
                     }
                 });
     }
     private void updateEmployeesDetails(String projectID) {
        currProjectID=projectID;
-        for (String id : TeamID) {
-            employeeCol.document(id).get().addOnSuccessListener(documentSnapshot -> {
-                Employee emp = documentSnapshot.toObject(Employee.class);
+        for (EmployeeOverview empOverview : employees) {
                 ArrayList<String> empInfo = new ArrayList<>();
-                empInfo.add(emp.getFirstName());
-                empInfo.add(emp.getLastName());
-                empInfo.add(emp.getTitle());
-                if(isDeleted){
-                    empInfo.add("");
-                    currProjectID="";
+                if(isDeleted || !empOverview.getSelected()){
+                    empOverview.setManagerID(null);
+                    currProjectID=null;
+                    Team.remove(empOverview);
                 }
-               else if (id.equals(vManagerID.getText().toString())) {
-                    empInfo.add("adminID");
+                if (empOverview.getId().equals(vManagerID.getText().toString())) {
+                    empOverview.setManagerID("adminID");
                 } else {
-                    empInfo.add(vManagerID.getText().toString());
+                    empOverview.setManagerID(vManagerID.getText().toString());
                 }
+                empInfo.add(empOverview.getFirstName());
+                empInfo.add(empOverview.getLastName());
+                empInfo.add(empOverview.getTitle());
+                empInfo.add(empOverview.getManagerID());
                 Map<String, Object> empInfoMap = new HashMap<>();
-                empInfoMap.put(id, empInfo);
-                employeeOverviewRef.update(empInfoMap);
-                employeeCol.document(id).update("managerID", empInfo.get(3), "projectID", currProjectID).addOnSuccessListener(unused -> ClearInputs());
-            });
+                empInfoMap.put(empOverview.getId(), empInfo);
+                employeeOverviewRef.update( empInfoMap);
+                employeeCol.document(empOverview.getId()).update("managerID", empOverview.getManagerID(), "projectID", currProjectID);
         }
     }
 
@@ -242,15 +243,18 @@ public class ProjectFragmentDialog extends DialogFragment {
 
     @SuppressLint("NotifyDataSetChanged")
     void retrieveEmployees(Map<String, ArrayList<String>> empMap) {
-        employees.clear();
+
         for (String key : empMap.keySet()) {
             String firstName = empMap.get(key).get(0);
             String lastName = empMap.get(key).get(1);
             String title = empMap.get(key).get(2);
             String managerID = empMap.get(key).get(3);
             String id = (key);
-            if ((managerID == null))
-                employees.add(new EmployeeOverview(firstName, lastName, title, id));
+            if(managerID == null){
+                EmployeeOverview newEmp = new EmployeeOverview(firstName, lastName, title, id);
+                newEmp.setManagerID(managerID);
+                employees.add(newEmp);
+            }
         }
         adapter.setEmployeeOverviewsList(employees);
         adapter.notifyDataSetChanged();
@@ -286,9 +290,9 @@ public class ProjectFragmentDialog extends DialogFragment {
         updatedProjectData.put("manager",vManagerName.getText().toString());
         updatedProjectData.put("managerID",vManagerID.getText().toString());
         updatedProjectData.put("location",vLocation.getText().toString());
-        if(Team.size()!=0)
+        updateEmployeesDetails(project.getId());
         updatedProjectData.put("employees",Team);
-        db.collection("projects").document(project.getId()).update(updatedProjectData).addOnSuccessListener(unused -> updateEmployeesDetails(project.getId()));
+        db.collection("projects").document(project.getId()).update(updatedProjectData);
 
     }
 

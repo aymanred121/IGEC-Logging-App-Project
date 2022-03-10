@@ -68,7 +68,6 @@ public class UsersFragment extends Fragment {
             String firstName = empMap.get(key).get(0);
             String lastName = empMap.get(key).get(1);
             String title = empMap.get(key).get(2);
-            String managerID = empMap.get(key).get(3);
             String id = (key);
             employees.add(new EmployeeOverview(firstName, lastName, title, id));
         }

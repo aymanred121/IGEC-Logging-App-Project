@@ -22,6 +22,7 @@ import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Employee;
 import com.example.igec_admin.fireBase.EmployeeOverview;
 import com.example.igec_admin.fireBase.Project;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
@@ -29,6 +30,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -277,19 +279,27 @@ public class UserFragmentDialog  extends DialogFragment {
     }
     private void deleteEmployee() {
         db.collection("employees").document(employee.getId()).delete().addOnSuccessListener(unused -> {
-           employeeOverviewRef.update(employee.getId(),null);
-           projectCol.document(employee.getProjectID()).get().addOnSuccessListener(documentSnapshot -> {
-               Project currProject = documentSnapshot.toObject(Project.class);
-               ArrayList<EmployeeOverview> temp = currProject.getEmployees();
-               temp.remove(new EmployeeOverview(employee.getFirstName(),employee.getLastName(),employee.getTitle(),employee.getId()));
-               currProject.setEmployees(temp);
-               projectCol.document(employee.getProjectID()).update("employees",temp);
-           });
-           vacationCol.whereEqualTo("employee.id",employee.getId()).whereEqualTo("vacationStatus",0).get().addOnSuccessListener(documentQuerey->{
-               for(QueryDocumentSnapshot d : documentQuerey){
-                   vacationCol.document(d.getId()).delete();
+           employeeOverviewRef.update(employee.getId(), FieldValue.delete()).addOnSuccessListener(unused1 -> {
+               if(employee.getProjectID()==null){
+                   dismiss();
                }
+               projectCol.document(employee.getProjectID()).get().addOnSuccessListener(documentSnapshot -> {
+                   Project currProject = documentSnapshot.toObject(Project.class);
+                   ArrayList<EmployeeOverview> temp = currProject.getEmployees();
+                   temp.remove(new EmployeeOverview(employee.getFirstName(),employee.getLastName(),employee.getTitle(),employee.getId()));
+                   currProject.setEmployees(temp);
+                   projectCol.document(employee.getProjectID()).update("employees",temp).addOnSuccessListener(unused2 -> {
+                       vacationCol.whereEqualTo("employee.id",employee.getId()).whereEqualTo("vacationStatus",0).get().addOnSuccessListener(documentQuery->{
+                           for(QueryDocumentSnapshot d : documentQuery){
+                               vacationCol.document(d.getId()).delete();
+                           }
+                           dismiss();
+                       });
+                   });
+               });
+
            });
+
         });
     }
 

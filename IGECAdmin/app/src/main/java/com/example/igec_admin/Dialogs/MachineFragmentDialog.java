@@ -129,7 +129,7 @@ public class MachineFragmentDialog extends DialogFragment {
           since this would imply that this machine didn't exist
           in the first place
           */
-        machineCol.document(machine.getId()).delete().addOnSuccessListener(unused ->Toast.makeText(getActivity(), "Deleted", Toast.LENGTH_SHORT).show());
+        machineCol.document(machine.getId()).delete().addOnSuccessListener(unused ->dismiss());
     }
 
     private void updateMachine() {

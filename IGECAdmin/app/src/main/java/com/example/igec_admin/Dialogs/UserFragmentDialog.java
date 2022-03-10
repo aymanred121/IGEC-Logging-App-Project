@@ -283,12 +283,11 @@ public class UserFragmentDialog  extends DialogFragment {
                if(employee.getProjectID()==null){
                    dismiss();
                }
-               projectCol.document(employee.getProjectID()).get().addOnSuccessListener(documentSnapshot -> {
-                   Project currProject = documentSnapshot.toObject(Project.class);
-                   ArrayList<EmployeeOverview> temp = currProject.getEmployees();
-                   temp.remove(new EmployeeOverview(employee.getFirstName(),employee.getLastName(),employee.getTitle(),employee.getId()));
-                   currProject.setEmployees(temp);
-                   projectCol.document(employee.getProjectID()).update("employees",temp).addOnSuccessListener(unused2 -> {
+               EmployeeOverview tEmp = new EmployeeOverview(employee.getFirstName(),employee.getLastName(),employee.getTitle(),employee.getId());
+               tEmp.setManagerID(employee.getManagerID());
+               tEmp.setSelected(true);
+               projectCol.document(employee.getProjectID()).update("employees",FieldValue.arrayRemove(tEmp))
+                       .addOnSuccessListener(documentSnapshot -> {
                        vacationCol.whereEqualTo("employee.id",employee.getId()).whereEqualTo("vacationStatus",0).get().addOnSuccessListener(documentQuery->{
                            for(QueryDocumentSnapshot d : documentQuery){
                                vacationCol.document(d.getId()).delete();
@@ -296,7 +295,6 @@ public class UserFragmentDialog  extends DialogFragment {
                            dismiss();
                        });
                    });
-               });
 
            });
 

@@ -1,24 +1,22 @@
 package com.example.igecuser.Activities;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.Toast;
 
 import com.budiyev.android.codescanner.CodeScanner;
 import com.budiyev.android.codescanner.CodeScannerView;
-import com.budiyev.android.codescanner.DecodeCallback;
 import com.example.igecuser.R;
-import com.google.zxing.Result;
 
 public class qrCameraActivity extends AppCompatActivity {
+
     //Views
     private CodeScanner mCodeScanner;
 
+    //Vars
+    //Overrides
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,7 +34,7 @@ public class qrCameraActivity extends AppCompatActivity {
         }));
         scannerView.setOnClickListener(view -> mCodeScanner.startPreview());
     }
-    // Functions
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -48,5 +46,8 @@ public class qrCameraActivity extends AppCompatActivity {
         mCodeScanner.releaseResources();
         super.onPause();
     }
+    //Functions
+    //Listeners
+
 
 }

@@ -10,14 +10,14 @@
         android:id="@+id/TextView_Greeting"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Good morning,"
+        android:text="@string/good_morning"
         android:textSize="32sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintVertical_bias=".3"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias=".3" />
 
 
     <com.google.android.material.button.MaterialButton
@@ -25,6 +25,7 @@
         style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
         android:layout_width="150dp"
         android:layout_height="150dp"
+        android:layout_marginTop="16dp"
         android:backgroundTint="@color/Green"
         android:insetLeft="0dp"
         android:insetTop="0dp"
@@ -32,9 +33,8 @@
         android:insetBottom="0dp"
         android:padding="0dp"
         android:text="IN"
-        android:textSize="32sp"
-        android:layout_marginTop="16dp"
         android:textColor="@color/white"
+        android:textSize="32sp"
         app:iconGravity="textStart"
         app:iconPadding="0dp"
         app:iconSize="24dp"
@@ -46,9 +46,9 @@
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/container"
-        android:elevation="1dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:elevation="1dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
@@ -57,19 +57,19 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|right"
-            android:visibility="gone"
             android:layout_margin="32dp"
-            android:src="@drawable/ic_baseline_construction_24" />
+            android:src="@drawable/ic_baseline_construction_24"
+            android:visibility="gone" />
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:overScrollMode="never"
-        android:layout_marginTop="32dp"
         android:layout_marginStart="32dp"
+        android:layout_marginTop="32dp"
         android:layout_marginEnd="32dp"
+        android:overScrollMode="never"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

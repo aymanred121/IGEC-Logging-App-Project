@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.example.igecuser.R;
 import com.example.igecuser.Adapters.VacationAdapter;
@@ -19,9 +20,11 @@ import com.example.igecuser.fireBase.Employee;
 import com.example.igecuser.fireBase.VacationRequest;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 
 
 public class VacationsLogFragment extends Fragment {
@@ -31,13 +34,14 @@ public class VacationsLogFragment extends Fragment {
     private RecyclerView.LayoutManager layoutManager;
 
     private ArrayList<VacationRequest> vacations = new ArrayList<>();
-    private static Employee user;
-    private static String query;
+    private Employee user;
     private final boolean isEmployee;
-    private static FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-    public VacationsLogFragment(boolean isEmployee) {
+    public VacationsLogFragment(boolean isEmployee, Employee user) {
         this.isEmployee = isEmployee;
+        this.user = user;
+
     }
 
     @Override
@@ -49,36 +53,54 @@ public class VacationsLogFragment extends Fragment {
         // Inflate the layout for this fragment
         return view;
     }
+
     // Functions
     private void Initialize(View view) {
         recyclerView = view.findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
-        user= (Employee) getArguments().getSerializable((isEmployee)?"emp":"mgr");
-        query = (isEmployee)?"employee.id":"manager.id";
         adapter = new VacationAdapter(vacations);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
         loadVacations();
     }
-    public static void loadVacations(){
 
-        db.collection("Vacation")
-                .whereEqualTo(query,user.getId())
-                .whereNotEqualTo("vacationStatus",0)
-                .addSnapshotListener((queryDocumentSnapshots, e) -> {
-                    if (e != null) {
-                        Log.w(TAG, "Listen failed.", e);
-                        return;
-                    }
-                    ArrayList<VacationRequest>vacationRequests=new ArrayList<>();
-                    for(DocumentSnapshot vacations: queryDocumentSnapshots){
-                        vacationRequests.add(vacations.toObject(VacationRequest.class));
-                    }
-                    Collections.reverse(vacationRequests);
-                    adapter.setVacationsList(vacationRequests);
-                    adapter.notifyDataSetChanged();
-                });
+    private void loadVacations() {
+
+        if (isEmployee) {
+            db.collection("Vacation")
+                    .whereEqualTo("employee.id", user.getId())
+                    .orderBy("requestDate", Query.Direction.DESCENDING)
+                    .addSnapshotListener((queryDocumentSnapshots, e) -> {
+                        if (e != null) {
+                            Log.w(TAG, "Listen failed.", e);
+                            return;
+                        }
+                        ArrayList<VacationRequest> vacationRequests = new ArrayList<>();
+                        for (DocumentSnapshot vacations : queryDocumentSnapshots) {
+                            vacationRequests.add(vacations.toObject(VacationRequest.class));
+                        }
+                        adapter.setVacationsList(vacationRequests);
+                        adapter.notifyDataSetChanged();
+                    });
+        } else {
+            db.collection("Vacation")
+                    .whereEqualTo("manager.id", user.getId())
+                    .orderBy("requestDate", Query.Direction.DESCENDING)
+                    .addSnapshotListener((queryDocumentSnapshots, e) -> {
+                        if (e != null) {
+                            Log.w(TAG, "Listen failed.", e);
+                            return;
+                        }
+                        ArrayList<VacationRequest> vacationRequests = new ArrayList<>();
+                        for (DocumentSnapshot vacations : queryDocumentSnapshots) {
+                            if (vacations.toObject(VacationRequest.class).getVacationStatus() != 0)
+                                vacationRequests.add(vacations.toObject(VacationRequest.class));
+                        }
+                        adapter.setVacationsList(vacationRequests);
+                        adapter.notifyDataSetChanged();
+                    });
+        }
     }
 
 }

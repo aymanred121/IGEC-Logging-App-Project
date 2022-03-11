@@ -2,7 +2,6 @@ package com.example.igecuser.Fragments;
 
 import android.os.Bundle;
 
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -13,16 +12,12 @@ import android.widget.Toast;
 import com.example.igecuser.R;
 import com.example.igecuser.fireBase.Employee;
 import com.example.igecuser.fireBase.VacationRequest;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -31,19 +26,20 @@ import java.util.Date;
 
 public class VacationRequestFragment extends Fragment {
 
-    // Views
+
+    //Views
     private TextInputEditText vVacationDate, vVacationNote, vVacationDays;
     private TextInputLayout vVacationDateLayout;
     private MaterialButton vSendRequest;
     private MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vDatePicker;
-
-    // Vars
-    private long duration, startDateMileSecond;
+    //Vars
+    private long days, startDate;
     private Employee currEmployee;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private VacationRequest vacationRequest;
 
+    //Overrides
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -58,7 +54,11 @@ public class VacationRequestFragment extends Fragment {
         return view;
     }
 
-    // Functions
+    //Functions
+    public VacationRequestFragment(Employee currEmployee) {
+        this.currEmployee = currEmployee;
+    }
+
     private void Initialize(View view) {
         vVacationDate = view.findViewById(R.id.TextInput_VacationDate);
         vVacationNote = view.findViewById(R.id.TextInput_VacationNote);
@@ -67,7 +67,6 @@ public class VacationRequestFragment extends Fragment {
         vSendRequest = view.findViewById(R.id.Button_SendRequest);
         vDatePickerBuilder.setTitleText("Vacation Date");
         vDatePicker = vDatePickerBuilder.build();
-        currEmployee = (Employee) getArguments().getSerializable("emp");
     }
 
     private void uploadVacationRequest() {
@@ -75,12 +74,10 @@ public class VacationRequestFragment extends Fragment {
         db.collection("employees")
                 .document(currEmployee.getManagerID())
                 .addSnapshotListener((value, error) -> {
-                    Date startDate = convertStringDate(vVacationDate.getText().toString());
-                    duration = ((long) Integer.parseInt(vVacationDays.getText().toString()) * 24 * 3600 * 1000) + startDateMileSecond;
-                    Date endDate = convertStringDate(convertLongDate(duration));
+                    days = ((long) Integer.parseInt(vVacationDays.getText().toString()) * 24 * 3600 * 1000) + startDate;
                     vacationRequest = new VacationRequest(
-                            startDate,
-                            endDate,
+                            new Date(startDate),
+                            new Date(days),
                             (new Date()),
                             value.toObject(Employee.class),
                             currEmployee,
@@ -100,60 +97,34 @@ public class VacationRequestFragment extends Fragment {
 
     private boolean ValidateInputs() {
         return !(vVacationNote.getText().toString().isEmpty()
-                        ||
+                ||
                 vVacationDate.getText().toString().isEmpty()
-                        ||
+                ||
                 vVacationDays.getText().toString().isEmpty());
     }
 
-    private String convertLongDate(Object selection) {
+    private String convertDateToString(Object selection) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
         Calendar calendar = Calendar.getInstance();
-        startDateMileSecond = (long) selection;
         calendar.setTimeInMillis((long) selection);
         return simpleDateFormat.format(calendar.getTime());
     }
-    private Date convertStringDate(String sDate) {
-        SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
-        try {
-            Date date = format.parse(sDate);
-            return date;
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
     // Listeners
-    private View.OnClickListener clSendRequest = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if(ValidateInputs()) {
-                uploadVacationRequest();
+    private View.OnClickListener clSendRequest = v -> {
+        if (ValidateInputs()) {
+            uploadVacationRequest();
 
-            }
-            else
-            {
-                Toast.makeText(getActivity(), "please, fill vacation request data", Toast.LENGTH_SHORT).show();
-            }
-        }
-
-
-    };
-    private View.OnClickListener clVacationDate = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (!vDatePicker.isVisible())
-                vDatePicker.show(getParentFragmentManager(), "DATE_PICKER");
+        } else {
+            Toast.makeText(getActivity(), "please, fill vacation request data", Toast.LENGTH_SHORT).show();
         }
     };
-    private MaterialPickerOnPositiveButtonClickListener pclDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
-        @Override
-        public void onPositiveButtonClick(Object selection) {
-
-            vVacationDate.setText(convertLongDate(selection));
-        }
-
+    private View.OnClickListener clVacationDate = v -> {
+        vDatePicker.show(getParentFragmentManager(), "DATE_PICKER");
+    };
+    private MaterialPickerOnPositiveButtonClickListener pclDatePicker = selection -> {
+        vVacationDate.setText(convertDateToString(selection));
+        startDate = (long) selection;
     };
 
 }

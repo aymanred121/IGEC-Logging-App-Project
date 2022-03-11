@@ -29,9 +29,9 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
 
     // Vars
     private ActionBarDrawerToggle actionBarDrawerToggle;
-    private VacationRequestsFragment vacationRequestsFragment = new VacationRequestsFragment();
-    private VacationsLogFragment vacationsLogFragment  = new VacationsLogFragment(false);
-    private CheckInOutFragment checkInOutFragment = new CheckInOutFragment();
+    private VacationRequestsFragment vacationRequestsFragment;
+    private VacationsLogFragment vacationsLogFragment ;
+    private CheckInOutFragment checkInOutFragment;
     private Employee currManager;
     private Bundle bundle;
 
@@ -51,6 +51,9 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
 
     // Functions
     private void initialize() {
+        currManager = (Employee) getIntent().getSerializableExtra("emp");
+
+
         vToolbar = findViewById(R.id.toolbar);
         vDrawerLayout = findViewById(R.id.drawer);
         vNavigationView = findViewById(R.id.navView);
@@ -60,7 +63,9 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
         actionBarDrawerToggle.syncState();
         vNavigationView.setNavigationItemSelectedListener(this);
 
-
+        checkInOutFragment = new CheckInOutFragment(currManager);
+        vacationsLogFragment = new VacationsLogFragment(false, currManager);
+        vacationRequestsFragment = new VacationRequestsFragment(currManager);
 
         viewPager.setOffscreenPageLimit(2);
         ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), 0);
@@ -69,13 +74,6 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
         viewPagerAdapter.addFragment(vacationsLogFragment, getString(R.string.vacations_log));
         viewPager.setAdapter(viewPagerAdapter);
 
-        currManager = (Employee) getIntent().getSerializableExtra("emp");
-        bundle = new Bundle();
-        bundle.putSerializable("emp", currManager);
-        bundle.putSerializable("mgr", currManager);
-        vacationRequestsFragment.setArguments(bundle);
-        vacationsLogFragment.setArguments(bundle);
-        checkInOutFragment.setArguments(bundle);
     }
 
     @Override
@@ -102,4 +100,6 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
         vDrawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
+
+    // Listeners
 }

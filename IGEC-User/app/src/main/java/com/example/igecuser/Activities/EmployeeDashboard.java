@@ -28,15 +28,15 @@ public class EmployeeDashboard extends AppCompatActivity implements NavigationVi
     private ViewPager viewPager;
     private DrawerLayout vDrawerLayout;
     private NavigationView vNavigationView;
-
     // Vars
-    private CheckInOutFragment checkInOutFragment = new CheckInOutFragment();
-    private VacationRequestFragment vacationRequestFragment = new VacationRequestFragment();
-    private VacationsLogFragment vacationsLogFragment = new VacationsLogFragment(true);
+    private CheckInOutFragment checkInOutFragment;
+    private VacationRequestFragment vacationRequestFragment;
+    private VacationsLogFragment vacationsLogFragment;
     private Employee currEmployee;
     private Bundle bundle;
     private ActionBarDrawerToggle actionBarDrawerToggle;
 
+    // Overrides
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,35 +50,6 @@ public class EmployeeDashboard extends AppCompatActivity implements NavigationVi
         vDrawerLayout.addDrawerListener(actionBarDrawerToggle);
         viewPager.setOnTouchListener((v, event) -> true);
 
-    }
-
-    //Functions
-    private void initialize() {
-        vToolbar = findViewById(R.id.toolbar);
-        vDrawerLayout = findViewById(R.id.drawer);
-        vNavigationView = findViewById(R.id.navView);
-        viewPager = findViewById(R.id.fragment_container);
-        setSupportActionBar(vToolbar);
-        actionBarDrawerToggle = new ActionBarDrawerToggle(this, vDrawerLayout, vToolbar, R.string.openNavBar, R.string.closeNavBar);
-        actionBarDrawerToggle.syncState();
-        vNavigationView.setNavigationItemSelectedListener(this);
-
-
-
-        viewPager.setOffscreenPageLimit(2);
-        ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), 0);
-        viewPagerAdapter.addFragment(checkInOutFragment, getString(R.string.check_in_out));
-        viewPagerAdapter.addFragment(vacationRequestFragment, getString(R.string.vacation_request));
-        viewPagerAdapter.addFragment(vacationsLogFragment, getString(R.string.vacations_log));
-        viewPager.setAdapter(viewPagerAdapter);
-
-        currEmployee = (Employee) getIntent().getSerializableExtra("emp");
-        bundle = new Bundle();
-        bundle.putSerializable("emp", currEmployee);
-        vacationRequestFragment.setArguments(bundle);
-        vacationsLogFragment.setArguments(bundle);
-        checkInOutFragment.setArguments(bundle);
-        vacationsLogFragment.setArguments(bundle);
     }
 
     @Override
@@ -105,5 +76,32 @@ public class EmployeeDashboard extends AppCompatActivity implements NavigationVi
         vDrawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
+    // Functions
+    private void initialize() {
+
+        currEmployee = (Employee) getIntent().getSerializableExtra("emp");
+
+        vToolbar = findViewById(R.id.toolbar);
+        vDrawerLayout = findViewById(R.id.drawer);
+        vNavigationView = findViewById(R.id.navView);
+        viewPager = findViewById(R.id.fragment_container);
+        setSupportActionBar(vToolbar);
+        actionBarDrawerToggle = new ActionBarDrawerToggle(this, vDrawerLayout, vToolbar, R.string.openNavBar, R.string.closeNavBar);
+        actionBarDrawerToggle.syncState();
+        vNavigationView.setNavigationItemSelectedListener(this);
+
+
+        viewPager.setOffscreenPageLimit(2);
+        checkInOutFragment = new CheckInOutFragment(currEmployee);
+        vacationRequestFragment = new VacationRequestFragment(currEmployee);
+        vacationsLogFragment = new VacationsLogFragment(true,currEmployee);
+        ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), 0);
+        viewPagerAdapter.addFragment(checkInOutFragment, getString(R.string.check_in_out));
+        viewPagerAdapter.addFragment(vacationRequestFragment, getString(R.string.vacation_request));
+        viewPagerAdapter.addFragment(vacationsLogFragment, getString(R.string.vacations_log));
+        viewPager.setAdapter(viewPagerAdapter);
+    }
+
+    //Listeners
 
 }

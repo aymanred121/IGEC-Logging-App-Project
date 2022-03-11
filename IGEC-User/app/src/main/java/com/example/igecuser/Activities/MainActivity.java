@@ -36,10 +36,10 @@ public class MainActivity extends AppCompatActivity {
     private TextInputLayout vEmailLayout;
     private TextInputEditText vPassword;
     private MaterialButton vSignIn;
-
     // Vars
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+    // Overrides
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,8 +54,17 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    // Functions
+    private void initialize() {
+        vEmail = findViewById(R.id.TextInput_email);
+        vPassword = findViewById(R.id.TextInput_password);
+        vEmailLayout = findViewById(R.id.textInputLayout_Email);
+        vSignIn = findViewById(R.id.Button_SignIn);
+
+    }
+
     private void askPermission() {
-        String[] PERMISSIONS={Manifest.permission.ACCESS_BACKGROUND_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.CAMERA};
+        String[] PERMISSIONS = {Manifest.permission.ACCESS_BACKGROUND_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.CAMERA};
         ActivityCompat.requestPermissions((Activity) this, PERMISSIONS, 112);
 
         TedPermission.create()
@@ -74,17 +83,6 @@ public class MainActivity extends AppCompatActivity {
                 .setPermissions(PERMISSIONS)
                 .check();
     }
-
-
-    // Functions
-    private void initialize() {
-        vEmail = findViewById(R.id.TextInput_email);
-        vPassword = findViewById(R.id.TextInput_password);
-        vEmailLayout = findViewById(R.id.textInputLayout_Email);
-        vSignIn = findViewById(R.id.Button_SignIn);
-
-    }
-
 
     private boolean isPasswordRight(String password) {
         try {
@@ -134,30 +132,29 @@ public class MainActivity extends AppCompatActivity {
                     .whereEqualTo("email", vEmail.getText().toString())
                     .limit(1)
                     .get().addOnSuccessListener(queryDocumentSnapshots -> {
-                        if (queryDocumentSnapshots.size() == 0) {
-                            Toast.makeText(MainActivity.this, "please enter a valid email or password", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-                        DocumentSnapshot d = queryDocumentSnapshots.getDocuments().get(0);
-                        if (d.exists()) {
-                            Employee currEmployee = d.toObject(Employee.class);
-                            if( !isPasswordRight(currEmployee.getPassword())){
-                                return;
-                            }
-                            Intent intent;
-                            if(currEmployee.getManagerID()==null){
-                                Toast.makeText(MainActivity.this, "you are not assigned to any project", Toast.LENGTH_SHORT).show();
-                                return;
-                            }
-                           else if (currEmployee.getManagerID().equals("adminID")) {
-                                intent = new Intent(MainActivity.this, ManagerDashboard.class);
-                            } else {
-                                intent = new Intent(MainActivity.this, EmployeeDashboard.class);
-                            }
-                            intent.putExtra("emp", currEmployee);
-                            startActivity(intent);
-                        }
-                    });
+                if (queryDocumentSnapshots.size() == 0) {
+                    Toast.makeText(MainActivity.this, "please enter a valid email or password", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                DocumentSnapshot d = queryDocumentSnapshots.getDocuments().get(0);
+                if (d.exists()) {
+                    Employee currEmployee = d.toObject(Employee.class);
+                    if (!isPasswordRight(currEmployee.getPassword())) {
+                        return;
+                    }
+                    Intent intent;
+                    if (currEmployee.getManagerID() == null) {
+                        Toast.makeText(MainActivity.this, "you are not assigned to any project", Toast.LENGTH_SHORT).show();
+                        return;
+                    } else if (currEmployee.getManagerID().equals("adminID")) {
+                        intent = new Intent(MainActivity.this, ManagerDashboard.class);
+                    } else {
+                        intent = new Intent(MainActivity.this, EmployeeDashboard.class);
+                    }
+                    intent.putExtra("emp", currEmployee);
+                    startActivity(intent);
+                }
+            });
         }
 
 

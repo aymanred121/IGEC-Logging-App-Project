@@ -31,6 +31,11 @@ public class VacationRequestsFragment extends Fragment {
     private ArrayList<VacationRequest> vacations = new ArrayList<>();
     private Employee currManager;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+    public VacationRequestsFragment(Employee currManager) {
+        this.currManager = currManager;
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -45,7 +50,6 @@ public class VacationRequestsFragment extends Fragment {
     // Functions
     private void Initialize(View view) {
 
-        currManager = (Employee) getArguments().getSerializable("mgr");
         recyclerView = view.findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
@@ -74,16 +78,9 @@ public class VacationRequestsFragment extends Fragment {
                 });
     }
 
-    VacationAdapter.OnItemClickListener itclVacationAdapter =  new VacationAdapter.OnItemClickListener() {
-        @Override
-        public void onItemClick(int position) {
-//            Intent intent = new Intent(getActivity(), VacationInfo.class);
-//            if(adapter.getVacationsList().size()>0)
-//                intent.putExtra("request",adapter.getVacationsList().get(position));
-//            startActivity(intent);
-            VacationRequestFragmentDialog vacationRequestFragmentDialog = new VacationRequestFragmentDialog(adapter.getVacationsList().get(position));
-            vacationRequestFragmentDialog.show(getParentFragmentManager(),"");
-        }
+    VacationAdapter.OnItemClickListener itclVacationAdapter = position -> {
+        VacationRequestFragmentDialog vacationRequestFragmentDialog = new VacationRequestFragmentDialog(adapter.getVacationsList().get(position));
+        vacationRequestFragmentDialog.show(getParentFragmentManager(),"");
     };
 
 }

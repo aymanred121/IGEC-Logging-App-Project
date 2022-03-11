@@ -58,6 +58,10 @@ public class CheckInOutFragment extends Fragment {
     private double latitude, longitude;
     private Machine currMachine;
 
+    public CheckInOutFragment(Employee currEmployee) {
+        this.currEmployee = currEmployee;
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -75,9 +79,11 @@ public class CheckInOutFragment extends Fragment {
         vGreeting = view.findViewById(R.id.TextView_Greeting);
         vCheckInOut = view.findViewById(R.id.Button_CheckInOut);
         vAddMachine = view.findViewById(R.id.Button_AddMachine);
-        currEmployee = (Employee) getArguments().getSerializable("emp");
-        id = LocalDate.now().toString()+currEmployee.getId();
+        id = LocalDate.now().toString() + currEmployee.getId();
+
+        vGreeting.setText(getString(R.string.good_morning) + "\n" + currEmployee.getFirstName());
     }
+
     private Location getLocation() {
         LocationManager lm = (LocationManager) getContext().getSystemService(LOCATION_SERVICE);
         List<String> providers = lm.getProviders(true);
@@ -97,53 +103,49 @@ public class CheckInOutFragment extends Fragment {
         return bestLocation;
 
     }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        switch(requestCode) {
-            case (55) : {
-                if (resultCode == Activity.RESULT_OK) {
-                    machineID = data.getStringExtra("qrCamera");
-                    try{
-                        Location location = getLocation();
-                        if(location ==null){
-                            Toast.makeText(getContext(), "Please enable GPS!", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-
-                        longitude = location.getLongitude();
-                        latitude = location.getLatitude();
-
-                        db.collection("machine").document(machineID).addSnapshotListener((value, error) -> {
-                            currMachine = value.toObject(Machine.class);
-                            Summary machineCheckOut = new Summary(latitude,longitude);
-                            Map<String,Object>machineEmployee = new HashMap();
-                            machineEmployee.put("Machine",currMachine);
-                            machineEmployee.put("Employee",currEmployee);
-                            machineEmployee.put("check Out",machineCheckOut);
-                            db.collection("Machine_Employee").document( LocalDate.now().toString() +currEmployee.getId()+currMachine.getId()).update(machineEmployee)
-                                    .addOnSuccessListener(unused -> Toast.makeText(getContext(), "Machine: "+currMachine.getCodeName()+" checked In successfully", Toast.LENGTH_SHORT).show())
-                                    .addOnFailureListener(e -> {
-                                        Summary machineCheckIn = new Summary(latitude,longitude);
-                                        Map<String,Object> machineEmployee1 = new HashMap();
-                                        machineEmployee1.put("Machine",currMachine);
-                                        machineEmployee1.put("Employee",currEmployee);
-                                        machineEmployee1.put("check In",machineCheckIn);
-                                        db.collection("Machine_Employee").document( LocalDate.now().toString() +currEmployee.getId()+currMachine.getId()).set(machineEmployee1);
-                                        Toast.makeText(getContext(), "Machine: "+currMachine.getCodeName()+" checked Out successfully", Toast.LENGTH_SHORT).show();
-                                    });
-                        });
-
-                    }catch (Exception e){
-                        Toast.makeText(getContext(), "invalid Machine ID", Toast.LENGTH_SHORT).show();
+        if (requestCode == 55) {
+            if (resultCode == Activity.RESULT_OK) {
+                machineID = data.getStringExtra("qrCamera");
+                try {
+                    Location location = getLocation();
+                    if (location == null) {
+                        Toast.makeText(getContext(), "Please enable GPS!", Toast.LENGTH_SHORT).show();
+                        return;
                     }
-                }
-                break;
-            }
 
+                    longitude = location.getLongitude();
+                    latitude = location.getLatitude();
+
+                    db.collection("machine").document(machineID).addSnapshotListener((value, error) -> {
+                        currMachine = value.toObject(Machine.class);
+                        Summary machineCheckOut = new Summary(latitude, longitude);
+                        Map<String, Object> machineEmployee = new HashMap();
+                        machineEmployee.put("Machine", currMachine);
+                        machineEmployee.put("Employee", currEmployee);
+                        machineEmployee.put("check Out", machineCheckOut);
+                        db.collection("Machine_Employee").document(LocalDate.now().toString() + currEmployee.getId() + currMachine.getId()).update(machineEmployee)
+                                .addOnSuccessListener(unused -> Toast.makeText(getContext(), "Machine: " + currMachine.getCodeName() + " checked In successfully", Toast.LENGTH_SHORT).show())
+                                .addOnFailureListener(e -> {
+                                    Summary machineCheckIn = new Summary(latitude, longitude);
+                                    Map<String, Object> machineEmployee1 = new HashMap();
+                                    machineEmployee1.put("Machine", currMachine);
+                                    machineEmployee1.put("Employee", currEmployee);
+                                    machineEmployee1.put("check In", machineCheckIn);
+                                    db.collection("Machine_Employee").document(LocalDate.now().toString() + currEmployee.getId() + currMachine.getId()).set(machineEmployee1);
+                                    Toast.makeText(getContext(), "Machine: " + currMachine.getCodeName() + " checked Out successfully", Toast.LENGTH_SHORT).show();
+                                });
+                    });
+
+                } catch (Exception e) {
+                    Toast.makeText(getContext(), "invalid Machine ID", Toast.LENGTH_SHORT).show();
+                }
+            }
         }
     }
-
 
 
     // Listeners
@@ -151,7 +153,7 @@ public class CheckInOutFragment extends Fragment {
         @Override
         public void onClick(View v) {
             Location location = getLocation();
-            if(location ==null){
+            if (location == null) {
                 Toast.makeText(getContext(), "Please enable GPS!", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -159,23 +161,23 @@ public class CheckInOutFragment extends Fragment {
             latitude = location.getLatitude();
 
             Map<String, Object> checkOut = new HashMap<>();
-                checkOut.put("Employee", currEmployee);
-                checkOut.put("Check Out",new Summary(latitude, longitude));
-                db.collection("summary").document(id).update(checkOut)
-                        .addOnSuccessListener(unused -> {
-                            Toast.makeText(getContext(), "Checked Out successfully!", Toast.LENGTH_SHORT).show();
-                        })
-                        .addOnFailureListener(e -> {
-                            Map<String, Object> checkIn = new HashMap<>();
-                            checkIn.put("Employee", currEmployee);
-                            checkIn.put("Check In", new Summary(latitude, longitude));
-                            db.collection("summary").document(id).set(checkIn);
-                            Toast.makeText(getContext(), "Checked In successfully!", Toast.LENGTH_SHORT).show();
-                        });
+            checkOut.put("Employee", currEmployee);
+            checkOut.put("Check Out", new Summary(latitude, longitude));
+            db.collection("summary").document(id).update(checkOut)
+                    .addOnSuccessListener(unused -> {
+                        Toast.makeText(getContext(), "Checked Out successfully!", Toast.LENGTH_SHORT).show();
+                    })
+                    .addOnFailureListener(e -> {
+                        Map<String, Object> checkIn = new HashMap<>();
+                        checkIn.put("Employee", currEmployee);
+                        checkIn.put("Check In", new Summary(latitude, longitude));
+                        db.collection("summary").document(id).set(checkIn);
+                        Toast.makeText(getContext(), "Checked In successfully!", Toast.LENGTH_SHORT).show();
+                    });
             isIn = !isIn;
             vCheckInOut.setBackgroundColor((isIn) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
             vCheckInOut.setText(isIn ? "Out" : "In");
-            vAddMachine.setVisibility(isIn? View.VISIBLE:View.GONE);
+            vAddMachine.setVisibility(isIn ? View.VISIBLE : View.GONE);
 
         }
 
@@ -196,7 +198,7 @@ public class CheckInOutFragment extends Fragment {
         @Override
         public void onClick(View view) {
             Intent intent = new Intent(getActivity(), qrCameraActivity.class);
-            startActivityForResult(intent,55);
+            startActivityForResult(intent, 55);
 
         }
     };

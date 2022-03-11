@@ -93,6 +93,8 @@ public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.Vacati
             case -1:
             holder.vVacationsStatus.setColorFilter(Color.rgb(153,0,0));
             break;
+            default:
+                holder.vVacationsStatus.setColorFilter(Color.GRAY);
         }
         holder.vVacationDays.setText("for : " + getDays(vacation) + " days");
     }

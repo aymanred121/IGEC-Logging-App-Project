@@ -11,6 +11,7 @@ import androidx.viewpager.widget.ViewPager;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 
 import com.example.igecuser.Adapters.ViewPagerAdapter;
@@ -72,6 +73,8 @@ public class EmployeeDashboard extends AppCompatActivity implements NavigationVi
 
         // Views
         Toolbar vToolbar = findViewById(R.id.toolbar);
+
+
         vDrawerLayout = findViewById(R.id.drawer);
         NavigationView vNavigationView = findViewById(R.id.navView);
         viewPager = findViewById(R.id.fragment_container);
@@ -80,6 +83,12 @@ public class EmployeeDashboard extends AppCompatActivity implements NavigationVi
         actionBarDrawerToggle.syncState();
         vNavigationView.setNavigationItemSelectedListener(this);
 
+
+        TextView EmployeeName = vNavigationView.getHeaderView(0).findViewById(R.id.EmployeeName);
+        TextView EmployeeID = vNavigationView.getHeaderView(0).findViewById(R.id.EmployeeID);
+
+        EmployeeName.setText(String.format("%s %s", currEmployee.getFirstName(), currEmployee.getLastName()));
+        EmployeeID.setText(String.format("Id: %s", currEmployee.getId()));
 
         viewPager.setOffscreenPageLimit(2);
         // Vars

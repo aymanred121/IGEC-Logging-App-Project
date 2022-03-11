@@ -4,10 +4,11 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="../../../../../../../layout/custom_preview.xml" value="0.10104166666666667" />
+        <entry key="app/src/main/res/drawable/ic_baseline_person_24.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/nav_item.xml" value="0.127" />
         <entry key="app/src/main/res/drawable/side_nav_bar.xml" value="0.127" />
         <entry key="app/src/main/res/layout/activity_dashboard.xml" value="0.10144927536231885" />
-        <entry key="app/src/main/res/layout/activity_employee_dashboard.xml" value="0.10144927536231885" />
+        <entry key="app/src/main/res/layout/activity_employee_dashboard.xml" value="0.22748815165876776" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.15364583333333334" />
         <entry key="app/src/main/res/layout/activity_manager_dashboard.xml" value="0.16" />
         <entry key="app/src/main/res/layout/activity_qr_camera.xml" value="0.22" />
@@ -18,6 +19,7 @@
         <entry key="app/src/main/res/layout/fragment_vacation_request.xml" value="0.33" />
         <entry key="app/src/main/res/layout/fragment_vacation_requests.xml" value="0.25" />
         <entry key="app/src/main/res/layout/fragment_vacations_log.xml" value="0.2" />
+        <entry key="app/src/main/res/layout/nav_header.xml" value="0.33" />
         <entry key="app/src/main/res/layout/vacation_request.xml" value="0.10144927536231885" />
         <entry key="app/src/main/res/layout/vacation_request_item.xml" value="0.2" />
         <entry key="app/src/main/res/menu/activity_main_drawer.xml" value="0.19025641025641027" />

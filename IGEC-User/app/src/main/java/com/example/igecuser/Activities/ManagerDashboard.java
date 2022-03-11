@@ -11,6 +11,7 @@ import androidx.viewpager.widget.ViewPager;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 import com.example.igecuser.Adapters.ViewPagerAdapter;
 import com.example.igecuser.Fragments.CheckInOutFragment;
@@ -57,6 +58,12 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
         actionBarDrawerToggle = new ActionBarDrawerToggle(this, vDrawerLayout, vToolbar, R.string.openNavBar, R.string.closeNavBar);
         actionBarDrawerToggle.syncState();
         vNavigationView.setNavigationItemSelectedListener(this);
+
+        TextView EmployeeName = vNavigationView.getHeaderView(0).findViewById(R.id.EmployeeName);
+        TextView EmployeeID = vNavigationView.getHeaderView(0).findViewById(R.id.EmployeeID);
+
+        EmployeeName.setText(String.format("%s %s", currManager.getFirstName(), currManager.getLastName()));
+        EmployeeID.setText(String.format("Id: %s", currManager.getId()));
 
         CheckInOutFragment checkInOutFragment = new CheckInOutFragment(currManager);
         VacationsLogFragment vacationsLogFragment = new VacationsLogFragment(false, currManager);

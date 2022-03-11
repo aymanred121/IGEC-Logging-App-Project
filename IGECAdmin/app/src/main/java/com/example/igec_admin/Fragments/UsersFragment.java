@@ -1,7 +1,10 @@
 package com.example.igec_admin.Fragments;
 
+import static android.content.ContentValues.TAG;
+
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,9 +61,17 @@ public class UsersFragment extends Fragment {
     }
     void getEmployees(){
         employeeOverviewRef.addSnapshotListener((documentSnapshot, e) -> {
-            HashMap<String,ArrayList<String>> empMap;
-            empMap = (HashMap)documentSnapshot.getData();
-            retrieveEmployees(empMap);
+            HashMap empMap;
+            if (e != null) {
+                Log.w(TAG, "Listen failed.", e);
+                return;
+            }
+            if(documentSnapshot != null && documentSnapshot.exists()){
+                empMap = (HashMap)documentSnapshot.getData();
+                retrieveEmployees(empMap);
+            }else{
+                return;
+            }
         });
     }
 

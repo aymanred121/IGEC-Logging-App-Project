@@ -54,6 +54,14 @@ public class VacationsLogFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        if (isVisibleToUser) {
+            loadVacations();
+        }
+    }
+
     // Functions
     private void Initialize(View view) {
         recyclerView = view.findViewById(R.id.recyclerview);

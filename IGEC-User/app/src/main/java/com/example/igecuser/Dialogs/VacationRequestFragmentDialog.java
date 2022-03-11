@@ -1,9 +1,12 @@
-package com.example.igecuser.Fragments;
+package com.example.igecuser.Dialogs;
 
+import android.app.Dialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,7 +23,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-public class VacationRequestFragmentDialog extends BottomSheetDialogFragment {
+public class VacationRequestFragmentDialog extends DialogFragment {
 
 
     // Views
@@ -35,11 +38,33 @@ public class VacationRequestFragmentDialog extends BottomSheetDialogFragment {
         this.currVacation = currVacation;
     }
 
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+
+
+        Dialog dialog = super.onCreateDialog(savedInstanceState);
+        Window window = dialog.getWindow();
+
+        if (window != null) {
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
+        }
+
+        return dialog;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setStyle(DialogFragment.STYLE_NORMAL, R.style.FullscreenDialogTheme);
+    }
+
+
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.activity_vacation_info, container, false);
-        getDialog().getWindow().setLayout(600,300);
         initialize(view);
 
         vAcceptRequest.setOnClickListener(oclAcceptRequest);
@@ -70,39 +95,24 @@ public class VacationRequestFragmentDialog extends BottomSheetDialogFragment {
         days /= (24 * 3600 * 1000);
         return String.valueOf(days);
     }
-    private String dateToString(long selection)
-    {
+
+    private String dateToString(long selection) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(selection);
         return simpleDateFormat.format(calendar.getTime());
     }
-    // Listeners
-    private View.OnClickListener oclAcceptRequest = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            db.collection("Vacation")
-                    .document(currVacation.getId())
-                    .update("vacationStatus", 1).addOnSuccessListener(new OnSuccessListener<Void>() {
-                @Override
-                public void onSuccess(Void unused) {
-                    getDialog().dismiss();
-                }
-            });
 
-        }
+    // Listeners
+    private View.OnClickListener oclAcceptRequest = v -> {
+        db.collection("Vacation")
+                .document(currVacation.getId())
+                .update("vacationStatus", 1).addOnSuccessListener(unused -> getDialog().dismiss());
+
     };
-    private View.OnClickListener oclDeclineRequest = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            db.collection("Vacation")
-                    .document(currVacation.getId())
-                    .update("vacationStatus", -1).addOnSuccessListener(new OnSuccessListener<Void>() {
-                @Override
-                public void onSuccess(Void unused) {
-                    getDialog().dismiss();
-                }
-            });
-        }
+    private View.OnClickListener oclDeclineRequest = v -> {
+        db.collection("Vacation")
+                .document(currVacation.getId())
+                .update("vacationStatus", -1).addOnSuccessListener(unused -> getDialog().dismiss());
     };
 }

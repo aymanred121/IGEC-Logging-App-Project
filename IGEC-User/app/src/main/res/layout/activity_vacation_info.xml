@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="?dialogPreferredPadding"
-    tools:context=".Fragments.VacationRequestFragmentDialog">
+    tools:context=".Dialogs.VacationRequestFragmentDialog">
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textInputLayout_EmployeeId"
@@ -15,7 +15,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="32dp"
         android:layout_marginEnd="8dp"
-        android:enabled="false"
+        android:enabled="true"
         app:boxBackgroundMode="outline"
         app:helperTextEnabled="true">
 
@@ -24,6 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/employee_id"
+            android:enabled="false"
             android:inputType="date"
             android:padding="14dp"
             android:singleLine="true" />
@@ -37,7 +38,7 @@
         android:layout_marginTop="32dp"
         android:layout_marginEnd="16dp"
         android:layout_toRightOf="@id/textInputLayout_EmployeeId"
-        android:enabled="false"
+        android:enabled="true"
         app:boxBackgroundMode="outline"
 
         app:helperTextEnabled="true">
@@ -48,6 +49,7 @@
             android:layout_height="wrap_content"
             android:hint="@string/employee_name"
             android:inputType="date"
+            android:enabled="false"
             android:padding="14dp"
             android:singleLine="true" />
     </com.google.android.material.textfield.TextInputLayout>
@@ -62,7 +64,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="32dp"
         android:layout_marginEnd="8dp"
-        android:enabled="false"
+        android:enabled="true"
         app:boxBackgroundMode="outline"
         app:helperTextEnabled="true">
 
@@ -73,6 +75,7 @@
             android:hint="@string/vacation_date"
             android:inputType="date"
             android:padding="14dp"
+            android:enabled="false"
             android:singleLine="true" />
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -85,7 +88,7 @@
         android:layout_marginTop="32dp"
         android:layout_marginEnd="16dp"
         android:layout_toRightOf="@id/textInputLayout_EmployeeId"
-        android:enabled="false"
+        android:enabled="true"
         app:boxBackgroundMode="outline"
         app:helperTextEnabled="true">
 
@@ -96,6 +99,7 @@
             android:hint="@string/vacation_days"
             android:inputType="number"
             android:padding="14dp"
+            android:enabled="false"
             android:singleLine="true" />
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -109,7 +113,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="16dp"
-        android:enabled="false"
+        android:enabled="true"
         app:boxBackgroundMode="outline"
         app:counterEnabled="true"
         app:counterMaxLength="250"
@@ -120,6 +124,7 @@
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:gravity="top"
+            android:enabled="false"
             android:hint="@string/vacation_reason"
             android:inputType="textMultiLine"
             android:padding="14dp" />

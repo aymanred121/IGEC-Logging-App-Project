@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.igecuser.Dialogs.VacationRequestFragmentDialog;
 import com.example.igecuser.R;
 import com.example.igecuser.Adapters.VacationAdapter;
 import com.example.igecuser.fireBase.Employee;
@@ -79,8 +80,8 @@ public class VacationRequestsFragment extends Fragment {
     }
 
     VacationAdapter.OnItemClickListener itclVacationAdapter = position -> {
-        VacationRequestFragmentDialog vacationRequestFragmentDialog = new VacationRequestFragmentDialog(adapter.getVacationsList().get(position));
-        vacationRequestFragmentDialog.show(getParentFragmentManager(),"");
+        VacationRequestFragmentDialog vacationRequestFragmentDialog  = new VacationRequestFragmentDialog(adapter.getVacationsList().get(position));
+        vacationRequestFragmentDialog.show(getFragmentManager(),"");
     };
 
 }

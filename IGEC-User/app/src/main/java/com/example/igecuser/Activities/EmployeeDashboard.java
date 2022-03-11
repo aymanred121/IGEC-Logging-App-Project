@@ -8,10 +8,10 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.viewpager.widget.ViewPager;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
+
 
 import com.example.igecuser.Adapters.ViewPagerAdapter;
 import com.example.igecuser.Fragments.CheckInOutFragment;
@@ -23,20 +23,12 @@ import com.google.android.material.navigation.NavigationView;
 
 public class EmployeeDashboard extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    // Views
-    private Toolbar vToolbar;
     private ViewPager viewPager;
     private DrawerLayout vDrawerLayout;
-    private NavigationView vNavigationView;
-    // Vars
-    private CheckInOutFragment checkInOutFragment;
-    private VacationRequestFragment vacationRequestFragment;
-    private VacationsLogFragment vacationsLogFragment;
-    private Employee currEmployee;
-    private Bundle bundle;
     private ActionBarDrawerToggle actionBarDrawerToggle;
 
     // Overrides
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,28 +54,26 @@ public class EmployeeDashboard extends AppCompatActivity implements NavigationVi
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.item_CheckInOut:
-                viewPager.setCurrentItem(0);
-                break;
-            case R.id.item_VacationRequests:
-                viewPager.setCurrentItem(1);
-                break;
-            case R.id.item_VacationsLog:
-                viewPager.setCurrentItem(2);
-                break;
-        }
+        if (R.id.item_CheckInOut == item.getItemId())
+            viewPager.setCurrentItem(0);
+        else if (R.id.item_VacationRequests == item.getItemId())
+            viewPager.setCurrentItem(1);
+        else if (R.id.item_VacationsLog == item.getItemId())
+            viewPager.setCurrentItem(2);
+
         vDrawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
+
     // Functions
     private void initialize() {
 
-        currEmployee = (Employee) getIntent().getSerializableExtra("emp");
+        Employee currEmployee = (Employee) getIntent().getSerializableExtra("emp");
 
-        vToolbar = findViewById(R.id.toolbar);
+        // Views
+        Toolbar vToolbar = findViewById(R.id.toolbar);
         vDrawerLayout = findViewById(R.id.drawer);
-        vNavigationView = findViewById(R.id.navView);
+        NavigationView vNavigationView = findViewById(R.id.navView);
         viewPager = findViewById(R.id.fragment_container);
         setSupportActionBar(vToolbar);
         actionBarDrawerToggle = new ActionBarDrawerToggle(this, vDrawerLayout, vToolbar, R.string.openNavBar, R.string.closeNavBar);
@@ -92,9 +82,10 @@ public class EmployeeDashboard extends AppCompatActivity implements NavigationVi
 
 
         viewPager.setOffscreenPageLimit(2);
-        checkInOutFragment = new CheckInOutFragment(currEmployee);
-        vacationRequestFragment = new VacationRequestFragment(currEmployee);
-        vacationsLogFragment = new VacationsLogFragment(true,currEmployee);
+        // Vars
+        CheckInOutFragment checkInOutFragment = new CheckInOutFragment(currEmployee);
+        VacationRequestFragment vacationRequestFragment = new VacationRequestFragment(currEmployee);
+        VacationsLogFragment vacationsLogFragment = new VacationsLogFragment(true, currEmployee);
         ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), 0);
         viewPagerAdapter.addFragment(checkInOutFragment, getString(R.string.check_in_out));
         viewPagerAdapter.addFragment(vacationRequestFragment, getString(R.string.vacation_request));

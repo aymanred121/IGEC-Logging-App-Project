@@ -1,6 +1,5 @@
 package com.example.igecuser.Fragments;
 
-import static android.content.ContentValues.TAG;
 import static android.content.Context.LOCATION_SERVICE;
 
 import android.Manifest;
@@ -12,30 +11,23 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 
-import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.igecuser.Adapters.MachineAdapter;
 import com.example.igecuser.R;
 import com.example.igecuser.fireBase.Employee;
 import com.example.igecuser.fireBase.Machine;
 import com.example.igecuser.fireBase.Summary;
 import com.example.igecuser.Activities.qrCameraActivity;
-import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -44,17 +36,14 @@ import java.util.Map;
 
 public class CheckInOutFragment extends Fragment {
 
-    //Views
-    private TextView vGreeting;
     private MaterialButton vCheckInOut;
     private FloatingActionButton vAddMachine;
 
     // Vars
     private boolean isIn = false;
-    private Employee currEmployee;
-    private String machineID;
+    private final Employee currEmployee;
     private String id;
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private double latitude, longitude;
     private Machine currMachine;
 
@@ -76,12 +65,13 @@ public class CheckInOutFragment extends Fragment {
     }
 
     private void initialize(View view) {
-        vGreeting = view.findViewById(R.id.TextView_Greeting);
+        //Views
+        TextView vGreeting = view.findViewById(R.id.TextView_Greeting);
         vCheckInOut = view.findViewById(R.id.Button_CheckInOut);
         vAddMachine = view.findViewById(R.id.Button_AddMachine);
         id = LocalDate.now().toString() + currEmployee.getId();
 
-        vGreeting.setText(getString(R.string.good_morning) + "\n" + currEmployee.getFirstName());
+        vGreeting.setText(String.format("%s\n%s", getString(R.string.good_morning), currEmployee.getFirstName()));
     }
 
     private Location getLocation() {
@@ -109,7 +99,7 @@ public class CheckInOutFragment extends Fragment {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == 55) {
             if (resultCode == Activity.RESULT_OK) {
-                machineID = data.getStringExtra("qrCamera");
+                String machineID = data.getStringExtra("qrCamera");
                 try {
                     Location location = getLocation();
                     if (location == null) {
@@ -182,17 +172,6 @@ public class CheckInOutFragment extends Fragment {
         }
 
 
-    };
-    private MachineAdapter.OnItemClickListener iclMachine = new MachineAdapter.OnItemClickListener() {
-        @Override
-        public void onItemClick(int position) {
-
-        }
-
-        @Override
-        public void onCheckInOutClick(int position) {
-
-        }
     };
     private View.OnClickListener oclMachine = new View.OnClickListener() {
         @Override

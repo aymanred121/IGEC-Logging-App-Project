@@ -23,14 +23,11 @@ public class qrCameraActivity extends AppCompatActivity {
         setContentView(R.layout.activity_qr_camera);
         CodeScannerView scannerView = findViewById(R.id.scanner_view);
         mCodeScanner = new CodeScanner(getApplicationContext(), scannerView);
-        mCodeScanner.setDecodeCallback(result -> runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Intent resultIntent = new Intent();
-                resultIntent.putExtra("qrCamera", result.getText());
-                setResult(Activity.RESULT_OK, resultIntent);
-                finish();
-            }
+        mCodeScanner.setDecodeCallback(result -> runOnUiThread(() -> {
+            Intent resultIntent = new Intent();
+            resultIntent.putExtra("qrCamera", result.getText());
+            setResult(Activity.RESULT_OK, resultIntent);
+            finish();
         }));
         scannerView.setOnClickListener(view -> mCodeScanner.startPreview());
     }

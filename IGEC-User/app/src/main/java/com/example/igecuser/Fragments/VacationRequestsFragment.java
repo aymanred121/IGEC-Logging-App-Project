@@ -61,17 +61,18 @@ public class VacationRequestsFragment extends Fragment {
 
 
     }
-    private void loadVacations(){
+
+    private void loadVacations() {
         db.collection("Vacation")
-                .whereEqualTo("manager.id",currManager.getId())
-                .whereEqualTo("vacationStatus",0)
+                .whereEqualTo("manager.id", currManager.getId())
+                .whereEqualTo("vacationStatus", 0)
                 .addSnapshotListener((queryDocumentSnapshots, e) -> {
                     if (e != null) {
                         Log.w(TAG, "Listen failed.", e);
                         return;
                     }
-                    ArrayList<VacationRequest>vacationRequests=new ArrayList<>();
-                    for(DocumentSnapshot vacations: queryDocumentSnapshots){
+                    ArrayList<VacationRequest> vacationRequests = new ArrayList<>();
+                    for (DocumentSnapshot vacations : queryDocumentSnapshots) {
                         vacationRequests.add(vacations.toObject(VacationRequest.class));
                     }
                     adapter.setVacationsList(vacationRequests);
@@ -80,8 +81,8 @@ public class VacationRequestsFragment extends Fragment {
     }
 
     VacationAdapter.OnItemClickListener itclVacationAdapter = position -> {
-        VacationRequestFragmentDialog vacationRequestFragmentDialog  = new VacationRequestFragmentDialog(adapter.getVacationsList().get(position));
-        vacationRequestFragmentDialog.show(getFragmentManager(),"");
+        VacationRequestFragmentDialog vacationRequestFragmentDialog = new VacationRequestFragmentDialog(adapter.getVacationsList().get(position));
+        vacationRequestFragmentDialog.show(getFragmentManager(), "");
     };
 
 }

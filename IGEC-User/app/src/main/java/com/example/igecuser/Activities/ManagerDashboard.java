@@ -8,6 +8,7 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.viewpager.widget.ViewPager;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.MenuItem;
 
@@ -21,20 +22,13 @@ import com.google.android.material.navigation.NavigationView;
 
 public class ManagerDashboard extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    // Views
-    private Toolbar vToolbar;
     private ViewPager viewPager;
     private DrawerLayout vDrawerLayout;
-    private NavigationView vNavigationView;
 
     // Vars
     private ActionBarDrawerToggle actionBarDrawerToggle;
-    private VacationRequestsFragment vacationRequestsFragment;
-    private VacationsLogFragment vacationsLogFragment ;
-    private CheckInOutFragment checkInOutFragment;
-    private Employee currManager;
-    private Bundle bundle;
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,21 +45,22 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
 
     // Functions
     private void initialize() {
-        currManager = (Employee) getIntent().getSerializableExtra("emp");
+        Employee currManager = (Employee) getIntent().getSerializableExtra("emp");
 
 
-        vToolbar = findViewById(R.id.toolbar);
+        // Views
+        Toolbar vToolbar = findViewById(R.id.toolbar);
         vDrawerLayout = findViewById(R.id.drawer);
-        vNavigationView = findViewById(R.id.navView);
+        NavigationView vNavigationView = findViewById(R.id.navView);
         viewPager = findViewById(R.id.fragment_container);
         setSupportActionBar(vToolbar);
         actionBarDrawerToggle = new ActionBarDrawerToggle(this, vDrawerLayout, vToolbar, R.string.openNavBar, R.string.closeNavBar);
         actionBarDrawerToggle.syncState();
         vNavigationView.setNavigationItemSelectedListener(this);
 
-        checkInOutFragment = new CheckInOutFragment(currManager);
-        vacationsLogFragment = new VacationsLogFragment(false, currManager);
-        vacationRequestsFragment = new VacationRequestsFragment(currManager);
+        CheckInOutFragment checkInOutFragment = new CheckInOutFragment(currManager);
+        VacationsLogFragment vacationsLogFragment = new VacationsLogFragment(false, currManager);
+        VacationRequestsFragment vacationRequestsFragment = new VacationRequestsFragment(currManager);
 
         viewPager.setOffscreenPageLimit(2);
         ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), 0);
@@ -86,16 +81,13 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.item_CheckInOut:
-                viewPager.setCurrentItem(0);
-                break;
-            case R.id.item_VacationRequests:
-                viewPager.setCurrentItem(1);
-                break;
-            case R.id.item_VacationsLog:
-                viewPager.setCurrentItem(2);
-                break;
+        int itemId = item.getItemId();
+        if (itemId == R.id.item_CheckInOut) {
+            viewPager.setCurrentItem(0);
+        } else if (itemId == R.id.item_VacationRequests) {
+            viewPager.setCurrentItem(1);
+        } else if (itemId == R.id.item_VacationsLog) {
+            viewPager.setCurrentItem(2);
         }
         vDrawerLayout.closeDrawer(GravityCompat.START);
         return true;

@@ -18,6 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.VacationViewHolder> {
     private ArrayList<VacationRequest> vacationsList;
@@ -48,16 +49,13 @@ public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.Vacati
             vVacationsStatus = itemView.findViewById(R.id.ImageView_VacationStatus);
             vVacationStartDate = itemView.findViewById(R.id.TextView_VacationStartDate);
 
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if(listener != null)
+            itemView.setOnClickListener(v -> {
+                if(listener != null)
+                {
+                    int position = getAdapterPosition();
+                    if(position != RecyclerView.NO_POSITION)
                     {
-                        int position = getAdapterPosition();
-                        if(position != RecyclerView.NO_POSITION)
-                        {
-                            listener.onItemClick(position);
-                        }
+                        listener.onItemClick(position);
                     }
                 }
             });
@@ -66,25 +64,25 @@ public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.Vacati
         }
     }
 
-    public VacationAdapter(ArrayList<VacationRequest> vacationslist) {
-        this.vacationsList = vacationslist;
+    public VacationAdapter(ArrayList<VacationRequest> vacationsList) {
+        this.vacationsList = vacationsList;
     }
 
     @NonNull
     @Override
     public VacationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.vacation_request_item,parent,false);
-        VacationViewHolder vvh = new VacationViewHolder(v,listener);
-        return vvh;
+        return new VacationViewHolder(v,listener);
+        
     }
 
     @Override
     public void onBindViewHolder(@NonNull VacationViewHolder holder, int position) {
         VacationRequest vacation = vacationsList.get(position);
-        holder.vName.setText("Name: " + vacation.getEmployee().getFirstName()+" "+vacation.getEmployee().getLastName());
-        holder.vID.setText("ID: " + vacation.getEmployee().getId());
+        holder.vName.setText(String.format("Name: %s %s", vacation.getEmployee().getFirstName(), vacation.getEmployee().getLastName()));
+        holder.vID.setText(String.format("ID: %s", vacation.getEmployee().getId()));
 
-        holder.vVacationStartDate.setText("Start Date: " + formatDate(vacation.getStartDate()) );
+        holder.vVacationStartDate.setText(String.format("Start Date: %s", formatDate(vacation.getStartDate())));
         //Todo fix missing img
         switch (vacation.getVacationStatus()) {
             case 1:
@@ -96,14 +94,14 @@ public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.Vacati
             default:
                 holder.vVacationsStatus.setColorFilter(Color.GRAY);
         }
-        holder.vVacationDays.setText("for : " + getDays(vacation) + " days");
+        holder.vVacationDays.setText(String.format("for : %s days", getDays(vacation)));
     }
 
     private String formatDate(Date Date)
     {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis((long) Date.getTime());
+        calendar.setTimeInMillis(Date.getTime());
         return simpleDateFormat.format(calendar.getTime());
     }
     private String getDays(VacationRequest vacation) {

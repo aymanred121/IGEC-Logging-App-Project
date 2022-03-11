@@ -10,6 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.IGECAdmin">
         <activity android:name=".Activities.MainActivity"
+            android:configChanges="uiMode"
             android:exported="true"
             android:windowSoftInputMode="adjustNothing">
             <intent-filter>

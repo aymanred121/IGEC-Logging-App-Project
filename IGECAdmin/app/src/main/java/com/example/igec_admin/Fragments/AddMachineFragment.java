@@ -28,6 +28,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 import androidmads.library.qrgenearator.QRGContents;
 import androidmads.library.qrgenearator.QRGEncoder;
@@ -36,17 +37,17 @@ public class AddMachineFragment extends Fragment {
 
 
     // Views
-    TextInputLayout vIDLayout, vPurchaseDateLayout;
-    TextInputEditText vID, vPurchaseDate, vCodeName;
-    ImageView vQRImg;
-    MaterialButton vRegister;
+    private TextInputLayout vIDLayout, vPurchaseDateLayout;
+    private TextInputEditText vID, vPurchaseDate, vCodeName;
+    private ImageView vQRImg;
+    private MaterialButton vRegister;
     // Vars
-    long purchaseDate;
-    QRGEncoder qrgEncoder;
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
-    CollectionReference machineCol = db.collection("machine");
-    MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
-    MaterialDatePicker vDatePicker;
+    private long purchaseDate;
+    private QRGEncoder qrgEncoder;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private CollectionReference machineCol = db.collection("machine");
+    private MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
+    private MaterialDatePicker vDatePicker;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -90,7 +91,7 @@ public class AddMachineFragment extends Fragment {
     }
 
     private String convertDateToString(long selection) {
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(selection);
         return simpleDateFormat.format(calendar.getTime());

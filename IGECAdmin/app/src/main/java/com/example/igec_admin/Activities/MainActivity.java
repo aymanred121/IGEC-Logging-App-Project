@@ -20,17 +20,13 @@ import com.example.igec_admin.Fragments.UsersFragment;
 import com.example.igec_admin.R;
 import com.example.igec_admin.Fragments.SummaryFragment;
 import com.google.android.material.navigation.NavigationView;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    // Views
-    private Toolbar vToolbar;
     private DrawerLayout vDrawerLayout;
     private NavigationView vNavigationView;
 
     // Vars
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private AddUserFragment adduserFragment;
     private AddProjectFragment addprojectFragment;
     private AddMachineFragment addmachineFragment;
@@ -61,7 +57,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     //Functions
     private void initialize() {
-        vToolbar = findViewById(R.id.toolbar);
+        // Views
+        Toolbar vToolbar = findViewById(R.id.toolbar);
         vDrawerLayout = findViewById(R.id.drawer);
         vNavigationView = findViewById(R.id.navView);
         setSupportActionBar(vToolbar);
@@ -88,28 +85,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.item_addUser:
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, adduserFragment).commit();
-                break;
-            case R.id.item_addProject:
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, addprojectFragment).commit();
-                break;
-            case R.id.item_addMachine:
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, addmachineFragment).commit();
-                break;
-            case R.id.item_summary:
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, summaryFragment).commit();
-                break;
-            case R.id.item_Users:
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, usersFragment).commit();
-                break;
-            case R.id.item_Projects:
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, projectsFragment).commit();
-                break;
-            case R.id.item_Machines:
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, machinesFragment).commit();
-                break;
+        int itemId = item.getItemId();
+        if (itemId == R.id.item_addUser) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, adduserFragment).commit();
+        } else if (itemId == R.id.item_addProject) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, addprojectFragment).commit();
+        } else if (itemId == R.id.item_addMachine) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, addmachineFragment).commit();
+        } else if (itemId == R.id.item_summary) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, summaryFragment).commit();
+        } else if (itemId == R.id.item_Users) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, usersFragment).commit();
+        } else if (itemId == R.id.item_Projects) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, projectsFragment).commit();
+        } else if (itemId == R.id.item_Machines) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, machinesFragment).commit();
         }
         vDrawerLayout.closeDrawer(GravityCompat.START);
         return true;

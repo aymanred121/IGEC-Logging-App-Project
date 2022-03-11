@@ -41,19 +41,19 @@ public class MachineFragmentDialog extends DialogFragment {
 
 
     // Views
-    TextInputLayout vIDLayout, vPurchaseDateLayout;
-    TextInputEditText vID, vPurchaseDate, vCodeName;
-    MaterialButton vRegister, vDelete, vUpdate;
-    ImageView vQRImg;
+    private TextInputLayout vIDLayout, vPurchaseDateLayout;
+    private TextInputEditText vID, vPurchaseDate, vCodeName;
+    private MaterialButton vRegister, vDelete, vUpdate;
+    private ImageView vQRImg;
 
     // Vars
-    long purchaseDate;
-    QRGEncoder qrgEncoder;
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
-    CollectionReference machineCol = db.collection("machine");
-    MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
-    MaterialDatePicker vDatePicker;
-    Machine machine;
+    private long purchaseDate;
+    private QRGEncoder qrgEncoder;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private CollectionReference machineCol = db.collection("machine");
+    private MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
+    private MaterialDatePicker vDatePicker;
+    private Machine machine;
 
 
     public MachineFragmentDialog(Machine machine) {
@@ -166,7 +166,7 @@ public class MachineFragmentDialog extends DialogFragment {
         return !(vID.getText().toString().isEmpty() || vPurchaseDate.getText().toString().isEmpty() || vCodeName.getText().toString().isEmpty());
     }
 
-    String convertDateToString(long selection) {
+    private String convertDateToString(long selection) {
         @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(selection);
@@ -174,17 +174,17 @@ public class MachineFragmentDialog extends DialogFragment {
     }
 
     // Listeners
-    View.OnClickListener oclDate = new View.OnClickListener() {
+    private View.OnClickListener oclDate = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             vDatePicker.show(getFragmentManager(), "DATE_PICKER");
         }
     };
-    View.OnClickListener oclUpdate = v -> updateMachine();
+    private View.OnClickListener oclUpdate = v -> updateMachine();
 
-    View.OnClickListener oclDelete = v -> deleteMachine();
+    private View.OnClickListener oclDelete = v -> deleteMachine();
 
-    MaterialPickerOnPositiveButtonClickListener pclDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
+    private MaterialPickerOnPositiveButtonClickListener pclDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
         @Override
         public void onPositiveButtonClick(Object selection) {
             vPurchaseDate.setText(convertDateToString((long) selection));

@@ -30,11 +30,8 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.text.SimpleDateFormat;
@@ -54,37 +51,37 @@ public class UserFragmentDialog extends DialogFragment {
         setStyle(DialogFragment.STYLE_NORMAL, R.style.FullscreenDialogTheme);
     }
 
-    //Var
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
-    CollectionReference machineEmployeeCol = db.collection("Machine_Employee");
-    CollectionReference vacationCol = db.collection("Vacation");
-    CollectionReference projectCol = db.collection("projects");
-    CollectionReference summaryCOl = db.collection("summary");
-    DocumentReference employeeOverviewRef = db.collection("EmployeeOverview").document("emp");
-    Employee employee;
-    ArrayList<EmployeeOverview> employeeOverviewArrayList;
-    int currEmpOverviewPos;
 
     // Views
-    MaterialButton vUpdate, vDelete, vRegister;
-    TextInputEditText vFirstName;
-    TextInputEditText vSecondName;
-    TextInputEditText vEmail;
-    TextInputLayout vEmailLayout;
-    TextInputEditText vPassword;
-    TextInputEditText vTitle;
-    TextInputEditText vSalary;
-    TextInputEditText vSSN;
-    TextInputEditText vArea;
-    TextInputEditText vCity;
-    TextInputEditText vStreet;
-    TextInputEditText vHireDate;
-    TextInputLayout vHireDateLayout;
-    MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
-    MaterialDatePicker vDatePicker;
+    private MaterialButton vUpdate;
+    private MaterialButton vDelete;
+    private TextInputEditText vFirstName;
+    private TextInputEditText vSecondName;
+    private TextInputEditText vEmail;
+    private TextInputLayout vEmailLayout;
+    private TextInputEditText vPassword;
+    private TextInputEditText vTitle;
+    private TextInputEditText vSalary;
+    private TextInputEditText vSSN;
+    private TextInputEditText vArea;
+    private TextInputEditText vCity;
+    private TextInputEditText vStreet;
+    private TextInputEditText vHireDate;
+    private TextInputLayout vHireDateLayout;
+    private final MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
+    private MaterialDatePicker vDatePicker;
 
 
-    // Vars
+    //Var
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private CollectionReference machineEmployeeCol = db.collection("Machine_Employee");
+    private CollectionReference vacationCol = db.collection("Vacation");
+    private CollectionReference projectCol = db.collection("projects");
+    private CollectionReference summaryCOl = db.collection("summary");
+    private DocumentReference employeeOverviewRef = db.collection("EmployeeOverview").document("emp");
+    private Employee employee;
+    private ArrayList<EmployeeOverview> employeeOverviewArrayList;
+    private int currEmpOverviewPos;
     private long hireDate;
 
     public UserFragmentDialog(Employee employee, ArrayList<EmployeeOverview> employeeOverviewArrayList, int currEmpOverviewPos) {
@@ -123,9 +120,6 @@ public class UserFragmentDialog extends DialogFragment {
     }
 
     // Functions
-
-
-
     private void Initialize(View view) {
         vFirstName = view.findViewById(R.id.TextInput_FirstName);
         vSecondName = view.findViewById(R.id.TextInput_SecondName);
@@ -142,7 +136,7 @@ public class UserFragmentDialog extends DialogFragment {
         vHireDateLayout = view.findViewById(R.id.textInputLayout_HireDate);
         vDatePickerBuilder.setTitleText("Hire Date");
         vDatePicker = vDatePickerBuilder.build();
-        vRegister = view.findViewById(R.id.button_register);
+        MaterialButton vRegister = view.findViewById(R.id.button_register);
         vDelete = view.findViewById(R.id.button_delete);
         vUpdate = view.findViewById(R.id.button_update);
 
@@ -176,7 +170,7 @@ public class UserFragmentDialog extends DialogFragment {
                         vCity.getText().toString().isEmpty() ||
                         vStreet.getText().toString().isEmpty() ||
                         vHireDate.getText().toString().isEmpty() ||
-                        vSSN.getText().toString().isEmpty()||
+                        vSSN.getText().toString().isEmpty() ||
                         vSSN.getText().toString().length() != 14);
     }
 
@@ -189,7 +183,8 @@ public class UserFragmentDialog extends DialogFragment {
             for (QueryDocumentSnapshot d : queryDocumentSnapshots) {
                 machineEmployeeCol.document(d.getId()).update("Employee", updatedEmployeeMap);
             }
-            updateVacation(updatedEmployeeMap);
+            //updateVacation(updatedEmployeeMap);
+            updateProjects(updatedEmployeeMap);
         });
     }
 
@@ -198,14 +193,14 @@ public class UserFragmentDialog extends DialogFragment {
             for (QueryDocumentSnapshot d : queryDocumentSnapshots) {
                 vacationCol.document(d.getId()).update("employee", updatedEmployeeMap);
             }
-            updateSummary(updatedEmployeeMap);
+            vacationCol.whereEqualTo("manager.id", employee.getId()).get().addOnSuccessListener(queryDocumentSnapshot -> {
+                for (QueryDocumentSnapshot d : queryDocumentSnapshot) {
+                    vacationCol.document(d.getId()).update("manager", updatedEmployeeMap);
+                }
+                updateSummary(updatedEmployeeMap);
+            });
         });
-        vacationCol.whereEqualTo("manager.id", employee.getId()).get().addOnSuccessListener(queryDocumentSnapshots -> {
-            for (QueryDocumentSnapshot d : queryDocumentSnapshots) {
-                vacationCol.document(d.getId()).update("manager", updatedEmployeeMap);
-            }
-            updateSummary(updatedEmployeeMap);
-        });
+
     }
 
     private void updateSummary(HashMap<String, Object> updatedEmployeeMap) {
@@ -213,20 +208,19 @@ public class UserFragmentDialog extends DialogFragment {
             for (QueryDocumentSnapshot d : queryDocumentSnapshots) {
                 summaryCOl.document(d.getId()).update("Employee", updatedEmployeeMap);
             }
-            updateProjects();
+            Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
+            dismiss();
         });
     }
 
-    private void updateProjects() {
-        EmployeeOverview tempEmp = new EmployeeOverview(vFirstName.getText().toString(), vSecondName.getText().toString(), vTitle.getText().toString(), employee.getId());
+    private void updateProjects(HashMap<String, Object> updatedEmployeeMap) {
+        EmployeeOverview tempEmp = new EmployeeOverview(vFirstName.getText().toString(), vSecondName.getText().toString(), vTitle.getText().toString(), employee.getId(), employee.getProjectID());
         tempEmp.setManagerID(employee.getManagerID());
         employeeOverviewArrayList.set(currEmpOverviewPos, tempEmp);
         if (employee.getProjectID() == null) {
-            Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
-            dismiss();
+            updateVacation(updatedEmployeeMap);
             return;
         }
-        ;
         projectCol.document(employee.getProjectID()).get().addOnSuccessListener(documentSnapshot ->
         {
             Project currProject = documentSnapshot.toObject(Project.class);
@@ -245,8 +239,7 @@ public class UserFragmentDialog extends DialogFragment {
             } else {
                 projectCol.document(employee.getProjectID()).update("employees", temp);
             }
-            Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
-            dismiss();
+            updateVacation(updatedEmployeeMap);
         });
     }
 
@@ -276,7 +269,7 @@ public class UserFragmentDialog extends DialogFragment {
         }
     }
 
-    String convertDateToString(long selection) {
+    private String convertDateToString(long selection) {
         @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(selection);
@@ -328,7 +321,7 @@ public class UserFragmentDialog extends DialogFragment {
     }
 
     // Listeners
-    View.OnClickListener clUpdate = v -> {
+    private View.OnClickListener clUpdate = v -> {
         if (!validateInputs()) {
             Toast.makeText(getActivity(), "please, fill the project data", Toast.LENGTH_SHORT).show();
             return;
@@ -336,26 +329,26 @@ public class UserFragmentDialog extends DialogFragment {
         updateEmployee();
 
     };
-    View.OnClickListener clDelete = v -> {
+    private View.OnClickListener clDelete = v -> {
         deleteEmployee();
     };
 
 
-    View.OnClickListener oclHireDate = new View.OnClickListener() {
+    private View.OnClickListener oclHireDate = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             if (!vDatePicker.isVisible())
                 vDatePicker.show(getFragmentManager(), "DATE_PICKER");
         }
     };
-    MaterialPickerOnPositiveButtonClickListener pclDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
+    private MaterialPickerOnPositiveButtonClickListener pclDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
         @Override
         public void onPositiveButtonClick(Object selection) {
             vHireDate.setText(convertDateToString((long) selection));
             hireDate = (long) selection;
         }
     };
-    TextWatcher twEmail = new TextWatcher() {
+    private TextWatcher twEmail = new TextWatcher() {
         private final Pattern mPattern = Pattern.compile("(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])");
 
         private boolean isValid(CharSequence s) {

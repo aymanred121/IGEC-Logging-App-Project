@@ -30,12 +30,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class UsersFragment extends Fragment {
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
-    DocumentReference employeeOverviewRef = db.collection("EmployeeOverview").document("emp");
-    ArrayList<EmployeeOverview> employees = new ArrayList<>();
-    EmployeeAdapter adapter;
-    RecyclerView recyclerView;
-    RecyclerView.LayoutManager layoutManager;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private DocumentReference employeeOverviewRef = db.collection("EmployeeOverview").document("emp");
+    private ArrayList<EmployeeOverview> employees = new ArrayList<>();
+    private EmployeeAdapter adapter;
+    private RecyclerView recyclerView;
+    private RecyclerView.LayoutManager layoutManager;
 
     @Nullable
     @Override

@@ -36,6 +36,7 @@ import java.util.Base64;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -99,68 +100,29 @@ public class AddUserFragment extends Fragment {
         vDatePicker = vDatePickerBuilder.build();
         vRegister = view.findViewById(R.id.button_register);
 
+        {
+            vFirstName.setText("test");
+            vSecondName.setText("1");
+            vEmail.setText("t@gmail.com");
+            vPassword.setText("1");
+            vTitle.setText("a");
+            vSalary.setText("1");
+            vSSN.setText("11111111111111");
+            vArea.setText("a");
+            vCity.setText("a");
+            vStreet.setText("a");
+            vHireDate.setText(convertDateToString(1000000000));
+        }
+
 
     }
 
-    String convertDateToString(long selection) {
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+    private String convertDateToString(long selection) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(selection);
         return simpleDateFormat.format(calendar.getTime());
     }
-
-    // Listeners
-    View.OnClickListener clRegister = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (validateInputs()) {
-                addEmployee();
-            } else {
-                Toast.makeText(getActivity(), "please, fill the user data", Toast.LENGTH_SHORT).show();
-            }
-        }
-    };
-    View.OnClickListener oclHireDate = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (!vDatePicker.isVisible())
-                vDatePicker.show(getFragmentManager(), "DATE_PICKER");
-        }
-    };
-    MaterialPickerOnPositiveButtonClickListener pclDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
-        @Override
-        public void onPositiveButtonClick(Object selection) {
-            vHireDate.setText(convertDateToString((long) selection));
-            hireDate = (long) selection;
-        }
-    };
-    TextWatcher twEmail = new TextWatcher() {
-        private final Pattern mPattern = Pattern.compile("(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])");
-
-        private boolean isValid(CharSequence s) {
-            return s.toString().equals("") || mPattern.matcher(s).matches();
-        }
-
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
-            if (!isValid(s)) {
-                vEmailLayout.setError("Wrong E-mail form");
-            } else {
-                vEmailLayout.setError(null);
-            }
-        }
-    };
-
 
     void addEmployee() {
         DocumentReference employeeOverviewRef = db.collection("EmployeeOverview").document("emp");
@@ -169,15 +131,15 @@ public class AddUserFragment extends Fragment {
         empInfo.add((vFirstName.getText()).toString());
         empInfo.add((vSecondName.getText()).toString());
         empInfo.add((vTitle.getText()).toString());
-        empInfo.add(null);
-        empInfo.add(null);
+        empInfo.add(null); // ManagerID
+        empInfo.add(null); // ProjectID
         Map<String, Object> empInfoMap = new HashMap<>();
         empInfoMap.put(id, empInfo);
         employeeOverviewRef.update(empInfoMap).addOnFailureListener(e -> employeeOverviewRef.set(empInfoMap));
         Employee newEmployee = fillEmployeeData();
         newEmployee.setId(id);
         db.collection("employees").document(id).set(newEmployee).addOnSuccessListener(unused -> {
-            clearInputs();
+           // clearInputs();
             Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
         });
     }
@@ -204,28 +166,6 @@ public class AddUserFragment extends Fragment {
             Log.e("error in encryption", e.toString());
             return null;
         }
-    }
-
-    void deleteRecord(String collection, String ID) {
-        db.collection(collection).whereEqualTo("id", ID).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-            @Override
-            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                for (DocumentSnapshot ds : queryDocumentSnapshots) {
-                    db.collection("employees").document(ds.getId()).delete();
-
-                }
-            }
-        });
-
-    }
-
-    void updateRecord(String Collection, String id, String field, Object value) {
-        Task updateDB = db.collection(Collection).document(id).update(field, value).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Toast.makeText(getActivity(), "Error while updating record", Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
     void clearInputs() {
@@ -257,6 +197,52 @@ public class AddUserFragment extends Fragment {
                         vSSN.getText().toString().isEmpty() ||
                         vSSN.getText().toString().length() != 14);
     }
+
+    // Listeners
+    View.OnClickListener clRegister = v -> {
+        if (validateInputs()) {
+            addEmployee();
+        } else {
+            Toast.makeText(getActivity(), "please, fill the user data", Toast.LENGTH_SHORT).show();
+        }
+    };
+    View.OnClickListener oclHireDate = v -> {
+        if (!vDatePicker.isVisible())
+            vDatePicker.show(getFragmentManager(), "DATE_PICKER");
+    };
+    MaterialPickerOnPositiveButtonClickListener pclDatePicker = selection -> {
+        vHireDate.setText(convertDateToString((long) selection));
+        hireDate = (long) selection;
+    };
+    TextWatcher twEmail = new TextWatcher() {
+        private final Pattern mPattern = Pattern.compile("(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)])");
+
+        private boolean isValid(CharSequence s) {
+            return s.toString().equals("") || mPattern.matcher(s).matches();
+        }
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            if (!isValid(s)) {
+                vEmailLayout.setError("Wrong E-mail form");
+            } else {
+                vEmailLayout.setError(null);
+            }
+        }
+    };
+
+
+
 
 
 }

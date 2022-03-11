@@ -67,6 +67,7 @@ public class ProjectFragmentDialog extends DialogFragment {
             .document("emp");
     CollectionReference employeeCol = db.collection("employees");
     Project project;
+    private EmployeeOverview selectedManager;
     private Boolean isDeleted = false;
     private String currProjectID;
 
@@ -154,9 +155,11 @@ public class ProjectFragmentDialog extends DialogFragment {
         vManagerName.setText(project.getManagerName());
         vStartTime.setText(convertDateToString(project.getStartDate().getTime()));
         vEndTime.setText(convertDateToString(project.getEstimatedEndDate().getTime()));
-
         vManagerIDLayout.setEnabled(true);
         vManagerID.setEnabled(false);
+        startDate = project.getStartDate().getTime();
+        endDate = project.getEstimatedEndDate().getTime();
+
 
         getEmployees();
 
@@ -171,11 +174,10 @@ public class ProjectFragmentDialog extends DialogFragment {
         return simpleDateFormat.format(calendar.getTime());
     }
 
-    void ChangeSelectedTeam(int position) {
+    private void ChangeSelectedTeam(int position) {
 
-
-        if (!employees.get(position).isSelected) {
-            employees.get(position).setManagerID(vManagerID.getText().toString());
+        employees.get(position).isSelected = !employees.get(position).isSelected;
+        if (employees.get(position).isSelected) {
             employees.get(position).setProjectId(project.getId());
             Team.add(employees.get(position));
             TeamID.add(String.valueOf(employees.get(position).getId()));
@@ -186,7 +188,6 @@ public class ProjectFragmentDialog extends DialogFragment {
                 vManagerID.setText("");
             Team.remove(employees.get(position));
             TeamID.remove(String.valueOf(employees.get(position).getId()));
-            employees.get(position).setManagerID(null);
             employees.get(position).setProjectId(null);
         }
         vManagerIDLayout.setEnabled(Team.size() >= 2);
@@ -198,13 +199,10 @@ public class ProjectFragmentDialog extends DialogFragment {
             vManagerID.setAdapter(idAdapter);
 
         }
-
-        employees.get(position).isSelected = !employees.get(position).isSelected;
         adapter.notifyItemChanged(position);
     }
 
     void getEmployees() {
-//        employees.addAll(project.getEmployees());
         employeeOverviewRef
                 .addSnapshotListener((documentSnapshot, e) -> {
                     if (e != null) {
@@ -220,8 +218,9 @@ public class ProjectFragmentDialog extends DialogFragment {
     }
 
     private void updateEmployeesDetails(String projectID) {
-        currProjectID = projectID;
+
         for (EmployeeOverview empOverview : employees) {
+            currProjectID = projectID;
             ArrayList<String> empInfo = new ArrayList<>();
             if (isDeleted || empOverview.getProjectId() == null) {
                 empOverview.setManagerID(null);
@@ -230,7 +229,7 @@ public class ProjectFragmentDialog extends DialogFragment {
             }
             if (empOverview.getId().equals(vManagerID.getText().toString())) {
                 empOverview.setManagerID("adminID");
-            } else if (empOverview.getProjectId()!= null && empOverview.getProjectId().equals(projectID)){
+            } else if (empOverview.getProjectId() != null && empOverview.getProjectId().equals(projectID)) {
                 empOverview.setManagerID(vManagerID.getText().toString());
             }
             empInfo.add(empOverview.getFirstName());
@@ -246,16 +245,6 @@ public class ProjectFragmentDialog extends DialogFragment {
     }
 
 
-    private void updateTeam() {
-        for (EmployeeOverview emp : Team) {
-            if (emp.getId().equals(vManagerID.getText().toString())) {
-                emp.setManagerID("adminID");
-            } else
-                emp.setManagerID(vManagerID.getText().toString());
-            emp.setProjectId(project.getId());
-        }
-    }
-
     @SuppressLint("NotifyDataSetChanged")
     void retrieveEmployees(Map<String, ArrayList<String>> empMap) {
 
@@ -267,11 +256,13 @@ public class ProjectFragmentDialog extends DialogFragment {
             String projectID = empMap.get(key).get(4);
             String id = (key);
             EmployeeOverview newEmp = new EmployeeOverview(firstName, lastName, title, id, projectID);
-            if (managerID == null) {
+            if (projectID == null) {
                 employees.add(newEmp);
-            } else if (managerID.equals(vManagerID.getText().toString()) || id.equals(vManagerID.getText().toString())) {
-                newEmp.setManagerID(vManagerID.getText().toString());
+            } else if (managerID.equals(project.getManagerID()) || id.equals(project.getManagerID())) {
+                newEmp.setManagerID(id.equals(project.getManagerID()) ? "adminID" : vManagerID.getText().toString());
                 newEmp.isSelected = true;
+                if (id.equals(project.getManagerID()))
+                    selectedManager = newEmp;
                 Team.add(newEmp);
                 employees.add(newEmp);
                 TeamID.add(newEmp.getId());
@@ -295,12 +286,11 @@ public class ProjectFragmentDialog extends DialogFragment {
 
     void updateProject() {
 
-        updateTeam();
         HashMap<String, Object> updatedProjectData = new HashMap<>();
         updatedProjectData.put("estimatedEndDate", new Date(endDate));
         updatedProjectData.put("startDate", new Date(startDate));
         updatedProjectData.put("name", vName.getText().toString());
-        updatedProjectData.put("manager", vManagerName.getText().toString());
+        updatedProjectData.put("managerName", vManagerName.getText().toString());
         updatedProjectData.put("managerID", vManagerID.getText().toString());
         updatedProjectData.put("location", vLocation.getText().toString());
         updateEmployeesDetails(project.getId());
@@ -342,16 +332,26 @@ public class ProjectFragmentDialog extends DialogFragment {
         @Override
         public void afterTextChanged(Editable s) {
             if (vManagerID.getText().length() > 0) {
-                int position = 0;
-                for (int i = 0; i < Team.size(); i++) {
-                    if (String.valueOf(Team.get(i).getId()).equals(s.toString())) {
-                        position = i;
-
+                if (selectedManager == null ||!selectedManager.getId().equals(vManagerID.getText().toString())) {
+                    for (int i = 0; i < Team.size(); i++) {
+                        if (String.valueOf(Team.get(i).getId()).equals(s.toString())) {
+                            selectedManager = Team.get(i);
+                        }
                     }
                 }
-                vManagerName.setText(Team.get(position).getFirstName() + " " + Team.get(position).getLastName());
-            } else
+                vManagerName.setText(String.format("%s %s", selectedManager.getFirstName(), selectedManager.getLastName()));
+            } else {
                 vManagerName.setText(null);
+                selectedManager = null;
+            }
+
+            for (EmployeeOverview emp : Team) {
+                if (!emp.getId().equals(vManagerID.getText().toString())) {
+                    emp.setManagerID(!vManagerID.getText().toString().equals("") ? vManagerID.getText().toString() : null);
+                } else {
+                    emp.setManagerID("adminID");
+                }
+            }
         }
     };
     View.OnClickListener oclStartDate = new View.OnClickListener() {

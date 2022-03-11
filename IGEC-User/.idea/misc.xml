@@ -24,6 +24,8 @@
         <entry key="app/src/main/res/menu/employee_menu.xml" value="0.8" />
         <entry key="app/src/main/res/menu/manager_menu.xml" value="0.19025641025641027" />
         <entry key="app/src/main/res/menu/test.xml" value="0.19025641025641027" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.1075" />
+        <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.1" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/no_response_round.xml" value="0.1" />
         <entry key="app/src/main/res/xml/root_preferences.xml" value="0.22" />
       </map>

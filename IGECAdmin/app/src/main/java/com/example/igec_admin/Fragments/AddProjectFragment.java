@@ -25,6 +25,7 @@ import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Employee;
 import com.example.igec_admin.fireBase.EmployeeOverview;
 import com.example.igec_admin.fireBase.Project;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
@@ -34,6 +35,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.WriteBatch;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -53,19 +55,21 @@ public class AddProjectFragment extends Fragment {
     private EmployeeAdapter adapter;
 
     // Vars
-    String projectID;
-    long startDate, endDate;
-    MaterialDatePicker.Builder<Long> vStartDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
-    MaterialDatePicker vStartDatePicker;
-    MaterialDatePicker.Builder<Long> vEndDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
-    MaterialDatePicker vEndDatePicker;
-    ArrayList<EmployeeOverview> employees = new ArrayList();
-    ArrayList<String> TeamID = new ArrayList<>();
-    ArrayList<EmployeeOverview> Team = new ArrayList<>();
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
-    DocumentReference employeeOverviewRef = db.collection("EmployeeOverview")
+    private EmployeeOverview selectedManager;
+    private String projectID;
+    private long startDate, endDate;
+    private MaterialDatePicker.Builder<Long> vStartDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
+    private MaterialDatePicker vStartDatePicker;
+    private MaterialDatePicker.Builder<Long> vEndDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
+    private MaterialDatePicker vEndDatePicker;
+    private ArrayList<EmployeeOverview> employees = new ArrayList();
+    private ArrayList<String> TeamID = new ArrayList<>();
+    private ArrayList<EmployeeOverview> Team = new ArrayList<>();
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private DocumentReference employeeOverviewRef = db.collection("EmployeeOverview")
             .document("emp");
-    CollectionReference employeeCol = db.collection("employees");
+    private CollectionReference employeeCol = db.collection("employees");
+    private WriteBatch batch = db.batch();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -113,11 +117,10 @@ public class AddProjectFragment extends Fragment {
         getEmployees();
     }
 
-    void ChangeSelectedTeam(int position) {
+    private void ChangeSelectedTeam(int position) {
 
         employees.get(position).isSelected = !employees.get(position).isSelected;
         if (employees.get(position).isSelected) {
-            employees.get(position).setManagerID(vManagerID.getText().toString());
             employees.get(position).setProjectId(projectID);
             Team.add(employees.get(position));
             TeamID.add(String.valueOf(employees.get(position).getId()));
@@ -128,7 +131,6 @@ public class AddProjectFragment extends Fragment {
                 vManagerID.setText("");
             Team.remove(employees.get(position));
             TeamID.remove(String.valueOf(employees.get(position).getId()));
-            employees.get(position).setManagerID(null);
             employees.get(position).setProjectId(null);
         }
         vManagerIDLayout.setEnabled(Team.size() >= 2);
@@ -164,46 +166,28 @@ public class AddProjectFragment extends Fragment {
 
 
     private void updateEmployeesDetails(String projectID) {
-        for (String id : TeamID) {
-            employeeCol.document(id).get().addOnSuccessListener(documentSnapshot -> {
-                Employee emp = documentSnapshot.toObject(Employee.class);
-                ArrayList<String> empInfo = new ArrayList<>();
-                empInfo.add(emp.getFirstName());
-                empInfo.add(emp.getLastName());
-                empInfo.add(emp.getTitle());
-                if (id.equals(vManagerID.getText().toString())) {
-                    empInfo.add("adminID");
-                } else {
-                    empInfo.add(vManagerID.getText().toString());
-                }
-                empInfo.add(projectID);
-                Map<String, Object> empInfoMap = new HashMap<>();
-                empInfoMap.put(id, empInfo);
-                employeeOverviewRef.update(empInfoMap);
-                employeeCol.document(id).update("managerID", empInfo.get(3), "projectID", projectID).addOnSuccessListener(unused -> {
-                    ClearInputs();
-                    Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
-                });
-            });
+        for (EmployeeOverview emp : Team) {
+            ArrayList<String> empInfo = new ArrayList<>();
+            empInfo.add(emp.getFirstName());
+            empInfo.add(emp.getLastName());
+            empInfo.add(emp.getTitle());
+            empInfo.add(emp.getManagerID());
+            empInfo.add(projectID);
+            Map<String, Object> empInfoMap = new HashMap<>();
+            empInfoMap.put(emp.getId(), empInfo);
+            employeeOverviewRef.update(empInfoMap);
+            batch.update(employeeCol.document(emp.getId()), "managerID", empInfo.get(3), "projectID", projectID);
         }
+        batch.commit().addOnSuccessListener(unused -> {
+            ClearInputs();
+            Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
+        });
     }
 
     private void addProject() {
-
-        updateTeam();
         Project newProject = new Project(vManagerName.getText().toString(), vManagerID.getText().toString(), vName.getText().toString(), new Date(startDate), new Date(endDate), Team, vLocation.getText().toString());
         newProject.setId(projectID);
         db.collection("projects").document(projectID).set(newProject).addOnSuccessListener(unused -> updateEmployeesDetails(projectID));
-    }
-
-    private void updateTeam() {
-        for (EmployeeOverview emp : Team) {
-            if (emp.getId().equals(vManagerID.getText().toString())) {
-                emp.setManagerID("adminID");
-            } else
-                emp.setManagerID(vManagerID.getText().toString());
-            emp.setProjectId(projectID);
-        }
     }
 
 
@@ -214,7 +198,6 @@ public class AddProjectFragment extends Fragment {
         return simpleDateFormat.format(calendar.getTime());
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     void retrieveEmployees(Map<String, ArrayList<String>> empMap) {
         employees.clear();
         for (String key : empMap.keySet()) {
@@ -248,11 +231,12 @@ public class AddProjectFragment extends Fragment {
                         vManagerID.getText().toString().isEmpty() ||
                         vManagerName.getText().toString().isEmpty() ||
                         vStartTime.getText().toString().isEmpty() ||
-                        vEndTime.getText().toString().isEmpty());
+                        vEndTime.getText().toString().isEmpty() ||
+                        startDate >= endDate);
     }
 
     // Listeners
-    TextWatcher twManagerID = new TextWatcher() {
+    private TextWatcher twManagerID = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -266,52 +250,62 @@ public class AddProjectFragment extends Fragment {
         @Override
         public void afterTextChanged(Editable s) {
             if (vManagerID.getText().length() > 0) {
-                int position = 0;
-                for (int i = 0; i < Team.size(); i++) {
-                    if (String.valueOf(Team.get(i).getId()).equals(s.toString())) {
-                        position = i;
-
+                if (selectedManager == null || !selectedManager.getId().equals(vManagerID.getText().toString())) {
+                    for (int i = 0; i < Team.size(); i++) {
+                        if (String.valueOf(Team.get(i).getId()).equals(s.toString())) {
+                            selectedManager = Team.get(i);
+                        }
                     }
                 }
-                vManagerName.setText(Team.get(position).getFirstName() + " " + Team.get(position).getLastName());
-            } else
+                vManagerName.setText(String.format("%s %s", selectedManager.getFirstName(), selectedManager.getLastName()));
+            } else {
                 vManagerName.setText(null);
+                selectedManager = null;
+            }
+
+            for (EmployeeOverview emp : Team) {
+                if (!emp.getId().equals(vManagerID.getText().toString())) {
+                    emp.setManagerID(!vManagerID.getText().toString().equals("") ? vManagerID.getText().toString() : null);
+                } else {
+                    emp.setManagerID("adminID");
+                }
+            }
         }
     };
-    View.OnClickListener oclStartDate = new View.OnClickListener() {
+    private View.OnClickListener oclStartDate = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             vStartDatePicker.show(getFragmentManager(), "DATE_PICKER");
         }
     };
-    View.OnClickListener oclEndDate = new View.OnClickListener() {
+    private View.OnClickListener oclEndDate = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             vEndDatePicker.show(getFragmentManager(), "DATE_PICKER");
         }
     };
-    MaterialPickerOnPositiveButtonClickListener pclStartDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
+    private MaterialPickerOnPositiveButtonClickListener pclStartDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
         @Override
         public void onPositiveButtonClick(Object selection) {
             vStartTime.setText(convertDateToString((long) selection));
             startDate = (long) selection;
         }
     };
-    MaterialPickerOnPositiveButtonClickListener pclEndDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
+    private MaterialPickerOnPositiveButtonClickListener pclEndDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
         @Override
         public void onPositiveButtonClick(Object selection) {
             vEndTime.setText(convertDateToString((long) selection));
             endDate = (long) selection;
         }
     };
-    View.OnClickListener clRegister = v -> {
+    private View.OnClickListener clRegister = v -> {
         if (validateInputs()) {
             addProject();
         } else {
             Toast.makeText(getActivity(), "please, fill the project data", Toast.LENGTH_SHORT).show();
         }
     };
-    EmployeeAdapter.OnItemClickListener itclEmployeeAdapter = new EmployeeAdapter.OnItemClickListener() {
+    private EmployeeAdapter.OnItemClickListener itclEmployeeAdapter = new EmployeeAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position) {
             ChangeSelectedTeam(position);

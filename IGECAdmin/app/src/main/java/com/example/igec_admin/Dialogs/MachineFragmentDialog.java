@@ -118,6 +118,7 @@ public class MachineFragmentDialog extends DialogFragment {
 
         vCodeName.setText(machine.getCodeName());
         vID.setText(machine.getId());
+        purchaseDate = machine.getPurchaseDate().getTime();
         vPurchaseDate.setText(convertDateToString(machine.getPurchaseDate().getTime()));
         qrgEncoder = new QRGEncoder(vID.getText().toString(), null, QRGContents.Type.TEXT, 25 * 25);
         try {

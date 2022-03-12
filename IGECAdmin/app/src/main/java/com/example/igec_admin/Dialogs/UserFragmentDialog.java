@@ -155,6 +155,7 @@ public class UserFragmentDialog extends DialogFragment {
         vSalary.setText(String.valueOf(employee.getSalary()));
         vSSN.setText(employee.getSSN());
         vHireDate.setText(convertDateToString(employee.getHireDate().getTime()));
+        hireDate = employee.getHireDate().getTime();
 
     }
 

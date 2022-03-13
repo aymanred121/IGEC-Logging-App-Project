@@ -56,21 +56,21 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/textInputLayout_StartTime"
+        android:id="@+id/textInputLayout_Time"
         style="@style/DatePicker"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
         android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="32dp"
         app:boxBackgroundMode="outline"
         app:helperTextEnabled="true"
-        app:layout_constraintEnd_toStartOf="@+id/textInputLayout_EndTime"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/textInputLayout_Location">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/TextInput_StartTime"
+            android:id="@+id/TextInput_Time"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:enabled="false"
@@ -81,31 +81,31 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/textInputLayout_EndTime"
-        style="@style/DatePicker"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="32dp"
-        app:boxBackgroundMode="outline"
-        app:helperTextEnabled="true"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/textInputLayout_StartTime"
-        app:layout_constraintTop_toBottomOf="@id/textInputLayout_Location">
+<!--    <com.google.android.material.textfield.TextInputLayout-->
+<!--        android:id="@+id/textInputLayout_EndTime"-->
+<!--        style="@style/DatePicker"-->
+<!--        android:layout_width="0dp"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginStart="8dp"-->
+<!--        android:layout_marginTop="8dp"-->
+<!--        android:layout_marginEnd="32dp"-->
+<!--        app:boxBackgroundMode="outline"-->
+<!--        app:helperTextEnabled="true"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintStart_toEndOf="@id/textInputLayout_StartTime"-->
+<!--        app:layout_constraintTop_toBottomOf="@id/textInputLayout_Location">-->
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/TextInput_EndTime"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:enabled="false"
-            android:hint="@string/end_time"
-            android:inputType="date"
-            android:padding="14dp"
-            android:singleLine="true" />
+<!--        <com.google.android.material.textfield.TextInputEditText-->
+<!--            android:id="@+id/TextInput_EndTime"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:enabled="false"-->
+<!--            android:hint="@string/end_time"-->
+<!--            android:inputType="date"-->
+<!--            android:padding="14dp"-->
+<!--            android:singleLine="true" />-->
 
-    </com.google.android.material.textfield.TextInputLayout>
+<!--    </com.google.android.material.textfield.TextInputLayout>-->
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textInputLayout_ManagerID"
@@ -121,7 +121,7 @@
         app:helperTextEnabled="true"
         app:layout_constraintEnd_toStartOf="@+id/textInputLayout_ManagerName"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textInputLayout_StartTime">
+        app:layout_constraintTop_toBottomOf="@id/textInputLayout_Time">
 
         <AutoCompleteTextView
             android:id="@+id/TextInput_ManagerID"
@@ -147,7 +147,7 @@
         app:helperTextEnabled="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/textInputLayout_ManagerID"
-        app:layout_constraintTop_toBottomOf="@id/textInputLayout_EndTime">
+        app:layout_constraintTop_toBottomOf="@id/textInputLayout_Time">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/TextInput_ManagerName"

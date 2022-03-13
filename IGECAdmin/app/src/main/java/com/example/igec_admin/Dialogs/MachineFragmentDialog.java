@@ -106,8 +106,7 @@ public class MachineFragmentDialog extends DialogFragment {
         vID = view.findViewById(R.id.TextInput_MachineID);
         vIDLayout = view.findViewById(R.id.textInputLayout_MachineID);
         vQRImg = view.findViewById(R.id.ImageView_MachineIDIMG);
-        vDatePickerBuilder.setTitleText("Purchase Date");
-        vDatePicker = vDatePickerBuilder.build();
+
 
 
         vRegister.setVisibility(View.GONE);
@@ -120,6 +119,8 @@ public class MachineFragmentDialog extends DialogFragment {
         vID.setText(machine.getId());
         purchaseDate = machine.getPurchaseDate().getTime();
         vPurchaseDate.setText(convertDateToString(machine.getPurchaseDate().getTime()));
+        vDatePickerBuilder.setTitleText("Purchase Date");
+        vDatePicker = vDatePickerBuilder.setSelection(purchaseDate).build();
         qrgEncoder = new QRGEncoder(vID.getText().toString(), null, QRGContents.Type.TEXT, 25 * 25);
         try {
             vQRImg.setImageBitmap(qrgEncoder.encodeAsBitmap());

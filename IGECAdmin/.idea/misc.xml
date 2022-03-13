@@ -12,7 +12,7 @@
         <entry key="app/src/main/res/layout/dropdown_item.xml" value="0.9" />
         <entry key="app/src/main/res/layout/employee_item.xml" value="0.33" />
         <entry key="app/src/main/res/layout/fragment_add_machine.xml" value="0.21" />
-        <entry key="app/src/main/res/layout/fragment_add_project.xml" value="0.21377672209026127" />
+        <entry key="app/src/main/res/layout/fragment_add_project.xml" value="0.33" />
         <entry key="app/src/main/res/layout/fragment_add_user.xml" value="0.21" />
         <entry key="app/src/main/res/layout/fragment_machine.xml" value="0.21" />
         <entry key="app/src/main/res/layout/fragment_machine_info.xml" value="0.1082427536231884" />

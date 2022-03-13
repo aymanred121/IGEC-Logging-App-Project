@@ -73,9 +73,10 @@ public class AddUserFragment extends Fragment {
         initialize(view);
         // Listeners
         vEmail.addTextChangedListener(twEmail);
-        vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);
         vHireDateLayout.setEndIconOnClickListener(oclHireDate);
         vRegister.setOnClickListener(clRegister);
+        vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);
+
 
         return view;
     }
@@ -139,7 +140,7 @@ public class AddUserFragment extends Fragment {
         Employee newEmployee = fillEmployeeData();
         newEmployee.setId(id);
         db.collection("employees").document(id).set(newEmployee).addOnSuccessListener(unused -> {
-           // clearInputs();
+            // clearInputs();
             Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
         });
     }
@@ -206,14 +207,15 @@ public class AddUserFragment extends Fragment {
             Toast.makeText(getActivity(), "please, fill the user data", Toast.LENGTH_SHORT).show();
         }
     };
-    View.OnClickListener oclHireDate = v -> {
-        if (!vDatePicker.isVisible())
-            vDatePicker.show(getFragmentManager(), "DATE_PICKER");
-    };
     MaterialPickerOnPositiveButtonClickListener pclDatePicker = selection -> {
         vHireDate.setText(convertDateToString((long) selection));
         hireDate = (long) selection;
     };
+    View.OnClickListener oclHireDate = v -> {
+
+        vDatePicker.show(getFragmentManager(), "DATE_PICKER");
+    };
+
     TextWatcher twEmail = new TextWatcher() {
         private final Pattern mPattern = Pattern.compile("(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)])");
 
@@ -240,9 +242,6 @@ public class AddUserFragment extends Fragment {
             }
         }
     };
-
-
-
 
 
 }

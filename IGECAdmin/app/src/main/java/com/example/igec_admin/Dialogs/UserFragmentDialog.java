@@ -134,8 +134,6 @@ public class UserFragmentDialog extends DialogFragment {
         vStreet = view.findViewById(R.id.TextInput_Street);
         vHireDate = view.findViewById(R.id.TextInput_HireDate);
         vHireDateLayout = view.findViewById(R.id.textInputLayout_HireDate);
-        vDatePickerBuilder.setTitleText("Hire Date");
-        vDatePicker = vDatePickerBuilder.build();
         MaterialButton vRegister = view.findViewById(R.id.button_register);
         vDelete = view.findViewById(R.id.button_delete);
         vUpdate = view.findViewById(R.id.button_update);
@@ -156,6 +154,8 @@ public class UserFragmentDialog extends DialogFragment {
         vSSN.setText(employee.getSSN());
         vHireDate.setText(convertDateToString(employee.getHireDate().getTime()));
         hireDate = employee.getHireDate().getTime();
+        vDatePickerBuilder.setTitleText("Hire Date");
+        vDatePicker = vDatePickerBuilder.setSelection(hireDate).build();
 
     }
 

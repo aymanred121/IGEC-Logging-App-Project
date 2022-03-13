@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.util.Pair;
 import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -45,20 +46,18 @@ import java.util.Map;
 
 public class ProjectFragmentDialog extends DialogFragment {
     // Views
-    private TextInputEditText vName, vLocation, vStartTime, vEndTime, vManagerName;
+    private TextInputEditText vName, vLocation, vTime, vManagerName;
     private MaterialButton vRegister, vUpdate, vDelete;
     private AutoCompleteTextView vManagerID;
-    private TextInputLayout vManagerIDLayout, vStartTimeLayout, vEndTimeLayout;
+    private TextInputLayout vManagerIDLayout, vTimeLayout;
     private RecyclerView recyclerView;
     private EmployeeAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
 
     // Vars
     long startDate, endDate;
-    MaterialDatePicker.Builder<Long> vStartDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
-    MaterialDatePicker vStartDatePicker;
-    MaterialDatePicker.Builder<Long> vEndDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
-    MaterialDatePicker vEndDatePicker;
+    private MaterialDatePicker.Builder<Pair<Long, Long>> vTimeDatePickerBuilder = MaterialDatePicker.Builder.dateRangePicker();
+    private MaterialDatePicker vTimeDatePicker;
     ArrayList<EmployeeOverview> employees = new ArrayList<>();
     ArrayList<String> TeamID = new ArrayList<>();
     ArrayList<EmployeeOverview> Team = new ArrayList<>();
@@ -107,10 +106,8 @@ public class ProjectFragmentDialog extends DialogFragment {
         vUpdate.setOnClickListener(clUpdate);
         vDelete.setOnClickListener(clDelete);
         vManagerID.addTextChangedListener(twManagerID);
-        vStartDatePicker.addOnPositiveButtonClickListener(pclStartDatePicker);
-        vEndDatePicker.addOnPositiveButtonClickListener(pclEndDatePicker);
-        vStartTimeLayout.setEndIconOnClickListener(oclStartDate);
-        vEndTimeLayout.setEndIconOnClickListener(oclEndDate);
+        vTimeDatePicker.addOnPositiveButtonClickListener(pclTimeDatePicker);
+        vTimeLayout.setEndIconOnClickListener(oclStartDate);
 
 
         // Inflate the layout for this fragment
@@ -121,10 +118,8 @@ public class ProjectFragmentDialog extends DialogFragment {
     private void Initialize(View view) {
         vName = view.findViewById(R.id.TextInput_ProjectName);
         vLocation = view.findViewById(R.id.TextInput_Location);
-        vStartTime = view.findViewById(R.id.TextInput_StartTime);
-        vEndTime = view.findViewById(R.id.TextInput_EndTime);
-        vStartTimeLayout = view.findViewById(R.id.textInputLayout_StartTime);
-        vEndTimeLayout = view.findViewById(R.id.textInputLayout_EndTime);
+        vTime = view.findViewById(R.id.TextInput_Time);
+        vTimeLayout = view.findViewById(R.id.textInputLayout_Time);
         vManagerID = view.findViewById(R.id.TextInput_ManagerID);
         vManagerIDLayout = view.findViewById(R.id.textInputLayout_ManagerID);
         vManagerName = view.findViewById(R.id.TextInput_ManagerName);
@@ -136,10 +131,7 @@ public class ProjectFragmentDialog extends DialogFragment {
         vDelete.setVisibility(View.VISIBLE);
         vUpdate.setVisibility(View.VISIBLE);
 
-        vStartDatePickerBuilder.setTitleText("Start Date");
-        vStartDatePicker = vStartDatePickerBuilder.build();
-        vEndDatePickerBuilder.setTitleText("End Date");
-        vEndDatePicker = vEndDatePickerBuilder.build();
+
         recyclerView = view.findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
@@ -153,12 +145,14 @@ public class ProjectFragmentDialog extends DialogFragment {
         vLocation.setText(project.getLocation());
         vManagerID.setText(project.getManagerID());
         vManagerName.setText(project.getManagerName());
-        vStartTime.setText(convertDateToString(project.getStartDate().getTime()));
-        vEndTime.setText(convertDateToString(project.getEstimatedEndDate().getTime()));
         vManagerIDLayout.setEnabled(true);
         vManagerID.setEnabled(false);
         startDate = project.getStartDate().getTime();
         endDate = project.getEstimatedEndDate().getTime();
+        vTimeDatePickerBuilder.setTitleText("Time");
+        vTimeDatePicker = vTimeDatePickerBuilder.setSelection(new Pair<>(startDate,endDate)).build();
+        vTime.setText(String.format("%s to %s", convertDateToString(startDate), convertDateToString(endDate)));
+
 
 
         getEmployees();
@@ -280,8 +274,7 @@ public class ProjectFragmentDialog extends DialogFragment {
                         vLocation.getText().toString().isEmpty() ||
                         vManagerID.getText().toString().isEmpty() ||
                         vManagerName.getText().toString().isEmpty() ||
-                        vStartTime.getText().toString().isEmpty() ||
-                        vEndTime.getText().toString().isEmpty());
+                        vTime.getText().toString().isEmpty());
     }
 
     void updateProject() {
@@ -332,7 +325,7 @@ public class ProjectFragmentDialog extends DialogFragment {
         @Override
         public void afterTextChanged(Editable s) {
             if (vManagerID.getText().length() > 0) {
-                if (selectedManager == null ||!selectedManager.getId().equals(vManagerID.getText().toString())) {
+                if (selectedManager == null || !selectedManager.getId().equals(vManagerID.getText().toString())) {
                     for (int i = 0; i < Team.size(); i++) {
                         if (String.valueOf(Team.get(i).getId()).equals(s.toString())) {
                             selectedManager = Team.get(i);
@@ -354,30 +347,19 @@ public class ProjectFragmentDialog extends DialogFragment {
             }
         }
     };
+    MaterialPickerOnPositiveButtonClickListener pclTimeDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
+        @Override
+        public void onPositiveButtonClick(Object selection) {
+            Pair<Long, Long> time = (Pair<Long, Long>) selection;
+            vTime.setText(String.format("%s to %s", convertDateToString(time.first), convertDateToString(time.second)));
+            startDate = time.first;
+            endDate = time.second;
+        }
+    };
     View.OnClickListener oclStartDate = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            vStartDatePicker.show(getParentFragmentManager(), "DATE_PICKER");
-        }
-    };
-    View.OnClickListener oclEndDate = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            vEndDatePicker.show(getParentFragmentManager(), "DATE_PICKER");
-        }
-    };
-    MaterialPickerOnPositiveButtonClickListener pclStartDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
-        @Override
-        public void onPositiveButtonClick(Object selection) {
-            vStartTime.setText(convertDateToString((long) selection));
-            startDate = (long) selection;
-        }
-    };
-    MaterialPickerOnPositiveButtonClickListener pclEndDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
-        @Override
-        public void onPositiveButtonClick(Object selection) {
-            vEndTime.setText(convertDateToString((long) selection));
-            endDate = (long) selection;
+            vTimeDatePicker.show(getFragmentManager(), "DATE_PICKER");
         }
     };
     View.OnClickListener clUpdate = v -> {

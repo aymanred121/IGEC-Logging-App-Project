@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">IGEC Admin</string>
+    <string name="app_name">Admin</string>
     <string name="name">Name*</string>
     <string name="location">Location*</string>
     <string name="start_time">Start Time*</string>

@@ -17,9 +17,13 @@ import android.widget.Toast;
 import com.example.igecuser.R;
 import com.example.igecuser.cryptography.RSAUtil;
 import com.example.igecuser.fireBase.Employee;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.gun0912.tedpermission.PermissionListener;
@@ -130,33 +134,33 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             FirebaseFirestore db = FirebaseFirestore.getInstance();
-            db.collection("employees")
-                    .whereEqualTo("email", (vEmail.getText() != null) ? vEmail.getText().toString() : "")
-                    .limit(1)
-                    .get().addOnSuccessListener(queryDocumentSnapshots -> {
-                if (queryDocumentSnapshots.size() == 0) {
-                    Toast.makeText(MainActivity.this, "please enter a valid email or password", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                DocumentSnapshot d = queryDocumentSnapshots.getDocuments().get(0);
-                if (d.exists()) {
-                    Employee currEmployee = d.toObject(Employee.class);
-                    if (currEmployee != null && !isPasswordRight(currEmployee.getPassword())) {
-                        return;
-                    }
-                    Intent intent;
-                    if (currEmployee != null && currEmployee.getManagerID() == null) {
-                        Toast.makeText(MainActivity.this, "you are not assigned to any project", Toast.LENGTH_SHORT).show();
-                        return;
-                    } else if (currEmployee != null && currEmployee.getManagerID().equals("adminID")) {
-                        intent = new Intent(MainActivity.this, ManagerDashboard.class);
-                    } else {
-                        intent = new Intent(MainActivity.this, EmployeeDashboard.class);
-                    }
-                    intent.putExtra("emp", currEmployee);
-                    startActivity(intent);
-                }
-            });
+             FirebaseAuth dbAuth = FirebaseAuth.getInstance();
+             if(vEmail.getText() ==null || vPassword.getText() == null){
+                 Toast.makeText(MainActivity.this, "please enter a valid email or password", Toast.LENGTH_SHORT).show();
+                 return;
+             }
+             dbAuth.signInWithEmailAndPassword(vEmail.getText().toString(),vPassword.getText().toString()).addOnSuccessListener(authResult -> {
+                 db.collection("employees").document(authResult.getUser().getUid())
+                         .get().addOnSuccessListener(d -> {
+                     if (d.exists()) {
+                         Employee currEmployee = d.toObject(Employee.class);
+                         currEmployee.setFirstName(authResult.getUser().getDisplayName());
+                         Intent intent;
+                         if (currEmployee != null && currEmployee.getManagerID() == null) {
+                             Toast.makeText(MainActivity.this, "you are not assigned to any project", Toast.LENGTH_SHORT).show();
+                             return;
+                         } else if (currEmployee != null && currEmployee.getManagerID().equals("adminID")) {
+                             intent = new Intent(MainActivity.this, ManagerDashboard.class);
+                         } else {
+                             intent = new Intent(MainActivity.this, EmployeeDashboard.class);
+                         }
+                         intent.putExtra("emp", currEmployee);
+                         startActivity(intent);
+                     }
+                 });
+
+             }).addOnFailureListener(e -> Toast.makeText(MainActivity.this, "please enter a valid email or password", Toast.LENGTH_SHORT).show());
+
         }
 
 

@@ -25,6 +25,10 @@ import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -64,6 +68,7 @@ public class AddUserFragment extends Fragment {
     // Vars
     long hireDate;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private FirebaseAuth dbAuth = FirebaseAuth.getInstance();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -126,38 +131,42 @@ public class AddUserFragment extends Fragment {
     }
 
     void addEmployee() {
-        DocumentReference employeeOverviewRef = db.collection("EmployeeOverview").document("emp");
-        String id = db.collection("EmployeeOverview").document().getId().substring(0, 5);
-        ArrayList<String> empInfo = new ArrayList<>();
-        empInfo.add((vFirstName.getText()).toString());
-        empInfo.add((vSecondName.getText()).toString());
-        empInfo.add((vTitle.getText()).toString());
-        empInfo.add(null); // ManagerID
-        empInfo.add(null); // ProjectID
-        Map<String, Object> empInfoMap = new HashMap<>();
-        empInfoMap.put(id, empInfo);
-        employeeOverviewRef.update(empInfoMap).addOnFailureListener(e -> employeeOverviewRef.set(empInfoMap));
         Employee newEmployee = fillEmployeeData();
-        newEmployee.setId(id);
-        db.collection("employees").document(id).set(newEmployee).addOnSuccessListener(unused -> {
-            // clearInputs();
-            Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
-        });
+        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                .setDisplayName(vFirstName.getText().toString() + " "+vSecondName.getText().toString())
+                .build();
+        dbAuth.createUserWithEmailAndPassword(vEmail.getText().toString(),vPassword.getText().toString()).addOnSuccessListener(authResult -> {
+            FirebaseUser user = dbAuth.getCurrentUser();
+            user.updateProfile(profileUpdates);
+            String id =  user.getUid();
+            DocumentReference employeeOverviewRef = db.collection("EmployeeOverview").document("emp");
+            ArrayList<String> empInfo = new ArrayList<>();
+            empInfo.add((vFirstName.getText()).toString());
+            empInfo.add((vSecondName.getText()).toString());
+            empInfo.add((vTitle.getText()).toString());
+            empInfo.add(null); // ManagerID
+            empInfo.add(null); // ProjectID
+            Map<String, Object> empInfoMap = new HashMap<>();
+            empInfoMap.put(id, empInfo);
+            employeeOverviewRef.update(empInfoMap).addOnFailureListener(e -> employeeOverviewRef.set(empInfoMap));
+            newEmployee.setId(id);
+            db.collection("employees").document(id).set(newEmployee).addOnSuccessListener(unused -> {
+                // clearInputs();
+                Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
+            });
+        }).addOnFailureListener(e -> Toast.makeText(getActivity(), "this Email is already exist", Toast.LENGTH_SHORT).show());
+
     }
 
     private Employee fillEmployeeData() {
         return new Employee(
-                (vFirstName.getText()).toString(),
-                (vSecondName.getText()).toString(),
                 (vTitle.getText()).toString(),
                 (vArea.getText()).toString(),
                 (vCity.getText()).toString(),
                 (vStreet.getText()).toString(),
                 Double.parseDouble(vSalary.getText().toString()),
                 ((vSSN.getText()).toString()),
-                new Date(hireDate),
-                vEmail.getText().toString(),
-                encryptedPassword());
+                new Date(hireDate));
     }
 
     private String encryptedPassword() {

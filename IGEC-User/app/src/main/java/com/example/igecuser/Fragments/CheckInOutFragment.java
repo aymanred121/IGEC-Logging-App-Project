@@ -27,6 +27,8 @@ import com.example.igecuser.fireBase.Summary;
 import com.example.igecuser.Activities.qrCameraActivity;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.time.LocalDate;

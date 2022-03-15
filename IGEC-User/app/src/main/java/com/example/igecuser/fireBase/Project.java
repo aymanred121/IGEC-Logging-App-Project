@@ -4,6 +4,7 @@ import com.google.firebase.database.Exclude;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 public class Project {
@@ -11,12 +12,21 @@ public class Project {
     private String managerName;
     private String name;
     private Date startDate, estimatedEndDate;
-  private ArrayList<EmployeeOverview>  employees;
+    private ArrayList<EmployeeOverview>  employees;
     private String location;
+    private HashMap<String,Object> employeeWorkedTime = new HashMap<>();
     public Project() {
     }
 
-    public Project(String managerName,String managerID, String name, Date startDate, Date estimatedEndDate, ArrayList<EmployeeOverview> employees,String location) {
+    public HashMap<String, Object> getEmployeeWorkedTime() {
+        return employeeWorkedTime;
+    }
+
+    public void setEmployeeWorkedTime(HashMap<String, Object> employeeWorkedTime) {
+        this.employeeWorkedTime = employeeWorkedTime;
+    }
+
+    public Project(String managerName, String managerID, String name, Date startDate, Date estimatedEndDate, ArrayList<EmployeeOverview> employees, String location) {
         this.managerID = managerID;
         this.name = name;
         this.startDate = startDate;

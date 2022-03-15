@@ -12,6 +12,7 @@ import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Project;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectViewHolder> {
     private ArrayList<Project> projectsList;
@@ -69,11 +70,21 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectV
             holder.vName.setText(project.getName());
             holder.vNEmployee.setText("# Employee: "+(project.getEmployees().size()));
             holder.vNMachine.setText("# Machine: ");
-            holder.vNHEmployee.setText("# Hours by Employee: ");
+            holder.vNHEmployee.setText("# Hours by Employee: "+ projectWorkingHours(project));
             holder.vNHMachine.setText("# Hours by Machine: ");
 
 
     }
+
+    private long projectWorkingHours(Project project) {
+        long seconds = 0;
+        HashMap<String,Object> workingHoursMap = project.getEmployeeWorkedTime();
+        for( String key : workingHoursMap.keySet()){
+            seconds+= (long)workingHoursMap.get(key);
+        }
+        return seconds/3600;
+    }
+
 
     public ArrayList<Project> getProjectsList() {
         return projectsList;

@@ -174,6 +174,11 @@ public class CheckInOutFragment extends Fragment {
                             long workingTime = (checkOutTime - checkInTime)*1000;
                             currEmpSummary.setWorkedTime(workingTime);
                             db.collection("summary").document(id).set(currEmpSummary);
+                            db.collection("projects").document(currEmployee.getProjectID())
+                                    .update("employeeWorkedTime",new HashMap<String,Object>(){{
+                                        put(currEmployee.getId(),workingTime);
+                                    }});
+
                         });
 
                     })

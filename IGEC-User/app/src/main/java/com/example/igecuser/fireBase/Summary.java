@@ -2,6 +2,8 @@ package com.example.igecuser.fireBase;
 
 import com.firebase.geofire.GeoFireUtils;
 import com.firebase.geofire.GeoLocation;
+import com.google.firebase.Timestamp;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.firestore.Exclude;
 import com.google.firebase.firestore.FieldValue;
 
@@ -13,9 +15,35 @@ import java.util.Objects;
 public class Summary {
     @Exclude private double lat,lng;
     @Exclude private String geoHash;
-    private Map<String,Object> geoMap = new HashMap<>();
-    private FieldValue time= FieldValue.serverTimestamp();
+    @Exclude private HashMap<String,Object> geoMap = new HashMap<>();
+     private HashMap<String, Object> checkIn;
+     private HashMap<String,Object> checkOut;
+    private Object workedTime;
+    private Employee employee;
 
+    public Employee getEmployee() {
+        return employee;
+    }
+
+    public void setEmployee(Employee employee) {
+        this.employee = employee;
+    }
+
+     public HashMap<String,  Object> getCheckIn() {
+        return checkIn;
+    }
+
+    public void setCheckIn(HashMap<String,  Object> checkIn) {
+        this.checkIn = checkIn;
+    }
+
+      public HashMap<String,  Object> getCheckOut() {
+        return checkOut;
+    }
+
+      public void setCheckOut(HashMap<String,  Object> checkOut) {
+        this.checkOut = checkOut;
+    }
 
     public Summary() {
     }
@@ -28,15 +56,6 @@ public class Summary {
         geoMap.put("lat", lat);
         geoMap.put("lng", lng);
     }
-
-    public FieldValue getTime() {
-        return time;
-    }
-
-    public void setTime(FieldValue time) {
-        this.time = time;
-    }
-
     @Exclude
     public double getLat() {
         return lat;
@@ -61,10 +80,20 @@ public class Summary {
     public void setGeoHash(String geoHash) {
         this.geoHash = geoHash;
     }
-    public Map<String, Object> getGeoMap() {
+    @Exclude
+    public HashMap<String, Object> getGeoMap() {
         return geoMap;
     }
-    public void setGeoMap(Map<String, Object> geoMap) {
+    @Exclude
+    public void setGeoMap(HashMap<String, Object> geoMap) {
         this.geoMap = geoMap;
+    }
+
+    public Object getWorkedTime() {
+        return workedTime;
+    }
+
+    public void setWorkedTime(Object workedTime) {
+        this.workedTime = workedTime;
     }
 }

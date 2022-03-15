@@ -14,6 +14,7 @@ import android.os.Bundle;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
+import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,13 +26,20 @@ import com.example.igecuser.fireBase.Employee;
 import com.example.igecuser.fireBase.Machine;
 import com.example.igecuser.fireBase.Summary;
 import com.example.igecuser.Activities.qrCameraActivity;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.time.LocalDate;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class CheckInOutFragment extends Fragment {
@@ -139,7 +147,7 @@ public class CheckInOutFragment extends Fragment {
 
 
     // Listeners
-    private View.OnClickListener oclCheckInOut = new View.OnClickListener() {
+    private final View.OnClickListener oclCheckInOut = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             Location location = getLocation();
@@ -150,17 +158,31 @@ public class CheckInOutFragment extends Fragment {
             longitude = location.getLongitude();
             latitude = location.getLatitude();
 
-            Map<String, Object> checkOut = new HashMap<>();
-            checkOut.put("Employee", currEmployee);
-            checkOut.put("Check Out", new Summary(latitude, longitude));
+           HashMap<String,Object> checkOut = new HashMap<>();
+            Summary summary = new Summary(latitude, longitude);
+            HashMap<String, Object> checkOutDetails = new HashMap<>(summary.getGeoMap());
+            checkOutDetails.put("Time",Timestamp.now());
+            checkOut.put("checkOut",checkOutDetails);
+            checkOut.put("employee",currEmployee);
             db.collection("summary").document(id).update(checkOut)
                     .addOnSuccessListener(unused -> {
                         Toast.makeText(getContext(), "Checked Out successfully!", Toast.LENGTH_SHORT).show();
+                        db.collection("summary").document(id).get().addOnSuccessListener(documentSnapshot -> {
+                            Summary currEmpSummary = documentSnapshot.toObject(Summary.class);
+                            long checkInTime = ((Timestamp)currEmpSummary.getCheckIn().get("Time")).getSeconds();
+                            long checkOutTime =((Timestamp)currEmpSummary.getCheckOut().get("Time")).getSeconds();
+                            long workingTime = (checkOutTime - checkInTime)*1000;
+                            currEmpSummary.setWorkedTime(workingTime);
+                            db.collection("summary").document(id).set(currEmpSummary);
+                        });
+
                     })
                     .addOnFailureListener(e -> {
-                        Map<String, Object> checkIn = new HashMap<>();
-                        checkIn.put("Employee", currEmployee);
-                        checkIn.put("Check In", new Summary(latitude, longitude));
+                        HashMap<String, Object> checkInDetails = new HashMap<>(summary.getGeoMap());
+                        checkInDetails.put("Time",Timestamp.now());
+                        HashMap<String, Object> checkIn = new HashMap<>();
+                        checkIn.put("checkIn",checkInDetails);
+                        checkIn.put("employee",currEmployee);
                         db.collection("summary").document(id).set(checkIn);
                         Toast.makeText(getContext(), "Checked In successfully!", Toast.LENGTH_SHORT).show();
                     });

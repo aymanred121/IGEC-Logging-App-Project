@@ -164,33 +164,35 @@ public class CheckInOutFragment extends Fragment {
             checkOutDetails.put("Time",Timestamp.now());
             checkOut.put("checkOut",checkOutDetails);
             checkOut.put("employee",currEmployee);
-            db.collection("summary").document(id).update(checkOut)
-                    .addOnSuccessListener(unused -> {
-                        Toast.makeText(getContext(), "Checked Out successfully!", Toast.LENGTH_SHORT).show();
-                        db.collection("summary").document(id).get().addOnSuccessListener(documentSnapshot -> {
-                            Summary currEmpSummary = documentSnapshot.toObject(Summary.class);
-                            long checkInTime = ((Timestamp)currEmpSummary.getCheckIn().get("Time")).getSeconds();
-                            long checkOutTime =((Timestamp)currEmpSummary.getCheckOut().get("Time")).getSeconds();
-                            long workingTime = (checkOutTime - checkInTime)*1000;
-                            currEmpSummary.setWorkedTime(workingTime);
-                            db.collection("summary").document(id).set(currEmpSummary);
-                            db.collection("projects").document(currEmployee.getProjectID())
-                                    .update("employeeWorkedTime",new HashMap<String,Object>(){{
-                                        put(currEmployee.getId(),workingTime);
-                                    }});
+            db.collection("summary").document(id).get().addOnSuccessListener(documentSnapshot -> {
+                if(!documentSnapshot.exists()){
+                    HashMap<String, Object> checkInDetails = new HashMap<>(summary.getGeoMap());
+                    checkInDetails.put("Time",Timestamp.now());
+                    HashMap<String, Object> checkIn = new HashMap<>();
+                    checkIn.put("checkIn",checkInDetails);
+                    checkIn.put("employee",currEmployee);
+                    db.collection("summary").document(id).set(checkIn);
+                    Toast.makeText(getContext(), "Checked In successfully!", Toast.LENGTH_SHORT).show();
+                }else {
 
-                        });
+                    Summary currEmpSummary = documentSnapshot.toObject(Summary.class);
+                    if (currEmpSummary.getWorkedTime() == null) {
+                        db.collection("summary").document(id).update(checkOut)
+                                .addOnSuccessListener(unused -> {
+                                    Toast.makeText(getContext(), "Checked Out successfully!", Toast.LENGTH_SHORT).show();
+                                    long checkInTime = ((Timestamp) currEmpSummary.getCheckIn().get("Time")).getSeconds();
+                                    long checkOutTime = Timestamp.now().getSeconds();
+                                    long workingTime = (checkOutTime - checkInTime) * 1000;
+                                    currEmpSummary.setWorkedTime(workingTime);
+                                    db.collection("summary").document(id).set(currEmpSummary);
+                                    db.collection("projects").document(currEmployee.getProjectID())
+                                            .update("employeeWorkedTime."+currEmployee.getId(), FieldValue.increment(workingTime));
 
-                    })
-                    .addOnFailureListener(e -> {
-                        HashMap<String, Object> checkInDetails = new HashMap<>(summary.getGeoMap());
-                        checkInDetails.put("Time",Timestamp.now());
-                        HashMap<String, Object> checkIn = new HashMap<>();
-                        checkIn.put("checkIn",checkInDetails);
-                        checkIn.put("employee",currEmployee);
-                        db.collection("summary").document(id).set(checkIn);
-                        Toast.makeText(getContext(), "Checked In successfully!", Toast.LENGTH_SHORT).show();
-                    });
+                                });
+                    } else {
+                        Toast.makeText(getActivity(), "You've been checked Out already!", Toast.LENGTH_SHORT).show();
+                    }
+                }});
             isIn = !isIn;
             vCheckInOut.setBackgroundColor((isIn) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
             vCheckInOut.setText(isIn ? "Out" : "In");

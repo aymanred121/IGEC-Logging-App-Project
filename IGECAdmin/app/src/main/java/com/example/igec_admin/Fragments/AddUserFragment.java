@@ -101,20 +101,20 @@ public class AddUserFragment extends Fragment {
         vDatePicker = vDatePickerBuilder.build();
         vRegister = view.findViewById(R.id.button_register);
 
-        {
-            vFirstName.setText("test");
-            vSecondName.setText("1");
-            vEmail.setText("t@gmail.com");
-            vPassword.setText("1");
-            vTitle.setText("a");
-            vSalary.setText("1");
-            vSSN.setText("11111111111111");
-            vArea.setText("a");
-            vCity.setText("a");
-            vStreet.setText("a");
-            vHireDate.setText(convertDateToString(1000000000));
-        }
-
+//        {
+//            vFirstName.setText("test");
+//            vSecondName.setText("1");
+//            vEmail.setText("t@gmail.com");
+//            vPassword.setText("1");
+//            vTitle.setText("a");
+//            vSalary.setText("1");
+//            vSSN.setText("11111111111111");
+//            vArea.setText("a");
+//            vCity.setText("a");
+//            vStreet.setText("a");
+//            vHireDate.setText(convertDateToString(1000000000));
+//        }
+//
 
     }
 
@@ -140,7 +140,7 @@ public class AddUserFragment extends Fragment {
         Employee newEmployee = fillEmployeeData();
         newEmployee.setId(id);
         db.collection("employees").document(id).set(newEmployee).addOnSuccessListener(unused -> {
-            // clearInputs();
+            clearInputs();
             Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
         });
     }

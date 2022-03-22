@@ -69,9 +69,9 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectV
 
             holder.vName.setText(project.getName());
             holder.vNEmployee.setText("# Employee: "+(project.getEmployees().size()));
-            holder.vNMachine.setText("# Machine: ");
+           // holder.vNMachine.setText("# Machine: ");
             holder.vNHEmployee.setText("# Hours by Employee: "+ projectWorkingHours(project));
-            holder.vNHMachine.setText("# Hours by Machine: ");
+            //holder.vNHMachine.setText("# Hours by Machine: ");
 
 
     }

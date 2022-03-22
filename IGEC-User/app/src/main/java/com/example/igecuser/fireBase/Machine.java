@@ -1,9 +1,10 @@
 package com.example.igecuser.fireBase;
 
-import androidx.annotation.Nullable;
+import java.util.Date;
 
 public class Machine {
-    private String id,codeName,buyingDate;
+    private String id,codeName;
+    private Date purchaseDate;
 
     public Machine() {
     }
@@ -24,18 +25,18 @@ public class Machine {
         this.codeName = codeName;
     }
 
-    public String getBuyingDate() {
-        return buyingDate;
+    public Date getPurchaseDate() {
+        return purchaseDate;
     }
 
-    public void setBuyingDate(String buyingDate) {
-        this.buyingDate = buyingDate;
+    public void setPurchaseDate(Date purchaseDate) {
+        this.purchaseDate = purchaseDate;
     }
 
-    public Machine(String id, String codeName, String buyingDate) {
+    public Machine(String id, String codeName, Date purchaseDate) {
         this.id = id;
         this.codeName = codeName;
-        this.buyingDate = buyingDate;
+        this.purchaseDate = purchaseDate;
     }
 
 

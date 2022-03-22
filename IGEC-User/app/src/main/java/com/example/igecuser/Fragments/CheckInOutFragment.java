@@ -24,6 +24,7 @@ import android.widget.Toast;
 import com.example.igecuser.R;
 import com.example.igecuser.fireBase.Employee;
 import com.example.igecuser.fireBase.Machine;
+import com.example.igecuser.fireBase.Machine_Employee;
 import com.example.igecuser.fireBase.Summary;
 import com.example.igecuser.Activities.qrCameraActivity;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -117,26 +118,40 @@ public class CheckInOutFragment extends Fragment {
 
                     longitude = location.getLongitude();
                     latitude = location.getLatitude();
-
                     db.collection("machine").document(machineID).addSnapshotListener((value, error) -> {
                         currMachine = value.toObject(Machine.class);
-                        Summary machineCheckOut = new Summary(latitude, longitude);
-                        Map<String, Object> machineEmployee = new HashMap();
-                        machineEmployee.put("Machine", currMachine);
-                        machineEmployee.put("Employee", currEmployee);
-                        machineEmployee.put("check Out", machineCheckOut);
-                        db.collection("Machine_Employee").document(LocalDate.now().toString() + currEmployee.getId() + currMachine.getId()).update(machineEmployee)
-                                .addOnSuccessListener(unused -> Toast.makeText(getContext(), "Machine: " + currMachine.getCodeName() + " checked In successfully", Toast.LENGTH_SHORT).show())
-                                .addOnFailureListener(e -> {
-                                    Summary machineCheckIn = new Summary(latitude, longitude);
-                                    Map<String, Object> machineEmployee1 = new HashMap();
-                                    machineEmployee1.put("Machine", currMachine);
-                                    machineEmployee1.put("Employee", currEmployee);
-                                    machineEmployee1.put("check In", machineCheckIn);
-                                    db.collection("Machine_Employee").document(LocalDate.now().toString() + currEmployee.getId() + currMachine.getId()).set(machineEmployee1);
-                                    Toast.makeText(getContext(), "Machine: " + currMachine.getCodeName() + " checked Out successfully", Toast.LENGTH_SHORT).show();
-                                });
-                    });
+                        String machineEmpId =  id+machineID;
+                        db.collection("Machine_Employee").document(machineEmpId).get().addOnSuccessListener(documentSnapshot -> {
+                            if(!documentSnapshot.exists()){
+                                HashMap<String, Object> checkInDetails = new HashMap<>((new Summary(latitude,longitude)).getGeoMap());
+                                checkInDetails.put("Time",Timestamp.now());
+                                Map<String, Object> machineEmployee1 = new HashMap();
+                                machineEmployee1.put("machine", currMachine);
+                                machineEmployee1.put("employee", currEmployee);
+                                machineEmployee1.put("checkIn", checkInDetails);
+                                db.collection("Machine_Employee").document(machineEmpId).set(machineEmployee1);
+                                Toast.makeText(getContext(), "Machine: " + currMachine.getCodeName() + " checked In successfully", Toast.LENGTH_SHORT).show();
+
+                            }else{
+                                Machine_Employee currMachineEmployee = documentSnapshot.toObject(Machine_Employee.class);
+                                HashMap<String, Object> checkOutDetails = new HashMap<>((new Summary(latitude,longitude)).getGeoMap());
+                                checkOutDetails.put("Time",Timestamp.now());
+                                if(currMachineEmployee.getWorkedTime() == null){
+                                    long checkInTime = ((Timestamp) currMachineEmployee.getCheckIn().get("Time")).getSeconds();
+                                    long checkOutTime = Timestamp.now().getSeconds();
+                                    long workingTime = (checkOutTime - checkInTime);
+                                    currMachineEmployee.setWorkedTime(workingTime);
+                                    currMachineEmployee.setCheckOut(checkOutDetails);
+                                    db.collection("Machine_Employee").document(machineEmpId).set(currMachineEmployee)
+                                            .addOnSuccessListener(unused -> Toast.makeText(getContext(), "Machine: " + currMachine.getCodeName() + " checked Out successfully", Toast.LENGTH_SHORT).show());
+
+                                }else{
+                                    Toast.makeText(getActivity(), "this Machine Already checked Out", Toast.LENGTH_SHORT).show();
+                                }
+
+                            }
+                        });
+                      });
 
                 } catch (Exception e) {
                     Toast.makeText(getContext(), "invalid Machine ID", Toast.LENGTH_SHORT).show();
@@ -182,7 +197,7 @@ public class CheckInOutFragment extends Fragment {
                                     Toast.makeText(getContext(), "Checked Out successfully!", Toast.LENGTH_SHORT).show();
                                     long checkInTime = ((Timestamp) currEmpSummary.getCheckIn().get("Time")).getSeconds();
                                     long checkOutTime = Timestamp.now().getSeconds();
-                                    long workingTime = (checkOutTime - checkInTime) * 1000;
+                                    long workingTime = (checkOutTime - checkInTime);
                                     currEmpSummary.setWorkedTime(workingTime);
                                     db.collection("summary").document(id).set(currEmpSummary);
                                     db.collection("projects").document(currEmployee.getProjectID())

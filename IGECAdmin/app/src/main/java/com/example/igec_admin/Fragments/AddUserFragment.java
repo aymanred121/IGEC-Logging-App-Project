@@ -126,24 +126,33 @@ public class AddUserFragment extends Fragment {
     }
 
     void addEmployee() {
-        DocumentReference employeeOverviewRef = db.collection("EmployeeOverview").document("emp");
-        String id = db.collection("EmployeeOverview").document().getId().substring(0, 5);
-        ArrayList<String> empInfo = new ArrayList<>();
-        empInfo.add((vFirstName.getText()).toString());
-        empInfo.add((vSecondName.getText()).toString());
-        empInfo.add((vTitle.getText()).toString());
-        empInfo.add(null); // ManagerID
-        empInfo.add(null); // ProjectID
-        Map<String, Object> empInfoMap = new HashMap<>();
-        empInfoMap.put(id, empInfo);
-        employeeOverviewRef.update(empInfoMap).addOnFailureListener(e -> employeeOverviewRef.set(empInfoMap));
-        Employee newEmployee = fillEmployeeData();
-        newEmployee.setId(id);
-        db.collection("employees").document(id).set(newEmployee).addOnSuccessListener(unused -> {
-            clearInputs();
-            Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
+        db.collection("employees").whereEqualTo("email",vEmail.getText().toString()).get().addOnSuccessListener(documents ->{
+            if(documents.getDocuments().size()!=0){
+                Toast.makeText(getActivity(), "this Email is already exist", Toast.LENGTH_SHORT).show();
+                return;
+            }else{
+                DocumentReference employeeOverviewRef = db.collection("EmployeeOverview").document("emp");
+                String id = db.collection("EmployeeOverview").document().getId().substring(0, 5);
+
+                ArrayList<String> empInfo = new ArrayList<>();
+                empInfo.add((vFirstName.getText()).toString());
+                empInfo.add((vSecondName.getText()).toString());
+                empInfo.add((vTitle.getText()).toString());
+                empInfo.add(null); // ManagerID
+                empInfo.add(null); // ProjectID
+                Map<String, Object> empInfoMap = new HashMap<>();
+                empInfoMap.put(id, empInfo);
+                employeeOverviewRef.update(empInfoMap).addOnFailureListener(e -> employeeOverviewRef.set(empInfoMap));
+                Employee newEmployee = fillEmployeeData();
+                newEmployee.setId(id);
+                db.collection("employees").document(id).set(newEmployee).addOnSuccessListener(unused -> {
+                    clearInputs();
+                    Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
+                });
+
+            }
         });
-    }
+       }
 
     private Employee fillEmployeeData() {
         return new Employee(

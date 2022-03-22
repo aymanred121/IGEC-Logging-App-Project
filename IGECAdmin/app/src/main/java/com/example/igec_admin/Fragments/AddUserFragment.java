@@ -126,7 +126,7 @@ public class AddUserFragment extends Fragment {
     }
 
     void addEmployee() {
-        db.collection("employees").whereEqualTo("email",vEmail.getText().toString()).get().addOnSuccessListener(documents ->{
+        db.collection("employees").whereEqualTo("email",vEmail.getText().toString().trim()).get().addOnSuccessListener(documents ->{
             if(documents.getDocuments().size()!=0){
                 Toast.makeText(getActivity(), "this Email is already exist", Toast.LENGTH_SHORT).show();
                 return;
@@ -165,7 +165,7 @@ public class AddUserFragment extends Fragment {
                 Double.parseDouble(vSalary.getText().toString()),
                 ((vSSN.getText()).toString()),
                 new Date(hireDate),
-                vEmail.getText().toString(),
+                vEmail.getText().toString().trim(),
                 encryptedPassword());
     }
 
@@ -244,7 +244,7 @@ public class AddUserFragment extends Fragment {
 
         @Override
         public void afterTextChanged(Editable s) {
-            if (!isValid(s)) {
+            if (!isValid(s.toString().trim())) {
                 vEmailLayout.setError("Wrong E-mail form");
             } else {
                 vEmailLayout.setError(null);

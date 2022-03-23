@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 
 import com.example.igecuser.Adapters.ViewPagerAdapter;
+import com.example.igecuser.Fragments.ChangePassword;
 import com.example.igecuser.Fragments.CheckInOutFragment;
 import com.example.igecuser.Fragments.VacationRequestFragment;
 import com.example.igecuser.Fragments.VacationsLogFragment;
@@ -61,6 +62,8 @@ public class EmployeeDashboard extends AppCompatActivity implements NavigationVi
             viewPager.setCurrentItem(1);
         else if (R.id.item_VacationsLog == item.getItemId())
             viewPager.setCurrentItem(2);
+        else if (R.id.item_ChangePassword == item.getItemId())
+            viewPager.setCurrentItem(3);
 
         vDrawerLayout.closeDrawer(GravityCompat.START);
         return true;
@@ -95,10 +98,12 @@ public class EmployeeDashboard extends AppCompatActivity implements NavigationVi
         CheckInOutFragment checkInOutFragment = new CheckInOutFragment(currEmployee);
         VacationRequestFragment vacationRequestFragment = new VacationRequestFragment(currEmployee);
         VacationsLogFragment vacationsLogFragment = new VacationsLogFragment(true, currEmployee);
+        ChangePassword changePassword = new ChangePassword();
         ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), 0);
         viewPagerAdapter.addFragment(checkInOutFragment, getString(R.string.check_in_out));
         viewPagerAdapter.addFragment(vacationRequestFragment, getString(R.string.vacation_request));
         viewPagerAdapter.addFragment(vacationsLogFragment, getString(R.string.vacations_log));
+        viewPagerAdapter.addFragment(changePassword, getString(R.string.change_password));
         viewPager.setAdapter(viewPagerAdapter);
     }
 

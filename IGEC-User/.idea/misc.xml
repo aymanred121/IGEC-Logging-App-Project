@@ -23,11 +23,12 @@
         <entry key="app/src/main/res/layout/fragment_client_info.xml" value="0.16" />
         <entry key="app/src/main/res/layout/fragment_fullscreen.xml" value="0.10144927536231885" />
         <entry key="app/src/main/res/layout/fragment_machine_check_in_out_dialog.xml" value="0.15" />
-        <entry key="app/src/main/res/layout/fragment_supplements.xml" value="0.10144927536231885" />
+        <entry key="app/src/main/res/layout/fragment_supplements.xml" value="0.22" />
         <entry key="app/src/main/res/layout/fragment_vacation_request.xml" value="0.33" />
         <entry key="app/src/main/res/layout/fragment_vacation_requests.xml" value="0.25" />
         <entry key="app/src/main/res/layout/fragment_vacations_log.xml" value="0.2" />
         <entry key="app/src/main/res/layout/nav_header.xml" value="0.33" />
+        <entry key="app/src/main/res/layout/supplement_item.xml" value="0.22" />
         <entry key="app/src/main/res/layout/vacation_request.xml" value="0.10144927536231885" />
         <entry key="app/src/main/res/layout/vacation_request_item.xml" value="0.2" />
         <entry key="app/src/main/res/menu/activity_main_drawer.xml" value="0.19025641025641027" />

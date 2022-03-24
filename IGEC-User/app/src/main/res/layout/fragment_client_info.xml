@@ -13,7 +13,6 @@
         android:layout_marginStart="32dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="32dp"
-        android:enabled="true"
         app:boxBackgroundMode="outline"
         app:helperTextEnabled="true">
 
@@ -22,7 +21,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="top"
-            android:enabled="false"
             android:singleLine="true"
             android:hint="@string/company_name"
             android:inputType="text"
@@ -37,7 +35,6 @@
         android:layout_marginStart="32dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="32dp"
-        android:enabled="true"
         android:layout_below="@id/textInputLayout_CompanyName"
         app:boxBackgroundMode="outline"
         app:helperTextEnabled="true">
@@ -47,7 +44,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="top"
-            android:enabled="false"
             android:singleLine="true"
             android:hint="@string/company_email"
             android:inputType="text"
@@ -62,7 +58,6 @@
         android:layout_marginStart="32dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="32dp"
-        android:enabled="true"
         android:layout_below="@id/textInputLayout_CompanyEmail"
         app:boxBackgroundMode="outline"
         app:helperTextEnabled="true">
@@ -72,7 +67,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="top"
-            android:enabled="false"
             android:singleLine="true"
             android:hint="@string/company_phone_number"
             android:inputType="text"
@@ -109,7 +103,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:padding="8dp"
-        android:text="@string/scan"
+        android:text="@string/Done"
         android:textAllCaps="false"
         android:textSize="16sp"
         app:cornerRadius="8dp"

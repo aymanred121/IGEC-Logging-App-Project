@@ -48,5 +48,6 @@
     <string name="company_email">Company Email*</string>
     <string name="company_phone_number">Company Phone Number</string>
     <string name="start_date">Start Date of use</string>
-    <string name="scan">Scan</string>
+    <string name="Done">Done</string>
+    <string name="supplementsState">Supplements State*</string>
 </resources>

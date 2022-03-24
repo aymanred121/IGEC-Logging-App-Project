@@ -20,6 +20,11 @@ import com.example.igecuser.R;
 public class MachineCheckInOutFragmentDialog extends DialogFragment {
     //Views
     private CodeScanner mCodeScanner;
+    private boolean isItAUser;
+    public MachineCheckInOutFragmentDialog(boolean isItAUser) {
+        this.isItAUser = isItAUser;
+    }
+
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
@@ -50,6 +55,7 @@ public class MachineCheckInOutFragmentDialog extends DialogFragment {
         mCodeScanner.setDecodeCallback(result -> getActivity().runOnUiThread(() -> {
             Bundle res = new Bundle();
             res.putString("response", result.getText());
+            res.putBoolean("isItAUser",isItAUser);
             getParentFragmentManager().setFragmentResult("machine", res);
             dismiss();
         }));

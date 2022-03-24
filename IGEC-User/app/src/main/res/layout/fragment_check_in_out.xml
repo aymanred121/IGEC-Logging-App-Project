@@ -46,7 +46,7 @@
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/container"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:elevation="1dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -57,24 +57,61 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|right"
-            android:layout_margin="32dp"
+            android:layout_marginBottom="32dp"
+            android:layout_marginEnd="32dp"
+            android:rotation="0"
             android:src="@drawable/ic_baseline_construction_24"
-            android:visibility="gone" />
+            android:visibility="invisible" />
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerview"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="32dp"
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/Button_AddMachineInside"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|right"
         android:layout_marginEnd="32dp"
-        android:overScrollMode="never"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/Button_CheckInOut"
-        tools:listitem="@layout/machine_item" />
+        android:layout_marginBottom="16dp"
+        android:src="@drawable/ic_round_desk_24"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/Button_AddMachineOutside"
+        app:layout_constraintEnd_toEndOf="parent" />
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/Button_AddMachineOutside"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|right"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="16dp"
+        android:src="@drawable/ic_round_corporate_fare_24"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toTopOf="@+id/container"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/textView_non_user"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/fab_label_background"
+        android:text="Company"
+        android:textSize="12sp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/Button_AddMachineOutside"
+        app:layout_constraintEnd_toStartOf="@+id/Button_AddMachineOutside"
+        app:layout_constraintTop_toTopOf="@+id/Button_AddMachineOutside" />
+
+    <TextView
+        android:id="@+id/textView_user"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/fab_label_background"
+        android:text="User"
+        android:textSize="12sp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/Button_AddMachineInside"
+        app:layout_constraintEnd_toStartOf="@+id/Button_AddMachineInside"
+        app:layout_constraintTop_toTopOf="@+id/Button_AddMachineInside" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

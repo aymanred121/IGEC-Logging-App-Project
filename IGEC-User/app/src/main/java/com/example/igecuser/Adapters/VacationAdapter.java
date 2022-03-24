@@ -83,7 +83,6 @@ public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.Vacati
         holder.vID.setText(String.format("ID: %s", vacation.getEmployee().getId()));
 
         holder.vVacationStartDate.setText(String.format("Start Date: %s", formatDate(vacation.getStartDate())));
-        //Todo fix missing img
         switch (vacation.getVacationStatus()) {
             case 1:
             holder.vVacationsStatus.setColorFilter(Color.rgb(0, 153, 0));

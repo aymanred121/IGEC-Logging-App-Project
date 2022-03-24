@@ -20,10 +20,13 @@ import androidx.fragment.app.FragmentResultListener;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.igecuser.Dialogs.CheckingInOutDialog;
+import com.example.igecuser.Dialogs.ClientInfoFragmentDialog;
 import com.example.igecuser.Dialogs.MachineCheckInOutFragmentDialog;
 import com.example.igecuser.R;
 import com.example.igecuser.fireBase.Employee;
@@ -44,15 +47,18 @@ import java.util.Map;
 public class CheckInOutFragment extends Fragment {
 
     private MaterialButton vCheckInOut;
-    private FloatingActionButton vAddMachine;
-
+    private FloatingActionButton vAddMachine, vAddMachineInside, vAddMachineOutside;
+    private TextView vInsideText, vOutsideText;
     // Vars
+    private boolean isOpen = false;
+    private Animation fabClose, fabOpen, rotateForward, rotateBackward, show, hide, rotateBackwardHide;
     private boolean isIn = false;
     private final Employee currEmployee;
     private String id;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private double latitude, longitude;
     private Machine currMachine;
+    private View view;
 
     public CheckInOutFragment(Employee currEmployee) {
         this.currEmployee = currEmployee;
@@ -115,7 +121,21 @@ public class CheckInOutFragment extends Fragment {
                         isIn = !isIn;
                         vCheckInOut.setBackgroundColor((isIn) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
                         vCheckInOut.setText(isIn ? "Out" : "In");
-                        vAddMachine.setVisibility(isIn ? View.VISIBLE : View.GONE);
+                        vAddMachine.setClickable(isIn);
+                        if (isOpen) {
+                            Toast.makeText(getActivity(), "closed", Toast.LENGTH_SHORT).show();
+                            vAddMachine.startAnimation(rotateBackwardHide);
+                            vAddMachineInside.startAnimation(fabClose);
+                            vAddMachineOutside.startAnimation(fabClose);
+                            vInsideText.startAnimation(hide);
+                            vOutsideText.startAnimation(hide);
+                            vAddMachineInside.setClickable(false);
+                            vAddMachineOutside.setClickable(false);
+                            isOpen = false;
+                        } else {
+                            vAddMachine.startAnimation(isIn ? show : hide);
+                        }
+
                     }
                 }
             }
@@ -183,21 +203,35 @@ public class CheckInOutFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_check_in_out, container, false);
-        initialize(view);
+        view = inflater.inflate(R.layout.fragment_check_in_out, container, false);
+        initialize();
 
 
         // Listeners
         vCheckInOut.setOnClickListener(oclCheckInOut);
         vAddMachine.setOnClickListener(oclMachine);
+        vAddMachineInside.setOnClickListener(oclInside);
+        vAddMachineOutside.setOnClickListener(oclOutside);
         return view;
     }
 
-    private void initialize(View view) {
+    private void initialize() {
         //Views
         TextView vGreeting = view.findViewById(R.id.TextView_Greeting);
         vCheckInOut = view.findViewById(R.id.Button_CheckInOut);
         vAddMachine = view.findViewById(R.id.Button_AddMachine);
+        vAddMachineInside = view.findViewById(R.id.Button_AddMachineInside);
+        vAddMachineOutside = view.findViewById(R.id.Button_AddMachineOutside);
+        vOutsideText = view.findViewById(R.id.textView_non_user);
+        vInsideText = view.findViewById(R.id.textView_user);
+
+        fabClose = AnimationUtils.loadAnimation(getActivity(), R.anim.fab_close);
+        fabOpen = AnimationUtils.loadAnimation(getActivity(), R.anim.fab_open);
+        rotateForward = AnimationUtils.loadAnimation(getActivity(), R.anim.rotate_forward);
+        rotateBackward = AnimationUtils.loadAnimation(getActivity(), R.anim.rotate_backward);
+        rotateBackwardHide = AnimationUtils.loadAnimation(getActivity(), R.anim.rotate_backward_hide);
+        show = AnimationUtils.loadAnimation(getActivity(), R.anim.show);
+        hide = AnimationUtils.loadAnimation(getActivity(), R.anim.hide);
         id = LocalDate.now().toString() + currEmployee.getId();
 
         vGreeting.setText(String.format("%s\n%s", getString(R.string.good_morning), currEmployee.getFirstName()));
@@ -280,24 +314,42 @@ public class CheckInOutFragment extends Fragment {
         }
     }
 
+    private void animationFab() {
+        if (isOpen) {
+            vAddMachine.startAnimation(rotateBackward);
+            vAddMachineInside.startAnimation(fabClose);
+            vAddMachineOutside.startAnimation(fabClose);
+            vInsideText.startAnimation(hide);
+            vOutsideText.startAnimation(hide);
+            vAddMachineInside.setClickable(false);
+            vAddMachineOutside.setClickable(false);
+        } else {
+
+            vAddMachine.startAnimation(rotateForward);
+            vAddMachineInside.startAnimation(fabOpen);
+            vAddMachineOutside.startAnimation(fabOpen);
+            vInsideText.startAnimation(show);
+            vOutsideText.startAnimation(show);
+            vAddMachineInside.setClickable(true);
+            vAddMachineOutside.setClickable(true);
+        }
+        isOpen = !isOpen;
+    }
 
     // Listeners
-    private final View.OnClickListener oclCheckInOut = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            CheckingInOutDialog checkingInOutDialog = new CheckingInOutDialog();
-            checkingInOutDialog.show(getFragmentManager(), "");
-        }
+    private final View.OnClickListener oclCheckInOut = v -> {
+        CheckingInOutDialog checkingInOutDialog = new CheckingInOutDialog();
+        checkingInOutDialog.show(getParentFragmentManager(), "");
+    };
+    private View.OnClickListener oclMachine = view -> {
+        animationFab();
+    };
+    private View.OnClickListener oclInside = view -> {
 
     };
-    private View.OnClickListener oclMachine = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-//            Intent intent = new Intent(getActivity(), qrCameraActivity.class);
-//            startActivityForResult(intent, 55);
-            MachineCheckInOutFragmentDialog machineCheckInOutFragmentDialog = new MachineCheckInOutFragmentDialog();
-            machineCheckInOutFragmentDialog.show(getParentFragmentManager(), "");
-        }
+    private View.OnClickListener oclOutside = view -> {
+        ClientInfoFragmentDialog clientInfoFragmentDialog = new ClientInfoFragmentDialog();
+        clientInfoFragmentDialog.show(getParentFragmentManager(), "");
     };
 
 

@@ -15,7 +15,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
-public class ChangePassword extends Fragment {
+public class ChangePasswordFragment extends Fragment {
 
     //Views
     private TextInputEditText vNewPassword, vConfirmPassword;

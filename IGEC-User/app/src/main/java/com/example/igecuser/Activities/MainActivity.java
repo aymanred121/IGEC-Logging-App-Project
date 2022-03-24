@@ -61,6 +61,9 @@ public class MainActivity extends AppCompatActivity {
         vEmailLayout = findViewById(R.id.textInputLayout_Email);
         vSignIn = findViewById(R.id.Button_SignIn);
 
+        vEmail.setText("t@gmail.com");
+        vPassword.setText("1");
+
     }
 
     @RequiresApi(api = Build.VERSION_CODES.Q)

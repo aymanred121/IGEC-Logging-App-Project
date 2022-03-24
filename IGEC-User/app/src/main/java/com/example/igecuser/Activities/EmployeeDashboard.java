@@ -15,7 +15,7 @@ import android.widget.TextView;
 
 
 import com.example.igecuser.Adapters.ViewPagerAdapter;
-import com.example.igecuser.Fragments.ChangePassword;
+import com.example.igecuser.Fragments.ChangePasswordFragment;
 import com.example.igecuser.Fragments.CheckInOutFragment;
 import com.example.igecuser.Fragments.VacationRequestFragment;
 import com.example.igecuser.Fragments.VacationsLogFragment;
@@ -98,12 +98,12 @@ public class EmployeeDashboard extends AppCompatActivity implements NavigationVi
         CheckInOutFragment checkInOutFragment = new CheckInOutFragment(currEmployee);
         VacationRequestFragment vacationRequestFragment = new VacationRequestFragment(currEmployee);
         VacationsLogFragment vacationsLogFragment = new VacationsLogFragment(true, currEmployee);
-        ChangePassword changePassword = new ChangePassword();
+        ChangePasswordFragment changePasswordFragment = new ChangePasswordFragment();
         ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), 0);
         viewPagerAdapter.addFragment(checkInOutFragment, getString(R.string.check_in_out));
         viewPagerAdapter.addFragment(vacationRequestFragment, getString(R.string.vacation_request));
         viewPagerAdapter.addFragment(vacationsLogFragment, getString(R.string.vacations_log));
-        viewPagerAdapter.addFragment(changePassword, getString(R.string.change_password));
+        viewPagerAdapter.addFragment(changePasswordFragment, getString(R.string.change_password));
         viewPager.setAdapter(viewPagerAdapter);
     }
 

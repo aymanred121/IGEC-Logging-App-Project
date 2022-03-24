@@ -28,13 +28,13 @@ public class CheckingInOutDialog extends DialogFragment {
         vYes.setOnClickListener(v1 -> {
             Bundle result = new Bundle();
             result.putString("response", "Yes");
-            getParentFragmentManager().setFragmentResult("requestKey", result);
+            getParentFragmentManager().setFragmentResult("employee", result);
             dismiss();
         });
         vNo.setOnClickListener(v1 -> {
             Bundle result = new Bundle();
             result.putString("response", "No");
-            getParentFragmentManager().setFragmentResult("requestKey", result);
+            getParentFragmentManager().setFragmentResult("employee", result);
             dismiss();
         });
         return v;

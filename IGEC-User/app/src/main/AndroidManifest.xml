@@ -19,9 +19,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.IGECUser">
         <activity
-            android:name=".Activities.qrCameraActivity"
-            android:exported="false" />
-        <activity
             android:name=".Activities.EmployeeDashboard"
             android:exported="false"
             android:windowSoftInputMode="adjustPan" />

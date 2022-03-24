@@ -16,18 +16,19 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginStart="16dp"
+
             android:text="@string/reason_for"
-            android:textSize="20sp" />
+            android:textSize="16sp" />
 
         <TextView
             android:id="@+id/TextView_MountOf"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
-            android:layout_marginStart="16dp"
+            android:drawablePadding="8dp"
             android:text="@string/_0_00"
-            android:textSize="20sp" />
+            android:textSize="16sp"
+            app:drawableLeftCompat="@drawable/ic_round_trending_flat_24" />
     </RelativeLayout>
 
 </com.google.android.material.card.MaterialCardView>

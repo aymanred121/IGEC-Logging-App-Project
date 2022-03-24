@@ -32,38 +32,6 @@ public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.Vacati
         this.listener = listener;
     }
 
-    public static class VacationViewHolder extends RecyclerView.ViewHolder{
-
-        public TextView vName;
-        public TextView vID;
-        public TextView vVacationStartDate;
-        public TextView vVacationDays;
-        public ImageView vVacationsStatus;
-
-
-        public VacationViewHolder(@NonNull View itemView,OnItemClickListener listener) {
-            super(itemView);
-            vName = itemView.findViewById(R.id.TextView_Name);
-            vID = itemView.findViewById(R.id.TextView_Id);
-            vVacationDays = itemView.findViewById(R.id.TextView_VacationDays);
-            vVacationsStatus = itemView.findViewById(R.id.ImageView_VacationStatus);
-            vVacationStartDate = itemView.findViewById(R.id.TextView_VacationStartDate);
-
-            itemView.setOnClickListener(v -> {
-                if(listener != null)
-                {
-                    int position = getAdapterPosition();
-                    if(position != RecyclerView.NO_POSITION)
-                    {
-                        listener.onItemClick(position);
-                    }
-                }
-            });
-
-
-        }
-    }
-
     public VacationAdapter(ArrayList<VacationRequest> vacationsList) {
         this.vacationsList = vacationsList;
     }
@@ -120,5 +88,37 @@ public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.Vacati
     @Override
     public int getItemCount() {
         return vacationsList.size();
+    }
+
+    public static class VacationViewHolder extends RecyclerView.ViewHolder{
+
+        public TextView vName;
+        public TextView vID;
+        public TextView vVacationStartDate;
+        public TextView vVacationDays;
+        public ImageView vVacationsStatus;
+
+
+        public VacationViewHolder(@NonNull View itemView,OnItemClickListener listener) {
+            super(itemView);
+            vName = itemView.findViewById(R.id.TextView_Name);
+            vID = itemView.findViewById(R.id.TextView_Id);
+            vVacationDays = itemView.findViewById(R.id.TextView_VacationDays);
+            vVacationsStatus = itemView.findViewById(R.id.ImageView_VacationStatus);
+            vVacationStartDate = itemView.findViewById(R.id.TextView_VacationStartDate);
+
+            itemView.setOnClickListener(v -> {
+                if(listener != null)
+                {
+                    int position = getAdapterPosition();
+                    if(position != RecyclerView.NO_POSITION)
+                    {
+                        listener.onItemClick(position);
+                    }
+                }
+            });
+
+
+        }
     }
 }

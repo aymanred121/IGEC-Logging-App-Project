@@ -41,7 +41,7 @@ public class VacationRequestsFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_vacation_requests, container, false);
-        Initialize(view);
+        initialize(view);
 
         adapter.setOnItemClickListener(itclVacationAdapter);
 
@@ -49,7 +49,7 @@ public class VacationRequestsFragment extends Fragment {
     }
 
     // Functions
-    private void Initialize(View view) {
+    private void initialize(View view) {
 
         recyclerView = view.findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);

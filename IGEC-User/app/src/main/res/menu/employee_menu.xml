@@ -15,6 +15,11 @@
             android:icon="@drawable/ic_baseline_password_24"
             android:title="@string/change_password"></item>
         <item
+            android:id="@+id/item_GrossSalary"
+            android:checkable="true"
+            android:icon="@drawable/ic_baseline_wallet_24"
+            android:title="@string/gross_salary"></item>
+        <item
             android:id="@+id/item_VacationRequests"
             android:checkable="true"
             android:icon="@drawable/ic_baseline_send_24"

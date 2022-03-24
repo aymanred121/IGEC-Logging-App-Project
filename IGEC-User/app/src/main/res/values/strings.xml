@@ -50,4 +50,7 @@
     <string name="start_date">Start Date of use</string>
     <string name="Done">Done</string>
     <string name="supplementsState">Supplements State*</string>
+    <string name="gross_salary">Gross Salary</string>
+    <string name="reason_for">Reason For:</string>
+    <string name="_0_00">0.00 EGP</string>
 </resources>

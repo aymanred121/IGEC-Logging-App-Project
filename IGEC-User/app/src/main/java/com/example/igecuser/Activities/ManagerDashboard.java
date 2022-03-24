@@ -16,6 +16,7 @@ import android.widget.TextView;
 import com.example.igecuser.Adapters.ViewPagerAdapter;
 import com.example.igecuser.Fragments.ChangePasswordFragment;
 import com.example.igecuser.Fragments.CheckInOutFragment;
+import com.example.igecuser.Fragments.GrossSalaryFragment;
 import com.example.igecuser.Fragments.VacationRequestsFragment;
 import com.example.igecuser.Fragments.VacationsLogFragment;
 import com.example.igecuser.R;
@@ -70,13 +71,16 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
         VacationsLogFragment vacationsLogFragment = new VacationsLogFragment(false, currManager);
         VacationRequestsFragment vacationRequestsFragment = new VacationRequestsFragment(currManager);
         ChangePasswordFragment changePasswordFragment = new ChangePasswordFragment();
+        GrossSalaryFragment grossSalaryFragment = new GrossSalaryFragment();
 
+        //TODO: might be removed
         viewPager.setOffscreenPageLimit(2);
         ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), 0);
         viewPagerAdapter.addFragment(checkInOutFragment, getString(R.string.check_in_out));
         viewPagerAdapter.addFragment(vacationRequestsFragment, getString(R.string.vacation_request));
         viewPagerAdapter.addFragment(vacationsLogFragment, getString(R.string.vacations_log));
         viewPagerAdapter.addFragment(changePasswordFragment, getString(R.string.change_password));
+        viewPagerAdapter.addFragment(grossSalaryFragment,getString(R.string.gross_salary));
         viewPager.setAdapter(viewPagerAdapter);
 
     }
@@ -100,6 +104,8 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
             viewPager.setCurrentItem(2);
         } else if (itemId == R.id.item_ChangePassword) {
             viewPager.setCurrentItem(3);
+        } else if (itemId == R.id.item_GrossSalary) {
+            viewPager.setCurrentItem(4);
         }
         vDrawerLayout.closeDrawer(GravityCompat.START);
         return true;

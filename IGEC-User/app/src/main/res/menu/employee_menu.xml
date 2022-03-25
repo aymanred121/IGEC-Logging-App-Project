@@ -20,7 +20,7 @@
             android:icon="@drawable/ic_baseline_wallet_24"
             android:title="@string/gross_salary"></item>
         <item
-            android:id="@+id/item_VacationRequests"
+            android:id="@+id/item_Send_Request"
             android:checkable="true"
             android:icon="@drawable/ic_baseline_send_24"
             android:title="@string/send_request"></item>

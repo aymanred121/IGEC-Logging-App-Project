@@ -160,6 +160,11 @@ public class CheckInOutFragment extends Fragment {
                     longitude = location.getLongitude();
                     latitude = location.getLatitude();
                     db.collection("machine").document(machineID).addSnapshotListener((value, error) -> {
+                        if(!value.exists())
+                        {
+                            Toast.makeText(getActivity(), "Invalid Machine ID", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
                         currMachine = value.toObject(Machine.class);
                         String machineEmpId = id + machineID;
                         db.collection("Machine_Employee").document(machineEmpId).get().addOnSuccessListener(documentSnapshot -> {
@@ -242,7 +247,7 @@ public class CheckInOutFragment extends Fragment {
         vGreeting.setText(String.format("%s\n%s", getString(R.string.good_morning), currEmployee.getFirstName()));
     }
 
-    private Location getLocation() {
+    public Location getLocation() {
         LocationManager lm = (LocationManager) getContext().getSystemService(LOCATION_SERVICE);
         List<String> providers = lm.getProviders(true);
         Location bestLocation = null;

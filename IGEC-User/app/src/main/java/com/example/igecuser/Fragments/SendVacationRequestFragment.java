@@ -24,7 +24,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-public class VacationRequestFragment extends Fragment {
+public class SendVacationRequestFragment extends Fragment {
 
 
     //Views
@@ -55,7 +55,7 @@ public class VacationRequestFragment extends Fragment {
     }
 
     //Functions
-    public VacationRequestFragment(Employee currEmployee) {
+    public SendVacationRequestFragment(Employee currEmployee) {
         this.currEmployee = currEmployee;
     }
 

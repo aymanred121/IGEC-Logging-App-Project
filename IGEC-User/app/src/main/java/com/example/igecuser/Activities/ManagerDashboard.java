@@ -6,14 +6,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.viewpager.widget.ViewPager;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-import com.example.igecuser.Adapters.ViewPagerAdapter;
 import com.example.igecuser.Fragments.ChangePasswordFragment;
 import com.example.igecuser.Fragments.CheckInOutFragment;
 import com.example.igecuser.Fragments.GrossSalaryFragment;
@@ -25,12 +23,11 @@ import com.google.android.material.navigation.NavigationView;
 
 public class ManagerDashboard extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    private ViewPager viewPager;
     private DrawerLayout vDrawerLayout;
-
+    private NavigationView vNavigationView;
     // Vars
     private ActionBarDrawerToggle actionBarDrawerToggle;
-
+    private Employee currManager;
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,23 +36,23 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
 
 
         initialize();
-
         // Listeners
         vDrawerLayout.addDrawerListener(actionBarDrawerToggle);
-        viewPager.setOnTouchListener((v, event) -> true);
-
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new CheckInOutFragment(currManager)).commit();
+            vNavigationView.setCheckedItem(R.id.item_CheckInOut);
+        }
     }
 
     // Functions
     private void initialize() {
-        Employee currManager = (Employee) getIntent().getSerializableExtra("emp");
+        currManager = (Employee) getIntent().getSerializableExtra("emp");
 
 
         // Views
         Toolbar vToolbar = findViewById(R.id.toolbar);
         vDrawerLayout = findViewById(R.id.drawer);
-        NavigationView vNavigationView = findViewById(R.id.navView);
-        viewPager = findViewById(R.id.fragment_container);
+        vNavigationView = findViewById(R.id.navView);
         setSupportActionBar(vToolbar);
         actionBarDrawerToggle = new ActionBarDrawerToggle(this, vDrawerLayout, vToolbar, R.string.openNavBar, R.string.closeNavBar);
         actionBarDrawerToggle.syncState();
@@ -66,22 +63,6 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
 
         EmployeeName.setText(String.format("%s %s", currManager.getFirstName(), currManager.getLastName()));
         EmployeeID.setText(String.format("Id: %s", currManager.getId()));
-
-        CheckInOutFragment checkInOutFragment = new CheckInOutFragment(currManager);
-        VacationsLogFragment vacationsLogFragment = new VacationsLogFragment(false, currManager);
-        VacationRequestsFragment vacationRequestsFragment = new VacationRequestsFragment(currManager);
-        ChangePasswordFragment changePasswordFragment = new ChangePasswordFragment();
-        GrossSalaryFragment grossSalaryFragment = new GrossSalaryFragment();
-
-        //TODO: might be removed
-        viewPager.setOffscreenPageLimit(2);
-        ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), 0);
-        viewPagerAdapter.addFragment(checkInOutFragment, getString(R.string.check_in_out));
-        viewPagerAdapter.addFragment(vacationRequestsFragment, getString(R.string.vacation_request));
-        viewPagerAdapter.addFragment(vacationsLogFragment, getString(R.string.vacations_log));
-        viewPagerAdapter.addFragment(changePasswordFragment, getString(R.string.change_password));
-        viewPagerAdapter.addFragment(grossSalaryFragment,getString(R.string.gross_salary));
-        viewPager.setAdapter(viewPagerAdapter);
 
     }
 
@@ -95,18 +76,16 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        int itemId = item.getItemId();
-        if (itemId == R.id.item_CheckInOut) {
-            viewPager.setCurrentItem(0);
-        } else if (itemId == R.id.item_VacationRequests) {
-            viewPager.setCurrentItem(1);
-        } else if (itemId == R.id.item_VacationsLog) {
-            viewPager.setCurrentItem(2);
-        } else if (itemId == R.id.item_ChangePassword) {
-            viewPager.setCurrentItem(3);
-        } else if (itemId == R.id.item_GrossSalary) {
-            viewPager.setCurrentItem(4);
-        }
+        if (R.id.item_CheckInOut == item.getItemId())
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new CheckInOutFragment(currManager)).commit();
+        else if (R.id.item_Vacation_Requests == item.getItemId())
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new VacationRequestsFragment(currManager)).commit();
+        else if (R.id.item_VacationsLog == item.getItemId())
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new VacationsLogFragment(true,currManager)).commit();
+        else if (R.id.item_ChangePassword == item.getItemId())
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new ChangePasswordFragment()).commit();
+        else if (R.id.item_GrossSalary == item.getItemId())
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new GrossSalaryFragment()).commit();
         vDrawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }

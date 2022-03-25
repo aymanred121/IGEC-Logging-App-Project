@@ -27,13 +27,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private NavigationView vNavigationView;
 
     // Vars
-    private AddUserFragment adduserFragment;
-    private AddProjectFragment addprojectFragment;
-    private AddMachineFragment addmachineFragment;
-    private SummaryFragment summaryFragment;
-    private UsersFragment usersFragment;
-    private ProjectsFragment projectsFragment;
-    private MachinesFragment machinesFragment;
     private ActionBarDrawerToggle actionBarDrawerToggle;
 
     @Override
@@ -48,7 +41,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Listeners
         vDrawerLayout.addDrawerListener(actionBarDrawerToggle);
         if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, adduserFragment).commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new AddUserFragment()).commit();
             vNavigationView.setCheckedItem(R.id.item_addUser);
         }
 
@@ -65,13 +58,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         actionBarDrawerToggle = new ActionBarDrawerToggle(this, vDrawerLayout, vToolbar, R.string.openNavBar, R.string.closeNavBar);
         actionBarDrawerToggle.syncState();
         vNavigationView.setNavigationItemSelectedListener(this);
-        adduserFragment = new AddUserFragment();
-        addprojectFragment = new AddProjectFragment();
-        addmachineFragment = new AddMachineFragment();
-        summaryFragment = new SummaryFragment();
-        machinesFragment = new MachinesFragment();
-        projectsFragment = new ProjectsFragment();
-        usersFragment = new UsersFragment();
+
 
     }
 
@@ -86,21 +73,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
-        if (itemId == R.id.item_addUser) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, adduserFragment).commit();
-        } else if (itemId == R.id.item_addProject) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, addprojectFragment).commit();
-        } else if (itemId == R.id.item_addMachine) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, addmachineFragment).commit();
-        } else if (itemId == R.id.item_summary) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, summaryFragment).commit();
-        } else if (itemId == R.id.item_Users) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, usersFragment).commit();
-        } else if (itemId == R.id.item_Projects) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, projectsFragment).commit();
-        } else if (itemId == R.id.item_Machines) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, machinesFragment).commit();
-        }
+        if (itemId == R.id.item_addUser)
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new AddUserFragment()).commit();
+        if (itemId == R.id.item_addProject)
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new AddProjectFragment()).commit();
+        if (itemId == R.id.item_addMachine)
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new AddMachineFragment()).commit();
+        if (itemId == R.id.item_summary)
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new SummaryFragment()).commit();
+        if (itemId == R.id.item_Users)
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new UsersFragment()).commit();
+        if (itemId == R.id.item_Projects)
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new ProjectsFragment()).commit();
+        if (itemId == R.id.item_Machines)
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new MachinesFragment()).commit();
+
         vDrawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }

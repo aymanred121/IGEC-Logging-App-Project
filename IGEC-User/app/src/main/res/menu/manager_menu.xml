@@ -18,7 +18,7 @@
             android:icon="@drawable/ic_baseline_wallet_24"
             android:title="@string/gross_salary"></item>
         <item
-            android:id="@+id/item_VacationRequests"
+            android:id="@+id/item_Vacation_Requests"
             android:icon="@drawable/ic_baseline_mail_24"
             android:title="@string/vacation_requests"></item>
         <item

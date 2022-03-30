@@ -1,6 +1,9 @@
 package com.example.igecuser.Fragments;
 
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -8,15 +11,11 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
 import com.example.igecuser.Adapters.SalarySummaryAdapter;
+import com.example.igecuser.Dialogs.SalarySummaryDialog;
 import com.example.igecuser.R;
 import com.example.igecuser.dummySalarySummary;
 import com.example.igecuser.dummySalarySummary.SalaryType;
-
 
 import java.util.ArrayList;
 
@@ -34,11 +33,14 @@ public class GrossSalaryFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_gross_salary, container, false);
     }
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        initialize(view);
-    }
+    SalarySummaryAdapter.OnItemClickListener onItemClickListener = new SalarySummaryAdapter.OnItemClickListener() {
+        @Override
+        public void onItemClick(int position) {
+
+            SalarySummaryDialog salarySummaryDialog = new SalarySummaryDialog(salarySummaries.get(position));
+            salarySummaryDialog.show(getParentFragmentManager(), "");
+        }
+    };
 
     // Functions
     private void initialize(View view) {
@@ -58,6 +60,13 @@ public class GrossSalaryFragment extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
 
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        initialize(view);
+        adapter.setOnItemClickListener(onItemClickListener);
     }
 
 

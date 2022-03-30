@@ -3,6 +3,10 @@ package com.example.igecuser.Fragments;
 import static android.content.ContentValues.TAG;
 
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -10,14 +14,9 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
-import com.example.igecuser.Dialogs.VacationRequestFragmentDialog;
-import com.example.igecuser.R;
 import com.example.igecuser.Adapters.VacationAdapter;
+import com.example.igecuser.Dialogs.VacationRequestDialog;
+import com.example.igecuser.R;
 import com.example.igecuser.fireBase.Employee;
 import com.example.igecuser.fireBase.VacationRequest;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -32,8 +31,8 @@ public class VacationRequestsFragment extends Fragment {
     private VacationAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
     private ArrayList<VacationRequest> vacations;
-    private Employee currManager;
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private final Employee currManager;
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     public VacationRequestsFragment(Employee currManager) {
         this.currManager = currManager;
@@ -87,8 +86,8 @@ public class VacationRequestsFragment extends Fragment {
     }
 
     VacationAdapter.OnItemClickListener itclVacationAdapter = position -> {
-        VacationRequestFragmentDialog vacationRequestFragmentDialog = new VacationRequestFragmentDialog(adapter.getVacationsList().get(position));
-        vacationRequestFragmentDialog.show(getFragmentManager(), "");
+        VacationRequestDialog vacationRequestDialog = new VacationRequestDialog(adapter.getVacationsList().get(position));
+        vacationRequestDialog.show(getParentFragmentManager(), "");
     };
 
 }

@@ -23,7 +23,7 @@ import java.util.Calendar;
 import java.util.Locale;
 import java.util.Objects;
 
-public class VacationRequestFragmentDialog extends DialogFragment {
+public class VacationRequestDialog extends DialogFragment {
 
 
     private MaterialButton vAcceptRequest, vDeclineRequest;
@@ -32,7 +32,7 @@ public class VacationRequestFragmentDialog extends DialogFragment {
     private VacationRequest currVacation;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-    public VacationRequestFragmentDialog(VacationRequest currVacation) {
+    public VacationRequestDialog(VacationRequest currVacation) {
         this.currVacation = currVacation;
     }
 

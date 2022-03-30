@@ -3,20 +3,11 @@ package com.example.igecuser.Fragments;
 import static android.content.Context.LOCATION_SERVICE;
 
 import android.Manifest;
-import android.app.Activity;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentResultListener;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,10 +16,15 @@ import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentResultListener;
+
 import com.example.igecuser.Dialogs.CheckingInOutDialog;
-import com.example.igecuser.Dialogs.ClientInfoFragmentDialog;
-import com.example.igecuser.Dialogs.MachineCheckInOutFragmentDialog;
-import com.example.igecuser.Dialogs.SupplementsFragmentDialog;
+import com.example.igecuser.Dialogs.MachineCheckInOutDialog;
+import com.example.igecuser.Dialogs.SupplementsDialog;
 import com.example.igecuser.R;
 import com.example.igecuser.fireBase.Employee;
 import com.example.igecuser.fireBase.Machine;
@@ -64,6 +60,110 @@ public class CheckInOutFragment extends Fragment {
         this.currEmployee = currEmployee;
     }
 
+
+    private final View.OnClickListener oclMachine = view -> {
+        animationFab();
+    };
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.fragment_check_in_out, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        initialize(view);
+
+        // Listeners
+        vCheckInOut.setOnClickListener(oclCheckInOut);
+        vAddMachine.setOnClickListener(oclMachine);
+        vAddMachineInside.setOnClickListener(oclInside);
+        vAddMachineOutside.setOnClickListener(oclOutside);
+    }
+
+    private void initialize(View view) {
+        //Views
+        TextView vGreeting = view.findViewById(R.id.TextView_Greeting);
+        vCheckInOut = view.findViewById(R.id.Button_CheckInOut);
+        vAddMachine = view.findViewById(R.id.Button_AddMachine);
+        vAddMachineInside = view.findViewById(R.id.Button_AddMachineInside);
+        vAddMachineOutside = view.findViewById(R.id.Button_AddMachineOutside);
+        vOutsideText = view.findViewById(R.id.textView_non_user);
+        vInsideText = view.findViewById(R.id.textView_user);
+
+        fabClose = AnimationUtils.loadAnimation(getActivity(), R.anim.fab_close);
+        fabOpen = AnimationUtils.loadAnimation(getActivity(), R.anim.fab_open);
+        rotateForward = AnimationUtils.loadAnimation(getActivity(), R.anim.rotate_forward);
+        rotateBackward = AnimationUtils.loadAnimation(getActivity(), R.anim.rotate_backward);
+        rotateBackwardHide = AnimationUtils.loadAnimation(getActivity(), R.anim.rotate_backward_hide);
+        show = AnimationUtils.loadAnimation(getActivity(), R.anim.show);
+        hide = AnimationUtils.loadAnimation(getActivity(), R.anim.hide);
+        id = LocalDate.now().toString() + currEmployee.getId();
+        vCheckInOut.setBackgroundColor((isHere) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
+        vCheckInOut.setText(isHere ? "Out" : "In");
+        vAddMachine.setClickable(isHere);
+        vAddMachine.startAnimation(isHere ? show : hide);
+
+        vGreeting.setText(String.format("%s\n%s", getString(R.string.good_morning), currEmployee.getFirstName()));
+    }
+
+    public Location getLocation() {
+        LocationManager lm = (LocationManager) getContext().getSystemService(LOCATION_SERVICE);
+        List<String> providers = lm.getProviders(true);
+        Location bestLocation = null;
+        for (String provider : providers) {
+            if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                return null;
+            }
+            Location l = lm.getLastKnownLocation(provider);
+            if (l == null) {
+                continue;
+            }
+            if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
+                bestLocation = l;
+            }
+        }
+        return bestLocation;
+
+    }
+
+    private void animationFab() {
+        if (isOpen) {
+            vAddMachine.startAnimation(rotateBackward);
+            vAddMachineInside.startAnimation(fabClose);
+            vAddMachineOutside.startAnimation(fabClose);
+            vInsideText.startAnimation(hide);
+            vOutsideText.startAnimation(hide);
+            vAddMachineInside.setClickable(false);
+            vAddMachineOutside.setClickable(false);
+        } else {
+
+            vAddMachine.startAnimation(rotateForward);
+            vAddMachineInside.startAnimation(fabOpen);
+            vAddMachineOutside.startAnimation(fabOpen);
+            vInsideText.startAnimation(show);
+            vOutsideText.startAnimation(show);
+            vAddMachineInside.setClickable(true);
+            vAddMachineOutside.setClickable(true);
+        }
+        isOpen = !isOpen;
+    }
+
+    // Listeners
+    private final View.OnClickListener oclCheckInOut = v -> {
+        CheckingInOutDialog checkingInOutDialog = new CheckingInOutDialog();
+        checkingInOutDialog.show(getParentFragmentManager(), "");
+    };
+    private final View.OnClickListener oclInside = view -> {
+        MachineCheckInOutDialog machineCheckInOutDialog = new MachineCheckInOutDialog(true);
+        machineCheckInOutDialog.show(getParentFragmentManager(), "");
+    };
+    private final View.OnClickListener oclOutside = view -> {
+        MachineCheckInOutDialog machineCheckInOutDialog = new MachineCheckInOutDialog(false);
+        machineCheckInOutDialog.show(getParentFragmentManager(), "");
+    };
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -202,114 +302,11 @@ public class CheckInOutFragment extends Fragment {
                     Toast.makeText(getContext(), "invalid Machine ID", Toast.LENGTH_SHORT).show();
                 }
                 // TODO: put it back to onSuccess
-                SupplementsFragmentDialog supplementsFragmentDialog = new SupplementsFragmentDialog(isItAUser);
-                supplementsFragmentDialog.show(getParentFragmentManager(),"");
+                SupplementsDialog supplementsDialog = new SupplementsDialog(isItAUser);
+                supplementsDialog.show(getParentFragmentManager(), "");
             }
         });
     }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_check_in_out, container, false);
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        initialize(view);
-
-        // Listeners
-        vCheckInOut.setOnClickListener(oclCheckInOut);
-        vAddMachine.setOnClickListener(oclMachine);
-        vAddMachineInside.setOnClickListener(oclInside);
-        vAddMachineOutside.setOnClickListener(oclOutside);
-    }
-
-    private void initialize(View view) {
-        //Views
-        TextView vGreeting = view.findViewById(R.id.TextView_Greeting);
-        vCheckInOut = view.findViewById(R.id.Button_CheckInOut);
-        vAddMachine = view.findViewById(R.id.Button_AddMachine);
-        vAddMachineInside = view.findViewById(R.id.Button_AddMachineInside);
-        vAddMachineOutside = view.findViewById(R.id.Button_AddMachineOutside);
-        vOutsideText = view.findViewById(R.id.textView_non_user);
-        vInsideText = view.findViewById(R.id.textView_user);
-
-        fabClose = AnimationUtils.loadAnimation(getActivity(), R.anim.fab_close);
-        fabOpen = AnimationUtils.loadAnimation(getActivity(), R.anim.fab_open);
-        rotateForward = AnimationUtils.loadAnimation(getActivity(), R.anim.rotate_forward);
-        rotateBackward = AnimationUtils.loadAnimation(getActivity(), R.anim.rotate_backward);
-        rotateBackwardHide = AnimationUtils.loadAnimation(getActivity(), R.anim.rotate_backward_hide);
-        show = AnimationUtils.loadAnimation(getActivity(), R.anim.show);
-        hide = AnimationUtils.loadAnimation(getActivity(), R.anim.hide);
-        id = LocalDate.now().toString() + currEmployee.getId();
-        vCheckInOut.setBackgroundColor((isHere) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
-        vCheckInOut.setText(isHere ? "Out" : "In");
-        vAddMachine.setClickable(isHere);
-        vAddMachine.startAnimation(isHere ? show : hide);
-
-        vGreeting.setText(String.format("%s\n%s", getString(R.string.good_morning), currEmployee.getFirstName()));
-    }
-
-    public Location getLocation() {
-        LocationManager lm = (LocationManager) getContext().getSystemService(LOCATION_SERVICE);
-        List<String> providers = lm.getProviders(true);
-        Location bestLocation = null;
-        for (String provider : providers) {
-            if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                return null;
-            }
-            Location l = lm.getLastKnownLocation(provider);
-            if (l == null) {
-                continue;
-            }
-            if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
-                bestLocation = l;
-            }
-        }
-        return bestLocation;
-
-    }
-
-    private void animationFab() {
-        if (isOpen) {
-            vAddMachine.startAnimation(rotateBackward);
-            vAddMachineInside.startAnimation(fabClose);
-            vAddMachineOutside.startAnimation(fabClose);
-            vInsideText.startAnimation(hide);
-            vOutsideText.startAnimation(hide);
-            vAddMachineInside.setClickable(false);
-            vAddMachineOutside.setClickable(false);
-        } else {
-
-            vAddMachine.startAnimation(rotateForward);
-            vAddMachineInside.startAnimation(fabOpen);
-            vAddMachineOutside.startAnimation(fabOpen);
-            vInsideText.startAnimation(show);
-            vOutsideText.startAnimation(show);
-            vAddMachineInside.setClickable(true);
-            vAddMachineOutside.setClickable(true);
-        }
-        isOpen = !isOpen;
-    }
-
-    // Listeners
-    private final View.OnClickListener oclCheckInOut = v -> {
-        CheckingInOutDialog checkingInOutDialog = new CheckingInOutDialog();
-        checkingInOutDialog.show(getParentFragmentManager(), "");
-    };
-    private View.OnClickListener oclMachine = view -> {
-        animationFab();
-    };
-    private View.OnClickListener oclInside = view -> {
-        MachineCheckInOutFragmentDialog machineCheckInOutFragmentDialog = new MachineCheckInOutFragmentDialog(true);
-        machineCheckInOutFragmentDialog.show(getParentFragmentManager(), "");
-    };
-    private View.OnClickListener oclOutside = view -> {
-        MachineCheckInOutFragmentDialog machineCheckInOutFragmentDialog = new MachineCheckInOutFragmentDialog(false);
-        machineCheckInOutFragmentDialog.show(getParentFragmentManager(), "");
-    };
 
 
 }

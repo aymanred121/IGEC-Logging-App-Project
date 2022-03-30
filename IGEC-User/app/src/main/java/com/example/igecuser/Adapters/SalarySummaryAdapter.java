@@ -1,9 +1,7 @@
 package com.example.igecuser.Adapters;
 
 import android.graphics.Color;
-import android.graphics.ColorFilter;
 import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.igecuser.R;
@@ -21,7 +18,8 @@ import com.example.igecuser.dummySalarySummary.SalaryType;
 import java.util.ArrayList;
 
 public class SalarySummaryAdapter extends RecyclerView.Adapter<SalarySummaryAdapter.SalarySummaryViewHolder> {
-    private ArrayList<dummySalarySummary> salarySummaries;
+    private final ArrayList<dummySalarySummary> salarySummaries;
+    private OnItemClickListener listener;
 
     public SalarySummaryAdapter(ArrayList<dummySalarySummary> salarySummaries) {
         this.salarySummaries = salarySummaries;
@@ -32,12 +30,16 @@ public class SalarySummaryAdapter extends RecyclerView.Adapter<SalarySummaryAdap
         void onItemClick(int position);
     }
 
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.listener = listener;
+    }
+
 
     @NonNull
     @Override
     public SalarySummaryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.salary_summary_item, parent, false);
-        return new SalarySummaryAdapter.SalarySummaryViewHolder(v);
+        return new SalarySummaryAdapter.SalarySummaryViewHolder(v, listener);
     }
 
     @Override
@@ -76,10 +78,19 @@ public class SalarySummaryAdapter extends RecyclerView.Adapter<SalarySummaryAdap
         public TextView vReasonFor;
         public TextView vMountOf;
 
-        public SalarySummaryViewHolder(@NonNull View itemView) {
+        public SalarySummaryViewHolder(@NonNull View itemView, OnItemClickListener listener) {
             super(itemView);
             vReasonFor = itemView.findViewById(R.id.TextView_ReasonFor);
             vMountOf = itemView.findViewById(R.id.TextView_MountOf);
+            itemView.setOnClickListener(v -> {
+                if (listener != null) {
+                    int position = getAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        listener.onItemClick(position);
+                    }
+                }
+            });
+
         }
     }
 }

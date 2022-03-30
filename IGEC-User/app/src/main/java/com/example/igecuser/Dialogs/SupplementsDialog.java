@@ -16,7 +16,7 @@ import com.example.igecuser.R;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
-public class SupplementsFragmentDialog extends DialogFragment {
+public class SupplementsDialog extends DialogFragment {
 
 
     //Views
@@ -24,10 +24,15 @@ public class SupplementsFragmentDialog extends DialogFragment {
     private MaterialButton vDone;
     private boolean isItAUser;
 
-    //TODO: modify this to carry machine data for registration
-    public SupplementsFragmentDialog(boolean isItAUser) {
-        this.isItAUser = isItAUser;
-    }
+    private final View.OnClickListener oclDone = v -> {
+        if (!isItAUser) {
+            ClientInfoDialog clientInfoDialog = new ClientInfoDialog(this);
+            clientInfoDialog.show(getParentFragmentManager(), "");
+        } else {
+            dismiss();
+        }
+
+    };
 
     @NonNull
     @Override
@@ -68,14 +73,9 @@ public class SupplementsFragmentDialog extends DialogFragment {
         vDone = view.findViewById(R.id.Button_Done);
     }
 
-    private View.OnClickListener oclDone = v -> {
-        if (!isItAUser) {
-            ClientInfoFragmentDialog clientInfoFragmentDialog = new ClientInfoFragmentDialog(this);
-            clientInfoFragmentDialog.show(getParentFragmentManager(), "");
-        } else {
-            dismiss();
-        }
-
-    };
+    //TODO: modify this to carry machine data for registration
+    public SupplementsDialog(boolean isItAUser) {
+        this.isItAUser = isItAUser;
+    }
 
 }

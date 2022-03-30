@@ -13,35 +13,31 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 import com.example.igecuser.R;
-import com.example.igecuser.fireBase.VacationRequest;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Locale;
-import java.util.Objects;
 
-public class ClientInfoFragmentDialog extends DialogFragment {
+public class ClientInfoDialog extends DialogFragment {
 
 
     //Views
-    private TextInputEditText vCompanyName,vCompanyEmail,vCompanyPhoneNumber,vStartDateOfUse;
+    private TextInputEditText vCompanyName, vCompanyEmail, vCompanyPhoneNumber, vStartDateOfUse;
     private TextInputLayout vStartDateOfUseLayout;
     private MaterialButton vScan;
-    private MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
+    private final MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vDatePicker;
-    private SupplementsFragmentDialog supplementsFragmentDialog;
+    private final SupplementsDialog supplementsDialog;
     //Vars
     private float startDate;
+    private final View.OnClickListener oclScan = v -> {
+        dismiss();
 
-    public ClientInfoFragmentDialog(SupplementsFragmentDialog supplementsFragmentDialog) {
-        this.supplementsFragmentDialog = supplementsFragmentDialog;
-    }
+    };
 
     @NonNull
     @Override
@@ -64,23 +60,14 @@ public class ClientInfoFragmentDialog extends DialogFragment {
         setStyle(DialogFragment.STYLE_NORMAL, R.style.FullscreenDialogTheme);
     }
 
-
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_client_info, container, false);
-        supplementsFragmentDialog.dismiss();
-        initialize(view);
-        vScan.setOnClickListener(oclScan);
-        vStartDateOfUseLayout.setEndIconOnClickListener(oclStartDateOfUse);
-        vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);
-        return view;
-    }
+    private final MaterialPickerOnPositiveButtonClickListener pclDatePicker = selection -> {
+        vStartDateOfUse.setText(convertDateToString(selection));
+        startDate = (long) selection;
+    };
 
     // Functions
-    private void initialize(View view)
-    {
-        vCompanyName =view.findViewById(R.id.TextInput_CompanyName);
+    private void initialize(View view) {
+        vCompanyName = view.findViewById(R.id.TextInput_CompanyName);
         vCompanyEmail = view.findViewById(R.id.TextInput_CompanyEmail);
         vCompanyPhoneNumber = view.findViewById(R.id.TextInput_CompanyPhoneNumber);
         vStartDateOfUse = view.findViewById(R.id.TextInput_UseStartDate);
@@ -90,6 +77,7 @@ public class ClientInfoFragmentDialog extends DialogFragment {
         vDatePickerBuilder.setTitleText("Start Date of Use");
         vDatePicker = vDatePickerBuilder.build();
     }
+
     private String convertDateToString(Object selection) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
         Calendar calendar = Calendar.getInstance();
@@ -97,17 +85,24 @@ public class ClientInfoFragmentDialog extends DialogFragment {
         return simpleDateFormat.format(calendar.getTime());
     }
 
-
-    private View.OnClickListener oclScan = v -> {
-        dismiss();
-
-    };
-    private MaterialPickerOnPositiveButtonClickListener pclDatePicker = selection -> {
-        vStartDateOfUse.setText(convertDateToString(selection));
-        startDate = (long) selection;
-    };
-    private View.OnClickListener oclStartDateOfUse = v -> {
+    private final View.OnClickListener oclStartDateOfUse = v -> {
         vDatePicker.show(getParentFragmentManager(), "DATE_PICKER");
     };
+
+    public ClientInfoDialog(SupplementsDialog supplementsDialog) {
+        this.supplementsDialog = supplementsDialog;
+    }
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_client_info, container, false);
+        supplementsDialog.dismiss();
+        initialize(view);
+        vScan.setOnClickListener(oclScan);
+        vStartDateOfUseLayout.setEndIconOnClickListener(oclStartDateOfUse);
+        vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);
+        return view;
+    }
 
 }

@@ -24,6 +24,8 @@
         <entry key="app/src/main/res/layout/fragment_fullscreen.xml" value="0.10144927536231885" />
         <entry key="app/src/main/res/layout/fragment_gross_salary.xml" value="0.2292418772563177" />
         <entry key="app/src/main/res/layout/fragment_machine_check_in_out_dialog.xml" value="0.15" />
+        <entry key="app/src/main/res/layout/fragment_manager_project_summary.xml" value="0.10144927536231885" />
+        <entry key="app/src/main/res/layout/fragment_salary_summary_dialog.xml" value="1.0" />
         <entry key="app/src/main/res/layout/fragment_supplements.xml" value="0.22" />
         <entry key="app/src/main/res/layout/fragment_vacation_request.xml" value="0.33" />
         <entry key="app/src/main/res/layout/fragment_vacation_requests.xml" value="0.25" />

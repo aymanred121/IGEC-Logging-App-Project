@@ -2,26 +2,26 @@ package com.example.igecuser.Dialogs;
 
 import android.app.Dialog;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.DialogFragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
+
 import com.budiyev.android.codescanner.CodeScanner;
 import com.budiyev.android.codescanner.CodeScannerView;
 import com.example.igecuser.R;
 
-public class MachineCheckInOutFragmentDialog extends DialogFragment {
+public class MachineCheckInOutDialog extends DialogFragment {
     //Views
     private CodeScanner mCodeScanner;
-    private boolean isItAUser;
-    public MachineCheckInOutFragmentDialog(boolean isItAUser) {
+    private final boolean isItAUser;
+
+    public MachineCheckInOutDialog(boolean isItAUser) {
         this.isItAUser = isItAUser;
     }
 

@@ -6,15 +6,19 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.viewpager.widget.ViewPager;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.TextView;
 
+import com.example.igecuser.Adapters.ViewPagerAdapter;
 import com.example.igecuser.Fragments.ChangePasswordFragment;
 import com.example.igecuser.Fragments.CheckInOutFragment;
 import com.example.igecuser.Fragments.GrossSalaryFragment;
+import com.example.igecuser.Fragments.SendVacationRequestFragment;
 import com.example.igecuser.Fragments.VacationRequestsFragment;
 import com.example.igecuser.Fragments.VacationsLogFragment;
 import com.example.igecuser.R;
@@ -23,11 +27,14 @@ import com.google.android.material.navigation.NavigationView;
 
 public class ManagerDashboard extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
+    private Toolbar vToolbar;
+    private ViewPager viewPager;
     private DrawerLayout vDrawerLayout;
     private NavigationView vNavigationView;
     // Vars
     private ActionBarDrawerToggle actionBarDrawerToggle;
     private Employee currManager;
+    private int selectedTab = 0;
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,10 +45,8 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
         initialize();
         // Listeners
         vDrawerLayout.addDrawerListener(actionBarDrawerToggle);
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new CheckInOutFragment(currManager)).commit();
-            vNavigationView.setCheckedItem(R.id.item_CheckInOut);
-        }
+        vDrawerLayout.addDrawerListener(drawerListener);
+        viewPager.addOnPageChangeListener(viewPagerListener);
     }
 
     // Functions
@@ -50,9 +55,28 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
 
 
         // Views
-        Toolbar vToolbar = findViewById(R.id.toolbar);
+        vToolbar = findViewById(R.id.toolbar);
         vDrawerLayout = findViewById(R.id.drawer);
         vNavigationView = findViewById(R.id.navView);
+        viewPager = findViewById(R.id.fragment_container);
+
+        ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), 0);
+        CheckInOutFragment checkInOutFragment = new CheckInOutFragment(currManager);
+        ChangePasswordFragment changePasswordFragment = new ChangePasswordFragment();
+        GrossSalaryFragment grossSalaryFragment = new GrossSalaryFragment();
+        VacationRequestsFragment vacationRequestsFragment = new VacationRequestsFragment(currManager);
+        VacationsLogFragment vacationsLogFragment = new VacationsLogFragment(false, currManager);
+        viewPagerAdapter.addFragment(checkInOutFragment, getString(R.string.check_in_out));
+        viewPagerAdapter.addFragment(changePasswordFragment, getString(R.string.change_password));
+        viewPagerAdapter.addFragment(grossSalaryFragment, getString(R.string.gross_salary));
+        viewPagerAdapter.addFragment(vacationRequestsFragment, getString(R.string.vacation_requests));
+        viewPagerAdapter.addFragment(vacationsLogFragment, getString(R.string.vacations_log));
+
+        viewPager.setAdapter(viewPagerAdapter);
+        vNavigationView.getMenu().getItem(0).setChecked(true);
+
+
+
         setSupportActionBar(vToolbar);
         actionBarDrawerToggle = new ActionBarDrawerToggle(this, vDrawerLayout, vToolbar, R.string.openNavBar, R.string.closeNavBar);
         actionBarDrawerToggle.syncState();
@@ -76,19 +100,59 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        if (R.id.item_CheckInOut == item.getItemId())
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new CheckInOutFragment(currManager)).commit();
-        else if (R.id.item_Vacation_Requests == item.getItemId())
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new VacationRequestsFragment(currManager)).commit();
-        else if (R.id.item_VacationsLog == item.getItemId())
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new VacationsLogFragment(true,currManager)).commit();
-        else if (R.id.item_ChangePassword == item.getItemId())
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new ChangePasswordFragment()).commit();
-        else if (R.id.item_GrossSalary == item.getItemId())
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new GrossSalaryFragment()).commit();
         vDrawerLayout.closeDrawer(GravityCompat.START);
+        selectedTab = item.getItemId();
         return true;
     }
+    private void changeTab(int itemId) {
+        if (itemId == R.id.item_CheckInOut)
+            viewPager.setCurrentItem(0, true);
+        if (itemId == R.id.item_ChangePassword)
+            viewPager.setCurrentItem(1, true);
+        if (itemId == R.id.item_GrossSalary)
+            viewPager.setCurrentItem(2, true);
+        if (itemId == R.id.item_Vacation_Requests)
+            viewPager.setCurrentItem(3, true);
+        if (itemId == R.id.item_VacationsLog)
+            viewPager.setCurrentItem(4, true);
+    }
+    //Listeners
+    private ViewPager.OnPageChangeListener viewPagerListener = new ViewPager.OnPageChangeListener() {
+        @Override
+        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
-    // Listeners
+        }
+
+        @Override
+        public void onPageSelected(int position) {
+            vNavigationView.getMenu().getItem(position).setChecked(true);
+            vToolbar.setTitle(vNavigationView.getMenu().getItem(position).getTitle());
+        }
+
+        @Override
+        public void onPageScrollStateChanged(int state) {
+
+        }
+    };
+    private DrawerLayout.DrawerListener drawerListener = new DrawerLayout.DrawerListener() {
+        @Override
+        public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
+
+        }
+
+        @Override
+        public void onDrawerOpened(@NonNull View drawerView) {
+
+        }
+
+        @Override
+        public void onDrawerClosed(@NonNull View drawerView) {
+            changeTab(selectedTab);
+        }
+
+        @Override
+        public void onDrawerStateChanged(int newState) {
+
+        }
+    };
 }

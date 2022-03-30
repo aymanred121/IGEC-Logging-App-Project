@@ -4,6 +4,8 @@ import static android.content.ContentValues.TAG;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -33,7 +35,7 @@ public class VacationsLogFragment extends Fragment {
     private static VacationAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
 
-    private ArrayList<VacationRequest> vacations = new ArrayList<>();
+    private ArrayList<VacationRequest> vacations;
     private Employee user;
     private final boolean isEmployee;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -47,11 +49,13 @@ public class VacationsLogFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_vacations_log, container, false);
-        Initialize(view);
+       return inflater.inflate(R.layout.fragment_vacations_log, container, false);
+    }
 
-        // Inflate the layout for this fragment
-        return view;
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        Initialize(view);
     }
 
     @Override
@@ -64,6 +68,7 @@ public class VacationsLogFragment extends Fragment {
 
     // Functions
     private void Initialize(View view) {
+        vacations = new ArrayList<>();
         recyclerView = view.findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());

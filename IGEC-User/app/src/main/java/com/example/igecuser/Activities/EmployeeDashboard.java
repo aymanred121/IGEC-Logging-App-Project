@@ -35,7 +35,6 @@ public class EmployeeDashboard extends AppCompatActivity implements NavigationVi
     private Employee currEmployee;
 
     private int selectedTab = 0;
-
     // Overrides
     @SuppressLint("ClickableViewAccessibility")
     @Override

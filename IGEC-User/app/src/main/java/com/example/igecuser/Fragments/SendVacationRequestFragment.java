@@ -2,6 +2,8 @@ package com.example.igecuser.Fragments;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -43,15 +45,17 @@ public class SendVacationRequestFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_vacation_request, container, false);
+        return inflater.inflate(R.layout.fragment_vacation_request, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         Initialize(view);
 
         vVacationDateLayout.setEndIconOnClickListener(clVacationDate);
         vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);
         vSendRequest.setOnClickListener(clSendRequest);
-
-        // Inflate the layout for this fragment
-        return view;
     }
 
     //Functions

@@ -53,13 +53,12 @@ public class CheckInOutFragment extends Fragment {
     // Vars
     private boolean isOpen = false;
     private Animation fabClose, fabOpen, rotateForward, rotateBackward, show, hide, rotateBackwardHide;
-    private boolean isIn = false;
+    private Boolean isHere = Boolean.FALSE;
     private final Employee currEmployee;
     private String id;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private double latitude, longitude;
     private Machine currMachine;
-    private View view;
 
     public CheckInOutFragment(Employee currEmployee) {
         this.currEmployee = currEmployee;
@@ -119,10 +118,10 @@ public class CheckInOutFragment extends Fragment {
                                 }
                             }
                         });
-                        isIn = !isIn;
-                        vCheckInOut.setBackgroundColor((isIn) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
-                        vCheckInOut.setText(isIn ? "Out" : "In");
-                        vAddMachine.setClickable(isIn);
+                        isHere =!isHere;
+                        vCheckInOut.setBackgroundColor((isHere) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
+                        vCheckInOut.setText(isHere ? "Out" : "In");
+                        vAddMachine.setClickable(isHere);
                         if (isOpen) {
                             vAddMachine.startAnimation(rotateBackwardHide);
                             vAddMachineInside.startAnimation(fabClose);
@@ -133,14 +132,13 @@ public class CheckInOutFragment extends Fragment {
                             vAddMachineOutside.setClickable(false);
                             isOpen = false;
                         } else {
-                            vAddMachine.startAnimation(isIn ? show : hide);
+                            vAddMachine.startAnimation(isHere ? show : hide);
                         }
 
                     }
                 }
             }
         });
-
         getParentFragmentManager().setFragmentResultListener("machine", this, new FragmentResultListener() {
             @Override
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
@@ -213,19 +211,22 @@ public class CheckInOutFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_check_in_out, container, false);
-        initialize();
+        return inflater.inflate(R.layout.fragment_check_in_out, container, false);
+    }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        initialize(view);
 
         // Listeners
         vCheckInOut.setOnClickListener(oclCheckInOut);
         vAddMachine.setOnClickListener(oclMachine);
         vAddMachineInside.setOnClickListener(oclInside);
         vAddMachineOutside.setOnClickListener(oclOutside);
-        return view;
     }
 
-    private void initialize() {
+    private void initialize(View view) {
         //Views
         TextView vGreeting = view.findViewById(R.id.TextView_Greeting);
         vCheckInOut = view.findViewById(R.id.Button_CheckInOut);
@@ -243,6 +244,10 @@ public class CheckInOutFragment extends Fragment {
         show = AnimationUtils.loadAnimation(getActivity(), R.anim.show);
         hide = AnimationUtils.loadAnimation(getActivity(), R.anim.hide);
         id = LocalDate.now().toString() + currEmployee.getId();
+        vCheckInOut.setBackgroundColor((isHere) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
+        vCheckInOut.setText(isHere ? "Out" : "In");
+        vAddMachine.setClickable(isHere);
+        vAddMachine.startAnimation(isHere ? show : hide);
 
         vGreeting.setText(String.format("%s\n%s", getString(R.string.good_morning), currEmployee.getFirstName()));
     }

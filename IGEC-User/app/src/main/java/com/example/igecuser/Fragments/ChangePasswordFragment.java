@@ -2,6 +2,8 @@ package com.example.igecuser.Fragments;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.text.Editable;
@@ -23,17 +25,23 @@ public class ChangePasswordFragment extends Fragment {
     private MaterialButton vChangePassword;
 
     //Vars
+
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View v = inflater.inflate(R.layout.fragment_change_password, container, false);
-        initialize(v);
+       return inflater.inflate(R.layout.fragment_change_password, container, false);
+    }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        initialize(view);
         vChangePassword.setOnClickListener(oclChangePassword);
         vConfirmPassword.addTextChangedListener(twConfirmPassword);
         vNewPassword.addTextChangedListener(twNewPassword);
-        return v;
     }
 
     private void initialize(View v) {

@@ -1,7 +1,11 @@
 package com.example.igec_admin.Activities;
 
+
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -10,7 +14,10 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.widget.ViewPager2;
 
+import com.example.igec_admin.Adatpers.ViewPagerAdapter;
 import com.example.igec_admin.Fragments.AddMachineFragment;
 import com.example.igec_admin.Fragments.AddProjectFragment;
 import com.example.igec_admin.Fragments.AddUserFragment;
@@ -25,10 +32,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private DrawerLayout vDrawerLayout;
     private NavigationView vNavigationView;
+    private ViewPager viewPager;
+    private Toolbar vToolbar;
 
     // Vars
     private ActionBarDrawerToggle actionBarDrawerToggle;
-
+    private int selectedTab = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,24 +49,44 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // Listeners
         vDrawerLayout.addDrawerListener(actionBarDrawerToggle);
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new AddUserFragment()).commit();
-            vNavigationView.setCheckedItem(R.id.item_addUser);
-        }
-
+        vDrawerLayout.addDrawerListener(drawerListener);
+        viewPager.addOnPageChangeListener(viewPagerListener);
     }
-
 
     //Functions
     private void initialize() {
         // Views
-        Toolbar vToolbar = findViewById(R.id.toolbar);
+        vToolbar = findViewById(R.id.toolbar);
         vDrawerLayout = findViewById(R.id.drawer);
         vNavigationView = findViewById(R.id.navView);
+        viewPager = findViewById(R.id.fragment_container);
+
         setSupportActionBar(vToolbar);
         actionBarDrawerToggle = new ActionBarDrawerToggle(this, vDrawerLayout, vToolbar, R.string.openNavBar, R.string.closeNavBar);
         actionBarDrawerToggle.syncState();
         vNavigationView.setNavigationItemSelectedListener(this);
+
+
+        AddUserFragment addUserFragment = new AddUserFragment();
+        AddProjectFragment addProjectFragment = new AddProjectFragment();
+        AddMachineFragment addMachineFragment = new AddMachineFragment();
+        UsersFragment usersFragment = new UsersFragment();
+        ProjectsFragment projectsFragment = new ProjectsFragment();
+        MachinesFragment machinesFragment = new MachinesFragment();
+        SummaryFragment summaryFragment = new SummaryFragment();
+
+
+        ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), 0);
+        viewPagerAdapter.addFragment(addUserFragment, getString(R.string.add_user));
+        viewPagerAdapter.addFragment(addProjectFragment, getString(R.string.add_project));
+        viewPagerAdapter.addFragment(addMachineFragment, getString(R.string.add_machine));
+        viewPagerAdapter.addFragment(usersFragment, getString(R.string.users));
+        viewPagerAdapter.addFragment(projectsFragment, getString(R.string.projects));
+        viewPagerAdapter.addFragment(machinesFragment, getString(R.string.machines));
+        viewPagerAdapter.addFragment(summaryFragment, getString(R.string.summary));
+
+        viewPager.setAdapter(viewPagerAdapter);
+        vNavigationView.getMenu().getItem(0).setChecked(true);
 
 
     }
@@ -72,23 +101,64 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        int itemId = item.getItemId();
-        if (itemId == R.id.item_addUser)
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new AddUserFragment()).commit();
-        if (itemId == R.id.item_addProject)
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new AddProjectFragment()).commit();
-        if (itemId == R.id.item_addMachine)
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new AddMachineFragment()).commit();
-        if (itemId == R.id.item_summary)
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new SummaryFragment()).commit();
-        if (itemId == R.id.item_Users)
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new UsersFragment()).commit();
-        if (itemId == R.id.item_Projects)
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new ProjectsFragment()).commit();
-        if (itemId == R.id.item_Machines)
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new MachinesFragment()).commit();
-
         vDrawerLayout.closeDrawer(GravityCompat.START);
+        selectedTab = item.getItemId();
         return true;
     }
+    private void changeTab(int itemId)
+    {
+        if (itemId == R.id.item_addUser)
+            viewPager.setCurrentItem(0, true);
+        if (itemId == R.id.item_addProject)
+            viewPager.setCurrentItem(1, true);
+        if (itemId == R.id.item_addMachine)
+            viewPager.setCurrentItem(2, true);
+        if (itemId == R.id.item_Users)
+            viewPager.setCurrentItem(3, true);
+        if (itemId == R.id.item_Projects)
+            viewPager.setCurrentItem(4, true);
+        if (itemId == R.id.item_Machines)
+            viewPager.setCurrentItem(5, true);
+        if (itemId == R.id.item_summary)
+            viewPager.setCurrentItem(6, true);
+    }
+
+    private ViewPager.OnPageChangeListener viewPagerListener = new ViewPager.OnPageChangeListener() {
+        @Override
+        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+        }
+
+        @Override
+        public void onPageSelected(int position) {
+            vNavigationView.getMenu().getItem(position).setChecked(true);
+            vToolbar.setTitle(vNavigationView.getMenu().getItem(position).getTitle());
+        }
+
+        @Override
+        public void onPageScrollStateChanged(int state) {
+
+        }
+    };
+    private DrawerLayout.DrawerListener drawerListener = new DrawerLayout.DrawerListener() {
+        @Override
+        public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
+
+        }
+
+        @Override
+        public void onDrawerOpened(@NonNull View drawerView) {
+
+        }
+
+        @Override
+        public void onDrawerClosed(@NonNull View drawerView) {
+            changeTab(selectedTab);
+        }
+
+        @Override
+        public void onDrawerStateChanged(int newState) {
+
+        }
+    };
 }

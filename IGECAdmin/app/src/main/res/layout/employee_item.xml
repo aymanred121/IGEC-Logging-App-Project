@@ -33,7 +33,7 @@
             android:id="@+id/ImageView_EmployeeSelected"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:buttonTint="@color/Primary"
+            android:buttonTint="@color/primaryColor"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 

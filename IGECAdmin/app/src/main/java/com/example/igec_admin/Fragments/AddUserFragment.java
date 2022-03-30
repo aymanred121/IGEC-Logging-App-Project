@@ -2,7 +2,6 @@ package com.example.igec_admin.Fragments;
 
 import static com.example.igec_admin.cryptography.RSAUtil.encrypt;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -10,25 +9,21 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Employee;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -45,19 +40,16 @@ public class AddUserFragment extends Fragment {
 
     // Views
     MaterialButton vRegister;
-    TextInputEditText vFirstName;
-    TextInputEditText vSecondName;
-    TextInputEditText vEmail;
-    TextInputLayout vEmailLayout;
-    TextInputEditText vPassword;
-    TextInputEditText vTitle;
-    TextInputEditText vSalary;
-    TextInputEditText vSSN;
-    TextInputEditText vArea;
-    TextInputEditText vCity;
-    TextInputEditText vStreet;
-    TextInputEditText vHireDate;
-    TextInputLayout vHireDateLayout;
+    TextInputEditText vFirstName ,vSecondName
+                    , vEmail
+                    , vPassword
+                    , vPhone
+                    , vTitle
+                    , vSalary
+                    , vNationalID
+                    , vArea, vCity, vStreet
+                    , vHireDate;
+    TextInputLayout vHireDateLayout, vEmailLayout;
     MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     MaterialDatePicker vDatePicker;
 
@@ -89,9 +81,10 @@ public class AddUserFragment extends Fragment {
         vEmail = view.findViewById(R.id.TextInput_Email);
         vEmailLayout = view.findViewById(R.id.textInputLayout_Email);
         vPassword = view.findViewById(R.id.TextInput_Password);
+        vPhone = view.findViewById(R.id.TextInput_Phone);
         vTitle = view.findViewById(R.id.TextInput_Title);
         vSalary = view.findViewById(R.id.TextInput_Salary);
-        vSSN = view.findViewById(R.id.TextInput_SNN);
+        vNationalID = view.findViewById(R.id.TextInput_NationalID);
         vArea = view.findViewById(R.id.TextInput_Area);
         vCity = view.findViewById(R.id.TextInput_City);
         vStreet = view.findViewById(R.id.TextInput_Street);
@@ -163,7 +156,7 @@ public class AddUserFragment extends Fragment {
                 (vCity.getText()).toString(),
                 (vStreet.getText()).toString(),
                 Double.parseDouble(vSalary.getText().toString()),
-                ((vSSN.getText()).toString()),
+                ((vNationalID.getText()).toString()),
                 new Date(hireDate),
                 vEmail.getText().toString().trim(),
                 encryptedPassword());
@@ -183,13 +176,14 @@ public class AddUserFragment extends Fragment {
         vSecondName.setText(null);
         vEmail.setText(null);
         vPassword.setText(null);
+        vPhone.setText(null);
         vTitle.setText(null);
         vSalary.setText(null);
         vArea.setText(null);
         vCity.setText(null);
         vStreet.setText(null);
         vHireDate.setText(null);
-        vSSN.setText(null);
+        vNationalID.setText(null);
     }
 
     boolean validateInputs() {
@@ -198,14 +192,15 @@ public class AddUserFragment extends Fragment {
                         vSecondName.getText().toString().isEmpty() ||
                         vEmail.getText().toString().isEmpty() ||
                         vPassword.getText().toString().isEmpty() ||
+                        vPhone.getText().toString().isEmpty() ||
                         vTitle.getText().toString().isEmpty() ||
                         vSalary.getText().toString().isEmpty() ||
                         vArea.getText().toString().isEmpty() ||
                         vCity.getText().toString().isEmpty() ||
                         vStreet.getText().toString().isEmpty() ||
                         vHireDate.getText().toString().isEmpty() ||
-                        vSSN.getText().toString().isEmpty() ||
-                        vSSN.getText().toString().length() != 14);
+                        vNationalID.getText().toString().isEmpty() ||
+                        vNationalID.getText().toString().length() != 14);
     }
 
     // Listeners

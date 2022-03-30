@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:scrollbars="vertical"
     tools:context=".Fragments.AddUserFragment">
 
     <com.google.android.material.textfield.TextInputLayout
@@ -12,7 +13,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
         app:boxBackgroundMode="outline"
         app:helperTextEnabled="true"
@@ -37,7 +38,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="32dp"
         app:boxBackgroundMode="outline"
         app:helperTextEnabled="true"
@@ -93,7 +94,7 @@
         android:layout_marginEnd="32dp"
         app:boxBackgroundMode="outline"
         app:endIconMode="password_toggle"
-        app:endIconTint="@color/Primary"
+        app:endIconTint="@color/primaryColor"
         app:helperTextEnabled="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -110,6 +111,32 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textInputLayout_Phone"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="32dp"
+        app:boxBackgroundMode="outline"
+        app:counterEnabled="true"
+        app:counterMaxLength="11"
+        app:helperTextEnabled="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout_Password">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/TextInput_Phone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/phone"
+            android:inputType="phone"
+            android:maxLength="11"
+            android:padding="14dp"
+            android:singleLine="true" />
+    </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textInputLayout_Title"
@@ -123,7 +150,7 @@
         app:helperTextEnabled="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textInputLayout_Password">
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout_Phone">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/TextInput_Title"
@@ -264,10 +291,10 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/textInputLayout_SNN"
+        android:id="@+id/textInputLayout_NationalID"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="64dp"
         android:layout_marginStart="32dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="32dp"
@@ -276,16 +303,15 @@
         app:counterEnabled="true"
         app:counterMaxLength="14"
         app:helperTextEnabled="true"
-        app:layout_constraintBottom_toTopOf="@+id/button_register"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/textInputLayout_HireDate">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/TextInput_SNN"
+            android:id="@+id/TextInput_NationalID"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/snn"
+            android:hint="@string/nationalId"
             android:inputType="number"
             android:maxLength="14"
             android:padding="14dp"
@@ -329,6 +355,5 @@
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

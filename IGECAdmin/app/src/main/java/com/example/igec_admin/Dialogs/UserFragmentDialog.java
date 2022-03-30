@@ -128,7 +128,7 @@ public class UserFragmentDialog extends DialogFragment {
         vPassword = view.findViewById(R.id.TextInput_Password);
         vTitle = view.findViewById(R.id.TextInput_Title);
         vSalary = view.findViewById(R.id.TextInput_Salary);
-        vSSN = view.findViewById(R.id.TextInput_SNN);
+        vSSN = view.findViewById(R.id.TextInput_NationalID);
         vArea = view.findViewById(R.id.TextInput_Area);
         vCity = view.findViewById(R.id.TextInput_City);
         vStreet = view.findViewById(R.id.TextInput_Street);

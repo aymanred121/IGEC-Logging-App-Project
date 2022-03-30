@@ -20,7 +20,7 @@
     <string name="city">City*</string>
     <string name="street">Street*</string>
     <string name="hire_date">Hire Date*</string>
-    <string name="snn">SNN*</string>
+    <string name="nationalId">National ID*</string>
     <string name="add_user">Add User</string>
     <string name="add_project">Add Project</string>
     <string name="add_machine">Add Machine</string>
@@ -32,4 +32,5 @@
     <string name="machines">Machines</string>
     <string name="update">Update</string>
     <string name="delete">Delete</string>
+    <string name="phone">Phone*</string>
 </resources>

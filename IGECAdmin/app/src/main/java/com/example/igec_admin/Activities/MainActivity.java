@@ -1,7 +1,11 @@
 package com.example.igec_admin.Activities;
 
 
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.Settings;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -40,6 +44,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private int selectedTab = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        if (Build.VERSION.SDK_INT >= 30){
+            if (!Environment.isExternalStorageManager()){
+                Intent getpermission = new Intent();
+                getpermission.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                startActivity(getpermission);
+            }
+        }
         super.onCreate(savedInstanceState);
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         setContentView(R.layout.activity_main);

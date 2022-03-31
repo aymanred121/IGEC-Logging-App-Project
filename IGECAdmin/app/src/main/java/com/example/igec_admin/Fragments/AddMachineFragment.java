@@ -1,10 +1,13 @@
 package com.example.igec_admin.Fragments;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.ContextWrapper;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -32,6 +35,9 @@ import com.google.firebase.storage.UploadTask;
 import com.google.zxing.WriterException;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -118,12 +124,13 @@ public class AddMachineFragment extends Fragment {
         @Override
         public void onClick(View v) {
             if (validateInput()) {
-
+                saveToInternalStorage();
+                saveToCloudStorage();
                 Machine newMachine = new Machine(vID.getText().toString(), vCodeName.getText().toString(), new Date(purchaseDate) , new Allowance());
                 machineCol.document(vID.getText().toString()).set(newMachine).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void unused) {
-                        Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
                         clearInput();
                     }
                 });
@@ -134,6 +141,23 @@ public class AddMachineFragment extends Fragment {
             }
         }
     };
+
+    private void saveToCloudStorage() {
+        vQRImg.setDrawingCacheEnabled(true);
+        vQRImg.buildDrawingCache();
+        Bitmap bitmap = ((BitmapDrawable)vQRImg.getDrawable()).getBitmap();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 20, baos);
+        byte[] data = baos.toByteArray();
+        StorageReference mountainsRef = storageRef.child("imgs/"+vID.getText().toString()+"/"+vCodeName.getText().toString()+".jpg");
+
+        UploadTask uploadTask = mountainsRef.putBytes(data);
+        uploadTask.addOnSuccessListener(unsed->{
+            Toast.makeText(getActivity(), "uploaded", Toast.LENGTH_SHORT).show();
+        }).addOnFailureListener(e->{
+            Toast.makeText(getActivity(), e.toString(), Toast.LENGTH_SHORT).show();
+        });
+    }
 
 
     View.OnClickListener oclMachineID = new View.OnClickListener() {
@@ -173,6 +197,28 @@ public class AddMachineFragment extends Fragment {
             purchaseDate = (long) selection;
         }
     };
-
+    public void saveToInternalStorage(){
+        if(new File( Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+vCodeName.getText().toString()+".jpg").exists())
+            return;
+        Bitmap bitmapImage=((BitmapDrawable)vQRImg.getDrawable()).getBitmap();
+        if(bitmapImage==null)
+            return;
+        File path = new File( Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),vCodeName.getText().toString()+".jpg");
+        FileOutputStream fos = null;
+        try {
+            path.createNewFile();
+            fos = new FileOutputStream(path.getAbsoluteFile());
+            bitmapImage.compress(Bitmap.CompressFormat.JPEG, 10, fos);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                fos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return ;
+    }
 
 }

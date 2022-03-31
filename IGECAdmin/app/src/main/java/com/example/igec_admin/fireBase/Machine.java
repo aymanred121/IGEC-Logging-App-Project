@@ -3,8 +3,11 @@ package com.example.igec_admin.fireBase;
 import java.util.Date;
 
 public class Machine {
-    private String id, codeName;
+    private String id, reference;
+    private double monthlyRentPrice,dailyRentPrice,weeklyRentPrice;
     private Date purchaseDate;
+    private Boolean isUsed;
+
 
     public Allowance getAllowance() {
         return allowance;
@@ -27,17 +30,17 @@ public class Machine {
         this.id = id;
     }
 
-    public String getCodeName() {
-        return codeName;
+    public String getReference() {
+        return reference;
     }
 
-    public void setCodeName(String codeName) {
-        this.codeName = codeName;
+    public void setReference(String reference) {
+        this.reference = reference;
     }
 
     public Machine(String id, String codeName, Date buyingDate , Allowance allowance) {
         this.id = id;
-        this.codeName = codeName;
+        this.reference = codeName;
         this.purchaseDate = buyingDate;
         this.allowance = allowance;
     }
@@ -45,8 +48,39 @@ public class Machine {
     public Date getPurchaseDate() {
         return purchaseDate;
     }
-
     public void setPurchaseDate(Date purchaseDate) {
         this.purchaseDate = purchaseDate;
+    }
+
+    public double getMonthlyRentPrice() {
+        return monthlyRentPrice;
+    }
+
+    public void setMonthlyRentPrice(double monthlyRentPrice) {
+        this.monthlyRentPrice = monthlyRentPrice;
+    }
+
+    public double getDailyRentPrice() {
+        return dailyRentPrice;
+    }
+
+    public void setDailyRentPrice(double dailyRentPrice) {
+        this.dailyRentPrice = dailyRentPrice;
+    }
+
+    public double getWeeklyRentPrice() {
+        return weeklyRentPrice;
+    }
+
+    public Boolean getUsed() {
+        return isUsed;
+    }
+
+    public void setUsed(Boolean used) {
+        isUsed = used;
+    }
+
+    public void setWeeklyRentPrice(double weeklyRentPrice) {
+        this.weeklyRentPrice = weeklyRentPrice;
     }
 }

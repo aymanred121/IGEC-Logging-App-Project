@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Machine;
-import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
 
@@ -66,7 +65,7 @@ public class MachineAdapter extends RecyclerView.Adapter<MachineAdapter.MachineV
     public void onBindViewHolder(@NonNull MachineViewHolder holder, int position) {
         Machine machine = machinesList.get(position);
         holder.vID.setText(String.format("ID: %s", machine.getId()));
-        holder.vCodeName.setText(String.format("Code Name: %s", machine.getCodeName()));
+        holder.vCodeName.setText(String.format("Code Name: %s", machine.getReference()));
     }
 
 

@@ -267,14 +267,24 @@ public class CheckInOutFragment extends Fragment {
                         String machineEmpId = id + machineID;
                         db.collection("Machine_Employee").document(machineEmpId).get().addOnSuccessListener(documentSnapshot -> {
                             if (!documentSnapshot.exists()) {
+                                if(currMachine.getUsed()){
+                                    Toast.makeText(getContext(), "this Machine already being used by"+currMachine.getEmployeeFirstName(), Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
                                 HashMap<String, Object> checkInDetails = new HashMap<>((new Summary(latitude, longitude)).getGeoMap());
                                 checkInDetails.put("Time", Timestamp.now());
                                 Map<String, Object> machineEmployee1 = new HashMap();
                                 machineEmployee1.put("machine", currMachine);
                                 machineEmployee1.put("employee", currEmployee);
                                 machineEmployee1.put("checkIn", checkInDetails);
-                                db.collection("Machine_Employee").document(machineEmpId).set(machineEmployee1);
-                                Toast.makeText(getContext(), "Machine: " + currMachine.getCodeName() + " checked In successfully", Toast.LENGTH_SHORT).show();
+                                db.collection("Machine_Employee").document(machineEmpId).set(machineEmployee1).addOnSuccessListener(unused -> {
+                                    currMachine.setUsed(true);
+                                    currMachine.setEmployeeFirstName(currEmployee.getFirstName());
+                                    db.collection("machine").document(currMachine.getId()).update("isUsed",true,"employeeFirstName",currEmployee.getFirstName())
+                                    .addOnSuccessListener(unused1->{
+                                        Toast.makeText(getContext(), "Machine: " + currMachine.getReference() + " checked In successfully", Toast.LENGTH_SHORT).show();
+                                    });
+                                });
 
                             } else {
                                 Machine_Employee currMachineEmployee = documentSnapshot.toObject(Machine_Employee.class);
@@ -287,7 +297,16 @@ public class CheckInOutFragment extends Fragment {
                                     currMachineEmployee.setWorkedTime(workingTime);
                                     currMachineEmployee.setCheckOut(checkOutDetails);
                                     db.collection("Machine_Employee").document(machineEmpId).set(currMachineEmployee)
-                                            .addOnSuccessListener(unused -> Toast.makeText(getContext(), "Machine: " + currMachine.getCodeName() + " checked Out successfully", Toast.LENGTH_SHORT).show());
+                                            .addOnSuccessListener(unused ->{
+                                                db.collection("Machine_Employee").document(machineEmpId).set(currMachineEmployee).addOnSuccessListener(unused1 -> {
+                                                    currMachine.setUsed(false);
+                                                    currMachine.setEmployeeFirstName("");
+                                                    db.collection("machine").document(currMachine.getId()).update("isUsed",false,"employeeFirstName","").addOnSuccessListener(vu->{
+                                                        Toast.makeText(getContext(), "Machine: " + currMachine.getReference() + " checked Out successfully", Toast.LENGTH_SHORT).show();
+
+                                                    });
+                                                });
+                                            });
 
                                 } else {
                                     Toast.makeText(getActivity(), "this Machine Already checked Out", Toast.LENGTH_SHORT).show();

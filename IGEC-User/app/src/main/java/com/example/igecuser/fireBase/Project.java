@@ -1,5 +1,6 @@
 package com.example.igecuser.fireBase;
 
+
 import com.google.firebase.database.Exclude;
 
 import java.util.ArrayList;
@@ -8,15 +9,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Project {
-    private String managerID;
-    private String managerName;
-    private String name;
-    private Date startDate, estimatedEndDate;
+    private String managerID,managerName,name,id , reference ,  locationCity ,locationArea ,locationStreet ;
+    private ArrayList<Allowance> allowancesList = new ArrayList<>();
+    private Client client ;
+    private Date startDate;
     private ArrayList<EmployeeOverview>  employees;
-    private String location;
     private HashMap<String,Object> employeeWorkedTime = new HashMap<>();
-    public Project() {
-    }
 
     public HashMap<String, Object> getEmployeeWorkedTime() {
         return employeeWorkedTime;
@@ -26,22 +24,43 @@ public class Project {
         this.employeeWorkedTime = employeeWorkedTime;
     }
 
-    public Project(String managerName, String managerID, String name, Date startDate, Date estimatedEndDate, ArrayList<EmployeeOverview> employees, String location) {
+    public Project() {
+    }
+
+    public Project(String managerName,String managerID, String name, Date startDate, ArrayList<EmployeeOverview> employees , String reference , String locationCity , String locationArea , String locationStreet) {
         this.managerID = managerID;
         this.name = name;
         this.startDate = startDate;
-        this.estimatedEndDate = estimatedEndDate;
         this.employees = employees;
         this.managerName=managerName;
-        this.location=location;
+        this.reference = reference;
+        this.locationArea = locationArea;
+        this.locationCity = locationCity;
+        this.locationStreet = locationStreet;
     }
 
-    public String getLocation() {
-        return location;
+    public String getLocationCity() {
+        return locationCity;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public void setLocationCity(String locationCity) {
+        this.locationCity = locationCity;
+    }
+
+    public String getLocationArea() {
+        return locationArea;
+    }
+
+    public void setLocationArea(String locationArea) {
+        this.locationArea = locationArea;
+    }
+
+    public String getLocationStreet() {
+        return locationStreet;
+    }
+
+    public void setLocationStreet(String locationStreet) {
+        this.locationStreet = locationStreet;
     }
 
     public String getManagerName() {
@@ -76,15 +95,40 @@ public class Project {
         this.startDate = startDate;
     }
 
-    public Date getEstimatedEndDate() {
-        return estimatedEndDate;
+
+    public String getId() {
+        return id;
     }
 
-    public void setEstimatedEndDate(Date estimatedEndDate) {
-        this.estimatedEndDate = estimatedEndDate;
+    public void setId(String id) {
+        this.id = id;
     }
 
-  public ArrayList<EmployeeOverview>  getEmployees() {
+    public Client getClient() {
+        return client;
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
+    }
+
+    public ArrayList<Allowance> getAllowancesList() {
+        return allowancesList;
+    }
+
+    public void setAllowancesList(ArrayList<Allowance> allowancesList) {
+        this.allowancesList = allowancesList;
+    }
+
+    public String getReference() {
+        return reference;
+    }
+
+    public void setReference(String reference) {
+        this.reference = reference;
+    }
+
+    public ArrayList<EmployeeOverview>  getEmployees() {
         return employees;
     }
 

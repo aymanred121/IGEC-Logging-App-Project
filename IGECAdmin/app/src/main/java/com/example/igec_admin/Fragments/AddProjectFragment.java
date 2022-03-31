@@ -37,6 +37,8 @@ import com.google.firebase.firestore.DocumentReference;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.WriteBatch;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -69,6 +71,10 @@ public class AddProjectFragment extends Fragment {
             .document("emp");
     private CollectionReference employeeCol = db.collection("employees");
     private WriteBatch batch = db.batch();
+
+
+
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -182,7 +188,7 @@ public class AddProjectFragment extends Fragment {
     }
 
     private void addProject() {
-        Project newProject = new Project(vManagerName.getText().toString(), vManagerID.getText().toString(), vName.getText().toString(), new Date(startDate), new Date(endDate), Team, "");
+        Project newProject = new Project(vManagerName.getText().toString(), vManagerID.getText().toString(), vName.getText().toString(), new Date(startDate), Team, "" ,vCity.getText().toString() , vArea.getText().toString() , vStreet.getText().toString());
         newProject.setId(projectID);
         db.collection("projects").document(projectID).set(newProject).addOnSuccessListener(unused -> updateEmployeesDetails(projectID));
     }

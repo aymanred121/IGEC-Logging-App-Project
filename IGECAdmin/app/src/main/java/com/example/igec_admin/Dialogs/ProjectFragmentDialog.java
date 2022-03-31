@@ -149,7 +149,6 @@ public class ProjectFragmentDialog extends DialogFragment {
         vManagerIDLayout.setEnabled(true);
         vManagerID.setEnabled(false);
         startDate = project.getStartDate().getTime();
-        endDate = project.getEstimatedEndDate().getTime();
         vTimeDatePickerBuilder.setTitleText("Time");
         vTimeDatePicker = vTimeDatePickerBuilder.setSelection(new Pair<>(startDate, endDate)).build();
         vTime.setText(String.format("%s to %s", convertDateToString(startDate), convertDateToString(endDate)));

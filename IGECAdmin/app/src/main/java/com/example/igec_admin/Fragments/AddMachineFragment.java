@@ -1,6 +1,9 @@
 package com.example.igec_admin.Fragments;
 
 import android.annotation.SuppressLint;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -13,6 +16,7 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 
 import com.example.igec_admin.R;
+import com.example.igec_admin.fireBase.Allowance;
 import com.example.igec_admin.fireBase.Machine;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
@@ -22,8 +26,12 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.google.zxing.WriterException;
 
+import java.io.ByteArrayOutputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -48,6 +56,8 @@ public class AddMachineFragment extends Fragment {
     private CollectionReference machineCol = db.collection("machine");
     private MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vDatePicker;
+    private FirebaseStorage storage = FirebaseStorage.getInstance("gs://test1-c253b.appspot.com");
+    private StorageReference storageRef = storage.getReference();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -108,7 +118,8 @@ public class AddMachineFragment extends Fragment {
         @Override
         public void onClick(View v) {
             if (validateInput()) {
-                Machine newMachine = new Machine(vID.getText().toString(), vCodeName.getText().toString(), new Date(purchaseDate));
+
+                Machine newMachine = new Machine(vID.getText().toString(), vCodeName.getText().toString(), new Date(purchaseDate) , new Allowance());
                 machineCol.document(vID.getText().toString()).set(newMachine).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void unused) {

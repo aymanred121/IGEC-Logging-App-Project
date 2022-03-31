@@ -6,6 +6,16 @@ public class Machine {
     private String id, codeName;
     private Date purchaseDate;
 
+    public Allowance getAllowance() {
+        return allowance;
+    }
+
+    public void setAllowance(Allowance allowance) {
+        this.allowance = allowance;
+    }
+
+    private Allowance allowance ;
+
     public Machine() {
     }
 
@@ -25,10 +35,11 @@ public class Machine {
         this.codeName = codeName;
     }
 
-    public Machine(String id, String codeName, Date buyingDate) {
+    public Machine(String id, String codeName, Date buyingDate , Allowance allowance) {
         this.id = id;
         this.codeName = codeName;
         this.purchaseDate = buyingDate;
+        this.allowance = allowance;
     }
 
     public Date getPurchaseDate() {

@@ -72,7 +72,7 @@ public class VacationRequestDialog extends DialogFragment {
 
     // Functions
     private void initialize(View view) {
-        TextInputEditText vEmployeeID = view.findViewById(R.id.TextInput_EmployeeId);
+        TextInputEditText vEmployeeID = view.findViewById(R.id.TextInput_EmployeeID);
         // Views
         TextInputEditText vVacationDate = view.findViewById(R.id.TextInput_VacationDate);
         TextInputEditText vVacationNote = view.findViewById(R.id.TextInput_VacationNote);

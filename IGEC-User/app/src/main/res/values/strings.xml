@@ -53,4 +53,11 @@
     <string name="gross_salary">Gross Salary</string>
     <string name="reason_for">Reason For:</string>
     <string name="_0_00">0.00 EGP</string>
+    <string name="project_name">Project Name*</string>
+    <string name="project_reference">Project Reference*</string>
+    <string name="project_allowances">Show Project Allowances</string>
+    <string name="update">Update</string>
+    <string name="ProjectSummary">Project Summary</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

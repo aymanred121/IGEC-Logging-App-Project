@@ -16,21 +16,24 @@
         <entry key="app/src/main/res/layout/activity_qr_camera.xml" value="0.22" />
         <entry key="app/src/main/res/layout/activity_vacation_info.xml" value="0.18" />
         <entry key="app/src/main/res/layout/content_test.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/employee_item.xml" value="0.25" />
         <entry key="app/src/main/res/layout/fragment_blank.xml" value="0.10144927536231885" />
         <entry key="app/src/main/res/layout/fragment_change_password.xml" value="0.4649122807017544" />
         <entry key="app/src/main/res/layout/fragment_check_in_out.xml" value="0.29814814814814816" />
         <entry key="app/src/main/res/layout/fragment_checking_in_out_dialog.xml" value="0.25" />
-        <entry key="app/src/main/res/layout/fragment_client_info.xml" value="0.16" />
+        <entry key="app/src/main/res/layout/fragment_client_info.xml" value="0.33" />
+        <entry key="app/src/main/res/layout/fragment_employee_summary_dialog.xml" value="0.22" />
         <entry key="app/src/main/res/layout/fragment_fullscreen.xml" value="0.10144927536231885" />
         <entry key="app/src/main/res/layout/fragment_gross_salary.xml" value="0.2292418772563177" />
         <entry key="app/src/main/res/layout/fragment_machine_check_in_out_dialog.xml" value="0.15" />
         <entry key="app/src/main/res/layout/fragment_manager_project_summary.xml" value="0.10144927536231885" />
+        <entry key="app/src/main/res/layout/fragment_project_summary.xml" value="0.25" />
         <entry key="app/src/main/res/layout/fragment_salary_summary_dialog.xml" value="1.0" />
         <entry key="app/src/main/res/layout/fragment_supplements.xml" value="0.22" />
         <entry key="app/src/main/res/layout/fragment_vacation_request.xml" value="0.33" />
         <entry key="app/src/main/res/layout/fragment_vacation_requests.xml" value="0.25" />
         <entry key="app/src/main/res/layout/fragment_vacations_log.xml" value="0.2" />
-        <entry key="app/src/main/res/layout/machine_item.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/machine_item.xml" value="0.25" />
         <entry key="app/src/main/res/layout/nav_header.xml" value="0.33" />
         <entry key="app/src/main/res/layout/salary_summary_item.xml" value="0.5179856115107914" />
         <entry key="app/src/main/res/layout/supplement_item.xml" value="0.22" />

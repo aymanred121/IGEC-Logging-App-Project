@@ -101,15 +101,14 @@
         android:id="@+id/Button_Scan"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_below="@id/textInputLayout_UseStartDate"
+        android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp"
         android:padding="8dp"
         android:text="@string/Done"
         android:textAllCaps="false"
         android:textSize="16sp"
-        app:cornerRadius="8dp"
-        android:layout_below="@id/textInputLayout_UseStartDate"
-        android:layout_centerHorizontal="true"
-        />
+        app:cornerRadius="8dp" />
 
 
 </RelativeLayout>

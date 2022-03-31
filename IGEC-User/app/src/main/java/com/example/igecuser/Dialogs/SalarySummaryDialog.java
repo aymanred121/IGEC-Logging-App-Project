@@ -11,17 +11,25 @@ import android.view.WindowManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.igecuser.Adapters.SalarySummaryAdapter;
 import com.example.igecuser.R;
 import com.example.igecuser.dummySalarySummary;
+
+import java.util.ArrayList;
 
 
 public class SalarySummaryDialog extends DialogFragment {
 
-    private final dummySalarySummary dummySalarySummary;
+    private final ArrayList<dummySalarySummary> salarySummaries;
+    private RecyclerView recyclerView;
+    private SalarySummaryAdapter adapter;
+    private RecyclerView.LayoutManager layoutManager;
 
-    public SalarySummaryDialog(dummySalarySummary dummySalarySummary) {
-        this.dummySalarySummary = dummySalarySummary;
+    public SalarySummaryDialog(ArrayList<dummySalarySummary> salarySummaries) {
+        this.salarySummaries = salarySummaries;
     }
 
     @NonNull
@@ -49,11 +57,17 @@ public class SalarySummaryDialog extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_salary_summary_dialog, container, false);
+        return inflater.inflate(R.layout.fragment_gross_salary, container, false);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        recyclerView = view.findViewById(R.id.recyclerview);
+        recyclerView.setHasFixedSize(true);
+        layoutManager = new LinearLayoutManager(getActivity());
+        adapter = new SalarySummaryAdapter(salarySummaries);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(adapter);
     }
 }

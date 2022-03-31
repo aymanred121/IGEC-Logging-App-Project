@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.igecuser.Adapters.SalarySummaryAdapter;
-import com.example.igecuser.Dialogs.SalarySummaryDialog;
 import com.example.igecuser.R;
 import com.example.igecuser.dummySalarySummary;
 import com.example.igecuser.dummySalarySummary.SalaryType;
@@ -37,8 +36,6 @@ public class GrossSalaryFragment extends Fragment {
         @Override
         public void onItemClick(int position) {
 
-            SalarySummaryDialog salarySummaryDialog = new SalarySummaryDialog(salarySummaries.get(position));
-            salarySummaryDialog.show(getParentFragmentManager(), "");
         }
     };
 

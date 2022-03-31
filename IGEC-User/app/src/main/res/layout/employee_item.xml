@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="5dp">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="12dp">
+
+        <TextView
+            android:id="@+id/TextView_EmployeeName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:textColor="@color/black"
+            tools:text="Employee Name" />
+
+        <TextView
+            android:id="@+id/TextView_EmployeeID"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/TextView_EmployeeName"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            android:textColor="@color/black"
+            tools:text="Employee ID" />
+
+        <TextView
+            android:id="@+id/TextView_EmployeeHours"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toEndOf="@id/TextView_EmployeeName"
+            android:textColor="@color/black"
+            tools:text="Employee Working Hours" />
+
+
+        <TextView
+            android:id="@+id/TextView_CurrentMachine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/TextView_EmployeeHours"
+            android:layout_marginTop="8dp"
+            android:layout_toEndOf="@id/TextView_EmployeeID"
+            android:textColor="@color/black"
+            tools:text="Current Machine" />
+
+
+    </RelativeLayout>
+
+</com.google.android.material.card.MaterialCardView>

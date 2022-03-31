@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
@@ -60,19 +61,19 @@ public class AddUserFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_add_user, container, false);
+      return inflater.inflate(R.layout.fragment_add_user, container, false);
+    }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         initialize(view);
         // Listeners
         vEmail.addTextChangedListener(twEmail);
         vHireDateLayout.setEndIconOnClickListener(oclHireDate);
         vRegister.setOnClickListener(clRegister);
         vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);
-
-
-        return view;
     }
-
 
     // Functions
     private void initialize(View view) {

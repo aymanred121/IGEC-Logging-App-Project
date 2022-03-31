@@ -46,7 +46,7 @@ import java.util.Map;
 
 public class ProjectFragmentDialog extends DialogFragment {
     // Views
-    private TextInputEditText vName, vLocation, vTime, vManagerName;
+    private TextInputEditText vName, vArea, vStreet, vCity, vTime, vManagerName;
     private MaterialButton vRegister, vUpdate, vDelete;
     private AutoCompleteTextView vManagerID;
     private TextInputLayout vManagerIDLayout, vTimeLayout;
@@ -117,7 +117,9 @@ public class ProjectFragmentDialog extends DialogFragment {
     // Functions
     private void Initialize(View view) {
         vName = view.findViewById(R.id.TextInput_ProjectName);
-        vLocation = view.findViewById(R.id.TextInput_Location);
+        vCity = view.findViewById(R.id.TextInput_City);
+        vStreet = view.findViewById(R.id.TextInput_Street);
+        vArea = view.findViewById(R.id.TextInput_Area);
         vTime = view.findViewById(R.id.TextInput_Time);
         vTimeLayout = view.findViewById(R.id.textInputLayout_Time);
         vManagerID = view.findViewById(R.id.TextInput_ManagerID);
@@ -142,7 +144,6 @@ public class ProjectFragmentDialog extends DialogFragment {
 
 
         vName.setText(project.getName());
-        vLocation.setText(project.getLocation());
         vManagerID.setText(project.getManagerID());
         vManagerName.setText(project.getManagerName());
         vManagerIDLayout.setEnabled(true);
@@ -150,9 +151,8 @@ public class ProjectFragmentDialog extends DialogFragment {
         startDate = project.getStartDate().getTime();
         endDate = project.getEstimatedEndDate().getTime();
         vTimeDatePickerBuilder.setTitleText("Time");
-        vTimeDatePicker = vTimeDatePickerBuilder.setSelection(new Pair<>(startDate,endDate)).build();
+        vTimeDatePicker = vTimeDatePickerBuilder.setSelection(new Pair<>(startDate, endDate)).build();
         vTime.setText(String.format("%s to %s", convertDateToString(startDate), convertDateToString(endDate)));
-
 
 
         getEmployees();
@@ -271,7 +271,9 @@ public class ProjectFragmentDialog extends DialogFragment {
     boolean validateInputs() {
         return
                 !(vName.getText().toString().isEmpty() ||
-                        vLocation.getText().toString().isEmpty() ||
+                        vArea.getText().toString().isEmpty() ||
+                        vCity.getText().toString().isEmpty() ||
+                        vStreet.getText().toString().isEmpty() ||
                         vManagerID.getText().toString().isEmpty() ||
                         vManagerName.getText().toString().isEmpty() ||
                         vTime.getText().toString().isEmpty());
@@ -285,7 +287,7 @@ public class ProjectFragmentDialog extends DialogFragment {
         updatedProjectData.put("name", vName.getText().toString());
         updatedProjectData.put("managerName", vManagerName.getText().toString());
         updatedProjectData.put("managerID", vManagerID.getText().toString());
-        updatedProjectData.put("location", vLocation.getText().toString());
+        updatedProjectData.put("location", "");
         updateEmployeesDetails(project.getId());
         updatedProjectData.put("employees", Team);
         db.collection("projects").document(project.getId()).update(updatedProjectData).addOnSuccessListener(unused -> {

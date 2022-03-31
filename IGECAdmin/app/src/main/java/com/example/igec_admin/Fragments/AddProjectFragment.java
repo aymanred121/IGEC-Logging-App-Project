@@ -6,6 +6,8 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -46,9 +48,9 @@ import java.util.Map;
 public class AddProjectFragment extends Fragment {
 
     // Views
-    private TextInputEditText vName, vLocation, vTime, vManagerName;
+    private TextInputEditText vName, vTime, vManagerName, vArea, vStreet, vCity;
     private MaterialButton vRegister;
-    private AutoCompleteTextView vManagerID;
+    private AutoCompleteTextView vManagerID, vContractType;
     private TextInputLayout vManagerIDLayout, vTimeLayout;
     private RecyclerView recyclerView;
     private EmployeeAdapter adapter;
@@ -71,7 +73,12 @@ public class AddProjectFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_add_project, container, false);
+        return inflater.inflate(R.layout.fragment_add_project, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         Initialize(view);
 
         // listeners
@@ -79,16 +86,15 @@ public class AddProjectFragment extends Fragment {
         vManagerID.addTextChangedListener(twManagerID);
         vTimeLayout.setEndIconOnClickListener(oclTimeDate);
         vTimeDatePicker.addOnPositiveButtonClickListener(pclTimeDatePicker);
-
-
-        // Inflate the layout for this fragment
-        return view;
     }
 
     // Functions
     private void Initialize(View view) {
         vName = view.findViewById(R.id.TextInput_ProjectName);
-        vLocation = view.findViewById(R.id.TextInput_Location);
+        vCity = view.findViewById(R.id.TextInput_City);
+        vStreet = view.findViewById(R.id.TextInput_Street);
+        vArea = view.findViewById(R.id.TextInput_Area);
+        vContractType = view.findViewById(R.id.TextInput_ContractType);
         vTime = view.findViewById(R.id.TextInput_Time);
         vTimeLayout = view.findViewById(R.id.textInputLayout_Time);
         vManagerID = view.findViewById(R.id.TextInput_ManagerID);
@@ -176,7 +182,7 @@ public class AddProjectFragment extends Fragment {
     }
 
     private void addProject() {
-        Project newProject = new Project(vManagerName.getText().toString(), vManagerID.getText().toString(), vName.getText().toString(), new Date(startDate), new Date(endDate), Team, vLocation.getText().toString());
+        Project newProject = new Project(vManagerName.getText().toString(), vManagerID.getText().toString(), vName.getText().toString(), new Date(startDate), new Date(endDate), Team, "");
         newProject.setId(projectID);
         db.collection("projects").document(projectID).set(newProject).addOnSuccessListener(unused -> updateEmployeesDetails(projectID));
     }
@@ -208,7 +214,10 @@ public class AddProjectFragment extends Fragment {
 
     void ClearInputs() {
         vName.setText(null);
-        vLocation.setText(null);
+        vCity.setText(null);
+        vArea.setText(null);
+        vStreet.setText(null);
+        vContractType.setText(null);
         vManagerID.setText(null);
         vManagerName.setText(null);
         vTime.setText(null);
@@ -217,7 +226,10 @@ public class AddProjectFragment extends Fragment {
     boolean validateInputs() {
         return
                 !(vName.getText().toString().isEmpty() ||
-                        vLocation.getText().toString().isEmpty() ||
+                        vArea.getText().toString().isEmpty() ||
+                        vCity.getText().toString().isEmpty() ||
+                        vStreet.getText().toString().isEmpty() ||
+                        vContractType.getText().toString().isEmpty() ||
                         vManagerID.getText().toString().isEmpty() ||
                         vManagerName.getText().toString().isEmpty() ||
                         vTime.getText().toString().isEmpty());

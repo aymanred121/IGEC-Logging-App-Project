@@ -33,4 +33,5 @@
     <string name="update">Update</string>
     <string name="delete">Delete</string>
     <string name="phone">Phone*</string>
+    <string name="contractType">ContractType*</string>
 </resources>

@@ -1,11 +1,7 @@
 package com.example.igec_admin.Fragments;
 
-import android.annotation.SuppressLint;
-import android.content.Context;
-import android.content.ContextWrapper;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.Editable;
@@ -38,7 +34,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -52,7 +47,7 @@ public class AddMachineFragment extends Fragment {
 
     // Views
     private TextInputLayout vIDLayout, vPurchaseDateLayout;
-    private TextInputEditText vID, vPurchaseDate, vCodeName;
+    private TextInputEditText vID, vPurchaseDate, vReference;
     private ImageView vQRImg;
     private MaterialButton vRegister;
     // Vars
@@ -86,7 +81,7 @@ public class AddMachineFragment extends Fragment {
         vIDLayout = view.findViewById(R.id.textInputLayout_MachineID);
         vQRImg = view.findViewById(R.id.ImageView_MachineIDIMG);
         vRegister = view.findViewById(R.id.button_register);
-        vCodeName = view.findViewById(R.id.TextInput_MachineCodeName);
+        vReference = view.findViewById(R.id.TextInput_MachineCodeName);
         vPurchaseDate = view.findViewById(R.id.TextInput_MachinePurchaseDate);
         vPurchaseDateLayout = view.findViewById(R.id.textInputLayout_MachinePurchaseDate);
         vDatePickerBuilder.setTitleText("Purchase Date");
@@ -96,14 +91,14 @@ public class AddMachineFragment extends Fragment {
 
     private void clearInput() {
         vID.setText(null);
-        vCodeName.setText(null);
+        vReference.setText(null);
         vPurchaseDate.setText(null);
         vQRImg.setImageResource(R.drawable.ic_baseline_image_24);
     }
 
 
     private boolean validateInput() {
-        return !(vID.getText().toString().isEmpty() || vPurchaseDate.getText().toString().isEmpty() || vCodeName.getText().toString().isEmpty());
+        return !(vID.getText().toString().isEmpty() || vPurchaseDate.getText().toString().isEmpty() || vReference.getText().toString().isEmpty());
     }
 
     private String convertDateToString(long selection) {
@@ -126,7 +121,7 @@ public class AddMachineFragment extends Fragment {
             if (validateInput()) {
                 saveToInternalStorage();
                 saveToCloudStorage();
-                Machine newMachine = new Machine(vID.getText().toString(), vCodeName.getText().toString(), new Date(purchaseDate) , new Allowance());
+                Machine newMachine = new Machine(vID.getText().toString(), vReference.getText().toString(), new Date(purchaseDate) , new Allowance());
                 machineCol.document(vID.getText().toString()).set(newMachine).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void unused) {
@@ -149,7 +144,7 @@ public class AddMachineFragment extends Fragment {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 20, baos);
         byte[] data = baos.toByteArray();
-        StorageReference mountainsRef = storageRef.child("imgs/"+vID.getText().toString()+"/"+vCodeName.getText().toString()+".jpg");
+        StorageReference mountainsRef = storageRef.child("imgs/"+vID.getText().toString()+"/"+ vReference.getText().toString()+".jpg");
 
         UploadTask uploadTask = mountainsRef.putBytes(data);
         uploadTask.addOnSuccessListener(unsed->{
@@ -198,12 +193,12 @@ public class AddMachineFragment extends Fragment {
         }
     };
     public void saveToInternalStorage(){
-        if(new File( Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+vCodeName.getText().toString()+".jpg").exists())
+        if(new File( Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+ vReference.getText().toString()+".jpg").exists())
             return;
         Bitmap bitmapImage=((BitmapDrawable)vQRImg.getDrawable()).getBitmap();
         if(bitmapImage==null)
             return;
-        File path = new File( Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),vCodeName.getText().toString()+".jpg");
+        File path = new File( Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), vReference.getText().toString()+".jpg");
         FileOutputStream fos = null;
         try {
             path.createNewFile();

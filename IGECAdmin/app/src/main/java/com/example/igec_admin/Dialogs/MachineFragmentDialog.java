@@ -3,8 +3,6 @@ package com.example.igec_admin.Dialogs;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,7 +40,7 @@ public class MachineFragmentDialog extends DialogFragment {
 
     // Views
     private TextInputLayout vIDLayout, vPurchaseDateLayout;
-    private TextInputEditText vID, vPurchaseDate, vCodeName;
+    private TextInputEditText vID, vPurchaseDate, vReference;
     private MaterialButton vRegister, vDelete, vUpdate;
     private ImageView vQRImg;
 
@@ -100,7 +98,7 @@ public class MachineFragmentDialog extends DialogFragment {
         vRegister = view.findViewById(R.id.button_register);
         vUpdate = view.findViewById(R.id.button_update);
         vDelete = view.findViewById(R.id.button_delete);
-        vCodeName = view.findViewById(R.id.TextInput_MachineCodeName);
+        vReference = view.findViewById(R.id.TextInput_MachineCodeName);
         vPurchaseDate = view.findViewById(R.id.TextInput_MachinePurchaseDate);
         vPurchaseDateLayout = view.findViewById(R.id.textInputLayout_MachinePurchaseDate);
         vID = view.findViewById(R.id.TextInput_MachineID);
@@ -115,7 +113,7 @@ public class MachineFragmentDialog extends DialogFragment {
 
         vID.setEnabled(false);
 
-        vCodeName.setText(machine.getCodeName());
+        vReference.setText(machine.getReference());
         vID.setText(machine.getId());
         purchaseDate = machine.getPurchaseDate().getTime();
         vPurchaseDate.setText(convertDateToString(machine.getPurchaseDate().getTime()));
@@ -148,7 +146,7 @@ public class MachineFragmentDialog extends DialogFragment {
             return;
         }
         HashMap<String, Object> modifiedMachine = new HashMap<>();
-        modifiedMachine.put("codeName", vCodeName.getText().toString());
+        modifiedMachine.put("codeName", vReference.getText().toString());
         modifiedMachine.put("purchaseDate", new Date(purchaseDate));
         modifiedMachine.put("id", machine.getId());
         machineCol.document(machine.getId()).update(modifiedMachine).addOnSuccessListener(unused -> {
@@ -165,7 +163,7 @@ public class MachineFragmentDialog extends DialogFragment {
     }
 
     private boolean validateInput() {
-        return !(vID.getText().toString().isEmpty() || vPurchaseDate.getText().toString().isEmpty() || vCodeName.getText().toString().isEmpty());
+        return !(vID.getText().toString().isEmpty() || vPurchaseDate.getText().toString().isEmpty() || vReference.getText().toString().isEmpty());
     }
 
     private String convertDateToString(long selection) {

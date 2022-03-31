@@ -44,7 +44,7 @@ public class MachineFragmentDialog extends DialogFragment {
     private TextInputLayout vIDLayout, vPurchaseDateLayout;
     private TextInputEditText vID, vPurchaseDate, vCodeName;
     private MaterialButton vRegister, vDelete, vUpdate;
-    private ImageView vQRImg;
+    private ImageView vQRImg, vAddSupplements;
 
     // Vars
     private long purchaseDate;
@@ -91,6 +91,7 @@ public class MachineFragmentDialog extends DialogFragment {
         vDelete.setOnClickListener(oclDelete);
         vPurchaseDateLayout.setEndIconOnClickListener(oclDate);
         vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);
+        vAddSupplements.setOnClickListener(oclAddSupplement);
         return view;
     }
 
@@ -106,7 +107,7 @@ public class MachineFragmentDialog extends DialogFragment {
         vID = view.findViewById(R.id.TextInput_MachineID);
         vIDLayout = view.findViewById(R.id.textInputLayout_MachineID);
         vQRImg = view.findViewById(R.id.ImageView_MachineIDIMG);
-
+        vAddSupplements = view.findViewById(R.id.button_addSupplements);
 
 
         vRegister.setVisibility(View.GONE);
@@ -183,6 +184,13 @@ public class MachineFragmentDialog extends DialogFragment {
         }
     };
     private View.OnClickListener oclUpdate = v -> updateMachine();
+    private View.OnClickListener oclAddSupplement = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            AddSupplementsDialog addSupplementsDialog = new AddSupplementsDialog();
+            addSupplementsDialog.show(getParentFragmentManager(),"");
+        }
+    };
 
     private View.OnClickListener oclDelete = v -> deleteMachine();
 

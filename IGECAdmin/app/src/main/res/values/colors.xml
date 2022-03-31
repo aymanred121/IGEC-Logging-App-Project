@@ -10,4 +10,6 @@
     <color name="secondaryDarkColor">#002d6a</color>
     <color name="primaryTextColor">#ffffff</color>
     <color name="secondaryTextColor">#ffffff</color>
+    <color name="Green">#009900</color>
+    <color name="Red" >#990000</color>
 </resources>

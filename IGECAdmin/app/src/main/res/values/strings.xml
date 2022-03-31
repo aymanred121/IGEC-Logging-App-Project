@@ -10,8 +10,8 @@
     <string name="first_name">First Name*</string>
     <string name="second_name">Second Name*</string>
     <string name="e_mail">E-mail*</string>
-    <string name="machine_id">Machine ID*</string>
-    <string name="machine_code_name">Machine Code Name*</string>
+    <string name="machine_id">ID*</string>
+    <string name="machine_serial_number">Serial number*</string>
     <string name="machine_purchase_date">Machine Purchase Date*</string>
     <string name="password">Password*</string>
     <string name="title">Title*</string>
@@ -44,4 +44,6 @@
     <string name="note">Notes</string>
     <string name="reference">Reference*</string>
     <string name="office_work">Office Work</string>
+    <string name="add_supplements">Add Supplements</string>
+    <string name="SupplementName">Supplement Name*</string>
 </resources>

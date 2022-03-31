@@ -15,6 +15,7 @@
         <entry key="app/src/main/res/layout/fragment_add_client_dialog.xml" value="0.25" />
         <entry key="app/src/main/res/layout/fragment_add_machine.xml" value="0.21" />
         <entry key="app/src/main/res/layout/fragment_add_project.xml" value="0.33" />
+        <entry key="app/src/main/res/layout/fragment_add_supplements_dialog.xml" value="0.2" />
         <entry key="app/src/main/res/layout/fragment_add_user.xml" value="0.22" />
         <entry key="app/src/main/res/layout/fragment_client_info.xml" value="0.25" />
         <entry key="app/src/main/res/layout/fragment_machine.xml" value="0.21" />
@@ -23,6 +24,7 @@
         <entry key="app/src/main/res/layout/fragment_project_info.xml" value="0.1082427536231884" />
         <entry key="app/src/main/res/layout/fragment_projects.xml" value="0.10144927536231885" />
         <entry key="app/src/main/res/layout/fragment_summary.xml" value="0.10144927536231885" />
+        <entry key="app/src/main/res/layout/fragment_supplement_info_dialog.xml" value="0.18" />
         <entry key="app/src/main/res/layout/fragment_user_info.xml" value="0.2" />
         <entry key="app/src/main/res/layout/fragment_users.xml" value="0.10144927536231885" />
         <entry key="app/src/main/res/layout/machine_item.xml" value="0.25" />
@@ -32,6 +34,7 @@
         <entry key="app/src/main/res/layout/modify_user.xml" value="0.10144927536231885" />
         <entry key="app/src/main/res/layout/project_item.xml" value="0.1" />
         <entry key="app/src/main/res/layout/projects.xml" value="0.10144927536231885" />
+        <entry key="app/src/main/res/layout/supplement_item.xml" value="0.25" />
         <entry key="app/src/main/res/layout/users.xml" value="0.10144927536231885" />
         <entry key="app/src/main/res/menu/admin_menu.xml" value="0.5" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.1" />

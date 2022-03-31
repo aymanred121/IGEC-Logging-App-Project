@@ -21,6 +21,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.util.Pair;
 import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -98,6 +99,17 @@ public class ProjectFragmentDialog extends DialogFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setStyle(DialogFragment.STYLE_NORMAL, R.style.FullscreenDialogTheme);
+        getParentFragmentManager().setFragmentResultListener("client", this, new FragmentResultListener() {
+            @Override
+            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
+                // We use a String here, but any type that can be put in a Bundle is supported
+                client = (Client) bundle.getSerializable("client");
+                // Do something with the result
+                Toast.makeText(getActivity(), client.getName(), Toast.LENGTH_SHORT).show();
+
+            }
+        });
+
     }
 
     @Override
@@ -158,7 +170,7 @@ public class ProjectFragmentDialog extends DialogFragment {
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
 
-
+        client = project.getClient();
         vName.setText(project.getName());
         vManagerID.setText(project.getManagerID());
         vManagerName.setText(project.getManagerName());

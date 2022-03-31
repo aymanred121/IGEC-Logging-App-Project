@@ -192,6 +192,7 @@ public class AddUserFragment extends Fragment {
                 !(vFirstName.getText().toString().isEmpty() ||
                         vSecondName.getText().toString().isEmpty() ||
                         vEmail.getText().toString().isEmpty() ||
+                        vEmailLayout.getError() != null ||
                         vPassword.getText().toString().isEmpty() ||
                         vPhone.getText().toString().isEmpty() ||
                         vTitle.getText().toString().isEmpty() ||

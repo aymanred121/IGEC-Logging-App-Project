@@ -34,4 +34,14 @@
     <string name="delete">Delete</string>
     <string name="phone">Phone*</string>
     <string name="contractType">ContractType*</string>
+    <string name="AddClient">Add Client</string>
+    <string name="company_name">Company Name*</string>
+    <string name="company_email">Company Email*</string>
+    <string name="company_phone_number">Company Phone Number*</string>
+    <string name="Done">Done</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="note">Notes</string>
+    <string name="reference">Reference*</string>
+    <string name="office_work">Office Work</string>
 </resources>

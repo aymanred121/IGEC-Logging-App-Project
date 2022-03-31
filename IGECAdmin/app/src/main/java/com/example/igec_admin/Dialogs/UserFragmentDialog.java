@@ -164,6 +164,7 @@ public class UserFragmentDialog extends DialogFragment {
                 !(vFirstName.getText().toString().isEmpty() ||
                         vSecondName.getText().toString().isEmpty() ||
                         vEmail.getText().toString().isEmpty() ||
+                        vEmailLayout.getError() != null ||
                         vPassword.getText().toString().isEmpty() ||
                         vTitle.getText().toString().isEmpty() ||
                         vSalary.getText().toString().isEmpty() ||

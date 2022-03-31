@@ -8,7 +8,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Project {
-    private String managerID,managerName,name,id , reference ,  locationCity ,locationArea ,locationStreet ;
+    private String managerID;
+    private String managerName;
+    private String name;
+    private String id;
+    private String reference;
+    private String locationCity;
+    private String locationArea;
+    private String locationStreet;
+    private String contractType;
     private ArrayList<Allowance> allowancesList = new ArrayList<>();
     private Client client ;
     private Date startDate;
@@ -26,7 +34,7 @@ public class Project {
     public Project() {
     }
 
-    public Project(String managerName,String managerID, String name, Date startDate, ArrayList<EmployeeOverview> employees , String reference , String locationCity , String locationArea , String locationStreet) {
+    public Project(String managerName,String managerID, String name, Date startDate, ArrayList<EmployeeOverview> employees , String reference , String locationCity , String locationArea , String locationStreet, String contractType) {
         this.managerID = managerID;
         this.name = name;
         this.startDate = startDate;
@@ -36,6 +44,7 @@ public class Project {
         this.locationArea = locationArea;
         this.locationCity = locationCity;
         this.locationStreet = locationStreet;
+        this.contractType = contractType;
     }
 
     public String getLocationCity() {
@@ -94,7 +103,13 @@ public class Project {
         this.startDate = startDate;
     }
 
+    public String getContractType() {
+        return contractType;
+    }
 
+    public void setContractType(String contractType) {
+        this.contractType = contractType;
+    }
     public String getId() {
         return id;
     }

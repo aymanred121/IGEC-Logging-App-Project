@@ -6,13 +6,14 @@
     android:layout_height="match_parent"
     tools:context=".Fragments.AddProjectFragment">
 
+
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textInputLayout_ProjectName"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="32dp"
         app:helperTextEnabled="true"
         app:layout_constraintEnd_toEndOf="parent"
@@ -28,8 +29,47 @@
             android:padding="14dp"
             android:singleLine="true" />
 
+
     </com.google.android.material.textfield.TextInputLayout>
 
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textInputLayout_ProjectReference"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        app:helperTextEnabled="true"
+        android:enabled="true"
+        app:prefixText="IGEC"
+        app:layout_constraintEnd_toStartOf="@id/checkbox_officeWork"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textInputLayout_ProjectName">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/TextInput_ProjectReference"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/reference"
+            android:inputType="text"
+            android:enabled="false"
+            android:maxLength="6"
+            android:padding="14dp"
+            android:singleLine="true" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.checkbox.MaterialCheckBox
+        android:id="@+id/checkbox_officeWork"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="32dp"
+        android:text="@string/office_work"
+        app:layout_constraintBottom_toTopOf="@+id/textInputLayout_Street"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textInputLayout_ProjectName" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textInputLayout_Area"
@@ -43,7 +83,7 @@
         app:helperTextEnabled="true"
         app:layout_constraintEnd_toStartOf="@+id/textInputLayout_City"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textInputLayout_ProjectName">
+        app:layout_constraintTop_toBottomOf="@id/textInputLayout_ProjectReference">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/TextInput_Area"
@@ -68,7 +108,7 @@
         app:helperTextEnabled="true"
         app:layout_constraintEnd_toStartOf="@+id/textInputLayout_Street"
         app:layout_constraintStart_toEndOf="@+id/textInputLayout_Area"
-        app:layout_constraintTop_toBottomOf="@+id/textInputLayout_ProjectName">
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout_ProjectReference">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/TextInput_City"
@@ -93,7 +133,7 @@
         app:helperTextEnabled="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/textInputLayout_City"
-        app:layout_constraintTop_toBottomOf="@+id/textInputLayout_ProjectName">
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout_ProjectReference">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/TextInput_Street"
@@ -111,9 +151,9 @@
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="32dp"
-        android:layout_marginStart="32dp"
         app:boxBackgroundMode="outline"
         app:endIconMode="dropdown_menu"
         app:helperTextEnabled="true"
@@ -212,12 +252,27 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_AddClient"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="32dp"
+        android:text="@string/AddClient"
+        android:textAllCaps="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textInputLayout_ManagerID" />
+
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="32dp"
         android:layout_marginBottom="96dp"
         android:overScrollMode="never"
@@ -225,7 +280,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textInputLayout_ManagerID"
+        app:layout_constraintTop_toBottomOf="@+id/button_AddClient"
         tools:listitem="@layout/employee_item" />
 
     <com.google.android.material.button.MaterialButton

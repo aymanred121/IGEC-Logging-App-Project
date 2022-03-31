@@ -26,9 +26,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.igec_admin.Adatpers.EmployeeAdapter;
 import com.example.igec_admin.R;
+import com.example.igec_admin.fireBase.Client;
 import com.example.igec_admin.fireBase.EmployeeOverview;
 import com.example.igec_admin.fireBase.Project;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.textfield.TextInputEditText;
@@ -46,17 +48,19 @@ import java.util.Map;
 
 public class ProjectFragmentDialog extends DialogFragment {
     // Views
-    private TextInputEditText vName, vArea, vStreet, vCity, vTime, vManagerName;
-    private MaterialButton vRegister, vUpdate, vDelete;
-    private AutoCompleteTextView vManagerID;
-    private TextInputLayout vManagerIDLayout, vTimeLayout;
+    private TextInputEditText vName, vArea, vStreet, vCity, vTime, vManagerName, vProjectReference;
+    private MaterialButton vRegister, vUpdate, vDelete, vAddClient;
+    private AutoCompleteTextView vManagerID, vContractType;
+    private TextInputLayout vManagerIDLayout, vTimeLayout, vProjectReferenceLayout, vContractTypeLayout;
     private RecyclerView recyclerView;
     private EmployeeAdapter adapter;
+    private MaterialCheckBox vOfficeWork;
     private RecyclerView.LayoutManager layoutManager;
 
     // Vars
     long startDate, endDate;
-    private MaterialDatePicker.Builder<Pair<Long, Long>> vTimeDatePickerBuilder = MaterialDatePicker.Builder.dateRangePicker();
+    private Client client;
+    private MaterialDatePicker.Builder<Long> vTimeDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vTimeDatePicker;
     ArrayList<EmployeeOverview> employees = new ArrayList<>();
     ArrayList<String> TeamID = new ArrayList<>();
@@ -108,6 +112,9 @@ public class ProjectFragmentDialog extends DialogFragment {
         vManagerID.addTextChangedListener(twManagerID);
         vTimeDatePicker.addOnPositiveButtonClickListener(pclTimeDatePicker);
         vTimeLayout.setEndIconOnClickListener(oclStartDate);
+        vProjectReference.addTextChangedListener(twProjectReference);
+        vOfficeWork.setOnClickListener(oclOfficeWork);
+        vAddClient.setOnClickListener(oclAddClient);;
 
 
         // Inflate the layout for this fragment
@@ -116,18 +123,27 @@ public class ProjectFragmentDialog extends DialogFragment {
 
     // Functions
     private void Initialize(View view) {
+
+
         vName = view.findViewById(R.id.TextInput_ProjectName);
+        vProjectReference = view.findViewById(R.id.TextInput_ProjectReference);
+        vProjectReferenceLayout = view.findViewById(R.id.textInputLayout_ProjectReference);
+        vOfficeWork = view.findViewById(R.id.checkbox_officeWork);
         vCity = view.findViewById(R.id.TextInput_City);
         vStreet = view.findViewById(R.id.TextInput_Street);
         vArea = view.findViewById(R.id.TextInput_Area);
+        vContractType = view.findViewById(R.id.TextInput_ContractType);
+        vContractTypeLayout = view.findViewById(R.id.textInputLayout_ContractType);
         vTime = view.findViewById(R.id.TextInput_Time);
         vTimeLayout = view.findViewById(R.id.textInputLayout_Time);
         vManagerID = view.findViewById(R.id.TextInput_ManagerID);
         vManagerIDLayout = view.findViewById(R.id.textInputLayout_ManagerID);
         vManagerName = view.findViewById(R.id.TextInput_ManagerName);
         vRegister = view.findViewById(R.id.button_register);
+        vAddClient = view.findViewById(R.id.button_AddClient);
+        vRegister = view.findViewById(R.id.button_register);
         vUpdate = view.findViewById(R.id.button_update);
-        vDelete = view.findViewById(R.id.button_delete);
+        vDelete =  view.findViewById(R.id.button_delete);
 
         vRegister.setVisibility(View.GONE);
         vDelete.setVisibility(View.VISIBLE);
@@ -146,18 +162,26 @@ public class ProjectFragmentDialog extends DialogFragment {
         vName.setText(project.getName());
         vManagerID.setText(project.getManagerID());
         vManagerName.setText(project.getManagerName());
+        vContractType.setText(project.getContractType());
+        vContractTypeLayout.setEnabled(true);
+        vContractType.setEnabled(false);
+        vProjectReference.setText(project.getReference());
+        vOfficeWork.setChecked(project.getReference().equals("-99999"));
+        vArea.setText(project.getLocationArea());
+        vCity.setText(project.getLocationCity());
+        vStreet.setText(project.getLocationStreet());
         vManagerIDLayout.setEnabled(true);
         vManagerID.setEnabled(false);
         startDate = project.getStartDate().getTime();
         vTimeDatePickerBuilder.setTitleText("Time");
-        vTimeDatePicker = vTimeDatePickerBuilder.setSelection(new Pair<>(startDate, endDate)).build();
-        vTime.setText(String.format("%s to %s", convertDateToString(startDate), convertDateToString(endDate)));
-
-
+        vTimeDatePicker = vTimeDatePickerBuilder.setSelection(startDate).build();
+        vTime.setText(String.format("%s", convertDateToString(startDate)));
         getEmployees();
 
         ArrayAdapter<String> idAdapter = new ArrayAdapter<>(getActivity(), R.layout.dropdown_item, TeamID);
         vManagerID.setAdapter(idAdapter);
+        ArrayAdapter<String> ContractAdapter = new ArrayAdapter<>(getActivity(), R.layout.dropdown_item, TeamID);
+        vContractType.setAdapter(ContractAdapter);
     }
 
     String convertDateToString(long selection) {
@@ -348,13 +372,32 @@ public class ProjectFragmentDialog extends DialogFragment {
             }
         }
     };
+    private TextWatcher twProjectReference = new TextWatcher() {
+        boolean removeDash = false;
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            removeDash = s.toString().contains("-");
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            if (s.toString().length() == 2 && !removeDash) {
+                s.append('-');
+            }
+        }
+    };
     MaterialPickerOnPositiveButtonClickListener pclTimeDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
         @Override
         public void onPositiveButtonClick(Object selection) {
-            Pair<Long, Long> time = (Pair<Long, Long>) selection;
-            vTime.setText(String.format("%s to %s", convertDateToString(time.first), convertDateToString(time.second)));
-            startDate = time.first;
-            endDate = time.second;
+            startDate = (long) selection;
+            vTime.setText(String.format("%s", convertDateToString(startDate)));
         }
     };
     View.OnClickListener oclStartDate = new View.OnClickListener() {
@@ -371,7 +414,32 @@ public class ProjectFragmentDialog extends DialogFragment {
         }
     };
     View.OnClickListener clDelete = v -> deleteProject();
+    private View.OnClickListener oclAddClient = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            AddClientDialog addClientDialog;
+            if (client != null && client.getName().equals(""))
+                addClientDialog = new AddClientDialog(null);
+            else
+                addClientDialog = new AddClientDialog(client);
 
+            addClientDialog.show(getParentFragmentManager(), "");
+        }
+    };
+    private View.OnClickListener oclOfficeWork = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            vAddClient.setEnabled(!vOfficeWork.isChecked());
+            vProjectReference.setEnabled(!vOfficeWork.isChecked());
+            vProjectReferenceLayout.setEnabled(!vOfficeWork.isChecked());
+            if (vOfficeWork.isChecked()) {
+                vProjectReference.setText("-99999");
+            } else {
+                vProjectReference.setText(null);
+            }
+
+        }
+    };
     EmployeeAdapter.OnItemClickListener itclEmployeeAdapter = new EmployeeAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position) {

@@ -1,16 +1,27 @@
 package com.example.igec_admin.fireBase;
 
-public class Client {
-   private String name , Email , phoneNumber;
+import java.io.Serializable;
 
-    public Client(String name, String Email, String phoneNumber) {
+public class Client implements Serializable {
+   private String name , Email , phoneNumber , note ;
+
+    public Client(String name, String Email, String phoneNumber, String note) {
         this.name = name;
         this.Email = Email;
         this.phoneNumber = phoneNumber;
+        this.note = note;
     }
     public Client()
     {
 
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
     }
 
     public String getName() {

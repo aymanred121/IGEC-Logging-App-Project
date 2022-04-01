@@ -112,7 +112,7 @@ public class SupplementInfoDialog extends DialogFragment {
         public void onClick(View v) {
             if (supplementNames != null) {
                 for (int i = 0; i < supplementNames.size(); i++) {
-                    if (supplementNames.get(i).getName().equals(vSupplementName.getText().toString())) {
+                    if (position != i && supplementNames.get(i).getName().equals(vSupplementName.getText().toString())) {
                         Toast.makeText(getContext(), "name is taken , please try another name", Toast.LENGTH_SHORT).show();
                         oldName.remove(oldName.size() - 1);
                         return;

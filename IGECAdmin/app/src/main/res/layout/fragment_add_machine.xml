@@ -51,7 +51,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/machine_serial_number"
-            android:inputType="text"
+            android:inputType="number"
             android:padding="14dp"
             android:singleLine="true" />
 
@@ -83,6 +83,107 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textInputLayout_MachineAllowance"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="32dp"
+        app:boxBackgroundMode="outline"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textInputLayout_MachinePurchaseDate">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/TextInput_MachineAllowance"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/machine_allowance"
+            android:inputType="number"
+            android:padding="14dp"
+            android:singleLine="true" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textInputLayout_MachineByDay"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        app:boxBackgroundMode="outline"
+        app:helperTextEnabled="true"
+        app:layout_constraintEnd_toStartOf="@+id/textInputLayout_MachineByWeek"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textInputLayout_MachineAllowance">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/TextInput_MachineByDay"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/perDay"
+            android:inputType="text"
+            android:padding="14dp"
+            android:singleLine="true" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textInputLayout_MachineByWeek"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        app:boxBackgroundMode="outline"
+        app:helperTextEnabled="true"
+        app:layout_constraintEnd_toStartOf="@+id/textInputLayout_MachineByMonth"
+        app:layout_constraintStart_toEndOf="@+id/textInputLayout_MachineByDay"
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout_MachineAllowance">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/TextInput_MachineByWeek"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/PerWeek"
+            android:inputType="text"
+            android:padding="14dp"
+            android:singleLine="true" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textInputLayout_MachineByMonth"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="32dp"
+        app:boxBackgroundMode="outline"
+        app:helperTextEnabled="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/textInputLayout_MachineByWeek"
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout_MachineAllowance">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/TextInput_MachineByMonth"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/PerMonth"
+            android:inputType="text"
+            android:padding="14dp"
+            android:singleLine="true" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
     <com.google.android.material.button.MaterialButton
         android:id="@+id/button_addSupplements"
         android:layout_width="wrap_content"
@@ -91,7 +192,7 @@
         android:layout_marginTop="8dp"
         android:text="@string/add_supplements"
         android:textAllCaps="false"
-        app:layout_constraintTop_toBottomOf="@id/textInputLayout_MachinePurchaseDate"
+        app:layout_constraintTop_toBottomOf="@id/textInputLayout_MachineByDay"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 

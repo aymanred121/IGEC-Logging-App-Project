@@ -1,20 +1,29 @@
 package com.example.igec_admin.Dialogs;
 
+import static android.app.Activity.RESULT_OK;
+
 import android.app.Dialog;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.example.igec_admin.R;
 import com.google.android.material.button.MaterialButton;
@@ -26,6 +35,7 @@ public class SupplementInfoDialog extends DialogFragment {
     private TextInputEditText vSupplementName;
     private MaterialButton vDone;
     private Bitmap bitmap;
+    private ActivityResultLauncher<Intent> activityResultLauncher;
     public SupplementInfoDialog(Bitmap bitmap) {
         this.bitmap = bitmap;
     }
@@ -64,6 +74,18 @@ public class SupplementInfoDialog extends DialogFragment {
         super.onViewCreated(view, savedInstanceState);
         initialize(view);
         vDone.setOnClickListener(oclDone);
+        vSupplementImg.setOnClickListener(oclImg);
+        activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+            @Override
+            public void onActivityResult(ActivityResult result) {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    Bundle bundle = result.getData().getExtras();
+                    Bitmap bitmap = (Bitmap) bundle.get("data");
+                    vSupplementImg.setImageBitmap(bitmap);
+                }
+            }
+        });
+
     }
 
     private void initialize(View view) {
@@ -77,6 +99,19 @@ public class SupplementInfoDialog extends DialogFragment {
         public void onClick(View v) {
             //TODO: put a supplement object as return AddSupplementsDialog
             dismiss();
+        }
+    };
+    private View.OnClickListener oclImg = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            if(takePicture.resolveActivity(getContext().getPackageManager())!= null) {
+                activityResultLauncher.launch(takePicture);
+            }
+            else
+            {
+                Toast.makeText(getActivity(), "there's no activity that supports that action", Toast.LENGTH_SHORT).show();
+            }
         }
     };
 

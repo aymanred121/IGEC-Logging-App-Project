@@ -51,7 +51,7 @@ public class AddMachineFragment extends Fragment {
 
     // Views
     private TextInputLayout vIDLayout, vPurchaseDateLayout;
-    private TextInputEditText vID, vPurchaseDate, vReference;
+    private TextInputEditText vID, vPurchaseDate, vReference,vAllowance,vMachineByDay,vMachineByWeek,vMachineByMonth;
     private ImageView vQRImg;
     private MaterialButton vRegister,vAddSupplement;
     // Vars
@@ -90,6 +90,10 @@ public class AddMachineFragment extends Fragment {
         vReference = view.findViewById(R.id.TextInput_MachineCodeName);
         vPurchaseDate = view.findViewById(R.id.TextInput_MachinePurchaseDate);
         vPurchaseDateLayout = view.findViewById(R.id.textInputLayout_MachinePurchaseDate);
+        vAllowance = view.findViewById(R.id.TextInput_MachineAllowance);
+        vMachineByDay = view.findViewById(R.id.TextInput_MachineByDay);
+        vMachineByWeek = view.findViewById(R.id.TextInput_MachineByWeek);
+        vMachineByMonth = view.findViewById(R.id.TextInput_MachineByMonth);
         vDatePickerBuilder.setTitleText("Purchase Date");
         vDatePicker = vDatePickerBuilder.build();
 

@@ -40,7 +40,7 @@ public class MachineFragmentDialog extends DialogFragment {
 
     // Views
     private TextInputLayout vIDLayout, vPurchaseDateLayout;
-    private TextInputEditText vID, vPurchaseDate, vReference;
+    private TextInputEditText vID, vPurchaseDate, vReference,vAllowance,vMachineByDay,vMachineByWeek,vMachineByMonth;
     private MaterialButton vRegister, vDelete, vUpdate, vAddSupplements;
     private ImageView vQRImg;
 
@@ -106,6 +106,10 @@ public class MachineFragmentDialog extends DialogFragment {
         vIDLayout = view.findViewById(R.id.textInputLayout_MachineID);
         vQRImg = view.findViewById(R.id.ImageView_MachineIDIMG);
         vAddSupplements = view.findViewById(R.id.button_addSupplements);
+        vAllowance = view.findViewById(R.id.TextInput_MachineAllowance);
+        vMachineByDay = view.findViewById(R.id.TextInput_MachineByDay);
+        vMachineByWeek = view.findViewById(R.id.TextInput_MachineByWeek);
+        vMachineByMonth = view.findViewById(R.id.TextInput_MachineByMonth);
 
 
         vRegister.setVisibility(View.GONE);

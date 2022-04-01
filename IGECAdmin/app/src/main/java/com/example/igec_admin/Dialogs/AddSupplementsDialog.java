@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import com.example.igec_admin.R;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -86,9 +87,13 @@ public class AddSupplementsDialog extends DialogFragment {
         @Override
         public void onClick(View v) {
             Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
-            activityResultLauncher.launch(takePicture);
-
+            if(takePicture.resolveActivity(getContext().getPackageManager())!= null) {
+                activityResultLauncher.launch(takePicture);
+            }
+            else
+            {
+                Toast.makeText(getActivity(), "there's no activity that supports that action", Toast.LENGTH_SHORT).show();
+            }
 
         }
     };

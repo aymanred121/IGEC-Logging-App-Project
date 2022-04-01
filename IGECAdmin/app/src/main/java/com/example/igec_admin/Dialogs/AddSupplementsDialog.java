@@ -6,6 +6,13 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
@@ -18,18 +25,8 @@ import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.provider.MediaStore;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.Toast;
-
-import com.example.igec_admin.Adatpers.MachineAdapter;
 import com.example.igec_admin.Adatpers.SupplementAdapter;
 import com.example.igec_admin.R;
-import com.example.igec_admin.fireBase.Client;
 import com.example.igec_admin.fireBase.Supplement;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
@@ -39,7 +36,7 @@ public class AddSupplementsDialog extends DialogFragment {
 
     private FloatingActionButton vAddPhoto, vDone;
     private ActivityResultLauncher<Intent> activityResultLauncher;
-    private ArrayList<Supplement> supplements;
+    private final ArrayList<Supplement> supplements;
     private SupplementAdapter adapter;
     private RecyclerView recyclerView;
     private RecyclerView.LayoutManager layoutManager;
@@ -128,14 +125,14 @@ public class AddSupplementsDialog extends DialogFragment {
                     Supplement supplement = new Supplement();
                     supplement.setName("");
                     supplement.setPhoto(bitmap);
-                    SupplementInfoDialog supplementInfoDialog = new SupplementInfoDialog(-1, supplement);
+                    SupplementInfoDialog supplementInfoDialog = new SupplementInfoDialog(-1, supplement, supplements);
                     supplementInfoDialog.show(getParentFragmentManager(), "");
                 }
             }
         });
     }
 
-    private View.OnClickListener oclDone = new View.OnClickListener() {
+    private final View.OnClickListener oclDone = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             Bundle result = new Bundle();
@@ -144,7 +141,7 @@ public class AddSupplementsDialog extends DialogFragment {
             dismiss();
         }
     };
-    private View.OnClickListener oclAddPhoto = new View.OnClickListener() {
+    private final View.OnClickListener oclAddPhoto = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -156,10 +153,10 @@ public class AddSupplementsDialog extends DialogFragment {
 
         }
     };
-    private SupplementAdapter.OnItemClickListener oclItemClickListener = new SupplementAdapter.OnItemClickListener() {
+    private final SupplementAdapter.OnItemClickListener oclItemClickListener = new SupplementAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position) {
-            SupplementInfoDialog supplementInfoDialog = new SupplementInfoDialog(position, supplements.get(position));
+            SupplementInfoDialog supplementInfoDialog = new SupplementInfoDialog(position, supplements.get(position), supplements);
             supplementInfoDialog.show(getParentFragmentManager(), "");
         }
     };

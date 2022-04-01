@@ -7,17 +7,9 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
-
 import android.provider.MediaStore;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,23 +18,36 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
+
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Supplement;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+
+import java.util.ArrayList;
 
 public class SupplementInfoDialog extends DialogFragment {
 
     private ImageView vSupplementImg;
     private TextInputEditText vSupplementName;
     private MaterialButton vDone;
-    private Supplement supplement;
+    private final Supplement supplement;
     private ActivityResultLauncher<Intent> activityResultLauncher;
-    private int position;
+    private final int position;
+    public static ArrayList<String> oldName = new ArrayList<>();
+    private final ArrayList<Supplement> supplementNames;
 
-    public SupplementInfoDialog(int position, Supplement supplement) {
+    public SupplementInfoDialog(int position, Supplement supplement, ArrayList<Supplement> supplementNames) {
         this.supplement = supplement;
         this.position = position;
+        this.supplementNames = supplementNames;
     }
 
     @NonNull
@@ -78,6 +83,7 @@ public class SupplementInfoDialog extends DialogFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         initialize(view);
+        vSupplementName.addTextChangedListener(twNames);
         vDone.setOnClickListener(oclDone);
         vSupplementImg.setOnClickListener(oclImg);
         activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
@@ -101,9 +107,18 @@ public class SupplementInfoDialog extends DialogFragment {
         vSupplementName.setText(supplement.getName());
     }
 
-    private View.OnClickListener oclDone = new View.OnClickListener() {
+    private final View.OnClickListener oclDone = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            if (supplementNames != null) {
+                for (int i = 0; i < supplementNames.size(); i++) {
+                    if (supplementNames.get(i).getName().equals(vSupplementName.getText().toString())) {
+                        Toast.makeText(getContext(), "name is taken , please try another name", Toast.LENGTH_SHORT).show();
+                        oldName.remove(oldName.size() - 1);
+                        return;
+                    }
+                }
+            }
             Bundle result = new Bundle();
             Supplement supplement = new Supplement();
             vSupplementImg.setDrawingCacheEnabled(true);
@@ -120,7 +135,26 @@ public class SupplementInfoDialog extends DialogFragment {
             dismiss();
         }
     };
-    private View.OnClickListener oclImg = new View.OnClickListener() {
+    TextWatcher twNames = new TextWatcher() {
+
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            oldName.add(s.toString());
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+
+        }
+    };
+
+    private final View.OnClickListener oclImg = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);

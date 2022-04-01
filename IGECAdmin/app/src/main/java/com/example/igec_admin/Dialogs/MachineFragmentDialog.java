@@ -65,12 +65,15 @@ public class MachineFragmentDialog extends DialogFragment {
     private MaterialDatePicker vDatePicker;
     private final Machine machine;
     private ArrayList<Supplement> supplements;
-    private final FirebaseStorage storage = FirebaseStorage.getInstance("gs://igec-dab77.appspot.com");
+    private final FirebaseStorage storage = FirebaseStorage.getInstance("gs://test1-c253b.appspot.com");
     private final StorageReference storageRef = storage.getReference();
-
 
     public MachineFragmentDialog(Machine machine) {
         this.machine = machine;
+    }
+
+    public ArrayList<Supplement> getSupplements() {
+        return supplements;
     }
 
     @NonNull
@@ -202,8 +205,20 @@ public class MachineFragmentDialog extends DialogFragment {
         }
         HashMap<String, Object> modifiedMachine = new HashMap<>();
         machine.getSupplementsNames().clear();
-        //TODO update supplements images
         IntStream.range(0, supplements.size()).forEach(i -> machine.getSupplementsNames().add(supplements.get(i).getName()));
+        for (String name : SupplementInfoDialog.oldName) {
+            storageRef.child("imgs/" + vID.getText().toString() + "/" + name + ".jpg").delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void unused) {
+                    //do nothing
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                }
+            });
+        }
+        SupplementInfoDialog.oldName.clear();
         for (Supplement supplement : supplements) {
             supplement.saveToCloudStorage(storageRef, vID.getText().toString());
         }

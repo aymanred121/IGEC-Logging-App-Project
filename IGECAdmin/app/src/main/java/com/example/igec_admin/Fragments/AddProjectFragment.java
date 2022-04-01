@@ -25,8 +25,10 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Toast;
 
 import com.example.igec_admin.Adatpers.EmployeeAdapter;
+import com.example.igec_admin.Dialogs.AddAllowanceDialog;
 import com.example.igec_admin.Dialogs.AddClientDialog;
 import com.example.igec_admin.R;
+import com.example.igec_admin.fireBase.Allowance;
 import com.example.igec_admin.fireBase.Client;
 import com.example.igec_admin.fireBase.EmployeeOverview;
 import com.example.igec_admin.fireBase.Project;
@@ -55,7 +57,7 @@ public class AddProjectFragment extends Fragment {
 
     // Views
     private TextInputEditText vName, vTime, vManagerName, vArea, vStreet, vCity, vProjectReference;
-    private MaterialButton vRegister, vAddClient;
+    private MaterialButton vRegister, vAddClient, vAddAllowance;
     private AutoCompleteTextView vManagerID, vContractType;
     private TextInputLayout vManagerIDLayout, vTimeLayout, vProjectReferenceLayout;
     private RecyclerView recyclerView;
@@ -63,6 +65,7 @@ public class AddProjectFragment extends Fragment {
     private EmployeeAdapter adapter;
 
     // Vars
+    private ArrayList<Allowance> allowances;
     private Client client;
     private EmployeeOverview selectedManager;
     private String projectID;
@@ -92,6 +95,14 @@ public class AddProjectFragment extends Fragment {
 
             }
         });
+        getParentFragmentManager().setFragmentResultListener("allowances", this, new FragmentResultListener() {
+            @Override
+            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
+                // We use a String here, but any type that can be put in a Bundle is supported
+                allowances = bundle.getParcelableArrayList("allowances");
+                // Do something with the result
+            }
+        });
     }
 
     @Override
@@ -113,6 +124,7 @@ public class AddProjectFragment extends Fragment {
         vManagerID.addTextChangedListener(twManagerID);
         vTimeLayout.setEndIconOnClickListener(oclTimeDate);
         vTimeDatePicker.addOnPositiveButtonClickListener(pclTimeDatePicker);
+        vAddAllowance.setOnClickListener(oclAddAllowance);
     }
 
     // Functions
@@ -131,6 +143,7 @@ public class AddProjectFragment extends Fragment {
         vManagerIDLayout = view.findViewById(R.id.textInputLayout_ManagerID);
         vManagerName = view.findViewById(R.id.TextInput_ManagerName);
         vRegister = view.findViewById(R.id.button_register);
+        vAddAllowance = view.findViewById(R.id.button_AddAllowances);
         vAddClient = view.findViewById(R.id.button_AddClient);
         vTimeDatePickerBuilder.setTitleText("Time");
         vTimeDatePicker = vTimeDatePickerBuilder.build();
@@ -149,6 +162,7 @@ public class AddProjectFragment extends Fragment {
         contract.add("timesheet");
         ArrayAdapter<String> ContractAdapter = new ArrayAdapter<>(getActivity(), R.layout.dropdown_item, contract);
         vContractType.setAdapter(ContractAdapter);
+        allowances = new ArrayList<>();
     }
 
     private void ChangeSelectedTeam(int position) {
@@ -231,6 +245,7 @@ public class AddProjectFragment extends Fragment {
                 ,vContractType.getText().toString());
         newProject.setId(projectID);
         newProject.setClient(client);
+        //TODO add allowances
         db.collection("projects").document(projectID).set(newProject).addOnSuccessListener(unused -> updateEmployeesDetails(projectID));
     }
 
@@ -397,6 +412,13 @@ public class AddProjectFragment extends Fragment {
                 vProjectReference.setText(null);
             }
 
+        }
+    };
+    private View.OnClickListener oclAddAllowance = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            AddAllowanceDialog addAllowanceDialog = new AddAllowanceDialog(allowances);
+            addAllowanceDialog.show(getParentFragmentManager(),"");
         }
     };
 }

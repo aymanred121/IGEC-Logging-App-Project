@@ -27,6 +27,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.igec_admin.Adatpers.EmployeeAdapter;
 import com.example.igec_admin.R;
+import com.example.igec_admin.fireBase.Allowance;
 import com.example.igec_admin.fireBase.Client;
 import com.example.igec_admin.fireBase.EmployeeOverview;
 import com.example.igec_admin.fireBase.Project;
@@ -50,7 +51,7 @@ import java.util.Map;
 public class ProjectFragmentDialog extends DialogFragment {
     // Views
     private TextInputEditText vName, vArea, vStreet, vCity, vTime, vManagerName, vProjectReference;
-    private MaterialButton vRegister, vUpdate, vDelete, vAddClient;
+    private MaterialButton vRegister, vUpdate, vDelete, vAddClient, vAddAllowance;
     private AutoCompleteTextView vManagerID, vContractType;
     private TextInputLayout vManagerIDLayout, vTimeLayout, vProjectReferenceLayout, vContractTypeLayout;
     private RecyclerView recyclerView;
@@ -59,6 +60,7 @@ public class ProjectFragmentDialog extends DialogFragment {
     private RecyclerView.LayoutManager layoutManager;
 
     // Vars
+    private ArrayList<Allowance> allowances;
     long startDate, endDate;
     private Client client;
     private MaterialDatePicker.Builder<Long> vTimeDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
@@ -109,7 +111,14 @@ public class ProjectFragmentDialog extends DialogFragment {
 
             }
         });
-
+        getParentFragmentManager().setFragmentResultListener("allowances", this, new FragmentResultListener() {
+            @Override
+            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
+                // We use a String here, but any type that can be put in a Bundle is supported
+                allowances = bundle.getParcelableArrayList("allowances");
+                // Do something with the result
+            }
+        });
     }
 
     @Override
@@ -126,7 +135,9 @@ public class ProjectFragmentDialog extends DialogFragment {
         vTimeLayout.setEndIconOnClickListener(oclStartDate);
         vProjectReference.addTextChangedListener(twProjectReference);
         vOfficeWork.setOnClickListener(oclOfficeWork);
-        vAddClient.setOnClickListener(oclAddClient);;
+        vAddClient.setOnClickListener(oclAddClient);
+        ;
+        vAddAllowance.setOnClickListener(oclAddAllowance);
 
 
         // Inflate the layout for this fragment
@@ -153,9 +164,10 @@ public class ProjectFragmentDialog extends DialogFragment {
         vManagerName = view.findViewById(R.id.TextInput_ManagerName);
         vRegister = view.findViewById(R.id.button_register);
         vAddClient = view.findViewById(R.id.button_AddClient);
+        vAddAllowance = view.findViewById(R.id.button_AddAllowances);
         vRegister = view.findViewById(R.id.button_register);
         vUpdate = view.findViewById(R.id.button_update);
-        vDelete =  view.findViewById(R.id.button_delete);
+        vDelete = view.findViewById(R.id.button_delete);
 
         vRegister.setVisibility(View.GONE);
         vDelete.setVisibility(View.VISIBLE);
@@ -194,6 +206,7 @@ public class ProjectFragmentDialog extends DialogFragment {
         vManagerID.setAdapter(idAdapter);
         ArrayAdapter<String> ContractAdapter = new ArrayAdapter<>(getActivity(), R.layout.dropdown_item, TeamID);
         vContractType.setAdapter(ContractAdapter);
+        allowances = new ArrayList<>();
     }
 
     String convertDateToString(long selection) {
@@ -325,6 +338,7 @@ public class ProjectFragmentDialog extends DialogFragment {
         updatedProjectData.put("location", "");
         updateEmployeesDetails(project.getId());
         updatedProjectData.put("employees", Team);
+        //TODO add allowances
         db.collection("projects").document(project.getId()).update(updatedProjectData).addOnSuccessListener(unused -> {
             Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
             project.setEmployees(null);
@@ -461,6 +475,13 @@ public class ProjectFragmentDialog extends DialogFragment {
         @Override
         public void onCheckboxClick(int position) {
             ChangeSelectedTeam(position);
+        }
+    };
+    private View.OnClickListener oclAddAllowance = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            AddAllowanceDialog addAllowanceDialog = new AddAllowanceDialog(allowances);
+            addAllowanceDialog.show(getParentFragmentManager(), "");
         }
     };
 

@@ -17,11 +17,15 @@
         <entry key="app/src/main/res/drawable/ic_baseline_image_24.xml" value="0.127" />
         <entry key="app/src/main/res/drawable/ic_baseline_person_24.xml" value="0.127" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.12612227447627192" />
+        <entry key="app/src/main/res/layout/allowance_item.xml" value="0.67" />
         <entry key="app/src/main/res/layout/dropdown_item.xml" value="0.9" />
         <entry key="app/src/main/res/layout/employee_item.xml" value="0.33" />
+        <entry key="app/src/main/res/layout/fragment_add_allowance_dialog.xml" value="0.2" />
         <entry key="app/src/main/res/layout/fragment_add_machine.xml" value="0.21" />
-        <entry key="app/src/main/res/layout/fragment_add_project.xml" value="0.22" />
+        <entry key="app/src/main/res/layout/fragment_add_project.xml" value="0.5" />
+        <entry key="app/src/main/res/layout/fragment_add_supplements_dialog.xml" value="0.1105072463768116" />
         <entry key="app/src/main/res/layout/fragment_add_user.xml" value="0.22" />
+        <entry key="app/src/main/res/layout/fragment_allowance_info_dialog.xml" value="0.21" />
         <entry key="app/src/main/res/layout/fragment_machine.xml" value="0.21" />
         <entry key="app/src/main/res/layout/fragment_machine_info.xml" value="0.1082427536231884" />
         <entry key="app/src/main/res/layout/fragment_machines.xml" value="0.10144927536231885" />

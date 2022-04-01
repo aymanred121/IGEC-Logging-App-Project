@@ -18,7 +18,6 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentResultListener;
 
 import com.example.igec_admin.Dialogs.AddSupplementsDialog;
-import com.example.igec_admin.Dialogs.SupplementInfoDialog;
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Allowance;
 import com.example.igec_admin.fireBase.Machine;
@@ -60,12 +59,12 @@ public class AddMachineFragment extends Fragment {
     // Vars
     private long purchaseDate;
     private QRGEncoder qrgEncoder;
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private CollectionReference machineCol = db.collection("machine");
-    private MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private final CollectionReference machineCol = db.collection("machine");
+    private final MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vDatePicker;
-    private FirebaseStorage storage = FirebaseStorage.getInstance("gs://test1-c253b.appspot.com");
-    private StorageReference storageRef = storage.getReference();
+    private final FirebaseStorage storage = FirebaseStorage.getInstance("gs://test1-c253b.appspot.com");
+    private final StorageReference storageRef = storage.getReference();
     private ArrayList<Supplement> supplements;
 
 
@@ -76,8 +75,6 @@ public class AddMachineFragment extends Fragment {
             @Override
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
                 supplements = bundle.getParcelableArrayList("supplements");
-                SupplementInfoDialog supplementInfoDialog = new SupplementInfoDialog(-1,supplements.get(0));
-                supplementInfoDialog.show(getParentFragmentManager(),"");
             }
         });
 
@@ -123,11 +120,24 @@ public class AddMachineFragment extends Fragment {
         vReference.setText(null);
         vPurchaseDate.setText(null);
         vQRImg.setImageResource(R.drawable.ic_baseline_image_24);
+        vAllowance.setText(null);
+        vMachineByDay.setText(null);
+        vMachineByMonth.setText(null);
+        vMachineByWeek.setText(null);
+        supplements.clear();
     }
 
 
     private boolean validateInput() {
-        return !(vID.getText().toString().isEmpty() || vPurchaseDate.getText().toString().isEmpty() || vReference.getText().toString().isEmpty());
+        return !(vID.getText().toString().isEmpty() ||
+                vPurchaseDate.getText().toString().isEmpty() ||
+                vReference.getText().toString().isEmpty() ||
+                vMachineByDay.getText().toString().isEmpty() ||
+                vMachineByWeek.getText().toString().isEmpty() ||
+                vMachineByMonth.getText().toString().isEmpty() ||
+                vAllowance.getText().toString().isEmpty() ||
+                supplements.size() == 0
+        );
     }
 
     private String convertDateToString(long selection) {
@@ -148,6 +158,10 @@ public class AddMachineFragment extends Fragment {
         @Override
         public void onClick(View v) {
             if (validateInput()) {
+                for (int i = 0; i < supplements.size(); i++) {
+                    supplements.get(i).setActivity(getActivity());
+                    supplements.get(i).saveToCloudStorage(storageRef, vID.getText().toString());
+                }
                 saveToInternalStorage();
                 saveToCloudStorage();
                 Machine newMachine = new Machine(vID.getText().toString(), vReference.getText().toString(), new Date(purchaseDate), new Allowance());
@@ -210,7 +224,7 @@ public class AddMachineFragment extends Fragment {
             }
         }
     };
-    private View.OnClickListener oclAddSupplement = new View.OnClickListener() {
+    private final View.OnClickListener oclAddSupplement = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             AddSupplementsDialog addSupplementsDialog = new AddSupplementsDialog(supplements);

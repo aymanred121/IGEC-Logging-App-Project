@@ -4,6 +4,13 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="../../../../../layout/custom_preview.xml" value="0.15416666666666667" />
+        <entry key="..\:/Users/maraw/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/fragment_add_machine.xml" value="0.22826086956521738" />
+        <entry key="..\:/Users/maraw/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/fragment_add_user.xml" value="0.20878623188405798" />
+        <entry key="..\:/Users/maraw/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/fragment_machines.xml" value="0.25416666666666665" />
+        <entry key="..\:/Users/maraw/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/fragment_supplement_info_dialog.xml" value="0.25416666666666665" />
+        <entry key="..\:/Users/maraw/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/fragment_users.xml" value="0.25416666666666665" />
+        <entry key="..\:/Users/maraw/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/machine_item.xml" value="0.25416666666666665" />
+        <entry key="..\:/Users/maraw/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/supplement_item.xml" value="0.25416666666666665" />
         <entry key="app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.128" />
         <entry key="app/src/main/res/drawable/ic_baseline_group_24.xml" value="0.127" />
         <entry key="app/src/main/res/drawable/ic_baseline_group_add_24.xml" value="0.127" />
@@ -12,19 +19,15 @@
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.12612227447627192" />
         <entry key="app/src/main/res/layout/dropdown_item.xml" value="0.9" />
         <entry key="app/src/main/res/layout/employee_item.xml" value="0.33" />
-        <entry key="app/src/main/res/layout/fragment_add_client_dialog.xml" value="0.25" />
-        <entry key="app/src/main/res/layout/fragment_add_machine.xml" value="0.33" />
-        <entry key="app/src/main/res/layout/fragment_add_project.xml" value="0.33" />
-        <entry key="app/src/main/res/layout/fragment_add_supplements_dialog.xml" value="0.2" />
+        <entry key="app/src/main/res/layout/fragment_add_machine.xml" value="0.21" />
+        <entry key="app/src/main/res/layout/fragment_add_project.xml" value="0.22" />
         <entry key="app/src/main/res/layout/fragment_add_user.xml" value="0.22" />
-        <entry key="app/src/main/res/layout/fragment_client_info.xml" value="0.25" />
         <entry key="app/src/main/res/layout/fragment_machine.xml" value="0.21" />
         <entry key="app/src/main/res/layout/fragment_machine_info.xml" value="0.1082427536231884" />
         <entry key="app/src/main/res/layout/fragment_machines.xml" value="0.10144927536231885" />
         <entry key="app/src/main/res/layout/fragment_project_info.xml" value="0.1082427536231884" />
         <entry key="app/src/main/res/layout/fragment_projects.xml" value="0.10144927536231885" />
         <entry key="app/src/main/res/layout/fragment_summary.xml" value="0.10144927536231885" />
-        <entry key="app/src/main/res/layout/fragment_supplement_info_dialog.xml" value="0.18" />
         <entry key="app/src/main/res/layout/fragment_user_info.xml" value="0.2" />
         <entry key="app/src/main/res/layout/fragment_users.xml" value="0.10144927536231885" />
         <entry key="app/src/main/res/layout/machine_item.xml" value="0.25" />
@@ -34,7 +37,6 @@
         <entry key="app/src/main/res/layout/modify_user.xml" value="0.10144927536231885" />
         <entry key="app/src/main/res/layout/project_item.xml" value="0.1" />
         <entry key="app/src/main/res/layout/projects.xml" value="0.10144927536231885" />
-        <entry key="app/src/main/res/layout/supplement_item.xml" value="0.25" />
         <entry key="app/src/main/res/layout/users.xml" value="0.10144927536231885" />
         <entry key="app/src/main/res/menu/admin_menu.xml" value="0.5" />
         <entry key="app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.1" />

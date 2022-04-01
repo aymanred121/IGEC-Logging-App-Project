@@ -19,6 +19,8 @@ import androidx.fragment.app.FragmentResultListener;
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Machine;
 import com.example.igec_admin.fireBase.Supplement;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
@@ -27,6 +29,9 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.ListResult;
+import com.google.firebase.storage.StorageReference;
 import com.google.zxing.WriterException;
 
 import java.text.SimpleDateFormat;
@@ -50,11 +55,11 @@ public class MachineFragmentDialog extends DialogFragment {
     // Vars
     private long purchaseDate;
     private QRGEncoder qrgEncoder;
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private CollectionReference machineCol = db.collection("machine");
-    private MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private final CollectionReference machineCol = db.collection("machine");
+    private final MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vDatePicker;
-    private Machine machine;
+    private final Machine machine;
     private ArrayList<Supplement> supplements;
 
 
@@ -85,8 +90,6 @@ public class MachineFragmentDialog extends DialogFragment {
             @Override
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
                 supplements = bundle.getParcelableArrayList("supplements");
-                SupplementInfoDialog supplementInfoDialog = new SupplementInfoDialog(-1, supplements.get(0));
-                supplementInfoDialog.show(getParentFragmentManager(), "");
             }
         });
     }
@@ -107,7 +110,6 @@ public class MachineFragmentDialog extends DialogFragment {
 
     // Functions
     private void Initialize(View view) {
-        supplements = new ArrayList<>();
         vRegister = view.findViewById(R.id.button_register);
         vUpdate = view.findViewById(R.id.button_update);
         vDelete = view.findViewById(R.id.button_delete);
@@ -122,6 +124,7 @@ public class MachineFragmentDialog extends DialogFragment {
         vMachineByDay = view.findViewById(R.id.TextInput_MachineByDay);
         vMachineByWeek = view.findViewById(R.id.TextInput_MachineByWeek);
         vMachineByMonth = view.findViewById(R.id.TextInput_MachineByMonth);
+        supplements = new ArrayList<>();
 
 
         vRegister.setVisibility(View.GONE);
@@ -142,7 +145,29 @@ public class MachineFragmentDialog extends DialogFragment {
         } catch (WriterException e) {
             e.printStackTrace();
         }
+        getAllSupplements();
+    }
 
+    private void getAllSupplements() {
+        FirebaseStorage storage = FirebaseStorage.getInstance("gs://test1-c253b.appspot.com");
+        String path = "imgs/" + vID.getText().toString() + "/";
+        StorageReference listRef = storage.getReference().child(path);
+        listRef.listAll()
+                .addOnSuccessListener(new OnSuccessListener<ListResult>() {
+                    @Override
+                    public void onSuccess(ListResult listResult) {
+                        Toast.makeText(getActivity(), path, Toast.LENGTH_SHORT).show();
+                        for (StorageReference item : listResult.getItems()) {
+                            //TODO complete this function
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // Uh-oh, an error occurred!
+                    }
+                });
     }
 
     private void deleteMachine() {
@@ -179,8 +204,17 @@ public class MachineFragmentDialog extends DialogFragment {
         });
     }
 
+
     private boolean validateInput() {
-        return !(vID.getText().toString().isEmpty() || vPurchaseDate.getText().toString().isEmpty() || vReference.getText().toString().isEmpty());
+        return !(vID.getText().toString().isEmpty() ||
+                vPurchaseDate.getText().toString().isEmpty() ||
+                vReference.getText().toString().isEmpty() ||
+                vMachineByDay.getText().toString().isEmpty() ||
+                vMachineByWeek.getText().toString().isEmpty() ||
+                vMachineByMonth.getText().toString().isEmpty() ||
+                vAllowance.getText().toString().isEmpty() ||
+                supplements.size() == 0
+        );
     }
 
     private String convertDateToString(long selection) {
@@ -191,14 +225,14 @@ public class MachineFragmentDialog extends DialogFragment {
     }
 
     // Listeners
-    private View.OnClickListener oclDate = new View.OnClickListener() {
+    private final View.OnClickListener oclDate = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             vDatePicker.show(getFragmentManager(), "DATE_PICKER");
         }
     };
-    private View.OnClickListener oclUpdate = v -> updateMachine();
-    private View.OnClickListener oclAddSupplement = new View.OnClickListener() {
+    private final View.OnClickListener oclUpdate = v -> updateMachine();
+    private final View.OnClickListener oclAddSupplement = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             AddSupplementsDialog addSupplementsDialog = new AddSupplementsDialog(supplements);
@@ -206,9 +240,9 @@ public class MachineFragmentDialog extends DialogFragment {
         }
     };
 
-    private View.OnClickListener oclDelete = v -> deleteMachine();
+    private final View.OnClickListener oclDelete = v -> deleteMachine();
 
-    private MaterialPickerOnPositiveButtonClickListener pclDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
+    private final MaterialPickerOnPositiveButtonClickListener pclDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
         @Override
         public void onPositiveButtonClick(Object selection) {
             vPurchaseDate.setText(convertDateToString((long) selection));

@@ -5,6 +5,7 @@ import static android.app.Activity.RESULT_OK;
 import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 
 import androidx.activity.result.ActivityResult;
@@ -26,6 +27,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.igec_admin.R;
+import com.example.igec_admin.fireBase.Supplement;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -34,10 +36,13 @@ public class SupplementInfoDialog extends DialogFragment {
     private ImageView vSupplementImg;
     private TextInputEditText vSupplementName;
     private MaterialButton vDone;
-    private Bitmap bitmap;
+    private Supplement supplement;
     private ActivityResultLauncher<Intent> activityResultLauncher;
-    public SupplementInfoDialog(Bitmap bitmap) {
-        this.bitmap = bitmap;
+    private int position;
+
+    public SupplementInfoDialog(int position, Supplement supplement) {
+        this.supplement = supplement;
+        this.position = position;
     }
 
     @NonNull
@@ -92,12 +97,26 @@ public class SupplementInfoDialog extends DialogFragment {
         vSupplementImg = view.findViewById(R.id.ImageView_Supplement);
         vSupplementName = view.findViewById(R.id.TextInput_SupplementName);
         vDone = view.findViewById(R.id.button_Done);
-        vSupplementImg.setImageBitmap(bitmap);
+        vSupplementImg.setImageBitmap(supplement.getPhoto());
+        vSupplementName.setText(supplement.getName());
     }
+
     private View.OnClickListener oclDone = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            //TODO: put a supplement object as return AddSupplementsDialog
+            Bundle result = new Bundle();
+            Supplement supplement = new Supplement();
+            vSupplementImg.setDrawingCacheEnabled(true);
+            vSupplementImg.buildDrawingCache();
+            supplement.setName(vSupplementName.getText().toString());
+            supplement.setPhoto(((BitmapDrawable) vSupplementImg.getDrawable()).getBitmap());
+            result.putSerializable("supplement", supplement);
+            result.putInt("position", position);
+            if (position == -1)
+                getParentFragmentManager().setFragmentResult("addSupplement", result);
+            else
+                getParentFragmentManager().setFragmentResult("editSupplement", result);
+
             dismiss();
         }
     };
@@ -105,11 +124,9 @@ public class SupplementInfoDialog extends DialogFragment {
         @Override
         public void onClick(View v) {
             Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            if(takePicture.resolveActivity(getContext().getPackageManager())!= null) {
+            if (takePicture.resolveActivity(getContext().getPackageManager()) != null) {
                 activityResultLauncher.launch(takePicture);
-            }
-            else
-            {
+            } else {
                 Toast.makeText(getActivity(), "there's no activity that supports that action", Toast.LENGTH_SHORT).show();
             }
         }

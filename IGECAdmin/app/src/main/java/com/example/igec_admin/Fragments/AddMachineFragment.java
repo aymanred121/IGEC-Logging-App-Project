@@ -1,12 +1,9 @@
 package com.example.igec_admin.Fragments;
 
-import android.content.ActivityNotFoundException;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -15,12 +12,17 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentResultListener;
 
 import com.example.igec_admin.Dialogs.AddSupplementsDialog;
+import com.example.igec_admin.Dialogs.SupplementInfoDialog;
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Allowance;
 import com.example.igec_admin.fireBase.Machine;
+import com.example.igec_admin.fireBase.Supplement;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
@@ -39,6 +41,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -51,9 +54,9 @@ public class AddMachineFragment extends Fragment {
 
     // Views
     private TextInputLayout vIDLayout, vPurchaseDateLayout;
-    private TextInputEditText vID, vPurchaseDate, vReference,vAllowance,vMachineByDay,vMachineByWeek,vMachineByMonth;
+    private TextInputEditText vID, vPurchaseDate, vReference, vAllowance, vMachineByDay, vMachineByWeek, vMachineByMonth;
     private ImageView vQRImg;
-    private MaterialButton vRegister,vAddSupplement;
+    private MaterialButton vRegister, vAddSupplement;
     // Vars
     private long purchaseDate;
     private QRGEncoder qrgEncoder;
@@ -63,6 +66,22 @@ public class AddMachineFragment extends Fragment {
     private MaterialDatePicker vDatePicker;
     private FirebaseStorage storage = FirebaseStorage.getInstance("gs://test1-c253b.appspot.com");
     private StorageReference storageRef = storage.getReference();
+    private ArrayList<Supplement> supplements;
+
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        getParentFragmentManager().setFragmentResultListener("supplements", this, new FragmentResultListener() {
+            @Override
+            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
+                supplements = bundle.getParcelableArrayList("supplements");
+                SupplementInfoDialog supplementInfoDialog = new SupplementInfoDialog(-1,supplements.get(0));
+                supplementInfoDialog.show(getParentFragmentManager(),"");
+            }
+        });
+
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -81,7 +100,7 @@ public class AddMachineFragment extends Fragment {
 
     // Functions
     private void Initialize(View view) {
-
+        supplements = new ArrayList<>();
         vID = view.findViewById(R.id.TextInput_MachineID);
         vIDLayout = view.findViewById(R.id.textInputLayout_MachineID);
         vQRImg = view.findViewById(R.id.ImageView_MachineIDIMG);
@@ -131,17 +150,15 @@ public class AddMachineFragment extends Fragment {
             if (validateInput()) {
                 saveToInternalStorage();
                 saveToCloudStorage();
-                Machine newMachine = new Machine(vID.getText().toString(), vReference.getText().toString(), new Date(purchaseDate) , new Allowance());
+                Machine newMachine = new Machine(vID.getText().toString(), vReference.getText().toString(), new Date(purchaseDate), new Allowance());
                 machineCol.document(vID.getText().toString()).set(newMachine).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void unused) {
-                            Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
                         clearInput();
                     }
                 });
-            }
-            else
-            {
+            } else {
                 Toast.makeText(getActivity(), "please, fill the machine data", Toast.LENGTH_SHORT).show();
             }
         }
@@ -150,16 +167,16 @@ public class AddMachineFragment extends Fragment {
     private void saveToCloudStorage() {
         vQRImg.setDrawingCacheEnabled(true);
         vQRImg.buildDrawingCache();
-        Bitmap bitmap = ((BitmapDrawable)vQRImg.getDrawable()).getBitmap();
+        Bitmap bitmap = ((BitmapDrawable) vQRImg.getDrawable()).getBitmap();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 20, baos);
         byte[] data = baos.toByteArray();
-        StorageReference mountainsRef = storageRef.child("imgs/"+vID.getText().toString()+"/"+ vReference.getText().toString()+".jpg");
+        StorageReference mountainsRef = storageRef.child("imgs/" + vID.getText().toString() + "/" + vReference.getText().toString() + ".jpg");
 
         UploadTask uploadTask = mountainsRef.putBytes(data);
-        uploadTask.addOnSuccessListener(unsed->{
+        uploadTask.addOnSuccessListener(unsed -> {
             Toast.makeText(getActivity(), "uploaded", Toast.LENGTH_SHORT).show();
-        }).addOnFailureListener(e->{
+        }).addOnFailureListener(e -> {
             Toast.makeText(getActivity(), e.toString(), Toast.LENGTH_SHORT).show();
         });
     }
@@ -196,8 +213,8 @@ public class AddMachineFragment extends Fragment {
     private View.OnClickListener oclAddSupplement = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            AddSupplementsDialog addSupplementsDialog = new AddSupplementsDialog();
-            addSupplementsDialog.show(getParentFragmentManager(),"");
+            AddSupplementsDialog addSupplementsDialog = new AddSupplementsDialog(supplements);
+            addSupplementsDialog.show(getParentFragmentManager(), "");
         }
     };
 
@@ -209,13 +226,14 @@ public class AddMachineFragment extends Fragment {
             purchaseDate = (long) selection;
         }
     };
-    public void saveToInternalStorage(){
-        if(new File( Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)+ vReference.getText().toString()+".jpg").exists())
+
+    public void saveToInternalStorage() {
+        if (new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + vReference.getText().toString() + ".jpg").exists())
             return;
-        Bitmap bitmapImage=((BitmapDrawable)vQRImg.getDrawable()).getBitmap();
-        if(bitmapImage==null)
+        Bitmap bitmapImage = ((BitmapDrawable) vQRImg.getDrawable()).getBitmap();
+        if (bitmapImage == null)
             return;
-        File path = new File( Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), vReference.getText().toString()+".jpg");
+        File path = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), vReference.getText().toString() + ".jpg");
         FileOutputStream fos = null;
         try {
             path.createNewFile();
@@ -230,7 +248,7 @@ public class AddMachineFragment extends Fragment {
                 e.printStackTrace();
             }
         }
-        return ;
+        return;
     }
 
 }

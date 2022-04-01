@@ -14,9 +14,11 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.FragmentResultListener;
 
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Machine;
+import com.example.igec_admin.fireBase.Supplement;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
@@ -28,6 +30,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.zxing.WriterException;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -40,7 +43,7 @@ public class MachineFragmentDialog extends DialogFragment {
 
     // Views
     private TextInputLayout vIDLayout, vPurchaseDateLayout;
-    private TextInputEditText vID, vPurchaseDate, vReference,vAllowance,vMachineByDay,vMachineByWeek,vMachineByMonth;
+    private TextInputEditText vID, vPurchaseDate, vReference, vAllowance, vMachineByDay, vMachineByWeek, vMachineByMonth;
     private MaterialButton vRegister, vDelete, vUpdate, vAddSupplements;
     private ImageView vQRImg;
 
@@ -52,6 +55,7 @@ public class MachineFragmentDialog extends DialogFragment {
     private MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vDatePicker;
     private Machine machine;
+    private ArrayList<Supplement> supplements;
 
 
     public MachineFragmentDialog(Machine machine) {
@@ -77,6 +81,14 @@ public class MachineFragmentDialog extends DialogFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setStyle(DialogFragment.STYLE_NORMAL, R.style.FullscreenDialogTheme);
+        getParentFragmentManager().setFragmentResultListener("supplements", this, new FragmentResultListener() {
+            @Override
+            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
+                supplements = bundle.getParcelableArrayList("supplements");
+                SupplementInfoDialog supplementInfoDialog = new SupplementInfoDialog(-1, supplements.get(0));
+                supplementInfoDialog.show(getParentFragmentManager(), "");
+            }
+        });
     }
 
     @Override
@@ -95,7 +107,7 @@ public class MachineFragmentDialog extends DialogFragment {
 
     // Functions
     private void Initialize(View view) {
-
+        supplements = new ArrayList<>();
         vRegister = view.findViewById(R.id.button_register);
         vUpdate = view.findViewById(R.id.button_update);
         vDelete = view.findViewById(R.id.button_delete);
@@ -189,8 +201,8 @@ public class MachineFragmentDialog extends DialogFragment {
     private View.OnClickListener oclAddSupplement = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            AddSupplementsDialog addSupplementsDialog = new AddSupplementsDialog();
-            addSupplementsDialog.show(getParentFragmentManager(),"");
+            AddSupplementsDialog addSupplementsDialog = new AddSupplementsDialog(supplements);
+            addSupplementsDialog.show(getParentFragmentManager(), "");
         }
     };
 

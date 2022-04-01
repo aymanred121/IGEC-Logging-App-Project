@@ -1,12 +1,14 @@
 package com.example.igec_admin.fireBase;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 public class Machine {
     private String id, reference;
-    private double monthlyRentPrice,dailyRentPrice,weeklyRentPrice;
+    private double monthlyRentPrice, dailyRentPrice, weeklyRentPrice;
     private Date purchaseDate;
     private Boolean isUsed;
+    private ArrayList<String> supplementsNames;
 
 
     public Allowance getAllowance() {
@@ -17,7 +19,7 @@ public class Machine {
         this.allowance = allowance;
     }
 
-    private Allowance allowance ;
+    private Allowance allowance;
 
     public Machine() {
     }
@@ -38,9 +40,9 @@ public class Machine {
         this.reference = reference;
     }
 
-    public Machine(String id, String codeName, Date buyingDate , Allowance allowance) {
+    public Machine(String id, String reference, Date buyingDate, Allowance allowance) {
         this.id = id;
-        this.reference = codeName;
+        this.reference = reference;
         this.purchaseDate = buyingDate;
         this.allowance = allowance;
     }
@@ -48,6 +50,7 @@ public class Machine {
     public Date getPurchaseDate() {
         return purchaseDate;
     }
+
     public void setPurchaseDate(Date purchaseDate) {
         this.purchaseDate = purchaseDate;
     }
@@ -82,5 +85,13 @@ public class Machine {
 
     public void setWeeklyRentPrice(double weeklyRentPrice) {
         this.weeklyRentPrice = weeklyRentPrice;
+    }
+
+    public ArrayList<String> getSupplementsNames() {
+        return supplementsNames;
+    }
+
+    public void setSupplementsNames(ArrayList<String> supplementsNames) {
+        this.supplementsNames = supplementsNames;
     }
 }

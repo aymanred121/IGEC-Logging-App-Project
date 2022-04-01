@@ -7,6 +7,10 @@ public class Allowance {
     public Allowance() {
     }
 
+    public Allowance(int amount) {
+        this.amount = amount;
+    }
+
     public String getName() {
         return name;
     }

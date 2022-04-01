@@ -41,8 +41,8 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
+import java.util.stream.IntStream;
 
 import androidmads.library.qrgenearator.QRGContents;
 import androidmads.library.qrgenearator.QRGEncoder;
@@ -102,7 +102,7 @@ public class MachineFragmentDialog extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_add_machine, container, false);
-        Initialize(view);
+        initialize(view);
 
         vUpdate.setOnClickListener(oclUpdate);
         vDelete.setOnClickListener(oclDelete);
@@ -113,7 +113,7 @@ public class MachineFragmentDialog extends DialogFragment {
     }
 
     // Functions
-    private void Initialize(View view) {
+    private void initialize(View view) {
         vRegister = view.findViewById(R.id.button_register);
         vUpdate = view.findViewById(R.id.button_update);
         vDelete = view.findViewById(R.id.button_delete);
@@ -141,6 +141,10 @@ public class MachineFragmentDialog extends DialogFragment {
         vID.setText(machine.getId());
         purchaseDate = machine.getPurchaseDate().getTime();
         vPurchaseDate.setText(convertDateToString(machine.getPurchaseDate().getTime()));
+        vAllowance.setText(String.valueOf(machine.getAllowance().getAmount()));
+        vMachineByDay.setText(String.valueOf(machine.getDailyRentPrice()));
+        vMachineByWeek.setText(String.valueOf(machine.getWeeklyRentPrice()));
+        vMachineByMonth.setText(String.valueOf(machine.getMonthlyRentPrice()));
         vDatePickerBuilder.setTitleText("Purchase Date");
         vDatePicker = vDatePickerBuilder.setSelection(purchaseDate).build();
         qrgEncoder = new QRGEncoder(vID.getText().toString(), null, QRGContents.Type.TEXT, 25 * 25);
@@ -154,24 +158,25 @@ public class MachineFragmentDialog extends DialogFragment {
 
     private void getAllSupplements() {
         StorageReference ref;
-        ref = FirebaseStorage.getInstance().getReference().child("/imgs/" + vID.getText().toString() + "/test.jpg");
-        try {
-            final File localFile = File.createTempFile("test", "jpg");
-            ref.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                    Bitmap bitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
-                    supplements.add(new Supplement("text", bitmap));
-                    Toast.makeText(getActivity(), supplements.size(), Toast.LENGTH_SHORT).show();
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
+        for (String name : machine.getSupplementsNames()) {
+            ref = FirebaseStorage.getInstance().getReference().child("/imgs/" + vID.getText().toString() + String.format("/%s.jpg", name));
+            try {
+                final File localFile = File.createTempFile(name, "jpg");
+                ref.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                        Bitmap bitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
+                        supplements.add(new Supplement(name, bitmap));
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
 
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
+                    }
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -193,10 +198,10 @@ public class MachineFragmentDialog extends DialogFragment {
             return;
         }
         HashMap<String, Object> modifiedMachine = new HashMap<>();
-        modifiedMachine.put("codeName", vReference.getText().toString());
-        modifiedMachine.put("purchaseDate", new Date(purchaseDate));
-        modifiedMachine.put("id", machine.getId());
-        machineCol.document(machine.getId()).update(modifiedMachine).addOnSuccessListener(unused -> {
+        machine.getSupplementsNames().clear();
+        //TODO update supplements images
+        IntStream.range(0, supplements.size()).forEach(i -> machine.getSupplementsNames().add(supplements.get(i).getName()));
+        machineCol.document(machine.getId()).set(machine).addOnSuccessListener(unused -> {
             db.collection("Machine_Employee").whereEqualTo("Machine", machine).get().addOnSuccessListener(queryDocumentSnapshots -> {
                 for (DocumentSnapshot d : queryDocumentSnapshots) {
                     db.collection("Machine_Employee")

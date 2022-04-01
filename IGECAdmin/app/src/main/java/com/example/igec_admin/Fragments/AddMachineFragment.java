@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.stream.IntStream;
 
 import androidmads.library.qrgenearator.QRGContents;
 import androidmads.library.qrgenearator.QRGEncoder;
@@ -63,7 +64,8 @@ public class AddMachineFragment extends Fragment {
     private final CollectionReference machineCol = db.collection("machine");
     private final MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vDatePicker;
-    private final FirebaseStorage storage = FirebaseStorage.getInstance("gs://test1-c253b.appspot.com");
+    //TODO change path
+    private final FirebaseStorage storage = FirebaseStorage.getInstance("gs://igec-dab77.appspot.com");
     private final StorageReference storageRef = storage.getReference();
     private ArrayList<Supplement> supplements;
 
@@ -164,7 +166,13 @@ public class AddMachineFragment extends Fragment {
                 }
                 saveToInternalStorage();
                 saveToCloudStorage();
-                Machine newMachine = new Machine(vID.getText().toString(), vReference.getText().toString(), new Date(purchaseDate), new Allowance());
+
+                Machine newMachine = new Machine(vID.getText().toString(), vReference.getText().toString(), new Date(purchaseDate), new Allowance(Integer.parseInt(vAllowance.getText().toString())));
+                newMachine.setDailyRentPrice(Double.parseDouble(vMachineByDay.getText().toString()));
+                newMachine.setWeeklyRentPrice(Double.parseDouble(vMachineByWeek.getText().toString()));
+                newMachine.setMonthlyRentPrice(Double.parseDouble(vMachineByMonth.getText().toString()));
+                newMachine.setSupplementsNames(new ArrayList<>());
+                IntStream.range(0, supplements.size()).forEach(i -> newMachine.getSupplementsNames().add(supplements.get(i).getName()));
                 machineCol.document(vID.getText().toString()).set(newMachine).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void unused) {

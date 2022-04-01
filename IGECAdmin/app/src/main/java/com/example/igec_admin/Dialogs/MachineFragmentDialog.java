@@ -2,6 +2,8 @@ package com.example.igec_admin.Dialogs;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,11 +31,13 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.ListResult;
 import com.google.firebase.storage.StorageReference;
 import com.google.zxing.WriterException;
 
+import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -149,25 +153,26 @@ public class MachineFragmentDialog extends DialogFragment {
     }
 
     private void getAllSupplements() {
-        FirebaseStorage storage = FirebaseStorage.getInstance("gs://test1-c253b.appspot.com");
-        String path = "imgs/" + vID.getText().toString() + "/";
-        StorageReference listRef = storage.getReference().child(path);
-        listRef.listAll()
-                .addOnSuccessListener(new OnSuccessListener<ListResult>() {
-                    @Override
-                    public void onSuccess(ListResult listResult) {
-                        Toast.makeText(getActivity(), path, Toast.LENGTH_SHORT).show();
-                        for (StorageReference item : listResult.getItems()) {
-                            //TODO complete this function
-                        }
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        // Uh-oh, an error occurred!
-                    }
-                });
+        StorageReference ref;
+        ref = FirebaseStorage.getInstance().getReference().child("/imgs/" + vID.getText().toString() + "/test.jpg");
+        try {
+            final File localFile = File.createTempFile("test", "jpg");
+            ref.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                    Bitmap bitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
+                    supplements.add(new Supplement("text", bitmap));
+                    Toast.makeText(getActivity(), supplements.size(), Toast.LENGTH_SHORT).show();
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void deleteMachine() {

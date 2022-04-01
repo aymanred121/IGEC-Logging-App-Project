@@ -65,6 +65,8 @@ public class MachineFragmentDialog extends DialogFragment {
     private MaterialDatePicker vDatePicker;
     private final Machine machine;
     private ArrayList<Supplement> supplements;
+    private final FirebaseStorage storage = FirebaseStorage.getInstance("gs://igec-dab77.appspot.com");
+    private final StorageReference storageRef = storage.getReference();
 
 
     public MachineFragmentDialog(Machine machine) {
@@ -193,6 +195,7 @@ public class MachineFragmentDialog extends DialogFragment {
     }
 
     private void updateMachine() {
+
         if (!validateInput()) {
             Toast.makeText(getActivity(), "please, fill the machine data", Toast.LENGTH_SHORT).show();
             return;
@@ -201,6 +204,9 @@ public class MachineFragmentDialog extends DialogFragment {
         machine.getSupplementsNames().clear();
         //TODO update supplements images
         IntStream.range(0, supplements.size()).forEach(i -> machine.getSupplementsNames().add(supplements.get(i).getName()));
+        for (Supplement supplement : supplements) {
+            supplement.saveToCloudStorage(storageRef, vID.getText().toString());
+        }
         machineCol.document(machine.getId()).set(machine).addOnSuccessListener(unused -> {
             db.collection("Machine_Employee").whereEqualTo("Machine", machine).get().addOnSuccessListener(queryDocumentSnapshots -> {
                 for (DocumentSnapshot d : queryDocumentSnapshots) {
@@ -212,6 +218,7 @@ public class MachineFragmentDialog extends DialogFragment {
             Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
             dismiss();
         });
+
     }
 
 

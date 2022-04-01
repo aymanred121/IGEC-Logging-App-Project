@@ -15,7 +15,6 @@ import java.io.Serializable;
 public class Supplement implements Parcelable, Serializable {
     private String name;
     private Bitmap photo;
-    private Context activity;
 
     protected Supplement(Parcel in) {
         name = in.readString();
@@ -33,14 +32,6 @@ public class Supplement implements Parcelable, Serializable {
             return new Supplement[size];
         }
     };
-
-    public Context getActivity() {
-        return activity;
-    }
-
-    public void setActivity(Context activity) {
-        this.activity = activity;
-    }
 
     public Supplement(String name, Bitmap photo) {
         this.name = name;
@@ -67,17 +58,18 @@ public class Supplement implements Parcelable, Serializable {
     }
 
     public void saveToCloudStorage(StorageReference storageRef, String file) {
+
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         photo.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         byte[] data = baos.toByteArray();
         StorageReference mountainsRef = storageRef.child("imgs/" + file + "/" + name + ".jpg");
 
         UploadTask uploadTask = mountainsRef.putBytes(data);
-        uploadTask.addOnSuccessListener(unsed -> {
-            Toast.makeText(getActivity(), "uploaded", Toast.LENGTH_SHORT).show();
-        }).addOnFailureListener(e -> {
-            Toast.makeText(getActivity(), e.toString(), Toast.LENGTH_SHORT).show();
-        });
+//        uploadTask.addOnSuccessListener(unsed -> {
+//            Toast.makeText(getActivity(), "uploaded", Toast.LENGTH_SHORT).show();
+//        }).addOnFailureListener(e -> {
+//            Toast.makeText(getActivity(), e.toString(), Toast.LENGTH_SHORT).show();
+//        });
     }
 
     @Override

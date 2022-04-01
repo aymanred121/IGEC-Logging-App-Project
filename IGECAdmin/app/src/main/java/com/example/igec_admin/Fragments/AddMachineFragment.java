@@ -161,7 +161,6 @@ public class AddMachineFragment extends Fragment {
         public void onClick(View v) {
             if (validateInput()) {
                 for (int i = 0; i < supplements.size(); i++) {
-                    supplements.get(i).setActivity(getActivity());
                     supplements.get(i).saveToCloudStorage(storageRef, vID.getText().toString());
                 }
                 saveToInternalStorage();

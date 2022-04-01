@@ -41,8 +41,8 @@ public class MachineFragmentDialog extends DialogFragment {
     // Views
     private TextInputLayout vIDLayout, vPurchaseDateLayout;
     private TextInputEditText vID, vPurchaseDate, vReference;
-    private MaterialButton vRegister, vDelete, vUpdate;
-    private ImageView vQRImg, vAddSupplements;
+    private MaterialButton vRegister, vDelete, vUpdate, vAddSupplements;
+    private ImageView vQRImg;
 
     // Vars
     private long purchaseDate;

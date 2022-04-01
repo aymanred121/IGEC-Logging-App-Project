@@ -1,6 +1,7 @@
 package com.example.igec_admin.Dialogs;
 
 import android.app.Dialog;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -24,6 +25,11 @@ public class SupplementInfoDialog extends DialogFragment {
     private ImageView vSupplementImg;
     private TextInputEditText vSupplementName;
     private MaterialButton vDone;
+    private Bitmap bitmap;
+    public SupplementInfoDialog(Bitmap bitmap) {
+        this.bitmap = bitmap;
+    }
+
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
@@ -57,12 +63,21 @@ public class SupplementInfoDialog extends DialogFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         initialize(view);
+        vDone.setOnClickListener(oclDone);
     }
 
     private void initialize(View view) {
         vSupplementImg = view.findViewById(R.id.ImageView_Supplement);
         vSupplementName = view.findViewById(R.id.TextInput_SupplementName);
         vDone = view.findViewById(R.id.button_Done);
+        vSupplementImg.setImageBitmap(bitmap);
     }
+    private View.OnClickListener oclDone = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            //TODO: put a supplement object as return AddSupplementsDialog
+            dismiss();
+        }
+    };
 
 }

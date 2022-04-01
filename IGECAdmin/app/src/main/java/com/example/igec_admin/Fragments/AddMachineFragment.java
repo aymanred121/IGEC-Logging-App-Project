@@ -1,9 +1,12 @@
 package com.example.igec_admin.Fragments;
 
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -14,6 +17,7 @@ import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
+import com.example.igec_admin.Dialogs.AddSupplementsDialog;
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Allowance;
 import com.example.igec_admin.fireBase.Machine;
@@ -49,7 +53,7 @@ public class AddMachineFragment extends Fragment {
     private TextInputLayout vIDLayout, vPurchaseDateLayout;
     private TextInputEditText vID, vPurchaseDate, vReference;
     private ImageView vQRImg;
-    private MaterialButton vRegister;
+    private MaterialButton vRegister,vAddSupplement;
     // Vars
     private long purchaseDate;
     private QRGEncoder qrgEncoder;
@@ -71,6 +75,7 @@ public class AddMachineFragment extends Fragment {
         vID.addTextChangedListener(atlMachineID);
         vPurchaseDateLayout.setEndIconOnClickListener(oclDate);
         vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);
+        vAddSupplement.setOnClickListener(oclAddSupplement);
         return view;
     }
 
@@ -81,6 +86,7 @@ public class AddMachineFragment extends Fragment {
         vIDLayout = view.findViewById(R.id.textInputLayout_MachineID);
         vQRImg = view.findViewById(R.id.ImageView_MachineIDIMG);
         vRegister = view.findViewById(R.id.button_register);
+        vAddSupplement = view.findViewById(R.id.button_addSupplements);
         vReference = view.findViewById(R.id.TextInput_MachineCodeName);
         vPurchaseDate = view.findViewById(R.id.TextInput_MachinePurchaseDate);
         vPurchaseDateLayout = view.findViewById(R.id.textInputLayout_MachinePurchaseDate);
@@ -181,6 +187,13 @@ public class AddMachineFragment extends Fragment {
             } catch (WriterException e) {
                 e.printStackTrace();
             }
+        }
+    };
+    private View.OnClickListener oclAddSupplement = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            AddSupplementsDialog addSupplementsDialog = new AddSupplementsDialog();
+            addSupplementsDialog.show(getParentFragmentManager(),"");
         }
     };
 

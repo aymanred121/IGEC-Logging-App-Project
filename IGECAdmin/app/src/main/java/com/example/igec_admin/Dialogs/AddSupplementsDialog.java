@@ -1,13 +1,22 @@
 package com.example.igec_admin.Dialogs;
 
+import static android.app.Activity.RESULT_OK;
+
 import android.app.Dialog;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Icon;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
 
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +28,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class AddSupplementsDialog extends DialogFragment {
 
-    private FloatingActionButton vAddPhoto;
+    private FloatingActionButton vAddPhoto, vDone;
+    private ActivityResultLauncher<Intent> activityResultLauncher;
 
     @NonNull
     @Override
@@ -41,6 +51,7 @@ public class AddSupplementsDialog extends DialogFragment {
         super.onCreate(savedInstanceState);
         setStyle(DialogFragment.STYLE_NORMAL, R.style.FullscreenDialogTheme);
     }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -57,10 +68,27 @@ public class AddSupplementsDialog extends DialogFragment {
 
     private void initialize(View view) {
         vAddPhoto = view.findViewById(R.id.Button_AddPhoto);
+        vDone = view.findViewById(R.id.Button_Done);
+        activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+            @Override
+            public void onActivityResult(ActivityResult result) {
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    Bundle bundle = result.getData().getExtras();
+                    Bitmap bitmap = (Bitmap) bundle.get("data");
+                    SupplementInfoDialog supplementInfoDialog = new SupplementInfoDialog(bitmap);
+                    supplementInfoDialog.show(getParentFragmentManager(),"");
+                }
+            }
+        });
     }
+
     private View.OnClickListener oclAddPhoto = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+            activityResultLauncher.launch(takePicture);
+
 
         }
     };

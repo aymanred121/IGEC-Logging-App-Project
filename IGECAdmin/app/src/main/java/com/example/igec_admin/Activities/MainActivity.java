@@ -1,6 +1,7 @@
 package com.example.igec_admin.Activities;
 
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -40,6 +41,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private Toolbar vToolbar;
 
     // Vars
+    public static Context contextOfApplication;
+    public static Context getContextOfApplication()
+    {
+        return contextOfApplication;
+    }
     private ActionBarDrawerToggle actionBarDrawerToggle;
     private int selectedTab = 0;
     @Override
@@ -53,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         }
         super.onCreate(savedInstanceState);
+        contextOfApplication = getApplicationContext();
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         setContentView(R.layout.activity_main);
 

@@ -145,11 +145,11 @@ public class AddSupplementsDialog extends DialogFragment {
         @Override
         public void onClick(View v) {
             Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            if (takePicture.resolveActivity(getContext().getPackageManager()) != null) {
-                activityResultLauncher.launch(takePicture);
-            } else {
-                Toast.makeText(getActivity(), "there's no activity that supports that action", Toast.LENGTH_SHORT).show();
-            }
+            activityResultLauncher.launch(takePicture);
+//            if (takePicture.resolveActivity(getContext().getPackageManager()) != null) {
+//            } else {
+//                Toast.makeText(getActivity(), "there's no activity that supports that action", Toast.LENGTH_SHORT).show();
+//            }
 
         }
     };

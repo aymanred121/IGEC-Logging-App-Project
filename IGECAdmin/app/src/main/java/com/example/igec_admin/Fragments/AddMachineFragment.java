@@ -64,8 +64,7 @@ public class AddMachineFragment extends Fragment {
     private final CollectionReference machineCol = db.collection("machine");
     private final MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vDatePicker;
-    //TODO change path
-    private final FirebaseStorage storage = FirebaseStorage.getInstance("gs://test1-c253b.appspot.com");
+    private final FirebaseStorage storage = FirebaseStorage.getInstance();
     private final StorageReference storageRef = storage.getReference();
     private ArrayList<Supplement> supplements;
 

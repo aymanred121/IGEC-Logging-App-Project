@@ -65,7 +65,7 @@ public class MachineFragmentDialog extends DialogFragment {
     private MaterialDatePicker vDatePicker;
     private final Machine machine;
     private ArrayList<Supplement> supplements;
-    private final FirebaseStorage storage = FirebaseStorage.getInstance("gs://test1-c253b.appspot.com");
+    private final FirebaseStorage storage = FirebaseStorage.getInstance();
     private final StorageReference storageRef = storage.getReference();
 
     public MachineFragmentDialog(Machine machine) {

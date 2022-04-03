@@ -5,6 +5,7 @@ import static android.app.Activity.RESULT_OK;
 import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
@@ -12,6 +13,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
@@ -27,20 +30,40 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.igec_admin.Adatpers.SupplementAdapter;
 import com.example.igec_admin.R;
+import com.example.igec_admin.fireBase.Machine;
 import com.example.igec_admin.fireBase.Supplement;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class AddSupplementsDialog extends DialogFragment {
 
     private FloatingActionButton vAddPhoto, vDone;
     private ActivityResultLauncher<Intent> activityResultLauncher;
-    private final ArrayList<Supplement> supplements;
+    private ArrayList<Supplement> supplements;
     private SupplementAdapter adapter;
     private RecyclerView recyclerView;
     private RecyclerView.LayoutManager layoutManager;
+    private CircularProgressIndicator vCircularProgressIndicator;
+    private Machine machine;
+    private Animation  show, hide;
 
+
+    // for machine dialog
+    public AddSupplementsDialog(Machine machine) {
+        this.machine = machine;
+    }
+
+    // for add machine dialog
     public AddSupplementsDialog(ArrayList<Supplement> supplements) {
         this.supplements = supplements;
     }
@@ -108,6 +131,9 @@ public class AddSupplementsDialog extends DialogFragment {
     }
 
     private void initialize(View view) {
+        if (supplements == null)
+            supplements = new ArrayList<>();
+        vCircularProgressIndicator = view.findViewById(R.id.progress_bar);
         vAddPhoto = view.findViewById(R.id.Button_AddPhoto);
         vDone = view.findViewById(R.id.Button_Done);
         recyclerView = view.findViewById(R.id.recyclerview);
@@ -130,6 +156,45 @@ public class AddSupplementsDialog extends DialogFragment {
                 }
             }
         });
+        show = AnimationUtils.loadAnimation(getActivity(), R.anim.show);
+        hide = AnimationUtils.loadAnimation(getActivity(), R.anim.hide);
+        if (machine != null) {
+            getAllSupplements();
+            vCircularProgressIndicator.setVisibility(View.VISIBLE);
+            vCircularProgressIndicator.startAnimation(show);
+            recyclerView.startAnimation(hide);
+        }
+    }
+
+    private void getAllSupplements() {
+        StorageReference ref;
+        final int[] progress = new int[1];
+        for (String name : machine.getSupplementsNames()) {
+            ref = FirebaseStorage.getInstance().getReference().child("/imgs/" + machine.getId() + String.format("/%s.jpg", name));
+            try {
+                final File localFile = File.createTempFile(name, "jpg");
+                ref.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                        Bitmap bitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
+                        supplements.add(new Supplement(name, bitmap));
+                        progress[0]++;
+                        if (progress[0] == machine.getSupplementsNames().size()) {
+                            vCircularProgressIndicator.startAnimation(hide);
+                            recyclerView.startAnimation(show);
+                            adapter.notifyDataSetChanged();
+                        }
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                    }
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private final View.OnClickListener oclDone = new View.OnClickListener() {
@@ -160,5 +225,4 @@ public class AddSupplementsDialog extends DialogFragment {
             supplementInfoDialog.show(getParentFragmentManager(), "");
         }
     };
-
 }

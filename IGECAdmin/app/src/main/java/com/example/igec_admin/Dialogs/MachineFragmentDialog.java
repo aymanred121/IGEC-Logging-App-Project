@@ -72,9 +72,6 @@ public class MachineFragmentDialog extends DialogFragment {
         this.machine = machine;
     }
 
-    public ArrayList<Supplement> getSupplements() {
-        return supplements;
-    }
 
     @NonNull
     @Override
@@ -133,7 +130,6 @@ public class MachineFragmentDialog extends DialogFragment {
         vMachineByDay = view.findViewById(R.id.TextInput_MachineByDay);
         vMachineByWeek = view.findViewById(R.id.TextInput_MachineByWeek);
         vMachineByMonth = view.findViewById(R.id.TextInput_MachineByMonth);
-        supplements = new ArrayList<>();
 
 
         vRegister.setVisibility(View.GONE);
@@ -158,32 +154,8 @@ public class MachineFragmentDialog extends DialogFragment {
         } catch (WriterException e) {
             e.printStackTrace();
         }
-        getAllSupplements();
     }
 
-    private void getAllSupplements() {
-        StorageReference ref;
-        for (String name : machine.getSupplementsNames()) {
-            ref = FirebaseStorage.getInstance().getReference().child("/imgs/" + vID.getText().toString() + String.format("/%s.jpg", name));
-            try {
-                final File localFile = File.createTempFile(name, "jpg");
-                ref.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                        Bitmap bitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
-                        supplements.add(new Supplement(name, bitmap));
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-
-                    }
-                });
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
 
     private void deleteMachine() {
         /*
@@ -267,7 +239,11 @@ public class MachineFragmentDialog extends DialogFragment {
     private final View.OnClickListener oclAddSupplement = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            AddSupplementsDialog addSupplementsDialog = new AddSupplementsDialog(supplements);
+            AddSupplementsDialog addSupplementsDialog;
+            if (supplements == null)
+                addSupplementsDialog = new AddSupplementsDialog(machine);
+            else
+                addSupplementsDialog = new AddSupplementsDialog(supplements);
             addSupplementsDialog.show(getParentFragmentManager(), "");
         }
     };

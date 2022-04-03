@@ -26,6 +26,7 @@ import com.example.igec_admin.fireBase.Project;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.CollectionReference;
@@ -332,7 +333,15 @@ public class UserFragmentDialog extends DialogFragment {
 
     };
     private View.OnClickListener clDelete = v -> {
-        deleteEmployee();
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
+        builder.setTitle(getString(R.string.Delete))
+                .setMessage(getString(R.string.AreUSure))
+                .setNegativeButton(getString(R.string.cancel), (dialogInterface, i) -> {
+                })
+                .setPositiveButton(getString(R.string.accept), (dialogInterface, i) -> {
+                    deleteEmployee();
+                })
+                .show();
     };
 
 

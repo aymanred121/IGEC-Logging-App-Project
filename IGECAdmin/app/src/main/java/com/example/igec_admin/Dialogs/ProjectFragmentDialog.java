@@ -35,6 +35,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.CollectionReference;
@@ -349,7 +350,7 @@ public class ProjectFragmentDialog extends DialogFragment {
                 , vCity.getText().toString()
                 , vArea.getText().toString()
                 , vStreet.getText().toString()
-                ,vContractType.getText().toString());
+                , vContractType.getText().toString());
         newProject.setId(project.getId());
         newProject.setClient(client);
         newProject.getAllowancesList().addAll(allowances);
@@ -453,7 +454,18 @@ public class ProjectFragmentDialog extends DialogFragment {
             Toast.makeText(getActivity(), "please, fill the project data", Toast.LENGTH_SHORT).show();
         }
     };
-    View.OnClickListener clDelete = v -> deleteProject();
+    View.OnClickListener clDelete = v -> {
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
+        builder.setTitle(getString(R.string.Delete))
+                .setMessage(getString(R.string.AreUSure))
+                .setNegativeButton(getString(R.string.cancel), (dialogInterface, i) -> {
+                })
+                .setPositiveButton(getString(R.string.accept), (dialogInterface, i) -> {
+                    deleteProject();
+                })
+                .show();
+
+    };
     private View.OnClickListener oclAddClient = new View.OnClickListener() {
         @Override
         public void onClick(View v) {

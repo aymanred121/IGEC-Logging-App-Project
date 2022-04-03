@@ -26,6 +26,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.CollectionReference;
@@ -253,7 +254,19 @@ public class MachineFragmentDialog extends DialogFragment {
         }
     };
 
-    private final View.OnClickListener oclDelete = v -> deleteMachine();
+    private final View.OnClickListener oclDelete = v -> {
+
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
+        builder.setTitle(getString(R.string.Delete))
+                .setMessage(getString(R.string.AreUSure))
+                .setNegativeButton(getString(R.string.cancel), (dialogInterface, i) -> {
+                })
+                .setPositiveButton(getString(R.string.accept), (dialogInterface, i) -> {
+                    deleteMachine();
+                })
+                .show();
+
+    };
 
     private final MaterialPickerOnPositiveButtonClickListener pclDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
         @Override

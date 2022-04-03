@@ -23,8 +23,11 @@
         </item>
         <item name="boxCollapsedPaddingTop">0dp</item>
     </style>
-    
-    
+
+    <style name="ShapeAppearanceOverlay.MyApp.Button.Circle" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
 
     <style name="FullscreenDialogTheme" parent="Theme.MaterialComponents.Light.DialogWhenLarge">
         <item name="colorPrimary">@color/primaryColor</item>

@@ -28,7 +28,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="top"
                 android:hint="@string/company_name"
-                android:inputType="text"
+                android:inputType="textPersonName"
                 android:padding="14dp"
                 android:singleLine="true" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -51,7 +51,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="top"
                 android:hint="@string/company_email"
-                android:inputType="text"
+                android:inputType="textEmailAddress"
                 android:padding="14dp"
                 android:singleLine="true" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -74,7 +74,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="top"
                 android:hint="@string/company_phone_number"
-                android:inputType="text"
+                android:inputType="phone"
                 android:padding="14dp"
                 android:singleLine="true" />
         </com.google.android.material.textfield.TextInputLayout>

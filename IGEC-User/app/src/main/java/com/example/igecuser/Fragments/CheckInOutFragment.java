@@ -22,7 +22,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentResultListener;
 
-import com.example.igecuser.Dialogs.CheckingInOutDialog;
 import com.example.igecuser.Dialogs.MachineCheckInOutDialog;
 import com.example.igecuser.Dialogs.SupplementsDialog;
 import com.example.igecuser.R;
@@ -31,6 +30,7 @@ import com.example.igecuser.fireBase.Machine;
 import com.example.igecuser.fireBase.Machine_Employee;
 import com.example.igecuser.fireBase.Summary;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.FieldValue;
@@ -50,7 +50,7 @@ public class CheckInOutFragment extends Fragment {
     private boolean isOpen = false;
     private Animation fabClose, fabOpen, rotateForward, rotateBackward, show, hide, rotateBackwardHide;
     private Boolean isHere = Boolean.FALSE;
-    private final Employee currEmployee;
+    private Employee currEmployee = null;
     private String id;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private double latitude, longitude;
@@ -153,28 +153,11 @@ public class CheckInOutFragment extends Fragment {
 
     // Listeners
     private final View.OnClickListener oclCheckInOut = v -> {
-        CheckingInOutDialog checkingInOutDialog = new CheckingInOutDialog();
-        checkingInOutDialog.show(getParentFragmentManager(), "");
-    };
-    private final View.OnClickListener oclInside = view -> {
-        MachineCheckInOutDialog machineCheckInOutDialog = new MachineCheckInOutDialog(true);
-        machineCheckInOutDialog.show(getParentFragmentManager(), "");
-    };
-    private final View.OnClickListener oclOutside = view -> {
-        MachineCheckInOutDialog machineCheckInOutDialog = new MachineCheckInOutDialog(false);
-        machineCheckInOutDialog.show(getParentFragmentManager(), "");
-    };
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        getParentFragmentManager().setFragmentResultListener("employee", this, new FragmentResultListener() {
-            @Override
-            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
-                // We use a String here, but any type that can be put in a Bundle is supported
-                String result = bundle.getString("response");
-                // Do something with the result
-                if (result.equals("Yes")) {
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
+        builder.setTitle(getString(R.string.do_you_want_to_confirm_this_action))
+                .setNegativeButton(getString(R.string.No), (dialogInterface, i) -> {
+                })
+                .setPositiveButton(getString(R.string.Yes), (dialogInterface, i) -> {
                     Location location = getLocation();
                     if (location == null) {
                         Toast.makeText(getContext(), "Please enable GPS!", Toast.LENGTH_SHORT).show();
@@ -236,9 +219,22 @@ public class CheckInOutFragment extends Fragment {
                         }
 
                     }
-                }
-            }
-        });
+                })
+                .show();
+
+    };
+    private final View.OnClickListener oclInside = view -> {
+        MachineCheckInOutDialog machineCheckInOutDialog = new MachineCheckInOutDialog(true);
+        machineCheckInOutDialog.show(getParentFragmentManager(), "");
+    };
+    private final View.OnClickListener oclOutside = view -> {
+        MachineCheckInOutDialog machineCheckInOutDialog = new MachineCheckInOutDialog(false);
+        machineCheckInOutDialog.show(getParentFragmentManager(), "");
+    };
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         getParentFragmentManager().setFragmentResultListener("machine", this, new FragmentResultListener() {
             @Override
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {

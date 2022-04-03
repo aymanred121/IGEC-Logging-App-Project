@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Project;
 import com.example.igec_admin.fireBase.Supplement;
+import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
 
@@ -35,6 +36,7 @@ public class SupplementAdapter extends RecyclerView.Adapter<SupplementAdapter.Su
         Supplement supplement = supplements.get(position);
         holder.vName.setText(supplement.getName());
         holder.vImg.setImageBitmap(supplement.getPhoto());
+
     }
 
     @Override
@@ -44,6 +46,7 @@ public class SupplementAdapter extends RecyclerView.Adapter<SupplementAdapter.Su
 
     public interface OnItemClickListener{
         void onItemClick(int position);
+        void onDeleteItem(int position);
     }
 
     public void setOnItemClickListener(OnItemClickListener listener) {
@@ -67,11 +70,14 @@ public class SupplementAdapter extends RecyclerView.Adapter<SupplementAdapter.Su
     public static class SupplementViewHolder extends RecyclerView.ViewHolder{
         public TextView vName;
         public ImageView vImg;
+        public MaterialButton vDelete;
+
         public SupplementViewHolder(@NonNull View itemView, OnItemClickListener listener) {
             super(itemView);
 
             vName = itemView.findViewById(R.id.TextView_SupplementName);
             vImg = itemView.findViewById(R.id.TextView_SupplementIMG);
+            vDelete = itemView.findViewById(R.id.button_delete);
 
             itemView.setOnClickListener(v -> {
                 if(listener != null)
@@ -80,6 +86,17 @@ public class SupplementAdapter extends RecyclerView.Adapter<SupplementAdapter.Su
                     if(position != RecyclerView.NO_POSITION)
                     {
                         listener.onItemClick(position);
+                    }
+                }
+            });
+
+            vDelete.setOnClickListener(v->{
+                if(listener != null)
+                {
+                    int position = getAdapterPosition();
+                    if(position != RecyclerView.NO_POSITION)
+                    {
+                        listener.onDeleteItem(position);
                     }
                 }
             });

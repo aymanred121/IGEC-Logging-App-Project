@@ -23,6 +23,7 @@ import android.widget.Toast;
 import com.example.igec_admin.Adatpers.AllowanceAdapter;
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Allowance;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
@@ -125,14 +126,29 @@ public class AddAllowanceDialog extends DialogFragment {
         @Override
         public void onClick(View v) {
             AllowanceInfoDialog allowanceInfoDialog = new AllowanceInfoDialog(-1);
-            allowanceInfoDialog.show(getParentFragmentManager(),"");
+            allowanceInfoDialog.show(getParentFragmentManager(), "");
         }
     };
     private AllowanceAdapter.OnItemClickListener oclItemClickListener = new AllowanceAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position) {
-            AllowanceInfoDialog allowanceInfoDialog = new AllowanceInfoDialog(position,allowances.get(position));
+            AllowanceInfoDialog allowanceInfoDialog = new AllowanceInfoDialog(position, allowances.get(position));
             allowanceInfoDialog.show(getParentFragmentManager(), "");
+        }
+
+        @Override
+        public void onDeleteItem(int position) {
+            MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
+            builder.setTitle(getString(R.string.Delete))
+                    .setMessage(getString(R.string.AreUSure))
+                    .setNegativeButton(getString(R.string.cancel), (dialogInterface, i) -> {
+                    })
+                    .setPositiveButton(getString(R.string.accept), (dialogInterface, i) -> {
+                        allowances.remove(position);
+                        adapter.notifyItemRemoved(position);
+                    })
+                    .show();
+
         }
     };
 }

@@ -67,6 +67,7 @@ public class MachineFragmentDialog extends DialogFragment {
     private ArrayList<Supplement> supplements;
     private final FirebaseStorage storage = FirebaseStorage.getInstance();
     private final StorageReference storageRef = storage.getReference();
+    private ArrayList<String> oldNames;
 
     public MachineFragmentDialog(Machine machine) {
         this.machine = machine;
@@ -96,6 +97,7 @@ public class MachineFragmentDialog extends DialogFragment {
             @Override
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
                 supplements = bundle.getParcelableArrayList("supplements");
+                oldNames = bundle.getStringArrayList("oldNames");
             }
         });
     }
@@ -116,6 +118,7 @@ public class MachineFragmentDialog extends DialogFragment {
 
     // Functions
     private void initialize(View view) {
+        oldNames = new ArrayList<>();
         vRegister = view.findViewById(R.id.button_register);
         vUpdate = view.findViewById(R.id.button_update);
         vDelete = view.findViewById(R.id.button_delete);
@@ -176,23 +179,26 @@ public class MachineFragmentDialog extends DialogFragment {
             return;
         }
         HashMap<String, Object> modifiedMachine = new HashMap<>();
-        machine.getSupplementsNames().clear();
-        IntStream.range(0, supplements.size()).forEach(i -> machine.getSupplementsNames().add(supplements.get(i).getName()));
-        for (String name : SupplementInfoDialog.oldName) {
-            storageRef.child("imgs/" + vID.getText().toString() + "/" + name + ".jpg").delete().addOnSuccessListener(new OnSuccessListener<Void>() {
-                @Override
-                public void onSuccess(Void unused) {
-                    //do nothing
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                }
-            });
-        }
-        SupplementInfoDialog.oldName.clear();
-        for (Supplement supplement : supplements) {
-            supplement.saveToCloudStorage(storageRef, vID.getText().toString());
+        if (supplements != null) {
+            machine.getSupplementsNames().clear();
+            IntStream.range(0, supplements.size()).forEach(i -> machine.getSupplementsNames().add(supplements.get(i).getName()));
+
+            for (String name : oldNames) {
+                storageRef.child("imgs/" + vID.getText().toString() + "/" + name + ".jpg").delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        //do nothing
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                    }
+                });
+            }
+            oldNames.clear();
+            for (Supplement supplement : supplements) {
+                supplement.saveToCloudStorage(storageRef, vID.getText().toString());
+            }
         }
         machineCol.document(machine.getId()).set(machine).addOnSuccessListener(unused -> {
             db.collection("Machine_Employee").whereEqualTo("Machine", machine).get().addOnSuccessListener(queryDocumentSnapshots -> {
@@ -216,8 +222,7 @@ public class MachineFragmentDialog extends DialogFragment {
                 vMachineByDay.getText().toString().isEmpty() ||
                 vMachineByWeek.getText().toString().isEmpty() ||
                 vMachineByMonth.getText().toString().isEmpty() ||
-                vAllowance.getText().toString().isEmpty() ||
-                supplements.size() == 0
+                vAllowance.getText().toString().isEmpty()
         );
     }
 

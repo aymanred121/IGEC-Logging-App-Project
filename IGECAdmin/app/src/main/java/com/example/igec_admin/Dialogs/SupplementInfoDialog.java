@@ -41,7 +41,6 @@ public class SupplementInfoDialog extends DialogFragment {
     private final Supplement supplement;
     private ActivityResultLauncher<Intent> activityResultLauncher;
     private final int position;
-    public static ArrayList<String> oldName = new ArrayList<>();
     private final ArrayList<Supplement> supplementNames;
 
     public SupplementInfoDialog(int position, Supplement supplement, ArrayList<Supplement> supplementNames) {
@@ -83,7 +82,6 @@ public class SupplementInfoDialog extends DialogFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         initialize(view);
-        vSupplementName.addTextChangedListener(twNames);
         vDone.setOnClickListener(oclDone);
         vSupplementImg.setOnClickListener(oclImg);
         activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
@@ -107,14 +105,22 @@ public class SupplementInfoDialog extends DialogFragment {
         vSupplementName.setText(supplement.getName());
     }
 
+    private boolean validateInput()
+    {
+        return !(vSupplementName.getText().toString().isEmpty());
+    }
+
     private final View.OnClickListener oclDone = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            if(!validateInput()){
+                Toast.makeText(getActivity(), "please fill Supplement data", Toast.LENGTH_SHORT).show();
+                return;
+            }
             if (supplementNames != null) {
                 for (int i = 0; i < supplementNames.size(); i++) {
                     if (position != i && supplementNames.get(i).getName().equals(vSupplementName.getText().toString())) {
                         Toast.makeText(getContext(), "name is taken , please try another name", Toast.LENGTH_SHORT).show();
-                        oldName.remove(oldName.size() - 1);
                         return;
                     }
                 }
@@ -133,24 +139,6 @@ public class SupplementInfoDialog extends DialogFragment {
                 getParentFragmentManager().setFragmentResult("editSupplement", result);
 
             dismiss();
-        }
-    };
-    TextWatcher twNames = new TextWatcher() {
-
-
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            oldName.add(s.toString());
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
-
         }
     };
 

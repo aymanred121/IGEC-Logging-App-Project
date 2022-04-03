@@ -245,7 +245,7 @@ public class AddProjectFragment extends Fragment {
                 ,vContractType.getText().toString());
         newProject.setId(projectID);
         newProject.setClient(client);
-        //TODO add allowances
+        newProject.getAllowancesList().addAll(allowances);
         db.collection("projects").document(projectID).set(newProject).addOnSuccessListener(unused -> updateEmployeesDetails(projectID));
     }
 

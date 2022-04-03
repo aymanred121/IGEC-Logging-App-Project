@@ -3,6 +3,7 @@ package com.example.igec_admin.Dialogs;
 import static android.app.Activity.RESULT_OK;
 
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -34,6 +35,7 @@ import com.example.igec_admin.fireBase.Machine;
 import com.example.igec_admin.fireBase.Supplement;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.firebase.storage.FileDownloadTask;
@@ -55,7 +57,9 @@ public class AddSupplementsDialog extends DialogFragment {
     private RecyclerView.LayoutManager layoutManager;
     private CircularProgressIndicator vCircularProgressIndicator;
     private Machine machine;
-    private Animation  show, hide;
+    private Animation show, hide;
+    private ArrayList<String> oldNames = new ArrayList<>();
+    private ArrayList<Integer> oldNamesIndexes = new ArrayList<>();
 
 
     // for machine dialog
@@ -93,7 +97,6 @@ public class AddSupplementsDialog extends DialogFragment {
                 // We use a String here, but any type that can be put in a Bundle is supported
                 supplements.add((Supplement) bundle.getSerializable("supplement"));
                 // Do something with the result
-                Toast.makeText(getActivity(), supplements.get(supplements.size() - 1).getName(), Toast.LENGTH_SHORT).show();
                 adapter.notifyDataSetChanged();
             }
         });
@@ -104,11 +107,19 @@ public class AddSupplementsDialog extends DialogFragment {
                 // We use a String here, but any type that can be put in a Bundle is supported
                 int position = bundle.getInt("position");
                 Supplement supplement = (Supplement) bundle.getSerializable("supplement");
+                if (!supplement.getName().equals(supplements.get(position).getName())) {
+                    if (oldNamesIndexes.contains(position)) {
+                        oldNamesIndexes.remove(position);
+                        oldNames.remove(oldNames.get(position));
+                    }
+                    oldNamesIndexes.add(position);
+                    oldNames.add(supplements.get(position).getName());
+
+                }
 
                 supplements.get(position).setName(supplement.getName());
                 supplements.get(position).setPhoto(supplement.getPhoto());
                 // Do something with the result
-                Toast.makeText(getActivity(), supplements.get(supplements.size() - 1).getName(), Toast.LENGTH_SHORT).show();
                 adapter.notifyItemChanged(position);
             }
         });
@@ -159,10 +170,16 @@ public class AddSupplementsDialog extends DialogFragment {
         show = AnimationUtils.loadAnimation(getActivity(), R.anim.show);
         hide = AnimationUtils.loadAnimation(getActivity(), R.anim.hide);
         if (machine != null) {
-            getAllSupplements();
-            vCircularProgressIndicator.setVisibility(View.VISIBLE);
-            vCircularProgressIndicator.startAnimation(show);
-            recyclerView.startAnimation(hide);
+            if (machine.getSupplementsNames().size() != 0) {
+                getAllSupplements();
+                vCircularProgressIndicator.setVisibility(View.VISIBLE);
+                vCircularProgressIndicator.startAnimation(show);
+                recyclerView.startAnimation(hide);
+            } else {
+                vCircularProgressIndicator.startAnimation(hide);
+                recyclerView.startAnimation(show);
+            }
+
         }
     }
 
@@ -202,6 +219,7 @@ public class AddSupplementsDialog extends DialogFragment {
         public void onClick(View v) {
             Bundle result = new Bundle();
             result.putSerializable("supplements", supplements);
+            result.putStringArrayList("oldNames", oldNames);
             getParentFragmentManager().setFragmentResult("supplements", result);
             dismiss();
         }
@@ -223,6 +241,23 @@ public class AddSupplementsDialog extends DialogFragment {
         public void onItemClick(int position) {
             SupplementInfoDialog supplementInfoDialog = new SupplementInfoDialog(position, supplements.get(position), supplements);
             supplementInfoDialog.show(getParentFragmentManager(), "");
+        }
+
+        @Override
+        public void onDeleteItem(int position) {
+
+            MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
+            builder.setTitle(getString(R.string.Delete))
+                    .setMessage(getString(R.string.AreUSure))
+                    .setNegativeButton(getString(R.string.cancel), (dialogInterface, i) -> {
+                    })
+                    .setPositiveButton(getString(R.string.accept), (dialogInterface, i) -> {
+                        oldNames.add(supplements.get(position).getName());
+                        supplements.remove(position);
+                        adapter.notifyItemRemoved(position);
+                    })
+                    .show();
+
         }
     };
 }

@@ -92,9 +92,20 @@ public class AllowanceInfoDialog extends DialogFragment {
         }
     }
 
+    private boolean validateInput() {
+        return
+                !(vAllowanceName.getText().toString().isEmpty() ||
+                        vAllowanceMount.getText().toString().isEmpty());
+
+    }
+
     private View.OnClickListener oclDone = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            if(!validateInput()){
+                Toast.makeText(getActivity(), "please fill allowance data", Toast.LENGTH_SHORT).show();
+                return;
+            }
             Bundle result = new Bundle();
             Allowance allowance = new Allowance();
             allowance.setName(vAllowanceName.getText().toString());

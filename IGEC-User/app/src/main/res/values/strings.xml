@@ -60,4 +60,5 @@
     <string name="ProjectSummary">Project Summary</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="do_you_want_to_confirm_this_action">Do you want to confirm this action?</string>
 </resources>

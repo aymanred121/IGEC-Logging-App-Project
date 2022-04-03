@@ -146,8 +146,7 @@ public class ProjectFragmentDialog extends DialogFragment {
 
     // Functions
     private void Initialize(View view) {
-
-
+        allowances = new ArrayList<>();
         vName = view.findViewById(R.id.TextInput_ProjectName);
         vProjectReference = view.findViewById(R.id.TextInput_ProjectReference);
         vProjectReferenceLayout = view.findViewById(R.id.textInputLayout_ProjectReference);
@@ -182,6 +181,7 @@ public class ProjectFragmentDialog extends DialogFragment {
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
 
+        allowances.addAll(project.getAllowancesList());
         client = project.getClient();
         vName.setText(project.getName());
         vManagerID.setText(project.getManagerID());
@@ -204,9 +204,11 @@ public class ProjectFragmentDialog extends DialogFragment {
 
         ArrayAdapter<String> idAdapter = new ArrayAdapter<>(getActivity(), R.layout.dropdown_item, TeamID);
         vManagerID.setAdapter(idAdapter);
-        ArrayAdapter<String> ContractAdapter = new ArrayAdapter<>(getActivity(), R.layout.dropdown_item, TeamID);
+        ArrayList<String> contract = new ArrayList<>();
+        contract.add("lump sum");
+        contract.add("timesheet");
+        ArrayAdapter<String> ContractAdapter = new ArrayAdapter<>(getActivity(), R.layout.dropdown_item, contract);
         vContractType.setAdapter(ContractAdapter);
-        allowances = new ArrayList<>();
     }
 
     String convertDateToString(long selection) {
@@ -329,17 +331,29 @@ public class ProjectFragmentDialog extends DialogFragment {
 
     void updateProject() {
 
-        HashMap<String, Object> updatedProjectData = new HashMap<>();
-        updatedProjectData.put("estimatedEndDate", new Date(endDate));
-        updatedProjectData.put("startDate", new Date(startDate));
-        updatedProjectData.put("name", vName.getText().toString());
-        updatedProjectData.put("managerName", vManagerName.getText().toString());
-        updatedProjectData.put("managerID", vManagerID.getText().toString());
-        updatedProjectData.put("location", "");
-        updateEmployeesDetails(project.getId());
-        updatedProjectData.put("employees", Team);
-        //TODO add allowances
-        db.collection("projects").document(project.getId()).update(updatedProjectData).addOnSuccessListener(unused -> {
+//        HashMap<String, Object> updatedProjectData = new HashMap<>();
+//        updatedProjectData.put("estimatedEndDate", new Date(endDate));
+//        updatedProjectData.put("startDate", new Date(startDate));
+//        updatedProjectData.put("name", vName.getText().toString());
+//        updatedProjectData.put("managerName", vManagerName.getText().toString());
+//        updatedProjectData.put("managerID", vManagerID.getText().toString());
+//        updatedProjectData.put("location", "");
+//        updateEmployeesDetails(project.getId());
+//        updatedProjectData.put("employees", Team);
+        Project newProject = new Project(vManagerName.getText().toString()
+                , vManagerID.getText().toString()
+                , vName.getText().toString()
+                , new Date(startDate)
+                , Team
+                , vProjectReference.getText().toString()
+                , vCity.getText().toString()
+                , vArea.getText().toString()
+                , vStreet.getText().toString()
+                ,vContractType.getText().toString());
+        newProject.setId(project.getId());
+        newProject.setClient(client);
+        newProject.getAllowancesList().addAll(allowances);
+        db.collection("projects").document(project.getId()).set(newProject).addOnSuccessListener(unused -> {
             Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
             project.setEmployees(null);
             employees.clear();

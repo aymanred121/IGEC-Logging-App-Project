@@ -102,7 +102,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/machine_allowance"
-            android:inputType="number"
+            android:inputType="numberDecimal"
             android:padding="14dp"
             android:singleLine="true" />
 

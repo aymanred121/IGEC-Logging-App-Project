@@ -33,6 +33,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -55,6 +56,9 @@ public class CheckInOutFragment extends Fragment {
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private double latitude, longitude;
     private Machine currMachine;
+    private String machineEmpId;
+    private final CollectionReference machineEmployee =  db.collection("Machine_Employee");
+    private final CollectionReference machineCol =   db.collection("machine");
 
     public CheckInOutFragment(Employee currEmployee) {
         this.currEmployee = currEmployee;
@@ -253,30 +257,35 @@ public class CheckInOutFragment extends Fragment {
                     }
                     longitude = location.getLongitude();
                     latitude = location.getLatitude();
-                    db.collection("machine").document(machineID).addSnapshotListener((value, error) -> {
+                  machineCol.document(machineID).addSnapshotListener((value, error) -> {
                         if(!value.exists())
                         {
                             Toast.makeText(getActivity(), "Invalid Machine ID", Toast.LENGTH_SHORT).show();
                             return;
                         }
                         currMachine = value.toObject(Machine.class);
-                        String machineEmpId = id + machineID;
-                        db.collection("Machine_Employee").document(machineEmpId).get().addOnSuccessListener(documentSnapshot -> {
+                      machineEmpId = !currMachine.getEmployeeId().equals(currEmployee.getId()) ? machineEmployee.document().getId() : currMachine.getMachineEmployeeID();
+                       machineEmployee.document(machineEmpId).get().addOnSuccessListener(documentSnapshot -> {
                             if (!documentSnapshot.exists()) {
+
                                 if(currMachine.getUsed()){
                                     Toast.makeText(getContext(), "this Machine already being used by"+currMachine.getEmployeeFirstName(), Toast.LENGTH_SHORT).show();
                                     return;
                                 }
+
                                 HashMap<String, Object> checkInDetails = new HashMap<>((new Summary(latitude, longitude)).getGeoMap());
                                 checkInDetails.put("Time", Timestamp.now());
                                 Map<String, Object> machineEmployee1 = new HashMap();
                                 machineEmployee1.put("machine", currMachine);
                                 machineEmployee1.put("employee", currEmployee);
                                 machineEmployee1.put("checkIn", checkInDetails);
-                                db.collection("Machine_Employee").document(machineEmpId).set(machineEmployee1).addOnSuccessListener(unused -> {
+
+                                machineEmployee.document(machineEmpId).set(machineEmployee1).addOnSuccessListener(unused -> {
                                     currMachine.setUsed(true);
                                     currMachine.setEmployeeFirstName(currEmployee.getFirstName());
-                                    db.collection("machine").document(currMachine.getId()).update("isUsed",true,"employeeFirstName",currEmployee.getFirstName())
+                                    currMachine.setMachineEmployeeID(machineEmpId);
+                                    //NOTE don't use set()
+                                  machineCol.document(currMachine.getId()).update("isUsed",true,"employeeFirstName",currEmployee.getFirstName(),"employeeId",currEmployee.getId(),"machineEmployeeID",machineEmpId)
                                     .addOnSuccessListener(unused1->{
                                         Toast.makeText(getContext(), "Machine: " + currMachine.getReference() + " checked In successfully", Toast.LENGTH_SHORT).show();
                                     });
@@ -292,12 +301,14 @@ public class CheckInOutFragment extends Fragment {
                                     long workingTime = (checkOutTime - checkInTime);
                                     currMachineEmployee.setWorkedTime(workingTime);
                                     currMachineEmployee.setCheckOut(checkOutDetails);
-                                    db.collection("Machine_Employee").document(machineEmpId).set(currMachineEmployee)
+                                    machineEmployee.document(machineEmpId).set(currMachineEmployee)
                                             .addOnSuccessListener(unused ->{
-                                                db.collection("Machine_Employee").document(machineEmpId).set(currMachineEmployee).addOnSuccessListener(unused1 -> {
+                                                db.collection("Machine_Employee").document(currMachine.getMachineEmployeeID()).set(currMachineEmployee).addOnSuccessListener(unused1 -> {
                                                     currMachine.setUsed(false);
                                                     currMachine.setEmployeeFirstName("");
-                                                    db.collection("machine").document(currMachine.getId()).update("isUsed",false,"employeeFirstName","").addOnSuccessListener(vu->{
+                                                    currMachine.setEmployeeId("");
+                                                    currMachine.setMachineEmployeeID("");
+                                                  machineCol.document(currMachine.getId()).update("isUsed",false,"employeeFirstName","","employeeId","","machineEmployeeID","").addOnSuccessListener(vu->{
                                                         Toast.makeText(getContext(), "Machine: " + currMachine.getReference() + " checked Out successfully", Toast.LENGTH_SHORT).show();
 
                                                     });

@@ -2,6 +2,7 @@ plugins {
     id 'com.android.application'
     id 'com.google.gms.google-services'
 }
+apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion 31
@@ -30,6 +31,8 @@ android {
 }
 
 dependencies {
+    def fragment_version = "1.4.1"
+    debugImplementation "androidx.fragment:fragment-testing:$fragment_version"
     implementation platform('com.google.firebase:firebase-bom:29.3.0')
     implementation 'com.firebaseui:firebase-ui-storage:7.2.0'
     implementation 'androidx.appcompat:appcompat:1.4.1'
@@ -44,5 +47,10 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     implementation 'com.google.firebase:firebase-storage'
+    implementation "androidx.core:core-ktx:+"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
+}
+repositories {
+    mavenCentral()
 }

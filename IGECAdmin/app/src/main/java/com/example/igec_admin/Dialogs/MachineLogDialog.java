@@ -14,15 +14,32 @@ import androidx.fragment.app.DialogFragment;
 
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Machine;
+import com.example.igec_admin.fireBase.Machine_Employee;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MachineLogDialog extends DialogFragment {
 
 
     private final Machine machine;
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     //TODO add epelemtn
     public MachineLogDialog(Machine machine) {
         this.machine = machine;
+    }
+
+    private void retrieveMachineSummary(){
+        ArrayList<Machine_Employee>machineSummaryData = new ArrayList<>();
+        db.collection("Machine_Employee").whereEqualTo("machine.id","FrFmr").get().addOnSuccessListener(queryDocumentSnapshots ->{
+                    if(queryDocumentSnapshots.size()!=0)
+                        machineSummaryData.addAll(queryDocumentSnapshots.toObjects(Machine_Employee.class));
+                }
+        );
     }
 
     @NonNull

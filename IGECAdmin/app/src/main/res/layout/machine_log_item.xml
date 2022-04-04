@@ -16,8 +16,8 @@
             android:id="@+id/TextView_Employee"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:text="Employee Name"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            tools:text="Employee Name" />
 
         <TextView
             android:id="@+id/TextView_StartDate"

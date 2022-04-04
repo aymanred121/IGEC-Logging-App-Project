@@ -1,70 +1,60 @@
 package com.example.igec_admin.fireBase;
 
-import com.firebase.geofire.GeoFireUtils;
-import com.firebase.geofire.GeoLocation;
-
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Machine_Employee {
-    private String machineID,employeeID;
-    private double lat,lng;
-    private Map<Date,Map<String,Object>>checkIn,CheckOut=new HashMap();
+    private Machine machine;
+    private Employee employee;
+    private long workedTime;
+    private Map<String,Object>checkIn;
+    private Map<String, Object> CheckOut=new HashMap<>();
 
     public Machine_Employee() {
     }
-    private Map geoPoint(){
-        Map<String, Object> updates = new HashMap<>();
-        String hash = GeoFireUtils.getGeoHashForLocation(new GeoLocation(lat, lng));
-        updates.put("geohash", hash);
-        updates.put("lat", lat);
-        updates.put("lng", lng);
-        return updates;
-    }
-    public Machine_Employee(String machineID, String employeeID) {
-        this.machineID = machineID;
-        this.employeeID = employeeID;
+
+    public Machine_Employee(Machine machine, Employee employee) {
+        this.machine = machine;
+        this.employee = employee;
     }
 
-    public String getMachineID() {
-        return machineID;
+    public long getWorkedTime() {
+        return workedTime;
     }
 
-    public void setMachineID(String machineID) {
-        this.machineID = machineID;
+    public void setWorkedTime(long workedTime) {
+        this.workedTime = workedTime;
     }
 
-    public String getEmployeeID() {
-        return employeeID;
+    public Machine getMachine() {
+        return machine;
     }
 
-    public void setEmployeeID(String employeeID) {
-        this.employeeID = employeeID;
+    public void setMachine(Machine machine) {
+        this.machine = machine;
     }
 
-    public void setLat(double lat) {
-        this.lat = lat;
+    public Employee getEmployee() {
+        return employee;
     }
 
-
-    public void setLng(double lng) {
-        this.lng = lng;
+    public void setEmployee(Employee employee) {
+        this.employee = employee;
     }
 
-    public Map<Date, Map<String, Object>> getCheckIn() {
+    public Map<String, Object> getCheckIn() {
         return checkIn;
     }
 
-    public Map<Date, Map<String, Object>> getCheckOut() {
+    public Map<String, Object> getCheckOut() {
         return CheckOut;
     }
 
-    public void setCheckOut(Map<Date, Map<String, Object>> checkOut) {
+    public void setCheckOut(Map<String, Object> checkOut) {
         CheckOut = checkOut;
     }
 
-    public void setCheckIn(Map<Date, Map<String, Object>> checkIn) {
+    public void setCheckIn(Map<String, Object> checkIn) {
         this.checkIn = checkIn;
     }
 }

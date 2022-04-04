@@ -25,6 +25,15 @@
             android:layout_below="@id/TextView_MachineID"
             android:text="test" />
 
+        <ImageView
+            android:id="@+id/ImageVIew_Log"
+            android:layout_width="35dp"
+            android:layout_height="35dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_round_history_24"
+            app:tint="@color/black" />
+
     </RelativeLayout>
 
 </com.google.android.material.card.MaterialCardView>

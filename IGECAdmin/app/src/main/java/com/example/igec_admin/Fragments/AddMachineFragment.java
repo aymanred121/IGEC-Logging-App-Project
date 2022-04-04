@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentResultListener;
 
@@ -22,10 +23,12 @@ import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Allowance;
 import com.example.igec_admin.fireBase.Machine;
 import com.example.igec_admin.fireBase.Supplement;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.CollectionReference;
@@ -158,9 +161,32 @@ public class AddMachineFragment extends Fragment {
     View.OnClickListener oclRegister = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            int size = supplements.size();
+            MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
+            builder.setTitle("Uploading...")
+                    .setMessage("Uploading Data")
+                    .setCancelable(false);
+            AlertDialog alertDialog = builder.create();
+            alertDialog.show();
             if (validateInput()) {
-                for (int i = 0; i < supplements.size(); i++) {
-                    supplements.get(i).saveToCloudStorage(storageRef, vID.getText().toString());
+                for (int i = 0; i < size; i++) {
+                    Integer[] finalI = new Integer[1];
+                    finalI[0] = i;
+                    supplements.get(i).saveToCloudStorage(storageRef, vID.getText().toString()).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            if (finalI[0] == size - 1) {
+                                alertDialog.dismiss();
+                            }
+
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            alertDialog.dismiss();
+                            Toast.makeText(getActivity(), "Failed to upload, check your internet", Toast.LENGTH_SHORT).show();
+                        }
+                    });
                 }
                 saveToInternalStorage();
                 saveToCloudStorage();

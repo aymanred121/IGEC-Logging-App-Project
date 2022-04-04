@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.igec_admin.Adatpers.MachineAdapter;
 import com.example.igec_admin.Dialogs.MachineFragmentDialog;
+import com.example.igec_admin.Dialogs.MachineLogDialog;
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Machine;
 import com.google.firebase.firestore.CollectionReference;
@@ -57,11 +58,17 @@ public class MachinesFragment extends Fragment {
 
     }
 
-    private MachineAdapter.OnItemClickListener itclMachineAdapter = new MachineAdapter.OnItemClickListener() {
+    private final MachineAdapter.OnItemClickListener itclMachineAdapter = new MachineAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position) {
             MachineFragmentDialog machineFragmentDialog = new MachineFragmentDialog(adapter.getMachinesList().get(position));
-            machineFragmentDialog.show(getParentFragmentManager(),"");
+            machineFragmentDialog.show(getParentFragmentManager(), "");
+        }
+
+        @Override
+        public void onLogClick(int position) {
+            MachineLogDialog machineLogDialog = new MachineLogDialog(machines.get(position));
+            machineLogDialog.show(getParentFragmentManager(), "");
         }
     };
 }

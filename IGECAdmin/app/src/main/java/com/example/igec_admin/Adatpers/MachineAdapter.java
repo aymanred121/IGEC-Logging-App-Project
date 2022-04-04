@@ -3,6 +3,7 @@ package com.example.igec_admin.Adatpers;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -19,6 +20,8 @@ public class MachineAdapter extends RecyclerView.Adapter<MachineAdapter.MachineV
 
     public interface OnItemClickListener{
         void onItemClick(int position);
+
+        void onLogClick(int position);
     }
 
     public void setOnItemClickListener(OnItemClickListener listener) {
@@ -26,20 +29,31 @@ public class MachineAdapter extends RecyclerView.Adapter<MachineAdapter.MachineV
     }
 
     public static class MachineViewHolder extends RecyclerView.ViewHolder{
-        TextView vID,vCodeName;
+        TextView vID, vCodeName;
+        ImageView vLog;
         public MachineViewHolder(@NonNull View itemView, OnItemClickListener listener) {
             super(itemView);
             vID = itemView.findViewById(R.id.TextView_MachineID);
             vCodeName = itemView.findViewById(R.id.TextView_MachineCodeName);
+            vLog = itemView.findViewById(R.id.ImageVIew_Log);
 
+            vLog.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (listener != null) {
+                        int position = getAdapterPosition();
+                        if (position != RecyclerView.NO_POSITION) {
+                            listener.onLogClick(position);
+                        }
+                    }
+                }
+            });
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if(listener != null)
-                    {
+                    if (listener != null) {
                         int position = getAdapterPosition();
-                        if(position != RecyclerView.NO_POSITION)
-                        {
+                        if (position != RecyclerView.NO_POSITION) {
                             listener.onItemClick(position);
                         }
                     }

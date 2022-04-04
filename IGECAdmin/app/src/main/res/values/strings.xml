@@ -56,4 +56,6 @@
     <string name="Delete">Delete</string>
     <string name="cancel">No</string>
     <string name="accept">Yes</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

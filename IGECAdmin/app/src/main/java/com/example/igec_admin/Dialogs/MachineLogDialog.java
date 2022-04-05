@@ -11,30 +11,34 @@ import android.view.WindowManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.igec_admin.Adatpers.EmployeeAdapter;
+import com.example.igec_admin.Adatpers.MachineLogAdapter;
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Machine;
 import com.example.igec_admin.fireBase.Machine_Employee;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+
 
 public class MachineLogDialog extends DialogFragment {
 
 
     private final Machine machine;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-    //TODO add epelemtn
+    private ArrayList<Machine_Employee> machineSummaryData;
+    private MachineLogAdapter adapter;
+    private RecyclerView recyclerView;
+    private RecyclerView.LayoutManager layoutManager;
     public MachineLogDialog(Machine machine) {
         this.machine = machine;
     }
 
     private void retrieveMachineSummary(){
-        ArrayList<Machine_Employee>machineSummaryData = new ArrayList<>();
+        machineSummaryData = new ArrayList<>();
         db.collection("Machine_Employee").whereEqualTo("machine.id","FrFmr").get().addOnSuccessListener(queryDocumentSnapshots ->{
                     if(queryDocumentSnapshots.size()!=0)
                         machineSummaryData.addAll(queryDocumentSnapshots.toObjects(Machine_Employee.class));
@@ -72,5 +76,19 @@ public class MachineLogDialog extends DialogFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        initialize(view);
+
+    }
+
+    void initialize(View view){
+        retrieveMachineSummary();
+        recyclerView = view.findViewById(R.id.recyclerview);
+        recyclerView.setHasFixedSize(true);
+        layoutManager = new LinearLayoutManager(getActivity());
+        adapter = new MachineLogAdapter(machineSummaryData);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(adapter);
+
+
     }
 }

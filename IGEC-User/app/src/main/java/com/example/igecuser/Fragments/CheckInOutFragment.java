@@ -243,12 +243,11 @@ public class CheckInOutFragment extends Fragment {
             @Override
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
                 // We use a String here, but any type that can be put in a Bundle is supported
-                String result = bundle.getString("machineID");
+                String machineID = bundle.getString("machineID");
                 boolean isItAUser = bundle.getBoolean("isItAUser");
-                Toast.makeText(getActivity(), result, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), machineID, Toast.LENGTH_SHORT).show();
                 // Do something with the result
 
-                String machineID = result;
                 try {
                     Location location = getLocation();
                     if (location == null) {
@@ -257,69 +256,26 @@ public class CheckInOutFragment extends Fragment {
                     }
                     longitude = location.getLongitude();
                     latitude = location.getLatitude();
+
                     machineCol.document(machineID).get().addOnSuccessListener((value) -> {
                         if (!value.exists()) {
                             Toast.makeText(getActivity(), "Invalid Machine ID", Toast.LENGTH_SHORT).show();
                             return;
                         }
                         currMachine = value.toObject(Machine.class);
+
+                        if(currMachine.getUsed() && !currMachine.getEmployeeId().equals(currEmployee.getId())){
+                            Toast.makeText(getContext(), "this Machine already being used by"+currMachine.getEmployeeFirstName(), Toast.LENGTH_SHORT).show();
+                            return;
+                        }
                         machineEmpId = !currMachine.getEmployeeId().equals(currEmployee.getId()) ? machineEmployee.document().getId() : currMachine.getMachineEmployeeID();
 
                         machineEmployee.document(machineEmpId).get().addOnSuccessListener(documentSnapshot -> {
                             if (!documentSnapshot.exists()) {
-
-                                if(currMachine.getUsed()){
-                                    Toast.makeText(getContext(), "this Machine already being used by"+currMachine.getEmployeeFirstName(), Toast.LENGTH_SHORT).show();
-                                    return;
-                                }
-
-                                HashMap<String, Object> checkInDetails = new HashMap<>((new Summary(latitude, longitude)).getGeoMap());
-                                checkInDetails.put("Time", Timestamp.now());
-                                Map<String, Object> machineEmployee1 = new HashMap();
-                                machineEmployee1.put("machine", currMachine);
-                                machineEmployee1.put("employee", currEmployee);
-                                machineEmployee1.put("checkIn", checkInDetails);
-
-                                machineEmployee.document(machineEmpId).set(machineEmployee1).addOnSuccessListener(unused -> {
-                                    currMachine.setUsed(true);
-                                    currMachine.setEmployeeFirstName(currEmployee.getFirstName());
-                                    currMachine.setMachineEmployeeID(machineEmpId);
-                                    //NOTE don't use set()
-                                  machineCol.document(currMachine.getId()).update("isUsed",true,"employeeFirstName",currEmployee.getFirstName(),"employeeId",currEmployee.getId(),"machineEmployeeID",machineEmpId)
-                                    .addOnSuccessListener(unused1->{
-                                        Toast.makeText(getContext(), "Machine: " + currMachine.getReference() + " checked In successfully", Toast.LENGTH_SHORT).show();
-                                    });
-                                });
-
+                               checkInMachine();
                             } else {
                                 Machine_Employee currMachineEmployee = documentSnapshot.toObject(Machine_Employee.class);
-                                HashMap<String, Object> checkOutDetails = new HashMap<>((new Summary(latitude, longitude)).getGeoMap());
-                                checkOutDetails.put("Time", Timestamp.now());
-                                if (currMachineEmployee.getWorkedTime() == null) {
-                                    long checkInTime = ((Timestamp) currMachineEmployee.getCheckIn().get("Time")).getSeconds();
-                                    long checkOutTime = Timestamp.now().getSeconds();
-                                    long workingTime = (checkOutTime - checkInTime);
-                                    currMachineEmployee.setWorkedTime(workingTime);
-                                    currMachineEmployee.setCheckOut(checkOutDetails);
-                                    machineEmployee.document(machineEmpId).set(currMachineEmployee)
-                                            .addOnSuccessListener(unused ->{
-                                                db.collection("Machine_Employee").document(currMachine.getMachineEmployeeID()).set(currMachineEmployee).addOnSuccessListener(unused1 -> {
-                                                    currMachine.setUsed(false);
-                                                    currMachine.setEmployeeFirstName("");
-                                                    currMachine.setEmployeeId("");
-                                                    currMachine.setMachineEmployeeID("");
-                                                  machineCol.document(currMachine.getId()).update("isUsed",false,"employeeFirstName","","employeeId","","machineEmployeeID","").addOnSuccessListener(vu->{
-
-                                                        Toast.makeText(getContext(), "Machine: " + currMachine.getReference() + " checked Out successfully", Toast.LENGTH_SHORT).show();
-
-                                                    });
-                                                });
-                                            });
-
-                                } else {
-                                    Toast.makeText(getActivity(), "this Machine Already checked Out", Toast.LENGTH_SHORT).show();
-                                }
-
+                                checkOutMachine(currMachineEmployee);
                             }
 
                         });
@@ -341,6 +297,45 @@ public class CheckInOutFragment extends Fragment {
             }
         });
 
+
+    }
+
+    private void checkOutMachine(Machine_Employee currMachineEmployee) {
+        HashMap<String, Object> checkOutDetails = new HashMap<>((new Summary(latitude, longitude)).getGeoMap());
+        checkOutDetails.put("Time", Timestamp.now());
+        long checkInTime = ((Timestamp) currMachineEmployee.getCheckIn().get("Time")).getSeconds();
+        long checkOutTime = Timestamp.now().getSeconds();
+        long workingTime = (checkOutTime - checkInTime);
+        currMachineEmployee.setWorkedTime(workingTime);
+        currMachineEmployee.setCheckOut(checkOutDetails);
+        machineEmployee.document(machineEmpId).set(currMachineEmployee)
+                .addOnSuccessListener(unused ->{
+                    db.collection("Machine_Employee").document(currMachine.getMachineEmployeeID()).set(currMachineEmployee).addOnSuccessListener(unused1 -> {
+                        currMachine.removeEmployeeDependency();
+                        machineCol.document(currMachine.getId()).update("isUsed",false,"employeeFirstName","","employeeId","","machineEmployeeID","").addOnSuccessListener(vu->{
+
+                            Toast.makeText(getContext(), "Machine: " + currMachine.getReference() + " checked Out successfully", Toast.LENGTH_SHORT).show();
+
+                        });
+                    });
+                });
+    }
+
+    private void checkInMachine() {
+        HashMap<String, Object> checkInDetails = new HashMap<>((new Summary(latitude, longitude)).getGeoMap());
+        checkInDetails.put("Time", Timestamp.now());
+        Map<String, Object> machineEmployee1 = new HashMap();
+        machineEmployee1.put("machine", currMachine);
+        machineEmployee1.put("employee", currEmployee);
+        machineEmployee1.put("checkIn", checkInDetails);
+        currMachine.setUsed(true);
+        currMachine.setEmployeeFirstName(currEmployee.getFirstName());
+        currMachine.setMachineEmployeeID(machineEmpId);
+        //NOTE don't use set()
+        machineCol.document(currMachine.getId()).update("isUsed",true,"employeeFirstName",currEmployee.getFirstName(),"employeeId",currEmployee.getId(),"machineEmployeeID",machineEmpId)
+                .addOnSuccessListener(unused1->{
+                    machineEmployee.document(machineEmpId).set(machineEmployee1).addOnSuccessListener(unused -> Toast.makeText(getContext(), "Machine: " + currMachine.getReference() + " checked In successfully", Toast.LENGTH_SHORT).show());
+                });
 
     }
 

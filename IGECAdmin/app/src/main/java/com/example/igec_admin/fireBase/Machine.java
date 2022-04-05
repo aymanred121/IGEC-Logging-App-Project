@@ -45,6 +45,7 @@ public class Machine {
         this.reference = reference;
         this.purchaseDate = buyingDate;
         this.allowance = allowance;
+        removeEmployeeDependency();
     }
 
     public Date getPurchaseDate() {
@@ -117,5 +118,11 @@ public class Machine {
 
     public void setMachineEmployeeID(String machineEmployeeID) {
         this.machineEmployeeID = machineEmployeeID;
+    }
+    public void removeEmployeeDependency(){
+        isUsed=false;
+        employeeFirstName="";
+        employeeId="";
+        machineEmployeeID="";
     }
 }

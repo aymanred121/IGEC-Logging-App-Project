@@ -195,10 +195,6 @@ public class AddMachineFragment extends Fragment {
                 newMachine.setDailyRentPrice(Double.parseDouble(vMachineByDay.getText().toString()));
                 newMachine.setWeeklyRentPrice(Double.parseDouble(vMachineByWeek.getText().toString()));
                 newMachine.setMonthlyRentPrice(Double.parseDouble(vMachineByMonth.getText().toString()));
-                newMachine.setEmployeeFirstName("");
-                newMachine.setMachineEmployeeID("");
-                newMachine.setEmployeeId("");
-                newMachine.setUsed(false);
                 newMachine.setSupplementsNames(new ArrayList<>());
                 IntStream.range(0, supplements.size()).forEach(i -> newMachine.getSupplementsNames().add(supplements.get(i).getName()));
                 machineCol.document(vID.getText().toString()).set(newMachine).addOnSuccessListener(new OnSuccessListener<Void>() {

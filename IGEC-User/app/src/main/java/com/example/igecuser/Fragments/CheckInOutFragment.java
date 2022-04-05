@@ -120,25 +120,6 @@ public class CheckInOutFragment extends Fragment {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
     }
 
-    public Location getLocation() {
-        LocationManager lm = (LocationManager) getContext().getSystemService(LOCATION_SERVICE);
-        List<String> providers = lm.getProviders(true);
-        Location bestLocation = null;
-        for (String provider : providers) {
-            if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                return null;
-            }
-            Location l = lm.getLastKnownLocation(provider);
-            if (l == null) {
-                continue;
-            }
-            if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
-                bestLocation = l;
-            }
-        }
-        return bestLocation;
-
-    }
 
     private void animationFab() {
         if (isOpen) {

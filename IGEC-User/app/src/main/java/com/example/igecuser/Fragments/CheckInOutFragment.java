@@ -50,7 +50,7 @@ public class CheckInOutFragment extends Fragment {
     // Vars
     private boolean isOpen = false;
     private Animation fabClose, fabOpen, rotateForward, rotateBackward, show, hide, rotateBackwardHide;
-    private Boolean isHere = Boolean.FALSE;
+    private Boolean isHere = Boolean.FALSE,machineChecked=false;
     private Employee currEmployee = null;
     private String id;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -257,7 +257,7 @@ public class CheckInOutFragment extends Fragment {
                     }
                     longitude = location.getLongitude();
                     latitude = location.getLatitude();
-                  machineCol.document(machineID).addSnapshotListener((value, error) -> {
+                    machineCol.document(machineID).addSnapshotListener((value, error) -> {
                         if(!value.exists())
                         {
                             Toast.makeText(getActivity(), "Invalid Machine ID", Toast.LENGTH_SHORT).show();
@@ -265,6 +265,7 @@ public class CheckInOutFragment extends Fragment {
                         }
                         currMachine = value.toObject(Machine.class);
                       machineEmpId = !currMachine.getEmployeeId().equals(currEmployee.getId()) ? machineEmployee.document().getId() : currMachine.getMachineEmployeeID();
+
                        machineEmployee.document(machineEmpId).get().addOnSuccessListener(documentSnapshot -> {
                             if (!documentSnapshot.exists()) {
 
@@ -309,6 +310,7 @@ public class CheckInOutFragment extends Fragment {
                                                     currMachine.setEmployeeId("");
                                                     currMachine.setMachineEmployeeID("");
                                                   machineCol.document(currMachine.getId()).update("isUsed",false,"employeeFirstName","","employeeId","","machineEmployeeID","").addOnSuccessListener(vu->{
+
                                                         Toast.makeText(getContext(), "Machine: " + currMachine.getReference() + " checked Out successfully", Toast.LENGTH_SHORT).show();
 
                                                     });

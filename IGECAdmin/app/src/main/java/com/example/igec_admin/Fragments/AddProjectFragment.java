@@ -295,7 +295,6 @@ public class AddProjectFragment extends Fragment {
                         vContractType.getText().toString().isEmpty() ||
                         vManagerID.getText().toString().isEmpty() ||
                         vManagerName.getText().toString().isEmpty() ||
-                        client == null ||
                         vTime.getText().toString().isEmpty());
     }
 

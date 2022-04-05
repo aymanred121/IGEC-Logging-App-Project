@@ -41,15 +41,7 @@ public class AddUserFragment extends Fragment {
 
     // Views
     MaterialButton vRegister;
-    TextInputEditText vFirstName ,vSecondName
-                    , vEmail
-                    , vPassword
-                    , vPhone
-                    , vTitle
-                    , vSalary
-                    , vNationalID
-                    , vArea, vCity, vStreet
-                    , vHireDate;
+    TextInputEditText vFirstName, vSecondName, vEmail, vPassword, vPhone, vTitle, vSalary, vNationalID, vArea, vCity, vStreet, vHireDate;
     TextInputLayout vHireDateLayout, vEmailLayout;
     MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     MaterialDatePicker vDatePicker;
@@ -61,7 +53,7 @@ public class AddUserFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-      return inflater.inflate(R.layout.fragment_add_user, container, false);
+        return inflater.inflate(R.layout.fragment_add_user, container, false);
     }
 
     @Override
@@ -120,11 +112,11 @@ public class AddUserFragment extends Fragment {
     }
 
     void addEmployee() {
-        db.collection("employees").whereEqualTo("email",vEmail.getText().toString().trim()).get().addOnSuccessListener(documents ->{
-            if(documents.getDocuments().size()!=0){
+        db.collection("employees").whereEqualTo("email", vEmail.getText().toString().trim()).get().addOnSuccessListener(documents -> {
+            if (documents.getDocuments().size() != 0) {
                 Toast.makeText(getActivity(), "this Email is already exist", Toast.LENGTH_SHORT).show();
                 return;
-            }else{
+            } else {
                 DocumentReference employeeOverviewRef = db.collection("EmployeeOverview").document("emp");
                 String id = db.collection("EmployeeOverview").document().getId().substring(0, 5);
 
@@ -146,7 +138,7 @@ public class AddUserFragment extends Fragment {
 
             }
         });
-       }
+    }
 
     private Employee fillEmployeeData() {
         return new Employee(
@@ -185,6 +177,8 @@ public class AddUserFragment extends Fragment {
         vStreet.setText(null);
         vHireDate.setText(null);
         vNationalID.setText(null);
+        vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
+        vDatePicker = vDatePickerBuilder.build();
     }
 
     boolean validateInputs() {

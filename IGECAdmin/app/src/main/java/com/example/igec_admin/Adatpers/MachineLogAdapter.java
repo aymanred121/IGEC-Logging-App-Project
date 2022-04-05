@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.EmployeeOverview;
 import com.example.igec_admin.fireBase.Machine_Employee;
+import com.google.firebase.Timestamp;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -37,8 +38,11 @@ public class MachineLogAdapter extends RecyclerView.Adapter<MachineLogAdapter.Ma
 
         Machine_Employee employeeMachine = machineEmployees.get(position);
         holder.vEmployee.setText(String.format("%s %s", employeeMachine.getEmployee().getFirstName(), employeeMachine.getEmployee().getLastName()));
-        holder.vStartDate.setText(convertDateToString((long) employeeMachine.getCheckIn().get("Time")));
-        holder.vStartDate.setText(convertDateToString((long) employeeMachine.getCheckOut().get("Time")));
+
+
+        holder.vStartDate.setText(convertDateToString((long) ((Timestamp) employeeMachine.getCheckIn().get("Time")).getSeconds()*1000));
+        holder.vStartDate.setText(convertDateToString((long) ((Timestamp) employeeMachine.getCheckOut().get("Time")).getSeconds()*1000));
+        //TODO
         //holder.vCost.setText();
     }
 

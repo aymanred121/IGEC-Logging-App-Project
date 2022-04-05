@@ -52,6 +52,7 @@ public class AddSupplementsDialog extends DialogFragment {
     private FloatingActionButton vAddPhoto, vDone;
     private ActivityResultLauncher<Intent> activityResultLauncher;
     private ArrayList<Supplement> supplements;
+    private ArrayList<Supplement> updatedSupplements;
     private SupplementAdapter adapter;
     private RecyclerView recyclerView;
     private RecyclerView.LayoutManager layoutManager;
@@ -60,16 +61,21 @@ public class AddSupplementsDialog extends DialogFragment {
     private Animation show, hide;
     private ArrayList<String> oldNames = new ArrayList<>();
     private ArrayList<Integer> oldNamesIndexes = new ArrayList<>();
+    private boolean saveUpdated = false;
 
 
     // for machine dialog
     public AddSupplementsDialog(Machine machine) {
         this.machine = machine;
+        supplements = new ArrayList<>();
+        updatedSupplements = new ArrayList<>();
     }
 
     // for add machine dialog
     public AddSupplementsDialog(ArrayList<Supplement> supplements) {
         this.supplements = supplements;
+        updatedSupplements = new ArrayList<>();
+        updatedSupplements.addAll(supplements);
     }
 
     @NonNull
@@ -95,7 +101,7 @@ public class AddSupplementsDialog extends DialogFragment {
             @Override
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
                 // We use a String here, but any type that can be put in a Bundle is supported
-                supplements.add((Supplement) bundle.getSerializable("supplement"));
+                updatedSupplements.add((Supplement) bundle.getSerializable("supplement"));
                 // Do something with the result
                 adapter.notifyDataSetChanged();
             }
@@ -107,18 +113,18 @@ public class AddSupplementsDialog extends DialogFragment {
                 // We use a String here, but any type that can be put in a Bundle is supported
                 int position = bundle.getInt("position");
                 Supplement supplement = (Supplement) bundle.getSerializable("supplement");
-                if (!supplement.getName().equals(supplements.get(position).getName())) {
+                if (!supplement.getName().equals(updatedSupplements.get(position).getName())) {
                     if (oldNamesIndexes.contains(position)) {
                         oldNamesIndexes.remove(position);
                         oldNames.remove(oldNames.get(position));
                     }
                     oldNamesIndexes.add(position);
-                    oldNames.add(supplements.get(position).getName());
+                    oldNames.add(updatedSupplements.get(position).getName());
 
                 }
 
-                supplements.get(position).setName(supplement.getName());
-                supplements.get(position).setPhoto(supplement.getPhoto());
+                updatedSupplements.get(position).setName(supplement.getName());
+                updatedSupplements.get(position).setPhoto(supplement.getPhoto());
                 // Do something with the result
                 adapter.notifyItemChanged(position);
             }
@@ -141,16 +147,26 @@ public class AddSupplementsDialog extends DialogFragment {
         adapter.setOnItemClickListener(oclItemClickListener);
     }
 
+    @Override
+    public void onDismiss(@NonNull DialogInterface dialog) {
+
+        if(!saveUpdated) {
+            Bundle result = new Bundle();
+            result.putSerializable("supplements", supplements);
+            getParentFragmentManager().setFragmentResult("supplements", result);
+        }
+        super.onDismiss(dialog);
+
+    }
+
     private void initialize(View view) {
-        if (supplements == null)
-            supplements = new ArrayList<>();
         vCircularProgressIndicator = view.findViewById(R.id.progress_bar);
         vAddPhoto = view.findViewById(R.id.Button_AddPhoto);
         vDone = view.findViewById(R.id.Button_Done);
         recyclerView = view.findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
-        adapter = new SupplementAdapter(supplements);
+        adapter = new SupplementAdapter(updatedSupplements);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
         activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
@@ -194,7 +210,8 @@ public class AddSupplementsDialog extends DialogFragment {
                     @Override
                     public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                         Bitmap bitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
-                        supplements.add(new Supplement(name, bitmap));
+                        updatedSupplements.add(new Supplement(name, bitmap));
+                        supplements.add(new Supplement(name,bitmap));
                         progress[0]++;
                         if (progress[0] == machine.getSupplementsNames().size()) {
                             vCircularProgressIndicator.startAnimation(hide);
@@ -218,9 +235,10 @@ public class AddSupplementsDialog extends DialogFragment {
         @Override
         public void onClick(View v) {
             Bundle result = new Bundle();
-            result.putSerializable("supplements", supplements);
+            result.putSerializable("supplements", updatedSupplements);
             result.putStringArrayList("oldNames", oldNames);
             getParentFragmentManager().setFragmentResult("supplements", result);
+            saveUpdated = true;
             dismiss();
         }
     };
@@ -239,7 +257,7 @@ public class AddSupplementsDialog extends DialogFragment {
     private final SupplementAdapter.OnItemClickListener oclItemClickListener = new SupplementAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position) {
-            SupplementInfoDialog supplementInfoDialog = new SupplementInfoDialog(position, supplements.get(position), supplements);
+            SupplementInfoDialog supplementInfoDialog = new SupplementInfoDialog(position, updatedSupplements.get(position), updatedSupplements);
             supplementInfoDialog.show(getParentFragmentManager(), "");
         }
 
@@ -252,8 +270,8 @@ public class AddSupplementsDialog extends DialogFragment {
                     .setNegativeButton(getString(R.string.cancel), (dialogInterface, i) -> {
                     })
                     .setPositiveButton(getString(R.string.accept), (dialogInterface, i) -> {
-                        oldNames.add(supplements.get(position).getName());
-                        supplements.remove(position);
+                        oldNames.add(updatedSupplements.get(position).getName());
+                        updatedSupplements.remove(position);
                         adapter.notifyItemRemoved(position);
                     })
                     .show();

@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentResultListener;
 
@@ -32,6 +33,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.google.zxing.WriterException;
 
 import java.text.SimpleDateFormat;
@@ -186,11 +188,20 @@ public class MachineFragmentDialog extends DialogFragment {
             Toast.makeText(getActivity(), "please, fill the machine data", Toast.LENGTH_SHORT).show();
             return;
         }
+
         HashMap<String, Object> modifiedMachine = new HashMap<>();
         if (supplements != null) {
-            machine.getSupplementsNames().clear();
-            IntStream.range(0, supplements.size()).forEach(i -> machine.getSupplementsNames().add(supplements.get(i).getName()));
-
+            int size = supplements.size();
+            MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
+            builder.setTitle("Uploading...")
+                    .setMessage("Uploading Data")
+                    .setCancelable(false);
+            AlertDialog alertDialog = builder.create();
+            alertDialog.show();
+            if(supplements.size()>0) {
+                machine.getSupplementsNames().clear();
+                IntStream.range(0, supplements.size()).forEach(i -> machine.getSupplementsNames().add(supplements.get(i).getName()));
+            }
             for (String name : oldNames) {
                 storageRef.child("imgs/" + vID.getText().toString() + "/" + name + ".jpg").delete().addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -204,8 +215,17 @@ public class MachineFragmentDialog extends DialogFragment {
                 });
             }
             oldNames.clear();
-            for (Supplement supplement : supplements) {
-                supplement.saveToCloudStorage(storageRef, vID.getText().toString());
+            for (int i = 0; i < size; i++) {
+                Integer[] finalI = new Integer[1];
+                finalI[0] = i;
+                supplements.get(i).saveToCloudStorage(storageRef, vID.getText().toString()).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        if (finalI[0] == size - 1) {
+                            alertDialog.dismiss();
+                        }
+                    }
+                });
             }
         }
         machineCol.document(machine.getId()).set(machine).addOnSuccessListener(unused -> {

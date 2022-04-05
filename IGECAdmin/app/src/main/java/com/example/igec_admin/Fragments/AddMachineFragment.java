@@ -161,14 +161,14 @@ public class AddMachineFragment extends Fragment {
     View.OnClickListener oclRegister = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            int size = supplements.size();
-            MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
-            builder.setTitle("Uploading...")
-                    .setMessage("Uploading Data")
-                    .setCancelable(false);
-            AlertDialog alertDialog = builder.create();
-            alertDialog.show();
             if (validateInput()) {
+                int size = supplements.size();
+                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
+                builder.setTitle("Uploading...")
+                        .setMessage("Uploading Data")
+                        .setCancelable(false);
+                AlertDialog alertDialog = builder.create();
+                alertDialog.show();
                 for (int i = 0; i < size; i++) {
                     Integer[] finalI = new Integer[1];
                     finalI[0] = i;

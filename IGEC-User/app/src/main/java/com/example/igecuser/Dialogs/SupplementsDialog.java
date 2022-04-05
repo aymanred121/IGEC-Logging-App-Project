@@ -29,6 +29,10 @@ public class SupplementsDialog extends DialogFragment {
             ClientInfoDialog clientInfoDialog = new ClientInfoDialog(this);
             clientInfoDialog.show(getParentFragmentManager(), "");
         } else {
+
+            Bundle bundle = new Bundle();
+            bundle.putString("supplementState", vSupplementsNote.getText().toString());
+            getParentFragmentManager().setFragmentResult("supplements", bundle);
             dismiss();
         }
 
@@ -69,7 +73,7 @@ public class SupplementsDialog extends DialogFragment {
 
     // Functions
     private void initialize(View view) {
-        vSupplementsNote = view.findViewById(R.id.TextInput_CompanyName);
+        vSupplementsNote = view.findViewById(R.id.TextInput_SupplementsNote);
         vDone = view.findViewById(R.id.Button_Done);
     }
 

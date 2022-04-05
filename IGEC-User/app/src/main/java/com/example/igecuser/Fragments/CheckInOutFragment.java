@@ -50,7 +50,7 @@ public class CheckInOutFragment extends Fragment {
     // Vars
     private boolean isOpen = false;
     private Animation fabClose, fabOpen, rotateForward, rotateBackward, show, hide, rotateBackwardHide;
-    private Boolean isHere = Boolean.FALSE,machineChecked=false;
+    private Boolean isHere = Boolean.FALSE;
     private Employee currEmployee = null;
     private String id;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -243,7 +243,7 @@ public class CheckInOutFragment extends Fragment {
             @Override
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
                 // We use a String here, but any type that can be put in a Bundle is supported
-                String result = bundle.getString("response");
+                String result = bundle.getString("machineID");
                 boolean isItAUser = bundle.getBoolean("isItAUser");
                 Toast.makeText(getActivity(), result, Toast.LENGTH_SHORT).show();
                 // Do something with the result
@@ -257,16 +257,15 @@ public class CheckInOutFragment extends Fragment {
                     }
                     longitude = location.getLongitude();
                     latitude = location.getLatitude();
-                    machineCol.document(machineID).addSnapshotListener((value, error) -> {
-                        if(!value.exists())
-                        {
+                    machineCol.document(machineID).get().addOnSuccessListener((value) -> {
+                        if (!value.exists()) {
                             Toast.makeText(getActivity(), "Invalid Machine ID", Toast.LENGTH_SHORT).show();
                             return;
                         }
                         currMachine = value.toObject(Machine.class);
-                      machineEmpId = !currMachine.getEmployeeId().equals(currEmployee.getId()) ? machineEmployee.document().getId() : currMachine.getMachineEmployeeID();
+                        machineEmpId = !currMachine.getEmployeeId().equals(currEmployee.getId()) ? machineEmployee.document().getId() : currMachine.getMachineEmployeeID();
 
-                       machineEmployee.document(machineEmpId).get().addOnSuccessListener(documentSnapshot -> {
+                        machineEmployee.document(machineEmpId).get().addOnSuccessListener(documentSnapshot -> {
                             if (!documentSnapshot.exists()) {
 
                                 if(currMachine.getUsed()){
@@ -334,6 +333,15 @@ public class CheckInOutFragment extends Fragment {
                 supplementsDialog.show(getParentFragmentManager(), "");
             }
         });
+        getParentFragmentManager().setFragmentResultListener("supplements", this, new FragmentResultListener() {
+            @Override
+            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
+                String note = bundle.getString("supplementState");
+                Toast.makeText(getActivity(), note, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
     }
 
 

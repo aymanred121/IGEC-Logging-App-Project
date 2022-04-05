@@ -54,8 +54,8 @@ public class MachineCheckInOutDialog extends DialogFragment {
         mCodeScanner = new CodeScanner(getActivity(), scannerView);
         mCodeScanner.setDecodeCallback(result -> getActivity().runOnUiThread(() -> {
             Bundle res = new Bundle();
-            res.putString("response", result.getText());
-            res.putBoolean("isItAUser",isItAUser);
+            res.putString("machineID", result.getText());
+            res.putBoolean("isItAUser", isItAUser);
             getParentFragmentManager().setFragmentResult("machine", res);
             dismiss();
         }));

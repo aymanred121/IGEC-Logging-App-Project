@@ -40,7 +40,7 @@
         app:layout_constraintStart_toStartOf="parent">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/TextInput_SupplementsNode"
+            android:id="@+id/TextInput_SupplementsNote"
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:gravity="top"

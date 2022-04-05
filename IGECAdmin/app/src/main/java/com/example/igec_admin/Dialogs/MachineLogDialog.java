@@ -33,17 +33,21 @@ public class MachineLogDialog extends DialogFragment {
     private MachineLogAdapter adapter;
     private RecyclerView recyclerView;
     private RecyclerView.LayoutManager layoutManager;
+
     public MachineLogDialog(Machine machine) {
         this.machine = machine;
     }
 
-    private void retrieveMachineSummary(){
-        machineSummaryData = new ArrayList<>();
-        db.collection("Machine_Employee").whereEqualTo("machine.id","FrFmr").get().addOnSuccessListener(queryDocumentSnapshots ->{
-                    if(queryDocumentSnapshots.size()!=0)
+    private void retrieveMachineSummary() {
+        db.collection("Machine_Employee").whereEqualTo("machine.id", machine.getId()).get().addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (queryDocumentSnapshots.size() != 0) {
                         machineSummaryData.addAll(queryDocumentSnapshots.toObjects(Machine_Employee.class));
+                        adapter.setMachineEmployees(machineSummaryData);
+                        adapter.notifyDataSetChanged();
+                    }
                 }
         );
+
     }
 
     @NonNull
@@ -80,15 +84,15 @@ public class MachineLogDialog extends DialogFragment {
 
     }
 
-    void initialize(View view){
-        retrieveMachineSummary();
+    void initialize(View view) {
+        machineSummaryData = new ArrayList<>();
         recyclerView = view.findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
         adapter = new MachineLogAdapter(machineSummaryData);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
-
+        retrieveMachineSummary();
 
     }
 }

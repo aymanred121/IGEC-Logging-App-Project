@@ -1,11 +1,13 @@
 package com.example.igec_admin.Dialogs;
 
 import static com.example.igec_admin.cryptography.RSAUtil.encrypt;
+import static com.google.android.material.textfield.TextInputLayout.END_ICON_CUSTOM;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -59,7 +61,7 @@ public class UserFragmentDialog extends DialogFragment {
     private TextInputEditText vFirstName;
     private TextInputEditText vSecondName;
     private TextInputEditText vEmail;
-    private TextInputLayout vEmailLayout;
+    private TextInputLayout vEmailLayout,vPasswordLayout;
     private TextInputEditText vPassword;
     private TextInputEditText vTitle;
     private TextInputEditText vSalary;
@@ -117,6 +119,7 @@ public class UserFragmentDialog extends DialogFragment {
         vHireDateLayout.setEndIconOnClickListener(oclHireDate);
         vUpdate.setOnClickListener(clUpdate);
         vDelete.setOnClickListener(clDelete);
+        vPasswordLayout.setEndIconOnClickListener(oclPasswordGenerate);
         return view;
     }
 
@@ -127,6 +130,7 @@ public class UserFragmentDialog extends DialogFragment {
         vEmail = view.findViewById(R.id.TextInput_Email);
         vEmailLayout = view.findViewById(R.id.textInputLayout_Email);
         vPassword = view.findViewById(R.id.TextInput_Password);
+        vPasswordLayout = view.findViewById(R.id.textInputLayout_Password);
         vTitle = view.findViewById(R.id.TextInput_Title);
         vSalary = view.findViewById(R.id.TextInput_Salary);
         vSSN = view.findViewById(R.id.TextInput_NationalID);
@@ -150,13 +154,17 @@ public class UserFragmentDialog extends DialogFragment {
         vCity.setText(employee.getCity());
         vStreet.setText(employee.getStreet());
         vEmail.setText(employee.getEmail());
-        vPassword.setText(employee.getDecryptedPassword());
         vSalary.setText(String.valueOf(employee.getSalary()));
         vSSN.setText(employee.getSSN());
         vHireDate.setText(convertDateToString(employee.getHireDate().getTime()));
         hireDate = employee.getHireDate().getTime();
         vDatePickerBuilder.setTitleText("Hire Date");
         vDatePicker = vDatePickerBuilder.setSelection(hireDate).build();
+        vPasswordLayout.setEndIconMode(END_ICON_CUSTOM);
+        vPasswordLayout.setEndIconDrawable(R.drawable.ic_baseline_autorenew_24);
+        vPassword.setInputType(InputType.TYPE_CLASS_TEXT);
+
+
 
     }
 
@@ -383,6 +391,12 @@ public class UserFragmentDialog extends DialogFragment {
             } else {
                 vEmailLayout.setError(null);
             }
+        }
+    };
+    private View.OnClickListener oclPasswordGenerate = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            vPassword.setText("1234");
         }
     };
 

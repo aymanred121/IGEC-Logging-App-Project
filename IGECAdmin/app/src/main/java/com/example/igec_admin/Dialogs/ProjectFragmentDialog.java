@@ -181,7 +181,6 @@ public class ProjectFragmentDialog extends DialogFragment {
         adapter.setOnItemClickListener(itclEmployeeAdapter);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
-
         allowances.addAll(project.getAllowancesList());
         client = project.getClient();
         vName.setText(project.getName());
@@ -192,6 +191,7 @@ public class ProjectFragmentDialog extends DialogFragment {
         vContractType.setEnabled(false);
         vProjectReference.setText(project.getReference());
         vOfficeWork.setChecked(project.getReference().equals("-99999"));
+        vAddClient.setEnabled(project.getReference().equals("-99999"));
         vArea.setText(project.getLocationArea());
         vCity.setText(project.getLocationCity());
         vStreet.setText(project.getLocationStreet());

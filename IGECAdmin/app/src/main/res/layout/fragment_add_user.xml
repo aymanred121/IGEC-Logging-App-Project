@@ -132,7 +132,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/phone"
-            android:inputType="textPhonetic"
+            android:inputType="phone"
             android:maxLength="11"
             android:padding="14dp"
             android:singleLine="true" />

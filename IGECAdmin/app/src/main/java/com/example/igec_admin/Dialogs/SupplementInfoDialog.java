@@ -6,8 +6,11 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -25,6 +28,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.DialogFragment;
 
 import com.example.igec_admin.R;
@@ -32,6 +36,8 @@ import com.example.igec_admin.fireBase.Supplement;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class SupplementInfoDialog extends DialogFragment {
@@ -43,6 +49,7 @@ public class SupplementInfoDialog extends DialogFragment {
     private ActivityResultLauncher<Intent> activityResultLauncher;
     private final int position;
     private final ArrayList<Supplement> supplementNames;
+    private String currentPhotoPath;
 
     public SupplementInfoDialog(int position, Supplement supplement, ArrayList<Supplement> supplementNames) {
         this.supplement = supplement;
@@ -92,9 +99,9 @@ public class SupplementInfoDialog extends DialogFragment {
         activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
             @Override
             public void onActivityResult(ActivityResult result) {
-                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                    Bundle bundle = result.getData().getExtras();
-                    Bitmap bitmap = (Bitmap) bundle.get("data");
+                if (result.getResultCode() == RESULT_OK) {
+                    //Bundle bundle = result.getData().getExtras();
+                    Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath);
                     vSupplementImg.setImageBitmap(bitmap);
                 }
             }
@@ -150,13 +157,23 @@ public class SupplementInfoDialog extends DialogFragment {
     private final View.OnClickListener oclImg = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            activityResultLauncher.launch(takePicture);
-//            if (takePicture.resolveActivity(getContext().getPackageManager()) != null) {
-//                activityResultLauncher.launch(takePicture);
-//            } else {
-//                Toast.makeText(getActivity(), "there's no activity that supports that action", Toast.LENGTH_SHORT).show();
-//            }
+
+            //TODO change file name
+            String fileName = "photo";
+            File storageDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+
+            try {
+                File imageFile = File.createTempFile(fileName,".jpg", storageDirectory);
+                currentPhotoPath = imageFile.getAbsolutePath();
+
+                Uri imageUri =  FileProvider.getUriForFile(getActivity(),"com.example.igec_admin.fileprovider",imageFile);
+
+                Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                takePicture. putExtra(MediaStore.EXTRA_OUTPUT,imageUri);
+                activityResultLauncher.launch(takePicture);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     };
 

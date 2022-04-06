@@ -177,12 +177,12 @@ public class AddSupplementsDialog extends DialogFragment {
         activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
             @Override
             public void onActivityResult(ActivityResult result) {
-                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
-                    Bundle bundle = result.getData().getExtras();
+                if (result.getResultCode() == RESULT_OK) {
+                    //Bundle bundle = result.getData().getExtras();
                     Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath);
                     Supplement supplement = new Supplement();
                     supplement.setName("");
-                    supplement.setPhoto((Bitmap) bundle.get("data"));
+                    supplement.setPhoto(bitmap);
                     SupplementInfoDialog supplementInfoDialog = new SupplementInfoDialog(-1, supplement, supplements);
                     supplementInfoDialog.show(getParentFragmentManager(), "");
                 }
@@ -273,7 +273,8 @@ public class AddSupplementsDialog extends DialogFragment {
         @Override
         public void onClick(View v) {
 
-            String fileName = machine.getId();
+            //TODO change file name
+            String fileName = "photo";
             File storageDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
 
             try {
@@ -283,7 +284,7 @@ public class AddSupplementsDialog extends DialogFragment {
                 Uri imageUri =  FileProvider.getUriForFile(getActivity(),"com.example.igec_admin.fileprovider",imageFile);
 
                 Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                //takePicture. putExtra(MediaStore.EXTRA_OUTPUT,imageUri);
+                takePicture. putExtra(MediaStore.EXTRA_OUTPUT,imageUri);
                 activityResultLauncher.launch(takePicture);
             } catch (IOException e) {
                 e.printStackTrace();

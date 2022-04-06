@@ -284,10 +284,10 @@ public class CheckInOutFragment extends Fragment {
                 Toast.makeText(getActivity(), note, Toast.LENGTH_SHORT).show();
                 machineEmployee.document(machineEmpId).get().addOnSuccessListener(documentSnapshot -> {
                     if (!documentSnapshot.exists()) {
-                        checkInMachine();
+                        machineCheckIn();
                     } else {
                         Machine_Employee currMachineEmployee = documentSnapshot.toObject(Machine_Employee.class);
-                        checkOutMachine(currMachineEmployee);
+                        machineCheckOut(currMachineEmployee);
                     }
 
                 });
@@ -298,28 +298,42 @@ public class CheckInOutFragment extends Fragment {
 
     }
 
-    private void checkOutMachine(Machine_Employee currMachineEmployee) {
+    private void machineCheckOut(Machine_Employee currMachineEmployee) {
         HashMap<String, Object> checkOutDetails = new HashMap<>((new Summary(latitude, longitude)).getGeoMap());
+        double workingCost, monthlyCost = 0, weeklyCost = 0, dailyCost = 0;
         checkOutDetails.put("Time", Timestamp.now());
         long checkInTime = ((Timestamp) currMachineEmployee.getCheckIn().get("Time")).getSeconds();
         long checkOutTime = Timestamp.now().getSeconds();
         long workingTime = (checkOutTime - checkInTime);
+        long rem = workingTime;
+        monthlyCost += (int) (workingTime / 2.628e+6);
+        rem %= 2.628e+6;
+        weeklyCost += (int) (rem / 604800);
+        rem %= 604800;
+        dailyCost += (int) (rem / 86400);
+        rem %= 86400;
+        if (rem > 0)
+            dailyCost++;
+        monthlyCost *= currMachine.getMonthlyRentPrice();
+        weeklyCost *= currMachine.getWeeklyRentPrice();
+        dailyCost *= currMachine.getDailyRentPrice();
         currMachineEmployee.setWorkedTime(workingTime);
         currMachineEmployee.setCheckOut(checkOutDetails);
+        currMachineEmployee.setCost(monthlyCost + weeklyCost + dailyCost);
+        db.collection("projects").document(currEmployee.getProjectID())
+                .update("machineWorkedTime." + currMachine.getReference(), FieldValue.increment(workingTime));
         machineEmployee.document(machineEmpId).set(currMachineEmployee)
                 .addOnSuccessListener(unused -> {
-                    db.collection("Machine_Employee").document(currMachine.getMachineEmployeeID()).set(currMachineEmployee).addOnSuccessListener(unused1 -> {
-                        currMachine.removeEmployeeDependency();
-                        machineCol.document(currMachine.getId()).update("isUsed", false, "employeeFirstName", "", "employeeId", "", "machineEmployeeID", "").addOnSuccessListener(vu -> {
+                    currMachine.removeEmployeeDependency();
+                    machineCol.document(currMachine.getId()).update("isUsed", false, "employeeFirstName", "", "employeeId", "", "machineEmployeeID", "").addOnSuccessListener(vu -> {
 
-                            Toast.makeText(getContext(), "Machine: " + currMachine.getReference() + " checked Out successfully", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Machine: " + currMachine.getReference() + " checked Out successfully", Toast.LENGTH_SHORT).show();
 
-                        });
                     });
                 });
     }
 
-    private void checkInMachine() {
+    private void machineCheckIn() {
         HashMap<String, Object> checkInDetails = new HashMap<>((new Summary(latitude, longitude)).getGeoMap());
         checkInDetails.put("Time", Timestamp.now());
         Map<String, Object> machineEmployee1 = new HashMap();

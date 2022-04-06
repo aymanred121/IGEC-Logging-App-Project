@@ -69,17 +69,21 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectV
 
             holder.vName.setText(project.getName());
             holder.vNEmployee.setText("# Employee: "+(project.getEmployees().size()));
-            //TODO
-           // holder.vNMachine.setText("# Machine: ");
-            holder.vNHEmployee.setText("# Hours by Employee: "+ projectWorkingHours(project));
-            //holder.vNHMachine.setText("# Hours by Machine: ");
+            holder.vNMachine.setText("# Machine: "+ project.getMachineWorkedTime().size());
+            holder.vNHEmployee.setText("# Hours by Employee: "+ projectWorkingHours(project,1));
+            holder.vNHMachine.setText("# Hours by Machine: "+  projectWorkingHours(project,0));
 
 
     }
 
-    private long projectWorkingHours(Project project) {
+    private long projectWorkingHours(Project project,int flag) {
         long seconds = 0;
-        HashMap<String,Object> workingHoursMap = project.getEmployeeWorkedTime();
+        HashMap<String,Object> workingHoursMap;
+        if(flag ==1){
+            workingHoursMap = project.getEmployeeWorkedTime();
+
+        }else
+            workingHoursMap = project.getMachineWorkedTime();
         for( String key : workingHoursMap.keySet()){
             seconds+= (long)workingHoursMap.get(key);
         }

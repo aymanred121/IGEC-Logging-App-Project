@@ -7,7 +7,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,6 +27,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -44,6 +48,7 @@ import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -62,7 +67,7 @@ public class AddSupplementsDialog extends DialogFragment {
     private ArrayList<String> oldNames = new ArrayList<>();
     private ArrayList<Integer> oldNamesIndexes = new ArrayList<>();
     private boolean saveUpdated = false;
-
+    private String currentPhotoPath;
 
     // for machine dialog
     public AddSupplementsDialog(Machine machine) {
@@ -174,10 +179,10 @@ public class AddSupplementsDialog extends DialogFragment {
             public void onActivityResult(ActivityResult result) {
                 if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                     Bundle bundle = result.getData().getExtras();
-                    Bitmap bitmap = (Bitmap) bundle.get("data");
+                    Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath);
                     Supplement supplement = new Supplement();
                     supplement.setName("");
-                    supplement.setPhoto(bitmap);
+                    supplement.setPhoto((Bitmap) bundle.get("data"));
                     SupplementInfoDialog supplementInfoDialog = new SupplementInfoDialog(-1, supplement, supplements);
                     supplementInfoDialog.show(getParentFragmentManager(), "");
                 }
@@ -230,7 +235,29 @@ public class AddSupplementsDialog extends DialogFragment {
             }
         }
     }
-
+    public void saveToInternalStorage(Bitmap img, String supplementName) {
+        if (new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + supplementName + ".jpg").exists())
+            return;
+        Bitmap bitmapImage = img;
+        if (bitmapImage == null)
+            return;
+        File path = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), supplementName + ".jpg");
+        FileOutputStream fos = null;
+        try {
+            path.createNewFile();
+            fos = new FileOutputStream(path.getAbsoluteFile());
+            bitmapImage.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                fos.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return;
+    }
     private final View.OnClickListener oclDone = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -245,12 +272,25 @@ public class AddSupplementsDialog extends DialogFragment {
     private final View.OnClickListener oclAddPhoto = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            activityResultLauncher.launch(takePicture);
-//            if (takePicture.resolveActivity(getContext().getPackageManager()) != null) {
-//            } else {
-//                Toast.makeText(getActivity(), "there's no activity that supports that action", Toast.LENGTH_SHORT).show();
-//            }
+
+            String fileName = machine.getId();
+            File storageDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+
+            try {
+                File imageFile = File.createTempFile(fileName,".jpg", storageDirectory);
+                currentPhotoPath = imageFile.getAbsolutePath();
+
+                Uri imageUri =  FileProvider.getUriForFile(getActivity(),"com.example.igec_admin.fileprovider",imageFile);
+
+                Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                //takePicture. putExtra(MediaStore.EXTRA_OUTPUT,imageUri);
+                activityResultLauncher.launch(takePicture);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+//
 
         }
     };

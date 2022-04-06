@@ -3,6 +3,7 @@ package com.example.igec_admin.Dialogs;
 import static android.app.Activity.RESULT_OK;
 
 import android.app.Dialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
@@ -70,6 +71,10 @@ public class SupplementInfoDialog extends DialogFragment {
         setStyle(DialogFragment.STYLE_NORMAL, R.style.FullscreenDialogTheme);
     }
 
+    @Override
+    public void onDismiss(@NonNull DialogInterface dialog) {
+        super.onDismiss(dialog);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

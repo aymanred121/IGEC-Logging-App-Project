@@ -9,6 +9,7 @@ public class Machine_Employee {
     private long workedTime;
     private Map<String,Object>checkIn;
     private Map<String, Object> CheckOut=new HashMap<>();
+    private double cost;
 
     public Machine_Employee() {
     }
@@ -56,5 +57,13 @@ public class Machine_Employee {
 
     public void setCheckIn(Map<String, Object> checkIn) {
         this.checkIn = checkIn;
+    }
+
+    public double getCost() {
+        return cost;
+    }
+
+    public void setCost(double cost) {
+        this.cost = cost;
     }
 }

@@ -22,6 +22,7 @@ public class Project {
     private Date startDate;
     private ArrayList<EmployeeOverview>  employees;
     private HashMap<String,Object> employeeWorkedTime = new HashMap<>();
+    private HashMap<String,Object> machineWorkedTime = new HashMap<>();
 
     public HashMap<String, Object> getEmployeeWorkedTime() {
         return employeeWorkedTime;
@@ -148,5 +149,13 @@ public class Project {
 
     public void setEmployees(ArrayList<EmployeeOverview>  employees) {
         this.employees = employees;
+    }
+
+    public HashMap<String, Object> getMachineWorkedTime() {
+        return machineWorkedTime;
+    }
+
+    public void setMachineWorkedTime(HashMap<String, Object> machineWorkedTime) {
+        this.machineWorkedTime = machineWorkedTime;
     }
 }

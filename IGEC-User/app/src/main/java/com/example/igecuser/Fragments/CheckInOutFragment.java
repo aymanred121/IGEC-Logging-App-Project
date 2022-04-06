@@ -1,13 +1,8 @@
 package com.example.igecuser.Fragments;
 
-import static android.content.Context.LOCATION_SERVICE;
-
-import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,7 +14,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentResultListener;
 
@@ -44,7 +38,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.time.LocalDate;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class CheckInOutFragment extends Fragment {
@@ -171,7 +164,7 @@ public class CheckInOutFragment extends Fragment {
 
                                     Summary summary1 = documentSnapshot.toObject(Summary.class);
                                     if (summary1.getWorkedTime() == null) {
-                                      employeeCheckOut(summary1,checkOut);
+                                        employeeCheckOut(summary1, checkOut);
                                     } else {
                                         Toast.makeText(getActivity(), "You've been checked Out already!", Toast.LENGTH_SHORT).show();
                                     }
@@ -252,10 +245,10 @@ public class CheckInOutFragment extends Fragment {
                 boolean isItAUser = bundle.getBoolean("isItAUser");
                 Toast.makeText(getActivity(), machineID, Toast.LENGTH_SHORT).show();
                 // Do something with the result
-                    fusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
-                        @Override
-                        public void onSuccess(Location location) {
-                            try {
+                fusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        try {
                             longitude = location.getLongitude();
                             latitude = location.getLatitude();
 
@@ -265,36 +258,23 @@ public class CheckInOutFragment extends Fragment {
                                     return;
                                 }
                                 currMachine = value.toObject(Machine.class);
-
+                                // TODO: put it back to onSuccess
+                                SupplementsDialog supplementsDialog = new SupplementsDialog(isItAUser, currMachine);
+                                supplementsDialog.show(getParentFragmentManager(), "");
                                 if (currMachine.getUsed() && !currMachine.getEmployeeId().equals(currEmployee.getId())) {
                                     Toast.makeText(getContext(), "this Machine already being used by" + currMachine.getEmployeeFirstName(), Toast.LENGTH_SHORT).show();
                                     return;
                                 }
                                 machineEmpId = !currMachine.getEmployeeId().equals(currEmployee.getId()) ? machineEmployee.document().getId() : currMachine.getMachineEmployeeID();
 
-                                machineEmployee.document(machineEmpId).get().addOnSuccessListener(documentSnapshot -> {
-                                    if (!documentSnapshot.exists()) {
-                                        checkInMachine();
-                                    } else {
-                                        Machine_Employee currMachineEmployee = documentSnapshot.toObject(Machine_Employee.class);
-                                        checkOutMachine(currMachineEmployee);
-                                    }
-
-                                });
                             });
-                        }  catch (Exception e) {
-                                Toast.makeText(getContext(), "invalid Machine ID", Toast.LENGTH_SHORT).show();
-                            }
+                        } catch (Exception e) {
+                            Toast.makeText(getContext(), "invalid Machine ID", Toast.LENGTH_SHORT).show();
                         }
-                    }).addOnFailureListener(unused ->{
-                        Toast.makeText(getContext(), "Please enable GPS!", Toast.LENGTH_SHORT).show();
-                    });
-
-
-
-                // TODO: put it back to onSuccess
-                SupplementsDialog supplementsDialog = new SupplementsDialog(isItAUser);
-                supplementsDialog.show(getParentFragmentManager(), "");
+                    }
+                }).addOnFailureListener(unused -> {
+                    Toast.makeText(getContext(), "Please enable GPS!", Toast.LENGTH_SHORT).show();
+                });
             }
         });
         getParentFragmentManager().setFragmentResultListener("supplements", this, new FragmentResultListener() {
@@ -302,6 +282,16 @@ public class CheckInOutFragment extends Fragment {
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
                 String note = bundle.getString("supplementState");
                 Toast.makeText(getActivity(), note, Toast.LENGTH_SHORT).show();
+                machineEmployee.document(machineEmpId).get().addOnSuccessListener(documentSnapshot -> {
+                    if (!documentSnapshot.exists()) {
+                        checkInMachine();
+                    } else {
+                        Machine_Employee currMachineEmployee = documentSnapshot.toObject(Machine_Employee.class);
+                        checkOutMachine(currMachineEmployee);
+                    }
+
+                });
+
             }
         });
 

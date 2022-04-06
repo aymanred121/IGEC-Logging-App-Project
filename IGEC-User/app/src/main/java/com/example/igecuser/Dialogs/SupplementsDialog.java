@@ -1,29 +1,50 @@
 package com.example.igecuser.Dialogs;
 
 import android.app.Dialog;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.igecuser.Adapters.SupplementsAdapter;
 import com.example.igecuser.R;
+import com.example.igecuser.fireBase.Machine;
+import com.example.igecuser.fireBase.Supplement;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 
 public class SupplementsDialog extends DialogFragment {
 
 
-    //Views
-    private TextInputEditText vSupplementsNote;
+    private final Machine machine;
+    ArrayList<Supplement> supplements;
     private MaterialButton vDone;
     private boolean isItAUser;
-
+    //Views
+    private CircularProgressIndicator vCircularProgressIndicator;
+    private TextInputEditText vComment;
     private final View.OnClickListener oclDone = v -> {
         if (!isItAUser) {
             ClientInfoDialog clientInfoDialog = new ClientInfoDialog(this);
@@ -31,12 +52,16 @@ public class SupplementsDialog extends DialogFragment {
         } else {
 
             Bundle bundle = new Bundle();
-            bundle.putString("supplementState", vSupplementsNote.getText().toString());
+            bundle.putString("supplementState", vComment.getText().toString());
             getParentFragmentManager().setFragmentResult("supplements", bundle);
             dismiss();
         }
 
     };
+    private Animation show, hide;
+    private RecyclerView recyclerView;
+    private SupplementsAdapter adapter;
+
 
     @NonNull
     @Override
@@ -71,15 +96,68 @@ public class SupplementsDialog extends DialogFragment {
         return view;
     }
 
-    // Functions
-    private void initialize(View view) {
-        vSupplementsNote = view.findViewById(R.id.TextInput_SupplementsNote);
-        vDone = view.findViewById(R.id.Button_Done);
+    private RecyclerView.LayoutManager layoutManager;
+
+    public SupplementsDialog(boolean isItAUser, Machine machine) {
+        this.isItAUser = isItAUser;
+        this.machine = machine;
     }
 
-    //TODO: modify this to carry machine data for registration
-    public SupplementsDialog(boolean isItAUser) {
-        this.isItAUser = isItAUser;
+    // Functions
+    private void initialize(View view) {
+        supplements = new ArrayList<>();
+        show = AnimationUtils.loadAnimation(getActivity(), R.anim.show);
+        hide = AnimationUtils.loadAnimation(getActivity(), R.anim.hide);
+        vCircularProgressIndicator = view.findViewById(R.id.progress_bar);
+        vComment = view.findViewById(R.id.TextInput_Comment);
+        vDone = view.findViewById(R.id.Button_Done);
+        recyclerView = view.findViewById(R.id.recyclerview);
+        recyclerView.setHasFixedSize(true);
+        layoutManager = new LinearLayoutManager(getActivity());
+        adapter = new SupplementsAdapter(supplements);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(adapter);
+        if (machine.getSupplementsNames().size() != 0) {
+            getAllSupplements();
+            vCircularProgressIndicator.setVisibility(View.VISIBLE);
+            vCircularProgressIndicator.startAnimation(show);
+            recyclerView.startAnimation(hide);
+        } else {
+            vCircularProgressIndicator.startAnimation(hide);
+            recyclerView.startAnimation(show);
+        }
     }
+
+    private void getAllSupplements() {
+        StorageReference ref;
+        final int[] progress = new int[1];
+        for (String name : machine.getSupplementsNames()) {
+            ref = FirebaseStorage.getInstance().getReference().child("/imgs/" + machine.getId() + String.format("/%s.jpg", name));
+            try {
+                final File localFile = File.createTempFile(name, "jpg");
+                ref.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
+                        Bitmap bitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
+                        supplements.add(new Supplement(name, bitmap));
+                        progress[0]++;
+                        if (progress[0] == machine.getSupplementsNames().size()) {
+                            vCircularProgressIndicator.startAnimation(hide);
+                            recyclerView.startAnimation(show);
+                            adapter.notifyDataSetChanged();
+                        }
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+
+                    }
+                });
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 
 }

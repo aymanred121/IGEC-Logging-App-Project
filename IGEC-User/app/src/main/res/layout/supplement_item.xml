@@ -3,29 +3,32 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_margin="8dp"
     app:cardCornerRadius="5dp">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="12dp">
+        android:padding="8dp">
+
         <ImageView
             android:id="@+id/ImageView_supplementImage"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
-            android:src="@mipmap/ic_launcher"/>
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="test"
+            tools:src="@drawable/ic_launcher_foreground"
+            tools:tint="@color/black" />
 
         <TextView
             android:id="@+id/TextView_supplementName"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
             android:layout_toRightOf="@id/ImageView_supplementImage"
             android:layout_centerVertical="true"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
             android:layout_marginStart="16dp"
-            android:textSize="32sp"
-            android:text="test" />
-
+            tools:text="Supplement Name" />
     </RelativeLayout>
 
 </com.google.android.material.card.MaterialCardView>

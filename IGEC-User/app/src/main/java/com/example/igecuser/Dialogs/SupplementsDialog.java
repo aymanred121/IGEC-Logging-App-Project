@@ -45,19 +45,6 @@ public class SupplementsDialog extends DialogFragment {
     //Views
     private CircularProgressIndicator vCircularProgressIndicator;
     private TextInputEditText vComment;
-    private final View.OnClickListener oclDone = v -> {
-        if (!isItAUser) {
-            ClientInfoDialog clientInfoDialog = new ClientInfoDialog(this);
-            clientInfoDialog.show(getParentFragmentManager(), "");
-        } else {
-
-            Bundle bundle = new Bundle();
-            bundle.putString("supplementState", vComment.getText().toString());
-            getParentFragmentManager().setFragmentResult("supplements", bundle);
-            dismiss();
-        }
-
-    };
     private Animation show, hide;
     private RecyclerView recyclerView;
     private SupplementsAdapter adapter;
@@ -72,7 +59,7 @@ public class SupplementsDialog extends DialogFragment {
         Window window = dialog.getWindow();
 
         if (window != null) {
-            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         }
 
         return dialog;
@@ -158,6 +145,16 @@ public class SupplementsDialog extends DialogFragment {
             }
         }
     }
+
+    private final View.OnClickListener oclDone = v -> {
+
+        Bundle bundle = new Bundle();
+        bundle.putString("supplementState", vComment.getText().toString());
+        bundle.putBoolean("isItAUser",isItAUser);
+        getParentFragmentManager().setFragmentResult("supplements", bundle);
+        dismiss();
+
+    };
 
 
 }

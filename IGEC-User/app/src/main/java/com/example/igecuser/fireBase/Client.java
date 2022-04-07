@@ -1,6 +1,8 @@
 package com.example.igecuser.fireBase;
 
-public class Client {
+import java.io.Serializable;
+
+public class Client implements Serializable  {
    private String name , Email , phoneNumber;
 
     public Client(String name, String Email, String phoneNumber) {

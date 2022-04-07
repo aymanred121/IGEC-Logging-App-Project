@@ -56,7 +56,7 @@
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/TextInput_Comment"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_height="100dp"
             android:gravity="top"
             android:hint="@string/Comment"
             android:inputType="textMultiLine"

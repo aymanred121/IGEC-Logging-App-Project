@@ -17,9 +17,11 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentResultListener;
 
+import com.example.igecuser.Dialogs.ClientInfoDialog;
 import com.example.igecuser.Dialogs.MachineCheckInOutDialog;
 import com.example.igecuser.Dialogs.SupplementsDialog;
 import com.example.igecuser.R;
+import com.example.igecuser.fireBase.Client;
 import com.example.igecuser.fireBase.Employee;
 import com.example.igecuser.fireBase.Machine;
 import com.example.igecuser.fireBase.Machine_Employee;
@@ -258,7 +260,6 @@ public class CheckInOutFragment extends Fragment {
                                     return;
                                 }
                                 currMachine = value.toObject(Machine.class);
-                                // TODO: put it back to onSuccess
                                 SupplementsDialog supplementsDialog = new SupplementsDialog(isItAUser, currMachine);
                                 supplementsDialog.show(getParentFragmentManager(), "");
                                 if (currMachine.getUsed() && !currMachine.getEmployeeId().equals(currEmployee.getId())) {
@@ -281,21 +282,39 @@ public class CheckInOutFragment extends Fragment {
             @Override
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
                 String note = bundle.getString("supplementState");
-                Toast.makeText(getActivity(), note, Toast.LENGTH_SHORT).show();
-                machineEmployee.document(machineEmpId).get().addOnSuccessListener(documentSnapshot -> {
-                    if (!documentSnapshot.exists()) {
-                        machineCheckIn();
-                    } else {
-                        Machine_Employee currMachineEmployee = documentSnapshot.toObject(Machine_Employee.class);
-                        machineCheckOut(currMachineEmployee);
-                    }
+                boolean isItAUser = bundle.getBoolean("isItAUser");
 
-                });
+                if (isItAUser) {
+                    checkMachineInOut();
+                } else {
+                    ClientInfoDialog clientInfoDialog = new ClientInfoDialog();
+                    clientInfoDialog.show(getParentFragmentManager(), "");
+                }
+            }
+        });
+        getParentFragmentManager().setFragmentResultListener("clientInfo", this, new FragmentResultListener() {
+            @Override
+            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
+                Client client = (Client) result.getSerializable("client");
+                checkMachineInOut();
+                //TODO MARAWAN
 
             }
         });
 
 
+    }
+
+    private void checkMachineInOut() {
+        machineEmployee.document(machineEmpId).get().addOnSuccessListener(documentSnapshot -> {
+            if (!documentSnapshot.exists()) {
+                machineCheckIn();
+            } else {
+                Machine_Employee currMachineEmployee = documentSnapshot.toObject(Machine_Employee.class);
+                machineCheckOut(currMachineEmployee);
+            }
+
+        });
     }
 
     private void machineCheckOut(Machine_Employee currMachineEmployee) {

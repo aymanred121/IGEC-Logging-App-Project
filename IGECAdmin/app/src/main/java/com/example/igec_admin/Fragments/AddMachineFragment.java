@@ -2,6 +2,7 @@ package com.example.igec_admin.Fragments;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.Editable;
@@ -14,6 +15,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentResultListener;
@@ -159,6 +161,7 @@ public class AddMachineFragment extends Fragment {
         }
     };
     View.OnClickListener oclRegister = new View.OnClickListener() {
+        @RequiresApi(api = Build.VERSION_CODES.R)
         @Override
         public void onClick(View v) {
             if (validateInput()) {
@@ -189,7 +192,7 @@ public class AddMachineFragment extends Fragment {
                     });
                 }
                 saveToInternalStorage();
-                saveToCloudStorage();
+                //saveToCloudStorage();
 
                 Machine newMachine = new Machine(vID.getText().toString(), vReference.getText().toString(), new Date(purchaseDate), new Allowance(Integer.parseInt(vAllowance.getText().toString())));
                 newMachine.setDailyRentPrice(Double.parseDouble(vMachineByDay.getText().toString()));

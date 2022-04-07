@@ -1,8 +1,11 @@
 package com.example.igec_admin.fireBase;
 
 import android.graphics.Bitmap;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import androidx.annotation.RequiresApi;
 
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -55,10 +58,11 @@ public class Supplement implements Parcelable, Serializable {
         this.photo = photo;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.R)
     public UploadTask saveToCloudStorage(StorageReference storageRef, String file) {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        photo.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        photo.compress(Bitmap.CompressFormat.WEBP_LOSSY, 10, baos);
         byte[] data = baos.toByteArray();
         StorageReference mountainsRef = storageRef.child("imgs/" + file + "/" + name + ".jpg");
 

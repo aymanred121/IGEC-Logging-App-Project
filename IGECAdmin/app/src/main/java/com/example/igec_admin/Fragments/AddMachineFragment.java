@@ -21,6 +21,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentResultListener;
 
 import com.example.igec_admin.Dialogs.AddSupplementsDialog;
+import com.example.igec_admin.Dialogs.MachineSerialNumberDialog;
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Allowance;
 import com.example.igec_admin.fireBase.Machine;
@@ -58,8 +59,8 @@ public class AddMachineFragment extends Fragment {
 
 
     // Views
-    private TextInputLayout vIDLayout, vPurchaseDateLayout;
-    private TextInputEditText vID, vPurchaseDate, vReference, vAllowance, vMachineByDay, vMachineByWeek, vMachineByMonth;
+    private TextInputLayout vIDLayout, vPurchaseDateLayout, vSerialNumberLayout;
+    private TextInputEditText vID, vPurchaseDate, vSerialNumber, vAllowance, vMachineByDay, vMachineByWeek, vMachineByMonth;
     private ImageView vQRImg;
     private MaterialButton vRegister, vAddSupplement;
     // Vars
@@ -83,7 +84,12 @@ public class AddMachineFragment extends Fragment {
                 supplements = bundle.getParcelableArrayList("supplements");
             }
         });
-
+        getParentFragmentManager().setFragmentResultListener("machine", this, new FragmentResultListener() {
+            @Override
+            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
+               vSerialNumber.setText(result.getString("SerialNumber"));
+            }
+        });
     }
 
     @Override
@@ -96,6 +102,7 @@ public class AddMachineFragment extends Fragment {
         vRegister.setOnClickListener(oclRegister);
         vID.addTextChangedListener(atlMachineID);
         vPurchaseDateLayout.setEndIconOnClickListener(oclDate);
+        vSerialNumberLayout.setEndIconOnClickListener(oclSerialNumber);
         vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);
         vAddSupplement.setOnClickListener(oclAddSupplement);
         return view;
@@ -106,10 +113,11 @@ public class AddMachineFragment extends Fragment {
         supplements = new ArrayList<>();
         vID = view.findViewById(R.id.TextInput_MachineID);
         vIDLayout = view.findViewById(R.id.textInputLayout_MachineID);
+        vSerialNumberLayout = view.findViewById(R.id.textInputLayout_MachineSerialNumber);
         vQRImg = view.findViewById(R.id.ImageView_MachineIDIMG);
         vRegister = view.findViewById(R.id.button_register);
         vAddSupplement = view.findViewById(R.id.button_addSupplements);
-        vReference = view.findViewById(R.id.TextInput_MachineCodeName);
+        vSerialNumber = view.findViewById(R.id.TextInput_MachineSerialNumber);
         vPurchaseDate = view.findViewById(R.id.TextInput_MachinePurchaseDate);
         vPurchaseDateLayout = view.findViewById(R.id.textInputLayout_MachinePurchaseDate);
         vAllowance = view.findViewById(R.id.TextInput_MachineAllowance);
@@ -123,7 +131,7 @@ public class AddMachineFragment extends Fragment {
 
     private void clearInput() {
         vID.setText(null);
-        vReference.setText(null);
+        vSerialNumber.setText(null);
         vPurchaseDate.setText(null);
         vQRImg.setImageResource(R.drawable.ic_baseline_image_24);
         vAllowance.setText(null);
@@ -137,7 +145,7 @@ public class AddMachineFragment extends Fragment {
     private boolean validateInput() {
         return !(vID.getText().toString().isEmpty() ||
                 vPurchaseDate.getText().toString().isEmpty() ||
-                vReference.getText().toString().isEmpty() ||
+                vSerialNumber.getText().toString().isEmpty() ||
                 vMachineByDay.getText().toString().isEmpty() ||
                 vMachineByWeek.getText().toString().isEmpty() ||
                 vMachineByMonth.getText().toString().isEmpty() ||
@@ -160,6 +168,14 @@ public class AddMachineFragment extends Fragment {
             vDatePicker.show(getFragmentManager(), "DATE_PICKER");
         }
     };
+    View.OnClickListener oclSerialNumber = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            MachineSerialNumberDialog machineSerialNumberDialog = new MachineSerialNumberDialog();
+            machineSerialNumberDialog.show(getParentFragmentManager(), "");
+        }
+    };
+
     View.OnClickListener oclRegister = new View.OnClickListener() {
         @RequiresApi(api = Build.VERSION_CODES.R)
         @Override
@@ -194,7 +210,7 @@ public class AddMachineFragment extends Fragment {
                 saveToInternalStorage();
                 //saveToCloudStorage();
 
-                Machine newMachine = new Machine(vID.getText().toString(), vReference.getText().toString(), new Date(purchaseDate), new Allowance(Integer.parseInt(vAllowance.getText().toString())));
+                Machine newMachine = new Machine(vID.getText().toString(), vSerialNumber.getText().toString(), new Date(purchaseDate), new Allowance(Integer.parseInt(vAllowance.getText().toString())));
                 newMachine.setDailyRentPrice(Double.parseDouble(vMachineByDay.getText().toString()));
                 newMachine.setWeeklyRentPrice(Double.parseDouble(vMachineByWeek.getText().toString()));
                 newMachine.setMonthlyRentPrice(Double.parseDouble(vMachineByMonth.getText().toString()));
@@ -212,23 +228,6 @@ public class AddMachineFragment extends Fragment {
             }
         }
     };
-
-    private void saveToCloudStorage() {
-        vQRImg.setDrawingCacheEnabled(true);
-        vQRImg.buildDrawingCache();
-        Bitmap bitmap = ((BitmapDrawable) vQRImg.getDrawable()).getBitmap();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 20, baos);
-        byte[] data = baos.toByteArray();
-        StorageReference mountainsRef = storageRef.child("imgs/" + vID.getText().toString() + "/" + vReference.getText().toString() + ".jpg");
-
-        UploadTask uploadTask = mountainsRef.putBytes(data);
-        uploadTask.addOnSuccessListener(unsed -> {
-            Toast.makeText(getActivity(), "uploaded", Toast.LENGTH_SHORT).show();
-        }).addOnFailureListener(e -> {
-            Toast.makeText(getActivity(), e.toString(), Toast.LENGTH_SHORT).show();
-        });
-    }
 
 
     View.OnClickListener oclMachineID = new View.OnClickListener() {
@@ -277,12 +276,12 @@ public class AddMachineFragment extends Fragment {
     };
 
     public void saveToInternalStorage() {
-        if (new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + vReference.getText().toString() + ".jpg").exists())
+        if (new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + vSerialNumber.getText().toString() + ".jpg").exists())
             return;
         Bitmap bitmapImage = ((BitmapDrawable) vQRImg.getDrawable()).getBitmap();
         if (bitmapImage == null)
             return;
-        File path = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), vReference.getText().toString() + ".jpg");
+        File path = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), vSerialNumber.getText().toString() + ".jpg");
         FileOutputStream fos = null;
         try {
             path.createNewFile();

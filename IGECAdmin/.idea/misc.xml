@@ -4,6 +4,9 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="../../../../../layout/custom_preview.xml" value="0.15416666666666667" />
+        <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/drawable/ic_barcode.xml" value="0.1" />
+        <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/fragment_add_machine.xml" value="0.4172767203513909" />
+        <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/fragment_machine_serial_code_dialog.xml" value="0.17074275362318841" />
         <entry key="..\:/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/drawable/ic_round_close_24.xml" value="0.2115" />
         <entry key="..\:/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/activity_main.xml" value="0.1621376811594203" />
         <entry key="..\:/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/allowance_item.xml" value="0.5" />

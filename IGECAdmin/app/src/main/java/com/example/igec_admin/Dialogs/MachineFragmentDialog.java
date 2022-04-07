@@ -49,8 +49,8 @@ public class MachineFragmentDialog extends DialogFragment {
 
 
     // Views
-    private TextInputLayout vIDLayout, vPurchaseDateLayout;
-    private TextInputEditText vID, vPurchaseDate, vReference, vAllowance, vMachineByDay, vMachineByWeek, vMachineByMonth;
+    private TextInputLayout vIDLayout, vPurchaseDateLayout,vSerialNumberLayout;
+    private TextInputEditText vID, vPurchaseDate, vSerialNumber, vAllowance, vMachineByDay, vMachineByWeek, vMachineByMonth;
     private MaterialButton vRegister, vDelete, vUpdate, vAddSupplements;
     private ImageView vQRImg;
 
@@ -98,6 +98,12 @@ public class MachineFragmentDialog extends DialogFragment {
                 oldNames = bundle.getStringArrayList("oldNames");
             }
         });
+        getParentFragmentManager().setFragmentResultListener("machine", this, new FragmentResultListener() {
+            @Override
+            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
+                vSerialNumber.setText(result.getString("SerialNumber"));
+            }
+        });
     }
 
     @Override
@@ -110,6 +116,7 @@ public class MachineFragmentDialog extends DialogFragment {
         vDelete.setOnClickListener(oclDelete);
         vPurchaseDateLayout.setEndIconOnClickListener(oclDate);
         vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);
+        vSerialNumberLayout.setEndIconOnClickListener(oclSerialNumber);
         vAddSupplements.setOnClickListener(oclAddSupplement);
         return view;
     }
@@ -120,7 +127,8 @@ public class MachineFragmentDialog extends DialogFragment {
         vRegister = view.findViewById(R.id.button_register);
         vUpdate = view.findViewById(R.id.button_update);
         vDelete = view.findViewById(R.id.button_delete);
-        vReference = view.findViewById(R.id.TextInput_MachineCodeName);
+        vSerialNumberLayout = view.findViewById(R.id.textInputLayout_MachineSerialNumber);
+        vSerialNumber = view.findViewById(R.id.TextInput_MachineSerialNumber);
         vPurchaseDate = view.findViewById(R.id.TextInput_MachinePurchaseDate);
         vPurchaseDateLayout = view.findViewById(R.id.textInputLayout_MachinePurchaseDate);
         vID = view.findViewById(R.id.TextInput_MachineID);
@@ -139,7 +147,7 @@ public class MachineFragmentDialog extends DialogFragment {
 
         vID.setEnabled(false);
 
-        vReference.setText(machine.getReference());
+        vSerialNumber.setText(machine.getReference());
         vID.setText(machine.getId());
         purchaseDate = machine.getPurchaseDate().getTime();
         vPurchaseDate.setText(convertDateToString(machine.getPurchaseDate().getTime()));
@@ -246,7 +254,7 @@ public class MachineFragmentDialog extends DialogFragment {
     private boolean validateInput() {
         return !(vID.getText().toString().isEmpty() ||
                 vPurchaseDate.getText().toString().isEmpty() ||
-                vReference.getText().toString().isEmpty() ||
+                vSerialNumber.getText().toString().isEmpty() ||
                 vMachineByDay.getText().toString().isEmpty() ||
                 vMachineByWeek.getText().toString().isEmpty() ||
                 vMachineByMonth.getText().toString().isEmpty() ||
@@ -280,7 +288,13 @@ public class MachineFragmentDialog extends DialogFragment {
             addSupplementsDialog.show(getParentFragmentManager(), "");
         }
     };
-
+    private View.OnClickListener oclSerialNumber = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            MachineSerialNumberDialog machineSerialNumberDialog = new MachineSerialNumberDialog();
+            machineSerialNumberDialog.show(getParentFragmentManager(), "");
+        }
+    };
     private final View.OnClickListener oclDelete = v -> {
 
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());

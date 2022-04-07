@@ -153,12 +153,9 @@ public class CheckInOutFragment extends Fragment {
                             longitude = location.getLongitude();
                             latitude = location.getLatitude();
 
-                            HashMap<String, Object> checkOut = new HashMap<>();
                             Summary summary = new Summary(latitude, longitude);
                             HashMap<String, Object> checkOutDetails = new HashMap<>(summary.getGeoMap());
                             checkOutDetails.put("Time", Timestamp.now());
-                            checkOut.put("checkOut", checkOutDetails);
-                            checkOut.put("employee", currEmployee);
                             db.collection("summary").document(id).get().addOnSuccessListener(documentSnapshot -> {
                                 if (!documentSnapshot.exists()) {
                                     employeeCheckIn(summary);
@@ -166,7 +163,7 @@ public class CheckInOutFragment extends Fragment {
 
                                     Summary summary1 = documentSnapshot.toObject(Summary.class);
                                     if (summary1.getWorkedTime() == null) {
-                                        employeeCheckOut(summary1, checkOut);
+                                        employeeCheckOut(summary1, checkOutDetails);
                                     } else {
                                         Toast.makeText(getActivity(), "You've been checked Out already!", Toast.LENGTH_SHORT).show();
                                     }
@@ -202,14 +199,14 @@ public class CheckInOutFragment extends Fragment {
     };
 
     private void employeeCheckOut(Summary summary1, HashMap<String, Object> checkOut) {
-        db.collection("summary").document(id).update(checkOut)
+        long checkInTime = ((Timestamp) summary1.getCheckIn().get("Time")).getSeconds();
+        long checkOutTime = Timestamp.now().getSeconds();
+        long workingTime = (checkOutTime - checkInTime);
+        summary1.setCheckOut(checkOut);
+        summary1.setWorkedTime(workingTime);
+        db.collection("summary").document(id).set(summary1)
                 .addOnSuccessListener(unused -> {
                     Toast.makeText(getContext(), "Checked Out successfully!", Toast.LENGTH_SHORT).show();
-                    long checkInTime = ((Timestamp) summary1.getCheckIn().get("Time")).getSeconds();
-                    long checkOutTime = Timestamp.now().getSeconds();
-                    long workingTime = (checkOutTime - checkInTime);
-                    summary1.setWorkedTime(workingTime);
-                    db.collection("summary").document(id).set(summary1);
                     db.collection("projects").document(currEmployee.getProjectID())
                             .update("employeeWorkedTime." + currEmployee.getId(), FieldValue.increment(workingTime));
 
@@ -285,7 +282,7 @@ public class CheckInOutFragment extends Fragment {
                 boolean isItAUser = bundle.getBoolean("isItAUser");
 
                 if (isItAUser) {
-                    checkMachineInOut();
+                    checkMachineInOut(null);
                 } else {
                     ClientInfoDialog clientInfoDialog = new ClientInfoDialog();
                     clientInfoDialog.show(getParentFragmentManager(), "");
@@ -296,19 +293,17 @@ public class CheckInOutFragment extends Fragment {
             @Override
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
                 Client client = (Client) result.getSerializable("client");
-                checkMachineInOut();
-                //TODO MARAWAN
-
+                checkMachineInOut(client);
             }
         });
 
 
     }
 
-    private void checkMachineInOut() {
+    private void checkMachineInOut(Client client) {
         machineEmployee.document(machineEmpId).get().addOnSuccessListener(documentSnapshot -> {
             if (!documentSnapshot.exists()) {
-                machineCheckIn();
+                machineCheckIn(client);
             } else {
                 Machine_Employee currMachineEmployee = documentSnapshot.toObject(Machine_Employee.class);
                 machineCheckOut(currMachineEmployee);
@@ -352,12 +347,16 @@ public class CheckInOutFragment extends Fragment {
                 });
     }
 
-    private void machineCheckIn() {
+    private void machineCheckIn(Client client) {
         HashMap<String, Object> checkInDetails = new HashMap<>((new Summary(latitude, longitude)).getGeoMap());
         checkInDetails.put("Time", Timestamp.now());
         Map<String, Object> machineEmployee1 = new HashMap();
         machineEmployee1.put("machine", currMachine);
-        machineEmployee1.put("employee", currEmployee);
+        if (client == null)
+            machineEmployee1.put("employee", currEmployee);
+        else
+            machineEmployee1.put("client", client);
+
         machineEmployee1.put("checkIn", checkInDetails);
         currMachine.setUsed(true);
         currMachine.setEmployeeFirstName(currEmployee.getFirstName());

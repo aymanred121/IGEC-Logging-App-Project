@@ -273,7 +273,6 @@ public class AddSupplementsDialog extends DialogFragment {
         @Override
         public void onClick(View v) {
 
-            //TODO change file name
             String fileName = "photo";
             File storageDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
 

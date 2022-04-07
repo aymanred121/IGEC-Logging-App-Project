@@ -21,18 +21,51 @@
             android:id="@+id/TextView_MachineCodeName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             android:layout_below="@id/TextView_MachineID"
+            android:layout_marginTop="16dp"
             android:text="test" />
 
-        <ImageView
-            android:id="@+id/ImageVIew_Log"
-            android:layout_width="35dp"
-            android:layout_height="35dp"
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/Button_Log"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_centerVertical="true"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_toStartOf="@id/Button_Comment"
+            android:insetLeft="0dp"
+            android:insetTop="0dp"
+            android:insetRight="0dp"
+            android:insetBottom="0dp"
+            android:padding="0dp"
+            android:textSize="32sp"
+            app:icon="@drawable/ic_round_history_24"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:iconSize="32dp"
+            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MyApp.Button.Circle" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/Button_Comment"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:src="@drawable/ic_round_history_24"
-            app:tint="@color/black" />
+            android:layout_marginTop="16dp"
+            android:insetLeft="0dp"
+            android:insetTop="0dp"
+            android:insetRight="0dp"
+            android:insetBottom="0dp"
+            android:padding="0dp"
+            android:textSize="32sp"
+            app:icon="@drawable/ic_baseline_comment_bank_24"
+            app:iconGravity="textStart"
+            app:iconPadding="0dp"
+            app:iconSize="32dp"
+            app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MyApp.Button.Circle" />
+
 
     </RelativeLayout>
 

@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Machine;
+import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
 
@@ -20,8 +21,8 @@ public class MachineAdapter extends RecyclerView.Adapter<MachineAdapter.MachineV
 
     public interface OnItemClickListener{
         void onItemClick(int position);
-
         void onLogClick(int position);
+        void onCommentsClick(int position);
     }
 
     public void setOnItemClickListener(OnItemClickListener listener) {
@@ -30,12 +31,13 @@ public class MachineAdapter extends RecyclerView.Adapter<MachineAdapter.MachineV
 
     public static class MachineViewHolder extends RecyclerView.ViewHolder{
         TextView vID, vCodeName;
-        ImageView vLog;
+        MaterialButton vLog,vComments;
         public MachineViewHolder(@NonNull View itemView, OnItemClickListener listener) {
             super(itemView);
             vID = itemView.findViewById(R.id.TextView_MachineID);
             vCodeName = itemView.findViewById(R.id.TextView_MachineCodeName);
-            vLog = itemView.findViewById(R.id.ImageVIew_Log);
+            vLog = itemView.findViewById(R.id.Button_Log);
+            vComments = itemView.findViewById(R.id.Button_Comment);
 
             vLog.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -44,6 +46,17 @@ public class MachineAdapter extends RecyclerView.Adapter<MachineAdapter.MachineV
                         int position = getAdapterPosition();
                         if (position != RecyclerView.NO_POSITION) {
                             listener.onLogClick(position);
+                        }
+                    }
+                }
+            });
+            vComments.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (listener != null) {
+                        int position = getAdapterPosition();
+                        if (position != RecyclerView.NO_POSITION) {
+                            listener.onCommentsClick(position);
                         }
                     }
                 }

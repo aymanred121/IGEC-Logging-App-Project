@@ -162,6 +162,7 @@ public class CheckInOutFragment extends Fragment {
                                 } else {
 
                                     Summary summary1 = documentSnapshot.toObject(Summary.class);
+                                    //TODO create tmp checkin if the original isn't created and increment working time based on it
                                     if (summary1.getWorkedTime() == null) {
                                         employeeCheckOut(summary1, checkOutDetails);
                                     } else {

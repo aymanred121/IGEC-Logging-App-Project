@@ -34,21 +34,10 @@
             android:id="@+id/TextView_EmployeeHours"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_toEndOf="@id/TextView_EmployeeName"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
             android:textColor="@color/black"
             tools:text="Employee Working Hours" />
-
-
-        <TextView
-            android:id="@+id/TextView_CurrentMachine"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/TextView_EmployeeHours"
-            android:layout_marginTop="8dp"
-            android:layout_toEndOf="@id/TextView_EmployeeID"
-            android:textColor="@color/black"
-            tools:text="Current Machine" />
-
 
     </RelativeLayout>
 

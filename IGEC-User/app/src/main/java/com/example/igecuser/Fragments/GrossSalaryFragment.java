@@ -11,10 +11,9 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.igecuser.Adapters.SalarySummaryAdapter;
+import com.example.igecuser.Adapters.AllowanceAdapter;
 import com.example.igecuser.R;
-import com.example.igecuser.dummySalarySummary;
-import com.example.igecuser.dummySalarySummary.SalaryType;
+import com.example.igecuser.fireBase.Allowance;
 
 import java.util.ArrayList;
 
@@ -22,9 +21,9 @@ public class GrossSalaryFragment extends Fragment {
 
 
     private RecyclerView recyclerView;
-    private SalarySummaryAdapter adapter;
+    private AllowanceAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
-    private ArrayList<dummySalarySummary> salarySummaries;
+    private ArrayList<Allowance> salarySummaries;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -32,9 +31,14 @@ public class GrossSalaryFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_gross_salary, container, false);
     }
 
-    SalarySummaryAdapter.OnItemClickListener onItemClickListener = new SalarySummaryAdapter.OnItemClickListener() {
+    AllowanceAdapter.OnItemClickListener onItemClickListener = new AllowanceAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position) {
+
+        }
+
+        @Override
+        public void onDeleteItem(int position) {
 
         }
     };
@@ -43,17 +47,13 @@ public class GrossSalaryFragment extends Fragment {
     private void initialize(View view) {
 
         salarySummaries = new ArrayList<>();
-        // TODO: to be updated when firebase is done
-        salarySummaries.add(new dummySalarySummary("Machine", 50.0f, SalaryType.allowance));
-        salarySummaries.add(new dummySalarySummary("Base Salary", 1500.0f, SalaryType.base));
-        salarySummaries.add(new dummySalarySummary("Late attendance", 50.0f, SalaryType.penalty));
-        salarySummaries.add(new dummySalarySummary("Over Time", 50.0f, SalaryType.overtime));
+        // TODO: to be updated with employee gross salary ie allowances and penalties and net salary
 
 
         recyclerView = view.findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
-        adapter = new SalarySummaryAdapter(salarySummaries);
+        adapter = new AllowanceAdapter(salarySummaries,false);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
 

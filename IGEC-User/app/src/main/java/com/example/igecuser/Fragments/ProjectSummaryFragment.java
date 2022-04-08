@@ -12,11 +12,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.igecuser.Adapters.EmployeeAdapter;
-import com.example.igecuser.Dialogs.SalarySummaryDialog;
+import com.example.igecuser.Dialogs.AddAllowanceDialog;
 import com.example.igecuser.R;
-import com.example.igecuser.Employee;
-import com.example.igecuser.dummySalarySummary;
-import com.example.igecuser.dummySalarySummary.SalaryType;
+import com.example.igecuser.fireBase.Allowance;
+import com.example.igecuser.fireBase.Employee;
+import com.example.igecuser.fireBase.EmployeeOverview;
 import com.example.igecuser.fireBase.Project;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
@@ -29,12 +29,14 @@ public class ProjectSummaryFragment extends Fragment {
     private RecyclerView recyclerView;
     private EmployeeAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
-    private ArrayList<Employee> Employees;
-    private com.example.igecuser.fireBase.Employee manager;
+    private ArrayList<EmployeeOverview> employeeOverviews;
+    private Employee manager;
     private Project project;
-    private TextInputEditText vProjectName,vProjectReference;
-    private MaterialButton vUpdate,vShowProjectAllowances;
+    private ArrayList<Allowance> projectAllowance;
+    private TextInputEditText vProjectName, vProjectReference;
+    private MaterialButton vUpdate, vShowProjectAllowances;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+
     public ProjectSummaryFragment(com.example.igecuser.fireBase.Employee manager) {
         this.manager = manager;
     }
@@ -55,21 +57,28 @@ public class ProjectSummaryFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         initialize(view);
-        adapter.setOnItemClickListener(itemClickListener);
-        vUpdate.setOnClickListener(oclUpdate);
-        vShowProjectAllowances.setOnClickListener(oclShowProjectAllowances);
+
     }
+
 
     // Functions
     private void initialize(View view) {
 
         db.collection("projects").document(manager.getProjectID()).get().addOnSuccessListener(documentSnapshot -> {
-            if(!documentSnapshot.exists())
+            if (!documentSnapshot.exists())
                 return;
             project = documentSnapshot.toObject(Project.class);
 
-            Employees = new ArrayList<>();
-            // TODO: fill with data
+            employeeOverviews = new ArrayList<>();
+            employeeOverviews = project.getEmployees();
+            for (int i = 0; i < employeeOverviews.size(); i++) {
+                if (employeeOverviews.get(i).getId().equals(project.getManagerID())) {
+                    employeeOverviews.remove(i);
+                    break;
+                }
+            }
+            projectAllowance = new ArrayList<>();
+            projectAllowance.addAll(project.getAllowancesList());
             vProjectName = view.findViewById(R.id.TextInput_ProjectName);
             vProjectReference = view.findViewById(R.id.TextInput_ProjectReference);
             vUpdate = view.findViewById(R.id.Button_Update);
@@ -77,39 +86,38 @@ public class ProjectSummaryFragment extends Fragment {
             recyclerView = view.findViewById(R.id.recyclerview);
             recyclerView.setHasFixedSize(true);
             layoutManager = new LinearLayoutManager(getActivity());
-            adapter = new EmployeeAdapter(Employees);
+            adapter = new EmployeeAdapter(employeeOverviews, project);
             recyclerView.setLayoutManager(layoutManager);
             recyclerView.setAdapter(adapter);
-
-
             vProjectName.setText(project.getName());
             vProjectReference.setText(project.getReference());
+            adapter.setOnItemClickListener(itemClickListener);
+            vUpdate.setOnClickListener(oclUpdate);
+            vShowProjectAllowances.setOnClickListener(oclShowProjectAllowances);
         });
 
     }
+
     private View.OnClickListener oclUpdate = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
+            //TODO update project list allowances and users allowances
 
         }
     };
     private View.OnClickListener oclShowProjectAllowances = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-
+            AddAllowanceDialog employeeSummaryDialog = new AddAllowanceDialog(projectAllowance, false, true);
+            employeeSummaryDialog.show(getParentFragmentManager(), "");
         }
     };
     private final EmployeeAdapter.OnItemClickListener itemClickListener = new EmployeeAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position) {
-            ArrayList<dummySalarySummary> salarySummaries = new ArrayList<>();
-            // TODO: to be updated when firebase is done
-            salarySummaries.add(new dummySalarySummary("Machine", 50.0f, SalaryType.allowance));
-            salarySummaries.add(new dummySalarySummary("Base Salary", 1500.0f, SalaryType.base));
-            salarySummaries.add(new dummySalarySummary("Late attendance", 50.0f, SalaryType.penalty));
-            salarySummaries.add(new dummySalarySummary("Over Time", 50.0f, SalaryType.overtime));
-            SalarySummaryDialog employeeSummaryDialog = new SalarySummaryDialog(salarySummaries);
-            employeeSummaryDialog.show(getParentFragmentManager(), "");
+            //TODO employee gross salary call AddAllowanceDialog with the arraylist WITHOUT NET SALARY
+           /* AddAllowanceDialog employeeSummaryDialog = new AddAllowanceDialog(here, true, true);
+            employeeSummaryDialog.show(getParentFragmentManager(), "");*/
         }
     };
 }

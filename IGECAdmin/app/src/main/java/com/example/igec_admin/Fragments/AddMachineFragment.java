@@ -60,7 +60,7 @@ import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class AddMachineFragment extends Fragment {
+public class AddMachineFragment extends Fragment implements EasyPermissions.PermissionCallbacks {
 
 
     // Views
@@ -69,6 +69,7 @@ public class AddMachineFragment extends Fragment {
     private ImageView vQRImg;
     private MaterialButton vRegister, vAddSupplement;
     // Vars
+    private static final int CAMERA_REQUEST_CODE = 100;
     private long purchaseDate;
     private QRGEncoder qrgEncoder;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -102,6 +103,7 @@ public class AddMachineFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_add_machine, container, false);
         Initialize(view);
+        getCameraPermission();
         vIDLayout.setEndIconOnClickListener(oclMachineID);
         vRegister.setOnClickListener(oclRegister);
         vID.addTextChangedListener(atlMachineID);
@@ -178,9 +180,10 @@ public class AddMachineFragment extends Fragment {
     View.OnClickListener oclSerialNumber = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            MachineSerialNumberDialog machineSerialNumberDialog = new MachineSerialNumberDialog();
-            machineSerialNumberDialog.show(getParentFragmentManager(), "");
-
+            if(getCameraPermission()){
+                MachineSerialNumberDialog machineSerialNumberDialog = new MachineSerialNumberDialog();
+                machineSerialNumberDialog.show(getParentFragmentManager(), "");
+            }
 
         }
     };
@@ -306,6 +309,27 @@ public class AddMachineFragment extends Fragment {
         }
         return;
     }
+    @AfterPermissionGranted(CAMERA_REQUEST_CODE)
+    private boolean getCameraPermission(){
+        String[] perms = {Manifest.permission.CAMERA};
+        if (EasyPermissions.hasPermissions(getContext(), perms)) {
+            return true;
+        } else {
+            EasyPermissions.requestPermissions(this, "We need camera permission in order to be able to scan the serial number",
+                    CAMERA_REQUEST_CODE, perms);
+            return false;
+        }
+    }
 
+    @Override
+    public void onPermissionsGranted(int requestCode, @NonNull List<String> perms) {
+    }
+
+    @Override
+    public void onPermissionsDenied(int requestCode, @NonNull List<String> perms) {
+        if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
+            new AppSettingsDialog.Builder(this).build().show();
+        }
+    }
 
 }

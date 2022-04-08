@@ -1,6 +1,8 @@
 package com.example.igecuser.fireBase;
 
-public class Allowance {
+import java.io.Serializable;
+
+public class Allowance implements Serializable {
     private String name ;
     private int amount ;
 

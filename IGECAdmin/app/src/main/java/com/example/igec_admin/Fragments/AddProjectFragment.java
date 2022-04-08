@@ -4,16 +4,6 @@ import static android.content.ContentValues.TAG;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.util.Pair;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentResultListener;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -23,6 +13,13 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentResultListener;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.igec_admin.Adatpers.EmployeeAdapter;
 import com.example.igec_admin.Dialogs.AddAllowanceDialog;
@@ -40,11 +37,8 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
-
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.WriteBatch;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -72,14 +66,15 @@ public class AddProjectFragment extends Fragment {
     private long startDate, endDate;
     private MaterialDatePicker.Builder<Long> vTimeDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vTimeDatePicker;
-    private ArrayList<EmployeeOverview> employees = new ArrayList();
-    private ArrayList<String> TeamID = new ArrayList<>();
-    private ArrayList<EmployeeOverview> Team = new ArrayList<>();
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private DocumentReference employeeOverviewRef = db.collection("EmployeeOverview")
+    private final ArrayList<EmployeeOverview> employees = new ArrayList();
+    private final ArrayList<String> TeamID = new ArrayList<>();
+    private final ArrayList<EmployeeOverview> Team = new ArrayList<>();
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private final DocumentReference employeeOverviewRef = db.collection("EmployeeOverview")
             .document("emp");
-    private CollectionReference employeeCol = db.collection("employees");
-    private WriteBatch batch = db.batch();
+    private final CollectionReference employeeCol = db.collection("employees");
+
+    private ArrayAdapter<String> idAdapter;
 
 
     @Override
@@ -174,7 +169,7 @@ public class AddProjectFragment extends Fragment {
 
         } else {
 
-            if (!vManagerID.getText().toString().isEmpty() && vManagerID.getText().toString().equals(employees.get(position).getId().toString()))
+            if (!vManagerID.getText().toString().isEmpty() && vManagerID.getText().toString().equals(employees.get(position).getId()))
                 vManagerID.setText("");
             Team.remove(employees.get(position));
             TeamID.remove(String.valueOf(employees.get(position).getId()));
@@ -185,7 +180,7 @@ public class AddProjectFragment extends Fragment {
         if (!vManagerIDLayout.isEnabled())
             vManagerID.setText("");
         if (TeamID.size() > 0) {
-            ArrayAdapter<String> idAdapter = new ArrayAdapter<>(getActivity(), R.layout.dropdown_item, TeamID);
+            idAdapter = new ArrayAdapter<>(getActivity(), R.layout.dropdown_item, TeamID);
             vManagerID.setAdapter(idAdapter);
 
         }
@@ -213,6 +208,7 @@ public class AddProjectFragment extends Fragment {
 
 
     private void updateEmployeesDetails(String projectID) {
+        WriteBatch batch = db.batch();
         for (EmployeeOverview emp : Team) {
             ArrayList<String> empInfo = new ArrayList<>();
             empInfo.add(emp.getFirstName());
@@ -227,8 +223,10 @@ public class AddProjectFragment extends Fragment {
         }
         batch.commit().addOnSuccessListener(unused -> {
             ClearInputs();
+
             Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
         });
+
     }
 
     private void addProject() {
@@ -246,6 +244,7 @@ public class AddProjectFragment extends Fragment {
         newProject.setClient(client);
         newProject.getAllowancesList().addAll(allowances);
         db.collection("projects").document(projectID).set(newProject).addOnSuccessListener(unused -> updateEmployeesDetails(projectID));
+
     }
 
 
@@ -282,6 +281,11 @@ public class AddProjectFragment extends Fragment {
         vManagerID.setText(null);
         vManagerName.setText(null);
         vTime.setText(null);
+        TeamID.clear();
+        Team.clear();
+        vManagerID.setAdapter(null);
+        vManagerID.setEnabled(false);
+
         client = null;
         vTimeDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
         vTimeDatePicker = vTimeDatePickerBuilder.build();
@@ -301,7 +305,7 @@ public class AddProjectFragment extends Fragment {
     }
 
     // Listeners
-    private TextWatcher twManagerID = new TextWatcher() {
+    private final TextWatcher twManagerID = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -337,7 +341,7 @@ public class AddProjectFragment extends Fragment {
             }
         }
     };
-    private TextWatcher twProjectReference = new TextWatcher() {
+    private final TextWatcher twProjectReference = new TextWatcher() {
         boolean removeDash = false;
 
         @Override
@@ -358,27 +362,27 @@ public class AddProjectFragment extends Fragment {
             }
         }
     };
-    private View.OnClickListener oclTimeDate = new View.OnClickListener() {
+    private final View.OnClickListener oclTimeDate = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             vTimeDatePicker.show(getFragmentManager(), "DATE_PICKER");
         }
     };
-    private MaterialPickerOnPositiveButtonClickListener pclTimeDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
+    private final MaterialPickerOnPositiveButtonClickListener pclTimeDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
         @Override
         public void onPositiveButtonClick(Object selection) {
             startDate = (long) selection;
             vTime.setText(String.format("%s", convertDateToString(startDate)));
         }
     };
-    private View.OnClickListener clRegister = v -> {
+    private final View.OnClickListener clRegister = v -> {
         if (validateInputs()) {
             addProject();
         } else {
             Toast.makeText(getActivity(), "please, fill the project data", Toast.LENGTH_SHORT).show();
         }
     };
-    private EmployeeAdapter.OnItemClickListener itclEmployeeAdapter = new EmployeeAdapter.OnItemClickListener() {
+    private final EmployeeAdapter.OnItemClickListener itclEmployeeAdapter = new EmployeeAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position) {
             ChangeSelectedTeam(position);
@@ -389,7 +393,7 @@ public class AddProjectFragment extends Fragment {
             ChangeSelectedTeam(position);
         }
     };
-    private View.OnClickListener oclAddClient = new View.OnClickListener() {
+    private final View.OnClickListener oclAddClient = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             AddClientDialog addClientDialog;
@@ -401,7 +405,7 @@ public class AddProjectFragment extends Fragment {
             addClientDialog.show(getParentFragmentManager(), "");
         }
     };
-    private View.OnClickListener oclOfficeWork = new View.OnClickListener() {
+    private final View.OnClickListener oclOfficeWork = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             vAddClient.setEnabled(!vOfficeWork.isChecked());
@@ -415,11 +419,11 @@ public class AddProjectFragment extends Fragment {
 
         }
     };
-    private View.OnClickListener oclAddAllowance = new View.OnClickListener() {
+    private final View.OnClickListener oclAddAllowance = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             AddAllowanceDialog addAllowanceDialog = new AddAllowanceDialog(allowances);
-            addAllowanceDialog.show(getParentFragmentManager(),"");
+            addAllowanceDialog.show(getParentFragmentManager(), "");
         }
     };
 }

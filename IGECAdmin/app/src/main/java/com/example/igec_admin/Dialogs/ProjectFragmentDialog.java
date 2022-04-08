@@ -19,7 +19,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.util.Pair;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -64,7 +63,7 @@ public class ProjectFragmentDialog extends DialogFragment {
     private ArrayList<Allowance> allowances;
     long startDate, endDate;
     private Client client;
-    private MaterialDatePicker.Builder<Long> vTimeDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
+    private final MaterialDatePicker.Builder<Long> vTimeDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vTimeDatePicker;
     ArrayList<EmployeeOverview> employees = new ArrayList<>();
     ArrayList<String> TeamID = new ArrayList<>();
@@ -136,7 +135,6 @@ public class ProjectFragmentDialog extends DialogFragment {
         vProjectReference.addTextChangedListener(twProjectReference);
         vOfficeWork.setOnClickListener(oclOfficeWork);
         vAddClient.setOnClickListener(oclAddClient);
-        ;
         vAddAllowance.setOnClickListener(oclAddAllowance);
 
 
@@ -228,7 +226,7 @@ public class ProjectFragmentDialog extends DialogFragment {
 
         } else {
 
-            if (!vManagerID.getText().toString().isEmpty() && vManagerID.getText().toString().equals(employees.get(position).getId().toString()))
+            if (!vManagerID.getText().toString().isEmpty() && vManagerID.getText().toString().equals(employees.get(position).getId()))
                 vManagerID.setText("");
             Team.remove(employees.get(position));
             TeamID.remove(String.valueOf(employees.get(position).getId()));
@@ -268,12 +266,12 @@ public class ProjectFragmentDialog extends DialogFragment {
             ArrayList<String> empInfo = new ArrayList<>();
             if (isDeleted || empOverview.getProjectId() == null) {
                 empOverview.setManagerID(null);
-                currProjectID = null;
+                empOverview.setProjectId(null);
                 Team.remove(empOverview);
             }
-            if (empOverview.getId().equals(vManagerID.getText().toString())) {
+            if (empOverview.getId().equals(vManagerID.getText().toString()) && !isDeleted) {
                 empOverview.setManagerID("adminID");
-            } else if (empOverview.getProjectId() != null && empOverview.getProjectId().equals(projectID)) {
+            } else if (empOverview.getProjectId() != null && empOverview.getProjectId().equals(projectID) && !isDeleted) {
                 empOverview.setManagerID(vManagerID.getText().toString());
             }
             empInfo.add(empOverview.getFirstName());
@@ -286,6 +284,7 @@ public class ProjectFragmentDialog extends DialogFragment {
             employeeOverviewRef.update(empInfoMap);
             employeeCol.document(empOverview.getId()).update("managerID", empOverview.getManagerID(), "projectID", currProjectID);
         }
+        Team.clear();
     }
 
 
@@ -412,7 +411,7 @@ public class ProjectFragmentDialog extends DialogFragment {
             }
         }
     };
-    private TextWatcher twProjectReference = new TextWatcher() {
+    private final TextWatcher twProjectReference = new TextWatcher() {
         boolean removeDash = false;
 
         @Override
@@ -465,7 +464,7 @@ public class ProjectFragmentDialog extends DialogFragment {
                 .show();
 
     };
-    private View.OnClickListener oclAddClient = new View.OnClickListener() {
+    private final View.OnClickListener oclAddClient = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             AddClientDialog addClientDialog;
@@ -477,7 +476,7 @@ public class ProjectFragmentDialog extends DialogFragment {
             addClientDialog.show(getParentFragmentManager(), "");
         }
     };
-    private View.OnClickListener oclOfficeWork = new View.OnClickListener() {
+    private final View.OnClickListener oclOfficeWork = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             vAddClient.setEnabled(!vOfficeWork.isChecked());
@@ -502,7 +501,7 @@ public class ProjectFragmentDialog extends DialogFragment {
             ChangeSelectedTeam(position);
         }
     };
-    private View.OnClickListener oclAddAllowance = new View.OnClickListener() {
+    private final View.OnClickListener oclAddAllowance = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             AddAllowanceDialog addAllowanceDialog = new AddAllowanceDialog(allowances);

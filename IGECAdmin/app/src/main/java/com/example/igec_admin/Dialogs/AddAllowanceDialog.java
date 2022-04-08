@@ -65,7 +65,6 @@ public class AddAllowanceDialog extends DialogFragment {
                 // We use a String here, but any type that can be put in a Bundle is supported
                 allowances.add((Allowance) bundle.getSerializable("allowance"));
                 // Do something with the result
-                Toast.makeText(getActivity(), allowances.get(allowances.size() - 1).getName(), Toast.LENGTH_SHORT).show();
                 adapter.notifyDataSetChanged();
             }
         });
@@ -80,7 +79,6 @@ public class AddAllowanceDialog extends DialogFragment {
                 allowances.get(position).setName(allowance.getName());
                 allowances.get(position).setAmount(allowance.getAmount());
                 // Do something with the result
-                Toast.makeText(getActivity(), allowances.get(allowances.size() - 1).getName(), Toast.LENGTH_SHORT).show();
                 adapter.notifyItemChanged(position);
             }
         });

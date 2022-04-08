@@ -60,7 +60,7 @@ import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class AddMachineFragment extends Fragment implements EasyPermissions.PermissionCallbacks {
+public class AddMachineFragment extends Fragment {
 
 
     // Views
@@ -69,7 +69,6 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
     private ImageView vQRImg;
     private MaterialButton vRegister, vAddSupplement;
     // Vars
-    private static final int CAMERA_REQUEST_CODE = 100;
     private long purchaseDate;
     private QRGEncoder qrgEncoder;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -93,7 +92,7 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
         getParentFragmentManager().setFragmentResultListener("machine", this, new FragmentResultListener() {
             @Override
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
-               vSerialNumber.setText(result.getString("SerialNumber"));
+                vSerialNumber.setText(result.getString("SerialNumber"));
             }
         });
     }
@@ -103,7 +102,6 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_add_machine, container, false);
         Initialize(view);
-        getCameraPermission();
         vIDLayout.setEndIconOnClickListener(oclMachineID);
         vRegister.setOnClickListener(oclRegister);
         vID.addTextChangedListener(atlMachineID);
@@ -180,10 +178,9 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
     View.OnClickListener oclSerialNumber = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            if(getCameraPermission()){
-                MachineSerialNumberDialog machineSerialNumberDialog = new MachineSerialNumberDialog();
-                machineSerialNumberDialog.show(getParentFragmentManager(), "");
-            }
+            MachineSerialNumberDialog machineSerialNumberDialog = new MachineSerialNumberDialog();
+            machineSerialNumberDialog.show(getParentFragmentManager(), "");
+
 
         }
     };
@@ -246,7 +243,6 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
         @Override
         public void onClick(View v) {
             vID.setText(machineCol.document().getId().substring(0, 5));
-            Toast.makeText(getActivity(), "Generated", Toast.LENGTH_SHORT).show();
         }
     };
     TextWatcher atlMachineID = new TextWatcher() {
@@ -310,27 +306,6 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
         }
         return;
     }
-    @AfterPermissionGranted(CAMERA_REQUEST_CODE)
-    private boolean getCameraPermission(){
-        String[] perms = {Manifest.permission.CAMERA};
-        if (EasyPermissions.hasPermissions(getContext(), perms)) {
-            return true;
-        } else {
-            EasyPermissions.requestPermissions(this, "We need camera permission in order to be able to scan the serial number",
-                    CAMERA_REQUEST_CODE, perms);
-            return false;
-        }
-    }
 
-    @Override
-    public void onPermissionsGranted(int requestCode, @NonNull List<String> perms) {
-    }
-
-    @Override
-    public void onPermissionsDenied(int requestCode, @NonNull List<String> perms) {
-        if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
-            new AppSettingsDialog.Builder(this).build().show();
-        }
-    }
 
 }

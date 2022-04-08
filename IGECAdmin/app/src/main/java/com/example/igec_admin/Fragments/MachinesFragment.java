@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -95,11 +96,14 @@ public class MachinesFragment extends Fragment {
             final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_selectable_list_item);
             ArrayList<MachineDefectsLog> machineDefectsLogArrayList = new ArrayList<>();
             db.collection("MachineDefectsLog").whereEqualTo("machineId", machines.get(position).getId()).addSnapshotListener((values, error) -> {
-                if (values == null || values.size() == 0)
+                if (values == null || values.size() == 0) {
+                    Toast.makeText(getActivity(), "no comments on that machine", Toast.LENGTH_SHORT).show();
                     return;
+                }
                 machineDefectsLogArrayList.addAll(values.toObjects(MachineDefectsLog.class));
                 for (DocumentSnapshot d : values)
                     arrayAdapter.add("Issue Date: " + convertDateToString(d.toObject(MachineDefectsLog.class).getIssueDate().getTime()));
+                    builderSingle.show();
             });
             builderSingle.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
                 @Override
@@ -128,7 +132,7 @@ public class MachinesFragment extends Fragment {
                     builderInner.show();
                 }
             });
-            builderSingle.show();
+
         }
     };
 }

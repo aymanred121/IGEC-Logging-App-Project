@@ -108,7 +108,6 @@ public class ProjectFragmentDialog extends DialogFragment {
                 // We use a String here, but any type that can be put in a Bundle is supported
                 client = (Client) bundle.getSerializable("client");
                 // Do something with the result
-                Toast.makeText(getActivity(), client.getName(), Toast.LENGTH_SHORT).show();
 
             }
         });

@@ -327,9 +327,8 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         checkInDetails.put("Time", Timestamp.now());
         Map<String, Object> machineEmployee1 = new HashMap();
         machineEmployee1.put("machine", currMachine);
-        if (client == null)
-            machineEmployee1.put("employee", currEmployee);
-        else
+        machineEmployee1.put("employee", currEmployee);
+        if (client != null)
             machineEmployee1.put("client", client);
 
         machineEmployee1.put("checkIn", checkInDetails);
@@ -395,10 +394,12 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
 
                 if (isItAUser) {
                     checkMachineInOut(null);
-                    MachineDefectsLog machineDefectsLog = new MachineDefectsLog(note.trim(), currMachine.getReference(), currMachine.getId(), currEmployee.getId(), currEmployee.getFirstName(), new Date());
-                    db.collection("MachineDefectsLog").add(machineDefectsLog).addOnSuccessListener(unused -> {
-                        Toast.makeText(getActivity(), "comment has been uploaded", Toast.LENGTH_SHORT).show();
-                    });
+                    if(!note.trim().isEmpty()) {
+                        MachineDefectsLog machineDefectsLog = new MachineDefectsLog(note.trim(), currMachine.getReference(), currMachine.getId(), currEmployee.getId(), currEmployee.getFirstName(), new Date());
+                        db.collection("MachineDefectsLog").add(machineDefectsLog).addOnSuccessListener(unused -> {
+                            Toast.makeText(getActivity(), "comment has been uploaded", Toast.LENGTH_SHORT).show();
+                        });
+                    }
                 } else {
                     ClientInfoDialog clientInfoDialog = new ClientInfoDialog(note);
                     clientInfoDialog.show(getParentFragmentManager(), "");
@@ -411,10 +412,12 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                 Client client = (Client) result.getSerializable("client");
                 String note = result.getString("note");
                 checkMachineInOut(client);
-                MachineDefectsLog machineDefectsLog = new MachineDefectsLog(note.trim(), currMachine.getReference(), currMachine.getId(), currEmployee.getId(), currEmployee.getFirstName(), new Date());
-                db.collection("MachineDefectsLog").add(machineDefectsLog).addOnSuccessListener(unused -> {
-                    Toast.makeText(getActivity(), "comment has been uploaded", Toast.LENGTH_SHORT).show();
-                });
+                if(!note.trim().isEmpty()) {
+                    MachineDefectsLog machineDefectsLog = new MachineDefectsLog(note.trim(), currMachine.getReference(), currMachine.getId(), currEmployee.getId(), currEmployee.getFirstName(), new Date());
+                    db.collection("MachineDefectsLog").add(machineDefectsLog).addOnSuccessListener(unused -> {
+                        Toast.makeText(getActivity(), "comment has been uploaded", Toast.LENGTH_SHORT).show();
+                    });
+                }
             }
         });
 

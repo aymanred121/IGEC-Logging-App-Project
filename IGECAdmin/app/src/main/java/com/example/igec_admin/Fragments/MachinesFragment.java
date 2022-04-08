@@ -1,5 +1,6 @@
 package com.example.igec_admin.Fragments;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -24,7 +25,9 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class MachinesFragment extends Fragment {
     FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -33,15 +36,17 @@ public class MachinesFragment extends Fragment {
     MachineAdapter adapter;
     RecyclerView recyclerView;
     RecyclerView.LayoutManager layoutManager;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_machines,container,false);
+        View view = inflater.inflate(R.layout.fragment_machines, container, false);
         initialize(view);
         adapter.setOnItemClickListener(itclMachineAdapter);
         return view;
     }
-    void initialize(View view){
+
+    private void initialize(View view) {
         recyclerView = view.findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
@@ -50,16 +55,24 @@ public class MachinesFragment extends Fragment {
         recyclerView.setAdapter(adapter);
         getMachines();
     }
-    void getMachines(){
+
+    private void getMachines() {
         machineRef.addSnapshotListener((queryDocumentSnapshots, e) -> {
             machines.clear();
-            for(DocumentSnapshot d : queryDocumentSnapshots){
+            for (DocumentSnapshot d : queryDocumentSnapshots) {
                 machines.add(d.toObject(Machine.class));
             }
             adapter.setMachinesList(machines);
             adapter.notifyDataSetChanged();
         });
 
+    }
+
+    private String convertDateToString(long selection) {
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("F EEE MMM yyyy hh:mm:ss a");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(selection);
+        return simpleDateFormat.format(calendar.getTime());
     }
 
     private final MachineAdapter.OnItemClickListener itclMachineAdapter = new MachineAdapter.OnItemClickListener() {
@@ -81,12 +94,12 @@ public class MachinesFragment extends Fragment {
             builderSingle.setTitle("Comments: ");
             final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_selectable_list_item);
             ArrayList<MachineDefectsLog> machineDefectsLogArrayList = new ArrayList<>();
-            db.collection("MachineDefectsLog").whereEqualTo("machineId",machines.get(position).getId()).addSnapshotListener((values,error)->{
-               if(values==null || values.size()==0)
-                   return;
+            db.collection("MachineDefectsLog").whereEqualTo("machineId", machines.get(position).getId()).addSnapshotListener((values, error) -> {
+                if (values == null || values.size() == 0)
+                    return;
                 machineDefectsLogArrayList.addAll(values.toObjects(MachineDefectsLog.class));
-                for(DocumentSnapshot d: values)
-                arrayAdapter.add(d.toObject(MachineDefectsLog.class).getNote());
+                for (DocumentSnapshot d : values)
+                    arrayAdapter.add("Issue Date: " + convertDateToString(d.toObject(MachineDefectsLog.class).getIssueDate().getTime()));
             });
             builderSingle.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
                 @Override
@@ -98,16 +111,17 @@ public class MachinesFragment extends Fragment {
             builderSingle.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    MachineDefectsLog currMachineDefectsLog =  machineDefectsLogArrayList.get(which);
-                    String strName = "Employee Name: "+currMachineDefectsLog.getEmployeeName()+'\n'
-                            +"Machine reference: "+currMachineDefectsLog.getMachineRef()+'\n'
-                            +"Issue Date: "+currMachineDefectsLog.getIssueDate();
+                    MachineDefectsLog currMachineDefectsLog = machineDefectsLogArrayList.get(which);
+                    String content = "Employee ID: " + currMachineDefectsLog.getEmployeeId() + '\n'
+                            + "Employee Name: " + currMachineDefectsLog.getEmployeeName() + '\n'
+                            + "Machine reference: " + currMachineDefectsLog.getMachineRef() + '\n'
+                            + "Comment: " + currMachineDefectsLog.getNote();
                     AlertDialog.Builder builderInner = new AlertDialog.Builder(getActivity());
-                    builderInner.setMessage(strName);
+                    builderInner.setMessage(content);
                     builderInner.setTitle("Content");
                     builderInner.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                         @Override
-                        public void onClick(DialogInterface dialog,int which) {
+                        public void onClick(DialogInterface dialog, int which) {
                             dialog.dismiss();
                         }
                     });

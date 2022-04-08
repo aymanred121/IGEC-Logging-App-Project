@@ -74,7 +74,7 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
     private QRGEncoder qrgEncoder;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private final CollectionReference machineCol = db.collection("machine");
-    private final MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
+    private MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vDatePicker;
     private final FirebaseStorage storage = FirebaseStorage.getInstance();
     private final StorageReference storageRef = storage.getReference();
@@ -145,6 +145,9 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
         vMachineByMonth.setText(null);
         vMachineByWeek.setText(null);
         supplements.clear();
+        vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
+        vDatePicker = vDatePickerBuilder.build();
+        vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);
     }
 
 

@@ -179,6 +179,7 @@ public class AddUserFragment extends Fragment {
         vNationalID.setText(null);
         vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
         vDatePicker = vDatePickerBuilder.build();
+        vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);
     }
 
     boolean validateInputs() {

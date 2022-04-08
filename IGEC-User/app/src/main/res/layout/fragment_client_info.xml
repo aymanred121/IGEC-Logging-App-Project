@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:gravity="center">
 
     <com.google.android.material.textfield.TextInputLayout
@@ -32,10 +32,10 @@
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/textInputLayout_CompanyName"
         android:layout_marginStart="32dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="32dp"
-        android:layout_below="@id/textInputLayout_CompanyName"
         app:boxBackgroundMode="outline"
         app:helperTextEnabled="true">
 
@@ -44,10 +44,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="top"
-            android:singleLine="true"
             android:hint="@string/company_email"
             android:inputType="textEmailAddress"
-            android:padding="14dp" />
+            android:padding="14dp"
+            android:singleLine="true" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -55,11 +55,13 @@
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/textInputLayout_CompanyEmail"
         android:layout_marginStart="32dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="32dp"
-        android:layout_below="@id/textInputLayout_CompanyEmail"
         app:boxBackgroundMode="outline"
+        app:counterEnabled="true"
+        app:counterMaxLength="11"
         app:helperTextEnabled="true">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -67,12 +69,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="top"
-            android:singleLine="true"
             android:hint="@string/company_phone_number"
             android:inputType="phone"
-            android:padding="14dp" />
+            android:maxLength="11"
+            android:padding="14dp"
+            android:singleLine="true" />
     </com.google.android.material.textfield.TextInputLayout>
-
 
 
     <com.google.android.material.button.MaterialButton

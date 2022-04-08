@@ -36,6 +36,10 @@ public class ClientInfoDialog extends DialogFragment {
     private MaterialButton vDone;
     //Vars
     private float startDate;
+    private String note;
+    public ClientInfoDialog(String note) {
+        this.note = note;
+    }
 
 
     @NonNull
@@ -95,6 +99,7 @@ public class ClientInfoDialog extends DialogFragment {
         Bundle bundle = new Bundle();
         Client client = new Client(vCompanyName.getText().toString(), vCompanyEmail.getText().toString(), vCompanyPhoneNumber.getText().toString());
         bundle.putSerializable("client", client);
+        bundle.putString("note",note);
         getParentFragmentManager().setFragmentResult("clientInfo", bundle);
         dismiss();
 

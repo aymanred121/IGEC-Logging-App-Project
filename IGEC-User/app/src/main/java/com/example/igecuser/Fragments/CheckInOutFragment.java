@@ -24,6 +24,7 @@ import com.example.igecuser.R;
 import com.example.igecuser.fireBase.Client;
 import com.example.igecuser.fireBase.Employee;
 import com.example.igecuser.fireBase.Machine;
+import com.example.igecuser.fireBase.MachineDefectsLog;
 import com.example.igecuser.fireBase.Machine_Employee;
 import com.example.igecuser.fireBase.Summary;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -39,6 +40,7 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -284,8 +286,12 @@ public class CheckInOutFragment extends Fragment {
 
                 if (isItAUser) {
                     checkMachineInOut(null);
+                    MachineDefectsLog machineDefectsLog = new MachineDefectsLog(note.trim(), currMachine.getReference(), currMachine.getId(), currEmployee.getId(), currEmployee.getFirstName(), new Date());
+                    db.collection("MachineDefectsLog").add(machineDefectsLog).addOnSuccessListener(unused->{
+                        Toast.makeText(getActivity(), "comment has been uploaded", Toast.LENGTH_SHORT).show();
+                    });
                 } else {
-                    ClientInfoDialog clientInfoDialog = new ClientInfoDialog();
+                    ClientInfoDialog clientInfoDialog = new ClientInfoDialog(note);
                     clientInfoDialog.show(getParentFragmentManager(), "");
                 }
             }
@@ -294,7 +300,12 @@ public class CheckInOutFragment extends Fragment {
             @Override
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
                 Client client = (Client) result.getSerializable("client");
+                String note = result.getString("note");
                 checkMachineInOut(client);
+                MachineDefectsLog machineDefectsLog = new MachineDefectsLog(note.trim(), currMachine.getReference(), currMachine.getId(), currEmployee.getId(), currEmployee.getFirstName(), new Date());
+                db.collection("MachineDefectsLog").add(machineDefectsLog).addOnSuccessListener(unused->{
+                    Toast.makeText(getActivity(), "comment has been uploaded", Toast.LENGTH_SHORT).show();
+                });
             }
         });
 

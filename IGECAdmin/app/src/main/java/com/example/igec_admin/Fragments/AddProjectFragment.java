@@ -284,6 +284,9 @@ public class AddProjectFragment extends Fragment {
         vManagerName.setText(null);
         vTime.setText(null);
         client = null;
+        vTimeDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
+        vTimeDatePicker = vTimeDatePickerBuilder.build();
+        vTimeDatePicker.addOnPositiveButtonClickListener(pclTimeDatePicker);
     }
 
     boolean validateInputs() {

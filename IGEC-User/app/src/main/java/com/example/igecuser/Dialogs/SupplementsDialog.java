@@ -160,15 +160,8 @@ public class SupplementsDialog extends DialogFragment {
         bundle.putString("supplementState", vComment.getText().toString());
         bundle.putBoolean("isItAUser",isItAUser);
         getParentFragmentManager().setFragmentResult("supplements", bundle);
-        if(!vComment.getText().toString().trim().isEmpty()){
-            MachineDefectsLog machineDefectsLog = new MachineDefectsLog(vComment.getText().toString().trim(), machine.getReference(), machine.getId(), employee.getId(), employee.getFirstName(), new Date());
-            db.collection("MachineDefectsLog").add(machineDefectsLog).addOnSuccessListener(unused->{
-                Toast.makeText(getActivity(), "comment has been uploaded", Toast.LENGTH_SHORT).show();
-                dismiss();
-            });
-        }else{
-            dismiss();
-        }
+        dismiss();
+
 
 
 

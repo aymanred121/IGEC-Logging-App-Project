@@ -14,30 +14,30 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.igecuser.Adapters.EmployeeAdapter;
 import com.example.igecuser.Dialogs.SalarySummaryDialog;
 import com.example.igecuser.R;
-import com.example.igecuser.dummyEmployee;
+import com.example.igecuser.Employee;
 import com.example.igecuser.dummySalarySummary;
 import com.example.igecuser.dummySalarySummary.SalaryType;
+import com.example.igecuser.fireBase.Project;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 
 public class ProjectSummaryFragment extends Fragment {
-    private final EmployeeAdapter.OnItemClickListener itemClickListener = new EmployeeAdapter.OnItemClickListener() {
-        @Override
-        public void onItemClick(int position) {
-            ArrayList<dummySalarySummary> salarySummaries = new ArrayList<>();
-            // TODO: to be updated when firebase is done
-            salarySummaries.add(new dummySalarySummary("Machine", 50.0f, SalaryType.allowance));
-            salarySummaries.add(new dummySalarySummary("Base Salary", 1500.0f, SalaryType.base));
-            salarySummaries.add(new dummySalarySummary("Late attendance", 50.0f, SalaryType.penalty));
-            salarySummaries.add(new dummySalarySummary("Over Time", 50.0f, SalaryType.overtime));
-            SalarySummaryDialog employeeSummaryDialog = new SalarySummaryDialog(salarySummaries);
-            employeeSummaryDialog.show(getParentFragmentManager(), "");
-        }
-    };
+
     private RecyclerView recyclerView;
     private EmployeeAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
-    private ArrayList<dummyEmployee> dummyEmployees;
+    private ArrayList<Employee> Employees;
+    private com.example.igecuser.fireBase.Employee manager;
+    private Project project;
+    private TextInputEditText vProjectName,vProjectReference;
+    private MaterialButton vUpdate,vShowProjectAllowances;
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    public ProjectSummaryFragment(com.example.igecuser.fireBase.Employee manager) {
+        this.manager = manager;
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -56,25 +56,60 @@ public class ProjectSummaryFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         initialize(view);
         adapter.setOnItemClickListener(itemClickListener);
+        vUpdate.setOnClickListener(oclUpdate);
+        vShowProjectAllowances.setOnClickListener(oclShowProjectAllowances);
     }
 
     // Functions
     private void initialize(View view) {
 
-        dummyEmployees = new ArrayList<>();
-        // TODO: to be updated when firebase is done
-        dummyEmployees.add(new dummyEmployee("A", 0, 1, 1));
-        dummyEmployees.add(new dummyEmployee("B", 1, 1, 1));
-        dummyEmployees.add(new dummyEmployee("C", 2, 1, 1));
-        dummyEmployees.add(new dummyEmployee("D", 3, 1, 1));
+        db.collection("projects").document(manager.getProjectID()).get().addOnSuccessListener(documentSnapshot -> {
+            if(!documentSnapshot.exists())
+                return;
+            project = documentSnapshot.toObject(Project.class);
+
+            Employees = new ArrayList<>();
+            // TODO: fill with data
+            vProjectName = view.findViewById(R.id.TextInput_ProjectName);
+            vProjectReference = view.findViewById(R.id.TextInput_ProjectReference);
+            vUpdate = view.findViewById(R.id.Button_Update);
+            vShowProjectAllowances = view.findViewById(R.id.Button_ShowProjectAllowances);
+            recyclerView = view.findViewById(R.id.recyclerview);
+            recyclerView.setHasFixedSize(true);
+            layoutManager = new LinearLayoutManager(getActivity());
+            adapter = new EmployeeAdapter(Employees);
+            recyclerView.setLayoutManager(layoutManager);
+            recyclerView.setAdapter(adapter);
 
 
-        recyclerView = view.findViewById(R.id.recyclerview);
-        recyclerView.setHasFixedSize(true);
-        layoutManager = new LinearLayoutManager(getActivity());
-        adapter = new EmployeeAdapter(dummyEmployees);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(adapter);
+            vProjectName.setText(project.getName());
+            vProjectReference.setText(project.getReference());
+        });
 
     }
+    private View.OnClickListener oclUpdate = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+
+        }
+    };
+    private View.OnClickListener oclShowProjectAllowances = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+
+        }
+    };
+    private final EmployeeAdapter.OnItemClickListener itemClickListener = new EmployeeAdapter.OnItemClickListener() {
+        @Override
+        public void onItemClick(int position) {
+            ArrayList<dummySalarySummary> salarySummaries = new ArrayList<>();
+            // TODO: to be updated when firebase is done
+            salarySummaries.add(new dummySalarySummary("Machine", 50.0f, SalaryType.allowance));
+            salarySummaries.add(new dummySalarySummary("Base Salary", 1500.0f, SalaryType.base));
+            salarySummaries.add(new dummySalarySummary("Late attendance", 50.0f, SalaryType.penalty));
+            salarySummaries.add(new dummySalarySummary("Over Time", 50.0f, SalaryType.overtime));
+            SalarySummaryDialog employeeSummaryDialog = new SalarySummaryDialog(salarySummaries);
+            employeeSummaryDialog.show(getParentFragmentManager(), "");
+        }
+    };
 }

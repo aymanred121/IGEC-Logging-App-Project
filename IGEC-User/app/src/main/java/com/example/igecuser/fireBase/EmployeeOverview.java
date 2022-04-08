@@ -12,6 +12,9 @@ public class EmployeeOverview {
         this.id = id;
     }
 
+    public EmployeeOverview() {
+    }
+
     public String getFirstName() {
         return firstName;
     }

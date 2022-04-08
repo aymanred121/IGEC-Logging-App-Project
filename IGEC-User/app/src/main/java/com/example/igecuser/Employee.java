@@ -1,10 +1,10 @@
 package com.example.igecuser;
 
-public class dummyEmployee {
+public class Employee {
     private String name;
     private int id, hours, machine;
 
-    public dummyEmployee(String name, int id, int hours, int machine) {
+    public Employee(String name, int id, int hours, int machine) {
         this.name = name;
         this.id = id;
         this.hours = hours;

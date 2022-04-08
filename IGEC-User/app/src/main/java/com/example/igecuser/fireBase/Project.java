@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.HashMap;
 
 public class Project {
-    private String managerID,managerName,name,id , reference ,  locationCity ,locationArea ,locationStreet ;
+    private String managerID,managerName,name,id , reference ,  locationCity ,locationArea ,locationStreet, contractType;
     private ArrayList<Allowance> allowancesList = new ArrayList<>();
     private Client client ;
     private Date startDate;
@@ -25,6 +25,7 @@ public class Project {
     public Project() {
     }
 
+
     public Project(String managerName,String managerID, String name, Date startDate, ArrayList<EmployeeOverview> employees , String reference , String locationCity , String locationArea , String locationStreet) {
         this.managerID = managerID;
         this.name = name;
@@ -35,6 +36,15 @@ public class Project {
         this.locationArea = locationArea;
         this.locationCity = locationCity;
         this.locationStreet = locationStreet;
+    }
+
+
+    public String getContractType() {
+        return contractType;
+    }
+
+    public void setContractType(String contractType) {
+        this.contractType = contractType;
     }
 
     public String getLocationCity() {

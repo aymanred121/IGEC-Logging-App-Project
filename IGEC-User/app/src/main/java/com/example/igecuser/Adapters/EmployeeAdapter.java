@@ -9,16 +9,16 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.igecuser.R;
-import com.example.igecuser.dummyEmployee;
+import com.example.igecuser.Employee;
 
 import java.util.ArrayList;
 
 public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.EmployeeAdapterViewHolder> {
-    private final ArrayList<dummyEmployee> dummyEmployees;
+    private final ArrayList<Employee> Employees;
     private OnItemClickListener listener;
 
-    public EmployeeAdapter(ArrayList<dummyEmployee> dummyEmployees) {
-        this.dummyEmployees = dummyEmployees;
+    public EmployeeAdapter(ArrayList<Employee> Employees) {
+        this.Employees = Employees;
     }
 
     public void setOnItemClickListener(OnItemClickListener listener) {
@@ -35,16 +35,16 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
     @Override
     public void onBindViewHolder(@NonNull EmployeeAdapterViewHolder holder, int position) {
         //TODO
-        dummyEmployee dummyEmployee = dummyEmployees.get(position);
-        holder.vEmployeeName.setText(dummyEmployee.getName());
-        holder.vEmployeeID.setText(String.valueOf(dummyEmployee.getId()));
-        holder.vWorkingHours.setText(String.format("%s Hours", dummyEmployee.getHours()));
-        holder.vCurrentMachine.setText(String.valueOf(dummyEmployee.getMachine()));
+        Employee Employee = Employees.get(position);
+        holder.vEmployeeName.setText(Employee.getName());
+        holder.vEmployeeID.setText(String.valueOf(Employee.getId()));
+        holder.vWorkingHours.setText(String.format("%s Hours", Employee.getHours()));
+        holder.vCurrentMachine.setText(String.valueOf(Employee.getMachine()));
     }
 
     @Override
     public int getItemCount() {
-        return dummyEmployees.size();
+        return Employees.size();
     }
 
     public interface OnItemClickListener {

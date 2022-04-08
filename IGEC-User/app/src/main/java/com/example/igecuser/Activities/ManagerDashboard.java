@@ -122,7 +122,7 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
         GrossSalaryFragment grossSalaryFragment = new GrossSalaryFragment();
         VacationRequestsFragment vacationRequestsFragment = new VacationRequestsFragment(currManager);
         VacationsLogFragment vacationsLogFragment = new VacationsLogFragment(false, currManager);
-        ProjectSummaryFragment projectSummaryFragment = new ProjectSummaryFragment();
+        ProjectSummaryFragment projectSummaryFragment = new ProjectSummaryFragment(currManager);
 
 
         viewPagerAdapter.addFragment(checkInOutFragment, getString(R.string.check_in_out));

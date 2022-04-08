@@ -1,11 +1,5 @@
 package com.example.igecuser.Activities;
 
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
-import androidx.core.app.ActivityCompat;
-
-import android.Manifest;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,6 +7,10 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Toast;
+
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 
 import com.example.igecuser.R;
 import com.example.igecuser.cryptography.RSAUtil;
@@ -22,10 +20,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.gun0912.tedpermission.PermissionListener;
-import com.gun0912.tedpermission.normal.TedPermission;
 
-import java.util.List;
 import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
@@ -45,7 +40,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         setContentView(R.layout.activity_main);
-        askPermission();
         initialize();
 
         // Listeners
@@ -67,26 +61,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.Q)
-    private void askPermission() {
-        String[] PERMISSIONS = {Manifest.permission.ACCESS_BACKGROUND_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.CAMERA};
-        ActivityCompat.requestPermissions(this, PERMISSIONS, 112);
-
-        TedPermission.create()
-                .setPermissionListener(new PermissionListener() {
-                    @Override
-                    public void onPermissionGranted() {
-                        Toast.makeText(MainActivity.this, "Granted", Toast.LENGTH_SHORT).show();
-                    }
-
-                    @Override
-                    public void onPermissionDenied(List<String> deniedPermissions) {
-
-                    }
-                })
-                .setDeniedMessage("If you reject permission,you can not use this service\n\nPlease turn on permissions at [Setting] > [Permission]")
-                .setPermissions(PERMISSIONS)
-                .check();
-    }
+//    private void askPermission() {
+//        String[] PERMISSIONS = {Manifest.permission.ACCESS_BACKGROUND_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.CAMERA};
+//        ActivityCompat.requestPermissions(this, PERMISSIONS, 112);
+//
+//        TedPermission.create()
+//                .setPermissionListener(new PermissionListener() {
+//                    @Override
+//                    public void onPermissionGranted() {
+//                        Toast.makeText(MainActivity.this, "Granted", Toast.LENGTH_SHORT).show();
+//                    }
+//
+//                    @Override
+//                    public void onPermissionDenied(List<String> deniedPermissions) {
+//
+//                    }
+//                })
+//                .setDeniedMessage("If you reject permission,you can not use this service\n\nPlease turn on permissions at [Setting] > [Permission]")
+//                .setPermissions(PERMISSIONS)
+//                .check();
+//    }
 
     private boolean isPasswordRight(String password) {
         try {
@@ -130,6 +124,7 @@ public class MainActivity extends AppCompatActivity {
         }
     };
     private final View.OnClickListener clSignIn = new View.OnClickListener() {
+        @RequiresApi(api = Build.VERSION_CODES.Q)
         @Override
         public void onClick(View v) {
             FirebaseFirestore db = FirebaseFirestore.getInstance();

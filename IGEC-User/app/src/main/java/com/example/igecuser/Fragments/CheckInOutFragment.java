@@ -1,5 +1,6 @@
 package com.example.igecuser.Fragments;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.location.Location;
@@ -42,15 +43,22 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-public class CheckInOutFragment extends Fragment {
+import pub.devrel.easypermissions.AfterPermissionGranted;
+import pub.devrel.easypermissions.AppSettingsDialog;
+import pub.devrel.easypermissions.EasyPermissions;
+
+public class CheckInOutFragment extends Fragment implements EasyPermissions.PermissionCallbacks {
 
     private MaterialButton vCheckInOut;
     private FloatingActionButton vAddMachine, vAddMachineInside, vAddMachineOutside;
     private TextView vInsideText, vOutsideText;
     // Vars
     private boolean isOpen = false;
+    private final int CAMERA_REQUEST_CODE = 123;
+    private final int LOCATION_REQUEST_CODE = 155;
     private Animation fabClose, fabOpen, rotateForward, rotateBackward, show, hide, rotateBackwardHide;
     private Boolean isHere = Boolean.FALSE;
     private Employee currEmployee = null;
@@ -82,7 +90,8 @@ public class CheckInOutFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         initialize(view);
-
+        getLocationPermissions();
+        getCameraPermission();
         // Listeners
         vCheckInOut.setOnClickListener(oclCheckInOut);
         vAddMachine.setOnClickListener(oclMachine);
@@ -140,64 +149,95 @@ public class CheckInOutFragment extends Fragment {
         isOpen = !isOpen;
     }
 
+    @AfterPermissionGranted(LOCATION_REQUEST_CODE)
+    private boolean getLocationPermissions() {
+        String[] perms = {Manifest.permission.ACCESS_FINE_LOCATION};
+
+        if (EasyPermissions.hasPermissions(getContext(), perms)) {
+            return true;
+        } else {
+            EasyPermissions.requestPermissions(
+                    this,
+                    "We need location permissions in order to the app to functional correctly",
+                    LOCATION_REQUEST_CODE,
+                    Manifest.permission.ACCESS_FINE_LOCATION);
+            return false;
+        }
+    }
+
+    @AfterPermissionGranted(CAMERA_REQUEST_CODE)
+    private boolean getCameraPermission() {
+        String[] perms = {Manifest.permission.CAMERA};
+        if (EasyPermissions.hasPermissions(getContext(), perms)) {
+            return true;
+        } else {
+            EasyPermissions.requestPermissions(this, "We need camera permission in order to be able to scan the qr code",
+                    CAMERA_REQUEST_CODE, perms);
+            return false;
+        }
+    }
+
     // Listeners
     @SuppressLint("MissingPermission")
     private final View.OnClickListener oclCheckInOut = v -> {
-        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
-        builder.setTitle(getString(R.string.do_you_want_to_confirm_this_action))
-                .setNegativeButton(getString(R.string.No), (dialogInterface, i) -> {
-                })
-                .setPositiveButton(getString(R.string.Yes), (dialogInterface, i) -> {
+        if (getLocationPermissions() && getCameraPermission()) {
+            MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
+            builder.setTitle(getString(R.string.do_you_want_to_confirm_this_action))
+                    .setNegativeButton(getString(R.string.No), (dialogInterface, i) -> {
+                    })
+                    .setPositiveButton(getString(R.string.Yes), (dialogInterface, i) -> {
 
-                    fusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
-                        @Override
-                        public void onSuccess(Location location) {
-                            longitude = location.getLongitude();
-                            latitude = location.getLatitude();
+                        fusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+                            @Override
+                            public void onSuccess(Location location) {
+                                longitude = location.getLongitude();
+                                latitude = location.getLatitude();
 
-                            Summary summary = new Summary(latitude, longitude);
-                            HashMap<String, Object> checkOutDetails = new HashMap<>(summary.getGeoMap());
-                            checkOutDetails.put("Time", Timestamp.now());
-                            db.collection("summary").document(id).get().addOnSuccessListener(documentSnapshot -> {
-                                if (!documentSnapshot.exists()) {
-                                    employeeCheckIn(summary);
-                                } else {
-
-                                    Summary summary1 = documentSnapshot.toObject(Summary.class);
-                                    //TODO create tmp checkin if the original isn't created and increment working time based on it
-                                    if (summary1.getWorkedTime() == null) {
-                                        employeeCheckOut(summary1, checkOutDetails);
+                                Summary summary = new Summary(latitude, longitude);
+                                HashMap<String, Object> checkOutDetails = new HashMap<>(summary.getGeoMap());
+                                checkOutDetails.put("Time", Timestamp.now());
+                                db.collection("summary").document(id).get().addOnSuccessListener(documentSnapshot -> {
+                                    if (!documentSnapshot.exists()) {
+                                        employeeCheckIn(summary);
                                     } else {
-                                        Toast.makeText(getActivity(), "You've been checked Out already!", Toast.LENGTH_SHORT).show();
-                                    }
-                                }
-                            });
-                            isHere = !isHere;
-                            vCheckInOut.setBackgroundColor((isHere) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
-                            vCheckInOut.setText(isHere ? "Out" : "In");
-                            vAddMachine.setClickable(isHere);
-                            if (isOpen) {
-                                vAddMachine.startAnimation(rotateBackwardHide);
-                                vAddMachineInside.startAnimation(fabClose);
-                                vAddMachineOutside.startAnimation(fabClose);
-                                vInsideText.startAnimation(hide);
-                                vOutsideText.startAnimation(hide);
-                                vAddMachineInside.setClickable(false);
-                                vAddMachineOutside.setClickable(false);
-                                isOpen = false;
-                            } else {
-                                vAddMachine.startAnimation(isHere ? show : hide);
-                            }
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Toast.makeText(getContext(), "Please enable GPS!", Toast.LENGTH_SHORT).show();
 
-                        }
-                    });
-                })
-                .show();
+                                        Summary summary1 = documentSnapshot.toObject(Summary.class);
+                                        //TODO create tmp checkin if the original isn't created and increment working time based on it
+                                        if (summary1.getWorkedTime() == null) {
+                                            employeeCheckOut(summary1, checkOutDetails);
+                                        } else {
+                                            Toast.makeText(getActivity(), "You've been checked Out already!", Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+                                });
+                                isHere = !isHere;
+                                vCheckInOut.setBackgroundColor((isHere) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
+                                vCheckInOut.setText(isHere ? "Out" : "In");
+                                vAddMachine.setClickable(isHere);
+                                if (isOpen) {
+                                    vAddMachine.startAnimation(rotateBackwardHide);
+                                    vAddMachineInside.startAnimation(fabClose);
+                                    vAddMachineOutside.startAnimation(fabClose);
+                                    vInsideText.startAnimation(hide);
+                                    vOutsideText.startAnimation(hide);
+                                    vAddMachineInside.setClickable(false);
+                                    vAddMachineOutside.setClickable(false);
+                                    isOpen = false;
+                                } else {
+                                    vAddMachine.startAnimation(isHere ? show : hide);
+                                }
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Toast.makeText(getContext(), "Please enable GPS!", Toast.LENGTH_SHORT).show();
+
+                            }
+                        });
+                    })
+                    .show();
+        }
+
 
     };
 
@@ -234,83 +274,6 @@ public class CheckInOutFragment extends Fragment {
         MachineCheckInOutDialog machineCheckInOutDialog = new MachineCheckInOutDialog(false);
         machineCheckInOutDialog.show(getParentFragmentManager(), "");
     };
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        getParentFragmentManager().setFragmentResultListener("machine", this, new FragmentResultListener() {
-            @SuppressLint("MissingPermission")
-            @Override
-            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
-                // We use a String here, but any type that can be put in a Bundle is supported
-                String machineID = bundle.getString("machineID");
-                boolean isItAUser = bundle.getBoolean("isItAUser");
-                Toast.makeText(getActivity(), machineID, Toast.LENGTH_SHORT).show();
-                // Do something with the result
-                fusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        try {
-                            longitude = location.getLongitude();
-                            latitude = location.getLatitude();
-
-                            machineCol.document(machineID).get().addOnSuccessListener((value) -> {
-                                if (!value.exists()) {
-                                    Toast.makeText(getActivity(), "Invalid Machine ID", Toast.LENGTH_SHORT).show();
-                                    return;
-                                }
-                                currMachine = value.toObject(Machine.class);
-                                SupplementsDialog supplementsDialog = new SupplementsDialog(isItAUser, currMachine,currEmployee);
-                                supplementsDialog.show(getParentFragmentManager(), "");
-                                if (currMachine.getUsed() && !currMachine.getEmployeeId().equals(currEmployee.getId())) {
-                                    Toast.makeText(getContext(), "this Machine already being used by" + currMachine.getEmployeeFirstName(), Toast.LENGTH_SHORT).show();
-                                    return;
-                                }
-                                machineEmpId = !currMachine.getEmployeeId().equals(currEmployee.getId()) ? machineEmployee.document().getId() : currMachine.getMachineEmployeeID();
-
-                            });
-                        } catch (Exception e) {
-                            Toast.makeText(getContext(), "invalid Machine ID", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                }).addOnFailureListener(unused -> {
-                    Toast.makeText(getContext(), "Please enable GPS!", Toast.LENGTH_SHORT).show();
-                });
-            }
-        });
-        getParentFragmentManager().setFragmentResultListener("supplements", this, new FragmentResultListener() {
-            @Override
-            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
-                String note = bundle.getString("supplementState");
-                boolean isItAUser = bundle.getBoolean("isItAUser");
-
-                if (isItAUser) {
-                    checkMachineInOut(null);
-                    MachineDefectsLog machineDefectsLog = new MachineDefectsLog(note.trim(), currMachine.getReference(), currMachine.getId(), currEmployee.getId(), currEmployee.getFirstName(), new Date());
-                    db.collection("MachineDefectsLog").add(machineDefectsLog).addOnSuccessListener(unused->{
-                        Toast.makeText(getActivity(), "comment has been uploaded", Toast.LENGTH_SHORT).show();
-                    });
-                } else {
-                    ClientInfoDialog clientInfoDialog = new ClientInfoDialog(note);
-                    clientInfoDialog.show(getParentFragmentManager(), "");
-                }
-            }
-        });
-        getParentFragmentManager().setFragmentResultListener("clientInfo", this, new FragmentResultListener() {
-            @Override
-            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
-                Client client = (Client) result.getSerializable("client");
-                String note = result.getString("note");
-                checkMachineInOut(client);
-                MachineDefectsLog machineDefectsLog = new MachineDefectsLog(note.trim(), currMachine.getReference(), currMachine.getId(), currEmployee.getId(), currEmployee.getFirstName(), new Date());
-                db.collection("MachineDefectsLog").add(machineDefectsLog).addOnSuccessListener(unused->{
-                    Toast.makeText(getActivity(), "comment has been uploaded", Toast.LENGTH_SHORT).show();
-                });
-            }
-        });
-
-
-    }
 
     private void checkMachineInOut(Client client) {
         machineEmployee.document(machineEmpId).get().addOnSuccessListener(documentSnapshot -> {
@@ -381,5 +344,93 @@ public class CheckInOutFragment extends Fragment {
 
     }
 
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        getParentFragmentManager().setFragmentResultListener("machine", this, new FragmentResultListener() {
+            @SuppressLint("MissingPermission")
+            @Override
+            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
+                // We use a String here, but any type that can be put in a Bundle is supported
+                String machineID = bundle.getString("machineID");
+                boolean isItAUser = bundle.getBoolean("isItAUser");
+                Toast.makeText(getActivity(), machineID, Toast.LENGTH_SHORT).show();
+                // Do something with the result
+                fusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        try {
+                            longitude = location.getLongitude();
+                            latitude = location.getLatitude();
 
+                            machineCol.document(machineID).get().addOnSuccessListener((value) -> {
+                                if (!value.exists()) {
+                                    Toast.makeText(getActivity(), "Invalid Machine ID", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+                                currMachine = value.toObject(Machine.class);
+                                SupplementsDialog supplementsDialog = new SupplementsDialog(isItAUser, currMachine, currEmployee);
+                                supplementsDialog.show(getParentFragmentManager(), "");
+                                if (currMachine.getUsed() && !currMachine.getEmployeeId().equals(currEmployee.getId())) {
+                                    Toast.makeText(getContext(), "this Machine already being used by" + currMachine.getEmployeeFirstName(), Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+                                machineEmpId = !currMachine.getEmployeeId().equals(currEmployee.getId()) ? machineEmployee.document().getId() : currMachine.getMachineEmployeeID();
+
+                            });
+                        } catch (Exception e) {
+                            Toast.makeText(getContext(), "invalid Machine ID", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }).addOnFailureListener(unused -> {
+                    Toast.makeText(getContext(), "Please enable GPS!", Toast.LENGTH_SHORT).show();
+                });
+            }
+        });
+        getParentFragmentManager().setFragmentResultListener("supplements", this, new FragmentResultListener() {
+            @Override
+            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
+                String note = bundle.getString("supplementState");
+                boolean isItAUser = bundle.getBoolean("isItAUser");
+
+                if (isItAUser) {
+                    checkMachineInOut(null);
+                    MachineDefectsLog machineDefectsLog = new MachineDefectsLog(note.trim(), currMachine.getReference(), currMachine.getId(), currEmployee.getId(), currEmployee.getFirstName(), new Date());
+                    db.collection("MachineDefectsLog").add(machineDefectsLog).addOnSuccessListener(unused -> {
+                        Toast.makeText(getActivity(), "comment has been uploaded", Toast.LENGTH_SHORT).show();
+                    });
+                } else {
+                    ClientInfoDialog clientInfoDialog = new ClientInfoDialog(note);
+                    clientInfoDialog.show(getParentFragmentManager(), "");
+                }
+            }
+        });
+        getParentFragmentManager().setFragmentResultListener("clientInfo", this, new FragmentResultListener() {
+            @Override
+            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
+                Client client = (Client) result.getSerializable("client");
+                String note = result.getString("note");
+                checkMachineInOut(client);
+                MachineDefectsLog machineDefectsLog = new MachineDefectsLog(note.trim(), currMachine.getReference(), currMachine.getId(), currEmployee.getId(), currEmployee.getFirstName(), new Date());
+                db.collection("MachineDefectsLog").add(machineDefectsLog).addOnSuccessListener(unused -> {
+                    Toast.makeText(getActivity(), "comment has been uploaded", Toast.LENGTH_SHORT).show();
+                });
+            }
+        });
+
+
+    }
+
+
+    @Override
+    public void onPermissionsGranted(int requestCode, @NonNull List<String> perms) {
+
+    }
+
+    @Override
+    public void onPermissionsDenied(int requestCode, @NonNull List<String> perms) {
+        if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
+            new AppSettingsDialog.Builder(this).build().show();
+        }
+    }
 }

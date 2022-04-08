@@ -42,7 +42,7 @@ import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener , EasyPermissions.PermissionCallbacks {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
     private DrawerLayout vDrawerLayout;
     private NavigationView vNavigationView;
@@ -51,8 +51,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     // Vars
     private ActionBarDrawerToggle actionBarDrawerToggle;
-    private static final int CAMERA_REQUEST_CODE = 100;
-    private static final int STORAGE_REQUEST_CODE = 120;
     private int selectedTab = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,17 +126,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         else
             super.onBackPressed();
     }
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-//        if (requestCode == MY_CAMERA_REQUEST_CODE) {
-//            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                Toast.makeText(this, "camera permission granted", Toast.LENGTH_LONG).show();
-//            } else {
-//                Toast.makeText(this, "camera permission denied", Toast.LENGTH_LONG).show();
-//            }
-//        }
-//    }
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -203,23 +190,5 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     };
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
-    }
-
-    @Override
-    public void onPermissionsGranted(int requestCode, @NonNull List<String> perms) {
-
-    }
-
-    @Override
-    public void onPermissionsDenied(int requestCode, @NonNull List<String> perms) {
-        if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
-            new AppSettingsDialog.Builder(this).build().show();
-        }
-    }
 
 }

@@ -19,6 +19,7 @@ import com.example.igec_admin.Dialogs.MachineFragmentDialog;
 import com.example.igec_admin.Dialogs.MachineLogDialog;
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Machine;
+import com.example.igec_admin.fireBase.MachineDefectsLog;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -78,15 +79,15 @@ public class MachinesFragment extends Fragment {
         public void onCommentsClick(int position) {
             AlertDialog.Builder builderSingle = new AlertDialog.Builder(getActivity());
             builderSingle.setTitle("Comments: ");
-
-            //TODO fill make it array list of comments
-            final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_selectable_list_item);
-            arrayAdapter.add("Hardik");
-            arrayAdapter.add("Archit");
-            arrayAdapter.add("Jignesh");
-            arrayAdapter.add("Umang");
-            arrayAdapter.add("Gatti");
-
+            final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_selectable_list_item);
+            ArrayList<MachineDefectsLog> machineDefectsLogArrayList = new ArrayList<>();
+            db.collection("MachineDefectsLog").whereEqualTo("machineId",machines.get(position).getId()).addSnapshotListener((values,error)->{
+               if(values==null || values.size()==0)
+                   return;
+                machineDefectsLogArrayList.addAll(values.toObjects(MachineDefectsLog.class));
+                for(DocumentSnapshot d: values)
+                arrayAdapter.add(d.toObject(MachineDefectsLog.class).getNote());
+            });
             builderSingle.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
@@ -97,9 +98,11 @@ public class MachinesFragment extends Fragment {
             builderSingle.setAdapter(arrayAdapter, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    String strName = arrayAdapter.getItem(which);
+                    MachineDefectsLog currMachineDefectsLog =  machineDefectsLogArrayList.get(which);
+                    String strName = "Employee Name: "+currMachineDefectsLog.getEmployeeName()+'\n'
+                            +"Machine reference: "+currMachineDefectsLog.getMachineRef()+'\n'
+                            +"Issue Date: "+currMachineDefectsLog.getIssueDate();
                     AlertDialog.Builder builderInner = new AlertDialog.Builder(getActivity());
-                    //TODO Change with comment content
                     builderInner.setMessage(strName);
                     builderInner.setTitle("Content");
                     builderInner.setPositiveButton("Ok", new DialogInterface.OnClickListener() {

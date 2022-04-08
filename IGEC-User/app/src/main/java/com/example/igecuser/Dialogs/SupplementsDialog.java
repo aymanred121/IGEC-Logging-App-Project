@@ -11,6 +11,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,13 +21,16 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.igecuser.Adapters.SupplementsAdapter;
 import com.example.igecuser.R;
+import com.example.igecuser.fireBase.Employee;
 import com.example.igecuser.fireBase.Machine;
+import com.example.igecuser.fireBase.MachineDefectsLog;
 import com.example.igecuser.fireBase.Supplement;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -34,14 +38,18 @@ import com.google.firebase.storage.StorageReference;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class SupplementsDialog extends DialogFragment {
 
 
-    private final Machine machine;
+    private Machine machine;
+    private Employee employee;
     ArrayList<Supplement> supplements;
     private MaterialButton vDone;
     private boolean isItAUser;
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+
     //Views
     private CircularProgressIndicator vCircularProgressIndicator;
     private TextInputEditText vComment;
@@ -85,9 +93,10 @@ public class SupplementsDialog extends DialogFragment {
 
     private RecyclerView.LayoutManager layoutManager;
 
-    public SupplementsDialog(boolean isItAUser, Machine machine) {
+    public SupplementsDialog(boolean isItAUser, Machine machine,Employee employee) {
         this.isItAUser = isItAUser;
         this.machine = machine;
+        this.employee= employee;
     }
 
     // Functions
@@ -147,12 +156,21 @@ public class SupplementsDialog extends DialogFragment {
     }
 
     private final View.OnClickListener oclDone = v -> {
-
         Bundle bundle = new Bundle();
         bundle.putString("supplementState", vComment.getText().toString());
         bundle.putBoolean("isItAUser",isItAUser);
         getParentFragmentManager().setFragmentResult("supplements", bundle);
-        dismiss();
+        if(!vComment.getText().toString().trim().isEmpty()){
+            MachineDefectsLog machineDefectsLog = new MachineDefectsLog(vComment.getText().toString().trim(), machine.getReference(), machine.getId(), employee.getId(), employee.getFirstName(), new Date());
+            db.collection("MachineDefectsLog").add(machineDefectsLog).addOnSuccessListener(unused->{
+                Toast.makeText(getActivity(), "comment has been uploaded", Toast.LENGTH_SHORT).show();
+                dismiss();
+            });
+        }else{
+            dismiss();
+        }
+
+
 
     };
 

@@ -258,7 +258,7 @@ public class CheckInOutFragment extends Fragment {
                                     return;
                                 }
                                 currMachine = value.toObject(Machine.class);
-                                SupplementsDialog supplementsDialog = new SupplementsDialog(isItAUser, currMachine);
+                                SupplementsDialog supplementsDialog = new SupplementsDialog(isItAUser, currMachine,currEmployee);
                                 supplementsDialog.show(getParentFragmentManager(), "");
                                 if (currMachine.getUsed() && !currMachine.getEmployeeId().equals(currEmployee.getId())) {
                                     Toast.makeText(getContext(), "this Machine already being used by" + currMachine.getEmployeeFirstName(), Toast.LENGTH_SHORT).show();

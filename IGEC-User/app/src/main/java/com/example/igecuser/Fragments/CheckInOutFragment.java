@@ -117,13 +117,24 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         show = AnimationUtils.loadAnimation(getActivity(), R.anim.show);
         hide = AnimationUtils.loadAnimation(getActivity(), R.anim.hide);
         id = LocalDate.now().toString() + currEmployee.getId();
-        vCheckInOut.setBackgroundColor((isHere) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
-        vCheckInOut.setText(isHere ? "Out" : "In");
+        setCheckInOutBtn();
         vAddMachine.setClickable(isHere);
         vAddMachine.startAnimation(isHere ? show : hide);
 
         vGreeting.setText(String.format("%s\n%s", getString(R.string.good_morning), currEmployee.getFirstName()));
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
+    }
+
+    private void setCheckInOutBtn() {
+        db.collection("summary").document(id).addSnapshotListener((value, e) -> {
+            if (!value.exists())
+                isHere = false;
+            else {
+                isHere = value.getData().get("checkOut") == null;
+            }
+            vCheckInOut.setBackgroundColor((isHere) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
+            vCheckInOut.setText(isHere ? "Out" : "In");
+        });
     }
 
 
@@ -396,7 +407,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
 
                 if (isItAUser) {
                     checkMachineInOut(null);
-                    if(!note.trim().isEmpty()) {
+                    if (!note.trim().isEmpty()) {
                         MachineDefectsLog machineDefectsLog = new MachineDefectsLog(note.trim(), currMachine.getReference(), currMachine.getId(), currEmployee.getId(), currEmployee.getFirstName(), new Date());
                         db.collection("MachineDefectsLog").add(machineDefectsLog).addOnSuccessListener(unused -> {
                             Toast.makeText(getActivity(), "comment has been uploaded", Toast.LENGTH_SHORT).show();
@@ -414,7 +425,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                 Client client = (Client) result.getSerializable("client");
                 String note = result.getString("note");
                 checkMachineInOut(client);
-                if(!note.trim().isEmpty()) {
+                if (!note.trim().isEmpty()) {
                     MachineDefectsLog machineDefectsLog = new MachineDefectsLog(note.trim(), currMachine.getReference(), currMachine.getId(), currEmployee.getId(), currEmployee.getFirstName(), new Date());
                     db.collection("MachineDefectsLog").add(machineDefectsLog).addOnSuccessListener(unused -> {
                         Toast.makeText(getActivity(), "comment has been uploaded", Toast.LENGTH_SHORT).show();

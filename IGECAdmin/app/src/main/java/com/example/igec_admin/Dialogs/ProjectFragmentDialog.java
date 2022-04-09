@@ -29,6 +29,7 @@ import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Allowance;
 import com.example.igec_admin.fireBase.Client;
 import com.example.igec_admin.fireBase.EmployeeOverview;
+import com.example.igec_admin.fireBase.EmployeesGrossSalary;
 import com.example.igec_admin.fireBase.Project;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.checkbox.MaterialCheckBox;
@@ -352,7 +353,11 @@ public class ProjectFragmentDialog extends DialogFragment {
         newProject.setId(project.getId());
         newProject.setClient(client);
         newProject.getAllowancesList().addAll(allowances);
+        allowances = newProject.getAllowancesList();
         db.collection("projects").document(project.getId()).set(newProject).addOnSuccessListener(unused -> {
+            newProject.getEmployees().forEach(emp->{
+                db.collection("EmployeesGrossSalary").document(emp.getId()).update("projectAllowances",allowances);
+            });
             Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
             project.setEmployees(null);
             employees.clear();

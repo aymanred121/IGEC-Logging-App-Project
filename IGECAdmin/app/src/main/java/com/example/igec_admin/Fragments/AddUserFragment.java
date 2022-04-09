@@ -18,6 +18,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Employee;
+import com.example.igec_admin.fireBase.EmployeesGrossSalary;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
@@ -115,11 +116,12 @@ public class AddUserFragment extends Fragment {
         db.collection("employees").whereEqualTo("email", vEmail.getText().toString().trim()).get().addOnSuccessListener(documents -> {
             if (documents.getDocuments().size() != 0) {
                 Toast.makeText(getActivity(), "this Email is already exist", Toast.LENGTH_SHORT).show();
-                return;
             } else {
                 DocumentReference employeeOverviewRef = db.collection("EmployeeOverview").document("emp");
                 String id = db.collection("EmployeeOverview").document().getId().substring(0, 5);
-
+                EmployeesGrossSalary employeesGrossSalary = new EmployeesGrossSalary();
+                employeesGrossSalary.setEmployeeId(id);
+                employeesGrossSalary.setNetSalary(Double.parseDouble(vSalary.getText().toString()));
                 ArrayList<String> empInfo = new ArrayList<>();
                 empInfo.add((vFirstName.getText()).toString());
                 empInfo.add((vSecondName.getText()).toString());
@@ -132,8 +134,11 @@ public class AddUserFragment extends Fragment {
                 Employee newEmployee = fillEmployeeData();
                 newEmployee.setId(id);
                 db.collection("employees").document(id).set(newEmployee).addOnSuccessListener(unused -> {
-                    clearInputs();
-                    Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
+                    db.collection("EmployeesGrossSalary").document(id).set(employeesGrossSalary).addOnSuccessListener(unused1 -> {
+                        clearInputs();
+                        Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
+
+                    });
                 });
 
             }
@@ -152,7 +157,8 @@ public class AddUserFragment extends Fragment {
                 ((vNationalID.getText()).toString()),
                 new Date(hireDate),
                 vEmail.getText().toString().trim(),
-                encryptedPassword());
+                encryptedPassword(),
+                vPhone.getText().toString());
     }
 
     private String encryptedPassword() {

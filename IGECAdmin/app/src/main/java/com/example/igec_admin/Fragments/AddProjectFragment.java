@@ -28,6 +28,7 @@ import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Allowance;
 import com.example.igec_admin.fireBase.Client;
 import com.example.igec_admin.fireBase.EmployeeOverview;
+import com.example.igec_admin.fireBase.EmployeesGrossSalary;
 import com.example.igec_admin.fireBase.Project;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.checkbox.MaterialCheckBox;
@@ -62,7 +63,7 @@ public class AddProjectFragment extends Fragment {
     private Client client;
     private EmployeeOverview selectedManager;
     private String projectID;
-    private long startDate, endDate;
+    private long startDate;
     private MaterialDatePicker.Builder<Long> vTimeDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vTimeDatePicker;
     private final ArrayList<EmployeeOverview> employees = new ArrayList<>();
@@ -205,7 +206,6 @@ public class AddProjectFragment extends Fragment {
 
 
     private void updateEmployeesDetails(String projectID) {
-        //  batch.update(employeeCol.document(emp.getId()), );
         final int[] counter = {0};
         Team.forEach(emp -> {
             ArrayList<String> empInfo = new ArrayList<>();
@@ -224,6 +224,8 @@ public class AddProjectFragment extends Fragment {
                 }
                 counter[0]++;
             });
+            if(allowances.size()!=0)
+            db.collection("EmployeesGrossSalary").document(emp.getId()).update("projectAllowances",allowances);
         });
 
     }
@@ -242,6 +244,7 @@ public class AddProjectFragment extends Fragment {
         newProject.setId(projectID);
         newProject.setClient(client);
         newProject.getAllowancesList().addAll(allowances);
+        allowances = newProject.getAllowancesList();
         db.collection("projects").document(projectID).set(newProject).addOnSuccessListener(unused -> {
             updateEmployeesDetails(projectID);
             projectID = db.collection("projects").document().getId().substring(0, 5);

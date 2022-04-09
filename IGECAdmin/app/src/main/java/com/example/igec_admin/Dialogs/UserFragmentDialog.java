@@ -70,6 +70,7 @@ public class UserFragmentDialog extends DialogFragment {
     private TextInputEditText vCity;
     private TextInputEditText vStreet;
     private TextInputEditText vHireDate;
+    private TextInputEditText vPhone;
     private TextInputLayout vHireDateLayout;
     private final MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vDatePicker;
@@ -138,6 +139,7 @@ public class UserFragmentDialog extends DialogFragment {
         vCity = view.findViewById(R.id.TextInput_City);
         vStreet = view.findViewById(R.id.TextInput_Street);
         vHireDate = view.findViewById(R.id.TextInput_HireDate);
+        vPhone = view.findViewById(R.id.TextInput_Phone);
         vHireDateLayout = view.findViewById(R.id.textInputLayout_HireDate);
         MaterialButton vRegister = view.findViewById(R.id.button_register);
         vDelete = view.findViewById(R.id.button_delete);
@@ -156,6 +158,8 @@ public class UserFragmentDialog extends DialogFragment {
         vEmail.setText(employee.getEmail());
         vSalary.setText(String.valueOf(employee.getSalary()));
         vSSN.setText(employee.getSSN());
+        vPassword.setText(employee.getDecryptedPassword());
+      //  vPhone.setText(employee.getPhoneNumber());
         vHireDate.setText(convertDateToString(employee.getHireDate().getTime()));
         hireDate = employee.getHireDate().getTime();
         vDatePickerBuilder.setTitleText("Hire Date");
@@ -266,6 +270,7 @@ public class UserFragmentDialog extends DialogFragment {
         empMap.put("title", vTitle.getText().toString());
         empMap.put("salary", Double.parseDouble(vSalary.getText().toString()));
         empMap.put("SSN", vSSN.getText().toString());
+        empMap.put("phoneNumber", vPhone.getText().toString());
         empMap.put("hireDate", new Date(hireDate));
         empMap.put("id", employee.getId());
         return empMap;
@@ -326,6 +331,9 @@ public class UserFragmentDialog extends DialogFragment {
         updatedEmpOverviewMap.put(id, empInfo);
         HashMap<String, Object> updatedEmployeeMap = fillEmployeeData();
         db.collection("employees").document(id).update(updatedEmployeeMap).addOnSuccessListener(unused -> {
+            if(employee.getSalary()!= Double.parseDouble(vSalary.getText().toString()))
+            db.collection("EmployeesGrossSalary").document(id).update("netSalary",Double.parseDouble(vSalary.getText().toString()));
+
             updateEmployeeOverview(updatedEmpOverviewMap, updatedEmployeeMap);
 
         });

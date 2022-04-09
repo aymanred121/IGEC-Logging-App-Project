@@ -1,5 +1,11 @@
 package com.example.igecuser.Activities;
 
+import android.annotation.SuppressLint;
+import android.os.Bundle;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
@@ -7,13 +13,6 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.viewpager.widget.ViewPager;
-
-import android.annotation.SuppressLint;
-import android.os.Bundle;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.TextView;
-
 
 import com.example.igecuser.Adapters.ViewPagerAdapter;
 import com.example.igecuser.Fragments.ChangePasswordFragment;
@@ -23,6 +22,7 @@ import com.example.igecuser.Fragments.SendVacationRequestFragment;
 import com.example.igecuser.Fragments.VacationsLogFragment;
 import com.example.igecuser.R;
 import com.example.igecuser.fireBase.Employee;
+import com.example.igecuser.fireBase.EmployeesGrossSalary;
 import com.google.android.material.navigation.NavigationView;
 
 public class EmployeeDashboard extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -33,6 +33,7 @@ public class EmployeeDashboard extends AppCompatActivity implements NavigationVi
     private ActionBarDrawerToggle actionBarDrawerToggle;
     private NavigationView vNavigationView;
     private Employee currEmployee;
+    private EmployeesGrossSalary employeesGrossSalary;
 
     private int selectedTab = 0;
     // Overrides
@@ -81,7 +82,7 @@ public class EmployeeDashboard extends AppCompatActivity implements NavigationVi
         ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), 0);
         CheckInOutFragment checkInOutFragment = new CheckInOutFragment(currEmployee);
         ChangePasswordFragment changePasswordFragment = new ChangePasswordFragment();
-        GrossSalaryFragment grossSalaryFragment = new GrossSalaryFragment();
+        GrossSalaryFragment grossSalaryFragment = new GrossSalaryFragment(currEmployee.getId());
         SendVacationRequestFragment sendVacationRequestFragment = new SendVacationRequestFragment(currEmployee);
         VacationsLogFragment vacationsLogFragment = new VacationsLogFragment(true, currEmployee);
         viewPagerAdapter.addFragment(checkInOutFragment, getString(R.string.check_in_out));
@@ -121,7 +122,7 @@ public class EmployeeDashboard extends AppCompatActivity implements NavigationVi
     }
 
     //Listeners
-    private ViewPager.OnPageChangeListener viewPagerListener = new ViewPager.OnPageChangeListener() {
+    private final ViewPager.OnPageChangeListener viewPagerListener = new ViewPager.OnPageChangeListener() {
         @Override
         public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
@@ -138,7 +139,7 @@ public class EmployeeDashboard extends AppCompatActivity implements NavigationVi
 
         }
     };
-    private DrawerLayout.DrawerListener drawerListener = new DrawerLayout.DrawerListener() {
+    private final DrawerLayout.DrawerListener drawerListener = new DrawerLayout.DrawerListener() {
         @Override
         public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
 

@@ -3,8 +3,8 @@ package com.example.igecuser.fireBase;
 import java.io.Serializable;
 
 public class Allowance implements Serializable {
-    private String name ;
-    private int amount ;
+    private String name;
+    private double amount;
 
     public Allowance() {
     }
@@ -17,15 +17,15 @@ public class Allowance implements Serializable {
         this.name = name;
     }
 
-    public int getAmount() {
+    public double getAmount() {
         return amount;
     }
 
-    public void setAmount(int amount) {
+    public void setAmount(double amount) {
         this.amount = amount;
     }
 
-    public Allowance(String name, int amount) {
+    public Allowance(String name, double amount) {
         this.name = name;
         this.amount = amount;
     }

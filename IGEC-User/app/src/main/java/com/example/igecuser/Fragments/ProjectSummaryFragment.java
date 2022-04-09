@@ -17,6 +17,7 @@ import com.example.igecuser.R;
 import com.example.igecuser.fireBase.Allowance;
 import com.example.igecuser.fireBase.Employee;
 import com.example.igecuser.fireBase.EmployeeOverview;
+import com.example.igecuser.fireBase.EmployeesGrossSalary;
 import com.example.igecuser.fireBase.Project;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
@@ -30,7 +31,7 @@ public class ProjectSummaryFragment extends Fragment {
     private EmployeeAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
     private ArrayList<EmployeeOverview> employeeOverviews;
-    private Employee manager;
+    private final Employee manager;
     private Project project;
     private ArrayList<Allowance> projectAllowance;
     private TextInputEditText vProjectName, vProjectReference;
@@ -98,14 +99,20 @@ public class ProjectSummaryFragment extends Fragment {
 
     }
 
-    private View.OnClickListener oclUpdate = new View.OnClickListener() {
+    private final View.OnClickListener oclUpdate = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
             //TODO update project list allowances and users allowances
+            project.setAllowancesList(projectAllowance);
+            db.collection("projects").document(manager.getProjectID()).update("allowancesList", projectAllowance).addOnSuccessListener(unused -> {
+                employeeOverviews.forEach(employeeOverview -> {
+                    db.collection("EmployeesGrossSalary").document(employeeOverview.getId()).update("projectAllowances", projectAllowance);
+                });
+            });
 
         }
     };
-    private View.OnClickListener oclShowProjectAllowances = new View.OnClickListener() {
+    private final View.OnClickListener oclShowProjectAllowances = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
             AddAllowanceDialog employeeSummaryDialog = new AddAllowanceDialog(projectAllowance, false, true);
@@ -116,6 +123,13 @@ public class ProjectSummaryFragment extends Fragment {
         @Override
         public void onItemClick(int position) {
             //TODO employee gross salary call AddAllowanceDialog with the arraylist WITHOUT NET SALARY
+            db.collection("EmployeesGrossSalary").document(employeeOverviews.get(position).getId()).get().addOnSuccessListener(documentSnapshot -> {
+                if (!documentSnapshot.exists())
+                    return;
+                EmployeesGrossSalary employeesGrossSalary = documentSnapshot.toObject(EmployeesGrossSalary.class);
+                AddAllowanceDialog employeeSummaryDialog = new AddAllowanceDialog(employeesGrossSalary.getAllowances(), true, true);
+                employeeSummaryDialog.show(getParentFragmentManager(), "");
+            });
            /* AddAllowanceDialog employeeSummaryDialog = new AddAllowanceDialog(here, true, true);
             employeeSummaryDialog.show(getParentFragmentManager(), "");*/
         }

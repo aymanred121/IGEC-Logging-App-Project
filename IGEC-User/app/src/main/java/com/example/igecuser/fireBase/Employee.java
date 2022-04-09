@@ -3,18 +3,17 @@ package com.example.igecuser.fireBase;
 import java.io.Serializable;
 import java.util.Date;
 @SuppressWarnings("serial")
-public class Employee  implements Serializable {
-    private String firstName, lastName, title, area, city, street,SSN,projectID,managerID,email,password,id;
+public class Employee implements Serializable {
+    private String firstName, lastName, title, area, city, street, SSN, projectID, managerID, email, password, id, phoneNumber;
     private double salary;
     private Date hireDate;
 
 
-
-    public  Employee(){
+    public Employee() {
 
     }
 
-    public Employee(String firstName, String lastName, String Title, String area, String City, String Street, String projectID, double salary, String SSN, Date hireDate,String email,String password) {
+    public Employee(String firstName, String lastName, String Title, String area, String City, String Street, String projectID, double salary, String SSN, Date hireDate, String email, String password, String phoneNumber) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.title = Title;
@@ -24,9 +23,10 @@ public class Employee  implements Serializable {
         this.projectID = projectID;
         this.salary = salary;
         this.SSN = SSN;
-        this.hireDate=hireDate;
+        this.hireDate = hireDate;
         this.email=email;
-        this.password=password;
+        this.password = password;
+        this.phoneNumber = phoneNumber;
     }
 
     public Date getHireDate() {
@@ -130,11 +130,20 @@ public class Employee  implements Serializable {
     public void setPassword(String password) {
         this.password = password;
     }
+
     public String getId() {
         return id;
     }
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 }

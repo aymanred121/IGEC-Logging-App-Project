@@ -6,7 +6,7 @@ import com.google.firebase.firestore.Exclude;
 import java.util.Date;
 
 public class Employee {
-    private String firstName, lastName, title, area, city, street,SSN,projectID,managerID,email,password,id;
+    private String firstName, lastName, title, area, city, street,SSN,projectID,managerID,email,password,id,phoneNumber;
     private double salary;
     private Date hireDate;
 
@@ -14,7 +14,7 @@ public class Employee {
 
     }
 
-    public Employee(String firstName, String lastName, String Title, String area, String City, String Street, double salary, String SSN, Date hireDate, String email, String password) {
+    public Employee(String firstName, String lastName, String Title, String area, String City, String Street, double salary, String SSN, Date hireDate, String email, String password,String phoneNumber) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.title = Title;
@@ -26,6 +26,7 @@ public class Employee {
         this.hireDate = hireDate;
         this.email=email;
         this.password=password;
+        this.phoneNumber = phoneNumber;
     }
 
     public Date getHireDate() {
@@ -142,5 +143,13 @@ public class Employee {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 }

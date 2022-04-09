@@ -61,7 +61,7 @@ public class ProjectFragmentDialog extends DialogFragment {
 
     // Vars
     private ArrayList<Allowance> allowances;
-    long startDate, endDate;
+    long startDate;
     private Client client;
     private final MaterialDatePicker.Builder<Long> vTimeDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vTimeDatePicker;

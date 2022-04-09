@@ -38,7 +38,6 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.WriteBatch;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -66,15 +65,13 @@ public class AddProjectFragment extends Fragment {
     private long startDate, endDate;
     private MaterialDatePicker.Builder<Long> vTimeDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vTimeDatePicker;
-    private final ArrayList<EmployeeOverview> employees = new ArrayList();
+    private final ArrayList<EmployeeOverview> employees = new ArrayList<>();
     private final ArrayList<String> TeamID = new ArrayList<>();
     private final ArrayList<EmployeeOverview> Team = new ArrayList<>();
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private final DocumentReference employeeOverviewRef = db.collection("EmployeeOverview")
             .document("emp");
     private final CollectionReference employeeCol = db.collection("employees");
-
-    private ArrayAdapter<String> idAdapter;
 
 
     @Override
@@ -180,7 +177,7 @@ public class AddProjectFragment extends Fragment {
         if (!vManagerIDLayout.isEnabled())
             vManagerID.setText("");
         if (TeamID.size() > 0) {
-            idAdapter = new ArrayAdapter<>(getActivity(), R.layout.dropdown_item, TeamID);
+            ArrayAdapter<String> idAdapter = new ArrayAdapter<>(getActivity(), R.layout.dropdown_item, TeamID);
             vManagerID.setAdapter(idAdapter);
 
         }
@@ -208,8 +205,9 @@ public class AddProjectFragment extends Fragment {
 
 
     private void updateEmployeesDetails(String projectID) {
-        WriteBatch batch = db.batch();
-        for (EmployeeOverview emp : Team) {
+        //  batch.update(employeeCol.document(emp.getId()), );
+        final int[] counter = {0};
+        Team.forEach(emp -> {
             ArrayList<String> empInfo = new ArrayList<>();
             empInfo.add(emp.getFirstName());
             empInfo.add(emp.getLastName());
@@ -219,12 +217,13 @@ public class AddProjectFragment extends Fragment {
             Map<String, Object> empInfoMap = new HashMap<>();
             empInfoMap.put(emp.getId(), empInfo);
             employeeOverviewRef.update(empInfoMap);
-            batch.update(employeeCol.document(emp.getId()), "managerID", empInfo.get(3), "projectID", projectID);
-        }
-        batch.commit().addOnSuccessListener(unused -> {
-            ClearInputs();
-
-            Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
+            employeeCol.document(emp.getId()).update("managerID", empInfo.get(3), "projectID", projectID).addOnSuccessListener(unused -> {
+                if (counter[0] == Team.size() - 1) {
+                    ClearInputs();
+                    Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
+                }
+                counter[0]++;
+            });
         });
 
     }
@@ -239,11 +238,14 @@ public class AddProjectFragment extends Fragment {
                 , vCity.getText().toString()
                 , vArea.getText().toString()
                 , vStreet.getText().toString()
-                ,vContractType.getText().toString());
+                , vContractType.getText().toString());
         newProject.setId(projectID);
         newProject.setClient(client);
         newProject.getAllowancesList().addAll(allowances);
-        db.collection("projects").document(projectID).set(newProject).addOnSuccessListener(unused -> updateEmployeesDetails(projectID));
+        db.collection("projects").document(projectID).set(newProject).addOnSuccessListener(unused -> {
+            updateEmployeesDetails(projectID);
+            projectID = db.collection("projects").document().getId().substring(0, 5);
+        });
 
     }
 

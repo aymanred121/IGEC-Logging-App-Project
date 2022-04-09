@@ -200,13 +200,12 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                     if (!documentSnapshot.exists()) {
                                         employeeCheckIn(summary);
                                     } else {
-
                                         Summary summary1 = documentSnapshot.toObject(Summary.class);
-                                        //TODO create tmp check in if the original isn't created and increment working time based on it
-                                        if (summary1.getWorkedTime() == null) {
+                                        if (summary1.getCheckOut() == null) {
                                             employeeCheckOut(summary1, checkOutDetails);
                                         } else {
-                                            Toast.makeText(getActivity(), "You've been checked Out already!", Toast.LENGTH_SHORT).show();
+                                            summary1.setLastCheckInTime(Timestamp.now());
+                                            db.collection("summary").document(id).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null);
                                         }
                                     }
                                 });
@@ -242,12 +241,12 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     };
 
     private void employeeCheckOut(Summary summary1, HashMap<String, Object> checkOut) {
-        long checkInTime = ((Timestamp) summary1.getCheckIn().get("Time")).getSeconds();
+        long checkInTime = (summary1.getLastCheckInTime()).getSeconds();
         long checkOutTime = Timestamp.now().getSeconds();
         long workingTime = (checkOutTime - checkInTime);
         summary1.setCheckOut(checkOut);
-        summary1.setWorkedTime(workingTime);
-        db.collection("summary").document(id).set(summary1)
+        summary1.setWorkedTime(FieldValue.increment(workingTime));
+        db.collection("summary").document(id).update("checkOut", checkOut, "workingTime", FieldValue.increment(workingTime))
                 .addOnSuccessListener(unused -> {
                     Toast.makeText(getContext(), "Checked Out successfully!", Toast.LENGTH_SHORT).show();
                     db.collection("projects").document(currEmployee.getProjectID())
@@ -257,11 +256,14 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     }
 
     private void employeeCheckIn(Summary summary) {
+
+        summary.setLastCheckInTime(Timestamp.now());
         HashMap<String, Object> checkInDetails = new HashMap<>(summary.getGeoMap());
         checkInDetails.put("Time", Timestamp.now());
         HashMap<String, Object> checkIn = new HashMap<>();
         checkIn.put("checkIn", checkInDetails);
         checkIn.put("employee", currEmployee);
+        checkIn.put("lastCheckInTime", summary.getLastCheckInTime());
         db.collection("summary").document(id).set(checkIn);
         Toast.makeText(getContext(), "Checked In successfully!", Toast.LENGTH_SHORT).show();
     }

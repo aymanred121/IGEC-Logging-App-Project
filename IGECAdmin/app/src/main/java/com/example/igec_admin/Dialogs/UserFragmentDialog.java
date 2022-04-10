@@ -61,7 +61,7 @@ public class UserFragmentDialog extends DialogFragment {
     private TextInputEditText vFirstName;
     private TextInputEditText vSecondName;
     private TextInputEditText vEmail;
-    private TextInputLayout vEmailLayout,vPasswordLayout;
+    private TextInputLayout vEmailLayout, vPasswordLayout;
     private TextInputEditText vPassword;
     private TextInputEditText vTitle;
     private TextInputEditText vSalary;
@@ -159,7 +159,7 @@ public class UserFragmentDialog extends DialogFragment {
         vSalary.setText(String.valueOf(employee.getSalary()));
         vSSN.setText(employee.getSSN());
         vPassword.setText(employee.getDecryptedPassword());
-      //  vPhone.setText(employee.getPhoneNumber());
+        vPhone.setText(employee.getPhoneNumber());
         vHireDate.setText(convertDateToString(employee.getHireDate().getTime()));
         hireDate = employee.getHireDate().getTime();
         vDatePickerBuilder.setTitleText("Hire Date");
@@ -167,7 +167,6 @@ public class UserFragmentDialog extends DialogFragment {
         vPasswordLayout.setEndIconMode(END_ICON_CUSTOM);
         vPasswordLayout.setEndIconDrawable(R.drawable.ic_baseline_autorenew_24);
         vPassword.setInputType(InputType.TYPE_CLASS_TEXT);
-
 
 
     }
@@ -331,8 +330,8 @@ public class UserFragmentDialog extends DialogFragment {
         updatedEmpOverviewMap.put(id, empInfo);
         HashMap<String, Object> updatedEmployeeMap = fillEmployeeData();
         db.collection("employees").document(id).update(updatedEmployeeMap).addOnSuccessListener(unused -> {
-            if(employee.getSalary()!= Double.parseDouble(vSalary.getText().toString()))
-            db.collection("EmployeesGrossSalary").document(id).update("netSalary",Double.parseDouble(vSalary.getText().toString()));
+            if (employee.getSalary() != Double.parseDouble(vSalary.getText().toString()))
+                db.collection("EmployeesGrossSalary").document(id).update("netSalary", Double.parseDouble(vSalary.getText().toString()));
 
             updateEmployeeOverview(updatedEmpOverviewMap, updatedEmployeeMap);
 
@@ -356,6 +355,7 @@ public class UserFragmentDialog extends DialogFragment {
                 })
                 .setPositiveButton(getString(R.string.accept), (dialogInterface, i) -> {
                     deleteEmployee();
+                    dialogInterface.dismiss();
                 })
                 .show();
     };

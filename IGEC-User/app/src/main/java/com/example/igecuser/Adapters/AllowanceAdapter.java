@@ -31,7 +31,7 @@ public class AllowanceAdapter extends RecyclerView.Adapter<AllowanceAdapter.Allo
     @Override
     public AllowanceViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from((parent.getContext())).inflate(canRemove ? R.layout.allowance_item : R.layout.salary_summary_item, parent, false);
-        return new AllowanceViewHolder(v, listener,canRemove);
+        return new AllowanceViewHolder(v, listener, canRemove);
     }
 
     @Override
@@ -40,6 +40,7 @@ public class AllowanceAdapter extends RecyclerView.Adapter<AllowanceAdapter.Allo
         holder.vName.setText(allowance.getName());
         holder.vAmount.setText(String.format("%s EGP", allowance.getAmount()));
 
+        if (allowance.getName().equals("Net Salary")) return;
         if (allowance.getAmount() > 0) {
             holder.vAmount.setTextColor(Color.rgb(0, 153, 0));
             holder.vAmount.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_round_trending_up_24, 0, 0, 0);
@@ -100,7 +101,7 @@ public class AllowanceAdapter extends RecyclerView.Adapter<AllowanceAdapter.Allo
             vName = itemView.findViewById(R.id.TextView_ReasonFor);
             vAmount = itemView.findViewById(R.id.TextView_MountOf);
 
-            if(canRemove) {
+            if (canRemove) {
                 vDelete = itemView.findViewById(R.id.button_delete);
 
                 vDelete.setOnClickListener(v -> {

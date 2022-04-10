@@ -94,8 +94,7 @@ public class AllowanceInfoDialog extends DialogFragment {
         return
                 !(vAllowanceName.getText().toString().isEmpty() ||
                         vAllowanceMount.getText().toString().isEmpty() ||
-                        (!canGivePenalty && Integer.parseInt(vAllowanceMount.getText().toString()) < 0) ||
-                        vAllowanceNote.getText().toString().isEmpty());
+                        (!canGivePenalty && Double.parseDouble(vAllowanceMount.getText().toString()) < 0));
 
     }
 
@@ -103,7 +102,7 @@ public class AllowanceInfoDialog extends DialogFragment {
         @Override
         public void onClick(View v) {
             if (!validateInput()) {
-                if (!canGivePenalty)
+                if (!canGivePenalty && Double.parseDouble(vAllowanceMount.getText().toString()) < 0)
                     Toast.makeText(getActivity(), "can't give penalty to whole project", Toast.LENGTH_SHORT).show();
                 else
                     Toast.makeText(getActivity(), "please fill allowance data", Toast.LENGTH_SHORT).show();
@@ -112,7 +111,7 @@ public class AllowanceInfoDialog extends DialogFragment {
             Bundle result = new Bundle();
             Allowance allowance = new Allowance();
             allowance.setName(vAllowanceName.getText().toString());
-            allowance.setAmount(Integer.parseInt(vAllowanceMount.getText().toString()));
+            allowance.setAmount(Double.parseDouble(vAllowanceMount.getText().toString()));
             result.putSerializable("allowance", allowance);
             result.putString("note",vAllowanceNote.getText().toString());
             result.putInt("position", position);

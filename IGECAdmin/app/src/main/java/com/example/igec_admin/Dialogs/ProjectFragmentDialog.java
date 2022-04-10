@@ -189,7 +189,7 @@ public class ProjectFragmentDialog extends DialogFragment {
         vContractType.setEnabled(false);
         vProjectReference.setText(project.getReference());
         vOfficeWork.setChecked(project.getReference().equals("-99999"));
-        vAddClient.setEnabled(project.getReference().equals("-99999"));
+        vAddClient.setEnabled(!project.getReference().equals("-99999"));
         vArea.setText(project.getLocationArea());
         vCity.setText(project.getLocationCity());
         vStreet.setText(project.getLocationStreet());
@@ -283,9 +283,15 @@ public class ProjectFragmentDialog extends DialogFragment {
             Map<String, Object> empInfoMap = new HashMap<>();
             empInfoMap.put(empOverview.getId(), empInfo);
             employeeOverviewRef.update(empInfoMap);
-            employeeCol.document(empOverview.getId()).update("managerID", empOverview.getManagerID(), "projectID", currProjectID);
+            if (isDeleted)
+                employeeCol.document(empOverview.getId()).update("managerID", empOverview.getManagerID(), "projectID", empOverview.getProjectId());
+            else
+                employeeCol.document(empOverview.getId()).update("managerID", empOverview.getManagerID(), "projectID", currProjectID);
+
+
+//            employeeCol.document(empOverview.getId()).update("managerID", empOverview.getManagerID(), "projectID", currProjectID);
         }
-        Team.clear();
+
     }
 
 
@@ -338,8 +344,8 @@ public class ProjectFragmentDialog extends DialogFragment {
 //        updatedProjectData.put("managerName", vManagerName.getText().toString());
 //        updatedProjectData.put("managerID", vManagerID.getText().toString());
 //        updatedProjectData.put("location", "");
-//        updateEmployeesDetails(project.getId());
 //        updatedProjectData.put("employees", Team);
+        updateEmployeesDetails(project.getId());
         Project newProject = new Project(vManagerName.getText().toString()
                 , vManagerID.getText().toString()
                 , vName.getText().toString()
@@ -465,6 +471,7 @@ public class ProjectFragmentDialog extends DialogFragment {
                 })
                 .setPositiveButton(getString(R.string.accept), (dialogInterface, i) -> {
                     deleteProject();
+                    dialogInterface.dismiss();
                 })
                 .show();
 

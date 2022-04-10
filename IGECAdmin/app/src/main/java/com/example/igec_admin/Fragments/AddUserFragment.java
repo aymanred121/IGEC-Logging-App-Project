@@ -95,7 +95,8 @@ public class AddUserFragment extends Fragment {
 //            vPassword.setText("1");
 //            vTitle.setText("a");
 //            vSalary.setText("1");
-//            vSSN.setText("11111111111111");
+//            vNationalID.setText("11111111111111");
+//            vPhone.setText("11111111111");
 //            vArea.setText("a");
 //            vCity.setText("a");
 //            vStreet.setText("a");
@@ -135,7 +136,7 @@ public class AddUserFragment extends Fragment {
                 newEmployee.setId(id);
                 db.collection("employees").document(id).set(newEmployee).addOnSuccessListener(unused -> {
                     db.collection("EmployeesGrossSalary").document(id).set(employeesGrossSalary).addOnSuccessListener(unused1 -> {
-                        clearInputs();
+                       // clearInputs();
                         Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
 
                     });

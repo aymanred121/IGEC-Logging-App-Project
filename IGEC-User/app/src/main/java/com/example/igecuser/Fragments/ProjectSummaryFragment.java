@@ -38,7 +38,7 @@ public class ProjectSummaryFragment extends Fragment {
     private MaterialButton vUpdate, vShowProjectAllowances;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-    public ProjectSummaryFragment(com.example.igecuser.fireBase.Employee manager) {
+    public ProjectSummaryFragment(Employee manager) {
         this.manager = manager;
     }
 

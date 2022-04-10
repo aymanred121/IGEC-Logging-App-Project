@@ -304,6 +304,7 @@ public class MachineFragmentDialog extends DialogFragment {
                 })
                 .setPositiveButton(getString(R.string.accept), (dialogInterface, i) -> {
                     deleteMachine();
+                    dialogInterface.dismiss();
                 })
                 .show();
 

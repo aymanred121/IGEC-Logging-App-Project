@@ -19,10 +19,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.igecuser.Adapters.AllowanceAdapter;
 import com.example.igecuser.R;
 import com.example.igecuser.fireBase.Allowance;
+import com.example.igecuser.fireBase.EmployeesGrossSalary;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.stream.IntStream;
 
 public class AddAllowanceDialog extends DialogFragment {
 
@@ -32,11 +35,20 @@ public class AddAllowanceDialog extends DialogFragment {
     private RecyclerView recyclerView;
     private RecyclerView.LayoutManager layoutManager;
     private boolean canGivePenalty, canRemove;
+    private String employeeId;
+    private EmployeesGrossSalary employeesGrossSalary;
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-    public AddAllowanceDialog(ArrayList<Allowance> allowances , boolean canGivePenalty, boolean canRemove) {
+    public AddAllowanceDialog(ArrayList<Allowance> allowances, boolean canGivePenalty, boolean canRemove) {
         this.allowances = allowances;
         this.canGivePenalty = canGivePenalty;
         this.canRemove = canRemove;
+    }
+
+    public AddAllowanceDialog(String employeeId, boolean canGivePenalty, boolean canRemove) {
+        this.employeeId = employeeId;
+        this.canRemove = canRemove;
+        this.canGivePenalty = canGivePenalty;
     }
 
     @NonNull
@@ -106,9 +118,31 @@ public class AddAllowanceDialog extends DialogFragment {
         recyclerView = view.findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
-        adapter = new AllowanceAdapter(allowances,canRemove);
         recyclerView.setLayoutManager(layoutManager);
+        adapter = new AllowanceAdapter(canRemove);
         recyclerView.setAdapter(adapter);
+        if(allowances != null) {
+            adapter.setAllowances(allowances);
+        }
+        else
+        {
+            allowances = new ArrayList<>();
+            db.collection("EmployeesGrossSalary").document(employeeId).addSnapshotListener((value, error) -> {
+                if (!value.exists())
+                    return;
+                allowances.clear();
+                employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
+                //IntStream.range(0, employeesGrossSalary.getPenalties().size()).forEach(i -> employeesGrossSalary.getPenalties().get(i).setAmount(employeesGrossSalary.getPenalties().get(i).getAmount() * -1));
+                allowances.addAll(employeesGrossSalary.getPenalties());
+                allowances.addAll(employeesGrossSalary.getBonuses());
+                allowances.addAll(employeesGrossSalary.getAllowances());
+                allowances.addAll(employeesGrossSalary.getProjectAllowances());
+                allowances.add(new Allowance("Net Salary", employeesGrossSalary.getNetSalary()));
+                adapter.setAllowances(allowances);
+                adapter.notifyDataSetChanged();
+            });
+        }
+
     }
 
     private View.OnClickListener oclDone = new View.OnClickListener() {
@@ -120,14 +154,14 @@ public class AddAllowanceDialog extends DialogFragment {
     private View.OnClickListener oclAddAllowance = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            AllowanceInfoDialog allowanceInfoDialog = new AllowanceInfoDialog(-1,canGivePenalty);
+            AllowanceInfoDialog allowanceInfoDialog = new AllowanceInfoDialog(-1, canGivePenalty);
             allowanceInfoDialog.show(getParentFragmentManager(), "");
         }
     };
     private AllowanceAdapter.OnItemClickListener oclItemClickListener = new AllowanceAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position) {
-            AllowanceInfoDialog allowanceInfoDialog = new AllowanceInfoDialog(position, allowances.get(position),canGivePenalty);
+            AllowanceInfoDialog allowanceInfoDialog = new AllowanceInfoDialog(position, allowances.get(position), canGivePenalty);
             allowanceInfoDialog.show(getParentFragmentManager(), "");
         }
 

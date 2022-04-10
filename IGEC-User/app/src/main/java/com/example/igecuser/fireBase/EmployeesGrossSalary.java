@@ -5,6 +5,7 @@ import java.util.ArrayList;
 public class EmployeesGrossSalary {
     private String employeeId;
     private double netSalary;
+    //TODO join them all to one arraylist expenses
     private ArrayList<Allowance> projectAllowances = new ArrayList<>(), penalties = new ArrayList<>(), bonuses = new ArrayList<>(), allowances = new ArrayList<>();
 
     public EmployeesGrossSalary() {

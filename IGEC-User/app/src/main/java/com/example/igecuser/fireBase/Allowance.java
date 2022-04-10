@@ -5,6 +5,7 @@ import java.io.Serializable;
 public class Allowance implements Serializable {
     private String name;
     private double amount;
+    //TODO added String type = [Net Salary, Allowance, Penalty, Bonus, Project]
 
     public Allowance() {
     }

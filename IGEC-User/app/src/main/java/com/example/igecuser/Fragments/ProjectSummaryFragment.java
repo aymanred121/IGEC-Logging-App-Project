@@ -102,7 +102,8 @@ public class ProjectSummaryFragment extends Fragment {
     private final View.OnClickListener oclUpdate = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            //TODO update project list allowances and users allowances
+            //TODO update project list allowances and users allowances doesn't affect the user
+            //TODO fix bug: it update employee data only not the manager
             project.setAllowancesList(projectAllowance);
             db.collection("projects").document(manager.getProjectID()).update("allowancesList", projectAllowance).addOnSuccessListener(unused -> {
                 employeeOverviews.forEach(employeeOverview -> {
@@ -122,16 +123,8 @@ public class ProjectSummaryFragment extends Fragment {
     private final EmployeeAdapter.OnItemClickListener itemClickListener = new EmployeeAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position) {
-            //TODO employee gross salary call AddAllowanceDialog with the arraylist WITHOUT NET SALARY
-            db.collection("EmployeesGrossSalary").document(employeeOverviews.get(position).getId()).get().addOnSuccessListener(documentSnapshot -> {
-                if (!documentSnapshot.exists())
-                    return;
-                EmployeesGrossSalary employeesGrossSalary = documentSnapshot.toObject(EmployeesGrossSalary.class);
-                AddAllowanceDialog employeeSummaryDialog = new AddAllowanceDialog(employeesGrossSalary.getAllowances(), true, true);
-                employeeSummaryDialog.show(getParentFragmentManager(), "");
-            });
-           /* AddAllowanceDialog employeeSummaryDialog = new AddAllowanceDialog(here, true, true);
-            employeeSummaryDialog.show(getParentFragmentManager(), "");*/
+            AddAllowanceDialog employeeSummaryDialog = new AddAllowanceDialog(employeeOverviews.get(position).getId(), true, true);
+            employeeSummaryDialog.show(getParentFragmentManager(), "");
         }
     };
 }

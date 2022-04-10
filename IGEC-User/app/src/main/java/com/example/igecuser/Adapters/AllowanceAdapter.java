@@ -18,13 +18,17 @@ import com.google.android.material.button.MaterialButton;
 import java.util.ArrayList;
 
 public class AllowanceAdapter extends RecyclerView.Adapter<AllowanceAdapter.AllowanceViewHolder> {
-    private ArrayList<Allowance> allowances;
+    private ArrayList<Allowance> allowances = new ArrayList<>();
     private OnItemClickListener listener;
     private boolean canRemove;
 
     public AllowanceAdapter(ArrayList<Allowance> supplements, boolean canRemoveItem) {
         this.allowances = supplements;
         this.canRemove = canRemoveItem;
+    }
+
+    public AllowanceAdapter(boolean canRemove) {
+        this.canRemove = canRemove;
     }
 
     @NonNull

@@ -224,8 +224,19 @@ public class AddProjectFragment extends Fragment {
                 }
                 counter[0]++;
             });
-            if(allowances.size()!=0)
-            db.collection("EmployeesGrossSalary").document(emp.getId()).update("projectAllowances",allowances);
+            ArrayList<Allowance> allTypes = new ArrayList<>();
+            db.collection("EmployeesGrossSalary").document(emp.getId()).get().addOnSuccessListener((value) -> {
+                if (!value.exists())
+                    return;
+                EmployeesGrossSalary employeesGrossSalary;
+                employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
+                allTypes.addAll(employeesGrossSalary.getAllTypes());
+                if (allowances.size() != 0) {
+                    allTypes.addAll(allowances);
+                }
+                db.collection("EmployeesGrossSalary").document(emp.getId()).update("allTypes",allTypes);
+            });
+
         });
 
     }
@@ -290,7 +301,6 @@ public class AddProjectFragment extends Fragment {
         Team.clear();
         vManagerID.setAdapter(null);
         vManagerID.setEnabled(false);
-
         client = null;
         vTimeDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
         vTimeDatePicker = vTimeDatePickerBuilder.build();

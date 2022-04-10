@@ -22,8 +22,10 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 import com.example.igec_admin.R;
+import com.example.igec_admin.fireBase.Allowance;
 import com.example.igec_admin.fireBase.Employee;
 import com.example.igec_admin.fireBase.EmployeeOverview;
+import com.example.igec_admin.fireBase.EmployeesGrossSalary;
 import com.example.igec_admin.fireBase.Project;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
@@ -54,7 +56,11 @@ public class UserFragmentDialog extends DialogFragment {
         setStyle(DialogFragment.STYLE_NORMAL, R.style.FullscreenDialogTheme);
     }
 
-
+    private final int PROJECT = 0;
+    private final int NETSALARY = 1;
+    private final int ALLOWANCE = 2;
+    private final int BONUS = 3;
+    private final int PENALTY = 4;
     // Views
     private MaterialButton vUpdate;
     private MaterialButton vDelete;
@@ -330,9 +336,18 @@ public class UserFragmentDialog extends DialogFragment {
         updatedEmpOverviewMap.put(id, empInfo);
         HashMap<String, Object> updatedEmployeeMap = fillEmployeeData();
         db.collection("employees").document(id).update(updatedEmployeeMap).addOnSuccessListener(unused -> {
-            if (employee.getSalary() != Double.parseDouble(vSalary.getText().toString()))
-                db.collection("EmployeesGrossSalary").document(id).update("netSalary", Double.parseDouble(vSalary.getText().toString()));
-
+            if (employee.getSalary() != Double.parseDouble(vSalary.getText().toString())) {
+                ArrayList<Allowance> allTypes = new ArrayList<>();
+                db.collection("EmployeesGrossSalary").document(employee.getId()).get().addOnSuccessListener((value) -> {
+                    if (!value.exists())
+                        return;
+                    EmployeesGrossSalary employeesGrossSalary;
+                    employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
+                    allTypes.addAll(employeesGrossSalary.getAllTypes());
+                    allTypes.add(new Allowance("Net salary" ,Double.parseDouble(vSalary.getText().toString()) , NETSALARY ));
+                    db.collection("EmployeesGrossSalary").document(employee.getId()).update("allTypes", allTypes);
+                });
+            }
             updateEmployeeOverview(updatedEmpOverviewMap, updatedEmployeeMap);
 
         });

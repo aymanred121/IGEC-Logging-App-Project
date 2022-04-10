@@ -362,7 +362,7 @@ public class ProjectFragmentDialog extends DialogFragment {
         allowances = newProject.getAllowancesList();
         db.collection("projects").document(project.getId()).set(newProject).addOnSuccessListener(unused -> {
             newProject.getEmployees().forEach(emp->{
-                db.collection("EmployeesGrossSalary").document(emp.getId()).update("projectAllowances",allowances);
+                db.collection("EmployeesGrossSalary").document(emp.getId()).update("allTypes",allowances);
             });
             Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
             project.setEmployees(null);
@@ -371,7 +371,6 @@ public class ProjectFragmentDialog extends DialogFragment {
             TeamID.clear();
             dismiss();
         });
-
     }
 
     void deleteProject() {

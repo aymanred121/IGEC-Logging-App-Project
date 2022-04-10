@@ -133,11 +133,7 @@ public class AddAllowanceDialog extends DialogFragment {
                 allowances.clear();
                 employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
                 //IntStream.range(0, employeesGrossSalary.getPenalties().size()).forEach(i -> employeesGrossSalary.getPenalties().get(i).setAmount(employeesGrossSalary.getPenalties().get(i).getAmount() * -1));
-                allowances.addAll(employeesGrossSalary.getPenalties());
-                allowances.addAll(employeesGrossSalary.getBonuses());
-                allowances.addAll(employeesGrossSalary.getAllowances());
-                allowances.addAll(employeesGrossSalary.getProjectAllowances());
-                allowances.add(new Allowance("Net Salary", employeesGrossSalary.getNetSalary()));
+                allowances.addAll(employeesGrossSalary.getAllTypes());
                 adapter.setAllowances(allowances);
                 adapter.notifyDataSetChanged();
             });

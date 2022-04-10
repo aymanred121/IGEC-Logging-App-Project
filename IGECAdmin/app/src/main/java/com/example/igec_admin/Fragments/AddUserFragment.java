@@ -17,6 +17,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.igec_admin.R;
+import com.example.igec_admin.fireBase.Allowance;
 import com.example.igec_admin.fireBase.Employee;
 import com.example.igec_admin.fireBase.EmployeesGrossSalary;
 import com.google.android.material.button.MaterialButton;
@@ -39,7 +40,11 @@ import java.util.regex.Pattern;
 
 public class AddUserFragment extends Fragment {
 
-
+    private final int PROJECT = 0;
+    private final int NETSALARY = 1;
+    private final int ALLOWANCE = 2;
+    private final int BONUS = 3;
+    private final int PENALTY = 4;
     // Views
     MaterialButton vRegister;
     TextInputEditText vFirstName, vSecondName, vEmail, vPassword, vPhone, vTitle, vSalary, vNationalID, vArea, vCity, vStreet, vHireDate;
@@ -122,7 +127,9 @@ public class AddUserFragment extends Fragment {
                 String id = db.collection("EmployeeOverview").document().getId().substring(0, 5);
                 EmployeesGrossSalary employeesGrossSalary = new EmployeesGrossSalary();
                 employeesGrossSalary.setEmployeeId(id);
-                employeesGrossSalary.setNetSalary(Double.parseDouble(vSalary.getText().toString()));
+                ArrayList<Allowance> allTypes = new ArrayList<>();
+                allTypes.add(new Allowance("Net salary" , Double.parseDouble(vSalary.getText().toString()) , NETSALARY));
+                employeesGrossSalary.setAllTypes(allTypes);
                 ArrayList<String> empInfo = new ArrayList<>();
                 empInfo.add((vFirstName.getText()).toString());
                 empInfo.add((vSecondName.getText()).toString());
@@ -136,7 +143,7 @@ public class AddUserFragment extends Fragment {
                 newEmployee.setId(id);
                 db.collection("employees").document(id).set(newEmployee).addOnSuccessListener(unused -> {
                     db.collection("EmployeesGrossSalary").document(id).set(employeesGrossSalary).addOnSuccessListener(unused1 -> {
-                       // clearInputs();
+                        clearInputs();
                         Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
 
                     });

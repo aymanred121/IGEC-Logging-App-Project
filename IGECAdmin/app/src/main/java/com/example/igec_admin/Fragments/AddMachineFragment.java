@@ -62,7 +62,11 @@ import pub.devrel.easypermissions.EasyPermissions;
 
 public class AddMachineFragment extends Fragment implements EasyPermissions.PermissionCallbacks {
 
-
+    private final int PROJECT = 0;
+    private final int NETSALARY = 1;
+    private final int ALLOWANCE = 2;
+    private final int BONUS = 3;
+    private final int PENALTY = 4;
     // Views
     private TextInputLayout vIDLayout, vPurchaseDateLayout, vSerialNumberLayout;
     private TextInputEditText vID, vPurchaseDate, vSerialNumber, vAllowance, vMachineByDay, vMachineByWeek, vMachineByMonth;
@@ -221,8 +225,8 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
                 }
                 saveToInternalStorage();
                 //saveToCloudStorage();
-
-                Machine newMachine = new Machine(vID.getText().toString(), vSerialNumber.getText().toString(), new Date(purchaseDate), new Allowance(Integer.parseInt(vAllowance.getText().toString())));
+                // REPLACE Hard code in type of allawance
+                Machine newMachine = new Machine(vID.getText().toString(), vSerialNumber.getText().toString(), new Date(purchaseDate), new Allowance(Integer.parseInt(vAllowance.getText().toString()) , ALLOWANCE));
                 newMachine.setDailyRentPrice(Double.parseDouble(vMachineByDay.getText().toString()));
                 newMachine.setWeeklyRentPrice(Double.parseDouble(vMachineByWeek.getText().toString()));
                 newMachine.setMonthlyRentPrice(Double.parseDouble(vMachineByMonth.getText().toString()));

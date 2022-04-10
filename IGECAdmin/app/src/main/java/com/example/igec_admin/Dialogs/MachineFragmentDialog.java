@@ -2,6 +2,7 @@ package com.example.igec_admin.Dialogs;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +14,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentResultListener;
@@ -45,6 +47,7 @@ import java.util.stream.IntStream;
 import androidmads.library.qrgenearator.QRGContents;
 import androidmads.library.qrgenearator.QRGEncoder;
 
+@RequiresApi(api = Build.VERSION_CODES.R)
 public class MachineFragmentDialog extends DialogFragment {
 
 
@@ -190,6 +193,7 @@ public class MachineFragmentDialog extends DialogFragment {
         });
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.R)
     private void updateMachine() {
 
         if (!validateInput()) {

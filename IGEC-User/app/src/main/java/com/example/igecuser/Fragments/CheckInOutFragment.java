@@ -22,8 +22,10 @@ import com.example.igecuser.Dialogs.ClientInfoDialog;
 import com.example.igecuser.Dialogs.MachineCheckInOutDialog;
 import com.example.igecuser.Dialogs.SupplementsDialog;
 import com.example.igecuser.R;
+import com.example.igecuser.fireBase.Allowance;
 import com.example.igecuser.fireBase.Client;
 import com.example.igecuser.fireBase.Employee;
+import com.example.igecuser.fireBase.EmployeesGrossSalary;
 import com.example.igecuser.fireBase.Machine;
 import com.example.igecuser.fireBase.MachineDefectsLog;
 import com.example.igecuser.fireBase.Machine_Employee;
@@ -41,6 +43,7 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -70,6 +73,8 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     private FusedLocationProviderClient fusedLocationClient;
     private final CollectionReference machineEmployee = db.collection("Machine_Employee");
     private final CollectionReference machineCol = db.collection("machine");
+    private final CollectionReference GrossSalaryRef = db.collection("EmployeesGrossSalary");
+
 
     public CheckInOutFragment(Employee currEmployee) {
         this.currEmployee = currEmployee;
@@ -353,6 +358,17 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                 .addOnSuccessListener(unused1 -> {
                     machineEmployee.document(machineEmpId).set(machineEmployee1).addOnSuccessListener(unused -> Toast.makeText(getContext(), "Machine: " + currMachine.getReference() + " checked In successfully", Toast.LENGTH_SHORT).show());
                 });
+        ArrayList<Allowance> allTypes = new ArrayList<>();
+        db.collection("EmployeesGrossSalary").document(currEmployee.getId()).get().addOnSuccessListener((value) -> {
+            if (!value.exists())
+                return;
+            EmployeesGrossSalary employeesGrossSalary;
+            employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
+            allTypes.addAll(employeesGrossSalary.getAllTypes());
+            allTypes.add(currMachine.getAllowance());
+            GrossSalaryRef.document(currEmployee.getId()).update("allTypes" , allTypes);
+        });
+
 
     }
 

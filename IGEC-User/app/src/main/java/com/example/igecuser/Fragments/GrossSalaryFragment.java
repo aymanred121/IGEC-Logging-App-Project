@@ -68,11 +68,7 @@ public class GrossSalaryFragment extends Fragment {
             salarySummaries.clear();
             employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
             //IntStream.range(0, employeesGrossSalary.getPenalties().size()).forEach(i -> employeesGrossSalary.getPenalties().get(i).setAmount(employeesGrossSalary.getPenalties().get(i).getAmount() * -1));
-            salarySummaries.addAll(employeesGrossSalary.getPenalties());
-            salarySummaries.addAll(employeesGrossSalary.getBonuses());
-            salarySummaries.addAll(employeesGrossSalary.getAllowances());
-            salarySummaries.addAll(employeesGrossSalary.getProjectAllowances());
-            salarySummaries.add(new Allowance("Net Salary", employeesGrossSalary.getNetSalary()));
+            salarySummaries.addAll(employeesGrossSalary.getAllTypes());
             adapter.setAllowances(salarySummaries);
             adapter.notifyDataSetChanged();
         });

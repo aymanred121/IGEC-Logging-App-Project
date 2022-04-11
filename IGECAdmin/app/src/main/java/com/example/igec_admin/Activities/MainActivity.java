@@ -24,6 +24,8 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.viewpager.widget.ViewPager;
 import androidx.viewpager2.widget.ViewPager2;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkRequest;
 
 import com.example.igec_admin.Adatpers.ViewPagerAdapter;
 import com.example.igec_admin.Fragments.AddMachineFragment;
@@ -61,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
 
         initialize();
+
 
 
         // Listeners

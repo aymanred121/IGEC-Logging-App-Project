@@ -5,6 +5,7 @@ package com.example.igecuser.Activities;
 import static com.example.igecuser.cryptography.RSAUtil.decrypt;
 import static com.example.igecuser.cryptography.RSAUtil.privateKey;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -18,18 +19,30 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
 import com.example.igecuser.R;
-import com.example.igecuser.cryptography.RSAUtil;
+import com.example.igecuser.fireBase.Allowance;
 import com.example.igecuser.fireBase.Employee;
+import com.example.igecuser.fireBase.EmployeeOverview;
+import com.example.igecuser.fireBase.EmployeesGrossSalary;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
 
+    private final int PROJECT = 0;
+    private final int NETSALARY = 1;
+    private final int ALLOWANCE = 2;
+    private final int BONUS = 3;
+    private final int PENALTY = 4;
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     // Views
     private TextInputEditText vEmail;
     private TextInputLayout vEmailLayout;
@@ -46,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         setContentView(R.layout.activity_main);
         initialize();
-
+        monthStart();
         // Listeners
         vEmail.addTextChangedListener(twEmail);
         vSignIn.setOnClickListener(clSignIn);
@@ -63,6 +76,60 @@ public class MainActivity extends AppCompatActivity {
         vEmail.setText("t@gmail.com");
         vPassword.setText("1");
 
+    }
+    private void monthStart()
+    {
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+        String currentDateAndTime = sdf.format(new Date());
+        String day = currentDateAndTime.substring(0,2);
+        String month = currentDateAndTime.substring(3,5);
+        String Year = currentDateAndTime.substring(6,10);
+        db.collection("Cloud").document("ifFirstDay").get().addOnSuccessListener((value) -> {
+            int op = -1;
+
+            if(!value.exists()) op = 0;
+
+            else if (Integer.parseInt(value.get("ifFirstDay").toString()) == 2 &&
+                    (value.get("IfDoneFor "+month+'-'+Year)== null || Integer.parseInt(value.get("IfDoneFor "+month+'-'+Year).toString()) == 0)) op = 1;
+
+            else if(Integer.parseInt(value.get("ifFirstDay").toString()) == 1) op = 2;
+
+            switch (op)
+            {
+                case 0:
+                    if(Integer.parseInt(day) == 1)
+                    {
+                        HashMap<String, Integer> temp = new HashMap<>();
+                        temp.put("ifFirstDay",1);
+                        temp.put("IfDoneFor "+month+'-'+Year,0);
+                        db.collection("Cloud").document("ifFirstDay").set(temp);
+                    }
+                    // No break
+                case 2:
+                    // TODO remove hard coded employee delete and fill allEmp with allEmployee data to reset all the old month data and leave only NETSALARY (to be discussed)
+                    ArrayList<Allowance> allTypes = new ArrayList<>();
+                    ArrayList<EmployeeOverview> allEmp = new ArrayList<>();
+                    db.collection("EmployeesGrossSalary").document("1Yfa6").get().addOnSuccessListener((value1) -> {
+                        if (!value1.exists())
+                            return;
+                        EmployeesGrossSalary employeesGrossSalary;
+                        employeesGrossSalary = value1.toObject(EmployeesGrossSalary.class);
+                        allTypes.addAll(employeesGrossSalary.getAllTypes());
+                        allTypes.removeIf(allowance -> allowance.getType() != NETSALARY);
+                        db.collection("EmployeesGrossSalary").document("1Yfa6").update("allTypes", allTypes);
+                    });
+                    db.collection("Cloud").document("ifFirstDay").update("ifFirstDay",2 ,"IfDoneFor "+month+'-'+Year , 1 );
+                    break;
+                case 1:
+                    if(Integer.parseInt(day) == 1)
+                    {
+                        db.collection("Cloud").document("ifFirstDay").update("ifFirstDay",1);
+                    }
+                    break;
+                case -1 :
+                    break;
+            }
+        });
     }
 
     @RequiresApi(api = Build.VERSION_CODES.Q)

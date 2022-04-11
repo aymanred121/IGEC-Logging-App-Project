@@ -1,9 +1,14 @@
 package com.example.igecuser.fireBase;
 
 
+import com.google.firebase.database.Exclude;
+
 public class EmployeeOverview {
-   private Boolean isSelected=false;
-    private String firstName,lastName,title,id;
+    @Exclude public boolean isSelected = false;
+    private String firstName, lastName, title, id, managerID, projectId;
+
+    public EmployeeOverview() {
+    }
 
     public EmployeeOverview(String firstName, String lastName, String title, String id) {
         this.firstName = firstName;
@@ -12,7 +17,12 @@ public class EmployeeOverview {
         this.id = id;
     }
 
-    public EmployeeOverview() {
+    public EmployeeOverview(String firstName, String lastName, String title, String id, String projectId) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.title = title;
+        this.id = id;
+        this.projectId = projectId;
     }
 
     public String getFirstName() {
@@ -43,15 +53,23 @@ public class EmployeeOverview {
         return id;
     }
 
-     public Boolean getSelected() {
-        return isSelected;
-    }
-
-    public void setSelected(Boolean selected) {
-        isSelected = selected;
-    }
-
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getManagerID() {
+        return managerID;
+    }
+
+    public void setManagerID(String managerID) {
+        this.managerID = managerID;
+    }
+
+    public String getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(String projectId) {
+        this.projectId = projectId;
     }
 }

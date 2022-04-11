@@ -48,7 +48,9 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="32dp"
             app:boxBackgroundMode="outline"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:endIconMode="clear_text"
+            app:endIconTint="@color/primaryColor"
+            app:layout_constraintEnd_toStartOf="@id/checkBox_Penalty"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/textInputLayout_AllowanceName">
 
@@ -57,11 +59,21 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/Mount"
-                android:inputType="numberSigned"
+                android:inputType="numberDecimal"
                 android:padding="14dp"
                 android:singleLine="true" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/checkBox_Penalty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@+id/textInputLayout_AllowanceMount"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginEnd="32dp"
+            app:layout_constraintStart_toEndOf="@+id/textInputLayout_AllowanceMount"
+            app:layout_constraintTop_toTopOf="@+id/textInputLayout_AllowanceMount"
+            android:text="@string/penalty" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/textInputLayout_AllowanceNote"

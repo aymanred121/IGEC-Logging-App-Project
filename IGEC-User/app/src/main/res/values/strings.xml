@@ -55,7 +55,7 @@
     <string name="_0_00">0.00 EGP</string>
     <string name="project_name">Project Name*</string>
     <string name="project_reference">Project Reference*</string>
-    <string name="project_allowances">Show Project Allowances</string>
+    <string name="project_allowances">Project Allowances</string>
     <string name="update">Update</string>
     <string name="ProjectSummary">Project Summary</string>
     <string name="do_you_want_to_confirm_this_action">Do you want to confirm this action?</string>
@@ -67,4 +67,5 @@
     <string name="cancel">No</string>
     <string name="accept">Yes</string>
     <string name="Note">Note*</string>
+    <string name="penalty">Penalty</string>
 </resources>

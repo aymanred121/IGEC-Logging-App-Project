@@ -35,7 +35,7 @@ public class ProjectSummaryFragment extends Fragment {
     private Project project;
     private ArrayList<Allowance> projectAllowance;
     private TextInputEditText vProjectName, vProjectReference;
-    private MaterialButton vUpdate, vShowProjectAllowances;
+    private MaterialButton vShowProjectAllowances;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     public ProjectSummaryFragment(Employee manager) {
@@ -82,7 +82,6 @@ public class ProjectSummaryFragment extends Fragment {
             projectAllowance.addAll(project.getAllowancesList());
             vProjectName = view.findViewById(R.id.TextInput_ProjectName);
             vProjectReference = view.findViewById(R.id.TextInput_ProjectReference);
-            vUpdate = view.findViewById(R.id.Button_Update);
             vShowProjectAllowances = view.findViewById(R.id.Button_ShowProjectAllowances);
             recyclerView = view.findViewById(R.id.recyclerview);
             recyclerView.setHasFixedSize(true);
@@ -93,37 +92,21 @@ public class ProjectSummaryFragment extends Fragment {
             vProjectName.setText(project.getName());
             vProjectReference.setText(project.getReference());
             adapter.setOnItemClickListener(itemClickListener);
-            vUpdate.setOnClickListener(oclUpdate);
             vShowProjectAllowances.setOnClickListener(oclShowProjectAllowances);
         });
 
     }
-
-    private final View.OnClickListener oclUpdate = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            //TODO update project list allowances and users allowances doesn't affect the user
-            //TODO fix bug: it update employee data only not the manager
-            project.setAllowancesList(projectAllowance);
-            db.collection("projects").document(manager.getProjectID()).update("allowancesList", projectAllowance).addOnSuccessListener(unused -> {
-                employeeOverviews.forEach(employeeOverview -> {
-                    db.collection("EmployeesGrossSalary").document(employeeOverview.getId()).update("projectAllowances", projectAllowance);
-                });
-            });
-
-        }
-    };
     private final View.OnClickListener oclShowProjectAllowances = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            AddAllowanceDialog employeeSummaryDialog = new AddAllowanceDialog(projectAllowance, false, true);
+            AddAllowanceDialog employeeSummaryDialog = new AddAllowanceDialog(manager,projectAllowance, false, true);
             employeeSummaryDialog.show(getParentFragmentManager(), "");
         }
     };
     private final EmployeeAdapter.OnItemClickListener itemClickListener = new EmployeeAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position) {
-            AddAllowanceDialog employeeSummaryDialog = new AddAllowanceDialog(employeeOverviews.get(position).getId(), true, true);
+            AddAllowanceDialog employeeSummaryDialog = new AddAllowanceDialog(employeeOverviews.get(position), true, true);
             employeeSummaryDialog.show(getParentFragmentManager(), "");
         }
     };

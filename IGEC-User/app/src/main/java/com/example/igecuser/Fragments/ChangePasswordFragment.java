@@ -1,5 +1,7 @@
 package com.example.igecuser.Fragments;
 
+import static com.example.igecuser.cryptography.RSAUtil.encrypt;
+
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -8,14 +10,20 @@ import androidx.fragment.app.Fragment;
 
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.igecuser.R;
+import com.example.igecuser.fireBase.Employee;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.Base64;
 
 public class ChangePasswordFragment extends Fragment {
 
@@ -25,14 +33,18 @@ public class ChangePasswordFragment extends Fragment {
     private MaterialButton vChangePassword;
 
     //Vars
+    private Employee user;
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-
+    public ChangePasswordFragment(Employee user) {
+        this.user = user;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-       return inflater.inflate(R.layout.fragment_change_password, container, false);
+        return inflater.inflate(R.layout.fragment_change_password, container, false);
     }
 
     @Override
@@ -63,11 +75,22 @@ public class ChangePasswordFragment extends Fragment {
         vNewPassword.setText(null);
         vConfirmPassword.setText(null);
     }
+    private String encryptedPassword() {
+        try {
+            return Base64.getEncoder().encodeToString(encrypt(vNewPassword.getText().toString()));
+        } catch (Exception e) {
+            Log.e("error in encryption", e.toString());
+            return null;
+        }
+    }
 
     private View.OnClickListener oclChangePassword = v -> {
         if (validateInput()) {
             // update password
-            clearInput();
+            user.setPassword(vNewPassword.getText().toString());
+            db.collection("employees").document(user.getId()).update("password", encryptedPassword()).addOnSuccessListener(unused -> {
+                clearInput();
+            });
 
         }
     };

@@ -19,27 +19,35 @@ import androidx.fragment.app.DialogFragment;
 import com.example.igecuser.R;
 import com.example.igecuser.fireBase.Allowance;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.lang.reflect.Type;
 
 public class AllowanceInfoDialog extends DialogFragment {
-
+    private final int PROJECT = 0;
+    private final int NETSALARY = 1;
+    private final int ALLOWANCE = 2;
+    private final int BONUS = 3;
+    private final int PENALTY = 4;
     private TextInputEditText vAllowanceName, vAllowanceMount, vAllowanceNote;
+    private MaterialCheckBox vPenalty;
     private MaterialButton vDone;
     private int position;
     private Allowance allowance = null;
-    private boolean canGivePenalty;
+    private boolean canGivePenalty, isProject;
 
-    public AllowanceInfoDialog(int position, boolean canGivePenalty) {
+    public AllowanceInfoDialog(int position, boolean canGivePenalty, boolean isProject) {
         this.position = position;
         this.canGivePenalty = canGivePenalty;
+        this.isProject = isProject;
     }
 
-    public AllowanceInfoDialog(int position, Allowance allowance, boolean canGivePenalty) {
+    public AllowanceInfoDialog(int position, Allowance allowance, boolean canGivePenalty, boolean isProject) {
         this.position = position;
         this.allowance = allowance;
         this.canGivePenalty = canGivePenalty;
+        this.isProject = isProject;
     }
 
     @NonNull
@@ -83,8 +91,12 @@ public class AllowanceInfoDialog extends DialogFragment {
         vAllowanceMount = view.findViewById(R.id.TextInput_AllowanceMount);
         vAllowanceName = view.findViewById(R.id.TextInput_AllowanceName);
         vAllowanceNote = view.findViewById(R.id.TextInput_AllowanceNote);
+        vPenalty = view.findViewById(R.id.checkBox_Penalty);
         vDone = view.findViewById(R.id.button_Done);
+        vPenalty.setVisibility(canGivePenalty ? View.VISIBLE : View.GONE);
+
         if (allowance != null) {
+            vPenalty.setChecked(allowance.getAmount() < 0);
             vAllowanceName.setText(allowance.getName());
             vAllowanceMount.setText(String.valueOf(allowance.getAmount()));
         }
@@ -94,7 +106,7 @@ public class AllowanceInfoDialog extends DialogFragment {
         return
                 !(vAllowanceName.getText().toString().isEmpty() ||
                         vAllowanceMount.getText().toString().isEmpty() ||
-                        (!canGivePenalty && Double.parseDouble(vAllowanceMount.getText().toString()) < 0));
+                        vAllowanceNote.getText().toString().isEmpty());
 
     }
 
@@ -102,18 +114,24 @@ public class AllowanceInfoDialog extends DialogFragment {
         @Override
         public void onClick(View v) {
             if (!validateInput()) {
-                if (!canGivePenalty && Double.parseDouble(vAllowanceMount.getText().toString()) < 0)
-                    Toast.makeText(getActivity(), "can't give penalty to whole project", Toast.LENGTH_SHORT).show();
-                else
-                    Toast.makeText(getActivity(), "please fill allowance data", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "please fill allowance data", Toast.LENGTH_SHORT).show();
                 return;
             }
             Bundle result = new Bundle();
             Allowance allowance = new Allowance();
             allowance.setName(vAllowanceName.getText().toString());
-            allowance.setAmount(Double.parseDouble(vAllowanceMount.getText().toString()));
+            allowance.setAmount(vPenalty.isChecked() ? (-1) * Double.parseDouble(vAllowanceMount.getText().toString()) : Double.parseDouble(vAllowanceMount.getText().toString()));
+            if (isProject)
+                allowance.setType(PROJECT);
+            else {
+                if (vPenalty.isChecked())
+                    allowance.setType(PENALTY);
+                else
+                    allowance.setType(BONUS);
+            }
+
             result.putSerializable("allowance", allowance);
-            result.putString("note",vAllowanceNote.getText().toString());
+            result.putString("note", vAllowanceNote.getText().toString());
             result.putInt("position", position);
             if (position == -1)
                 getParentFragmentManager().setFragmentResult("addAllowance", result);

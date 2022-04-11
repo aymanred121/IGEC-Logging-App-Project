@@ -81,7 +81,7 @@ public class EmployeeDashboard extends AppCompatActivity implements NavigationVi
 
         ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), 0);
         CheckInOutFragment checkInOutFragment = new CheckInOutFragment(currEmployee);
-        ChangePasswordFragment changePasswordFragment = new ChangePasswordFragment();
+        ChangePasswordFragment changePasswordFragment = new ChangePasswordFragment(currEmployee);
         GrossSalaryFragment grossSalaryFragment = new GrossSalaryFragment(currEmployee.getId());
         SendVacationRequestFragment sendVacationRequestFragment = new SendVacationRequestFragment(currEmployee);
         VacationsLogFragment vacationsLogFragment = new VacationsLogFragment(true, currEmployee);

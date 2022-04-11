@@ -123,8 +123,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         hide = AnimationUtils.loadAnimation(getActivity(), R.anim.hide);
         id = LocalDate.now().toString() + currEmployee.getId();
         setCheckInOutBtn();
-        vAddMachine.setClickable(isHere);
-        vAddMachine.startAnimation(isHere ? show : hide);
+
 
         vGreeting.setText(String.format("%s\n%s", getString(R.string.good_morning), currEmployee.getFirstName()));
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
@@ -139,6 +138,8 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
             }
             vCheckInOut.setBackgroundColor((isHere) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
             vCheckInOut.setText(isHere ? "Out" : "In");
+            vAddMachine.setClickable(isHere);
+            vAddMachine.startAnimation(isHere ? show : hide);
         });
     }
 

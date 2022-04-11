@@ -225,8 +225,7 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
                 }
                 saveToInternalStorage();
                 //saveToCloudStorage();
-                // REPLACE Hard code in type of allawance
-                Machine newMachine = new Machine(vID.getText().toString(), vSerialNumber.getText().toString(), new Date(purchaseDate), new Allowance(Integer.parseInt(vAllowance.getText().toString()) , ALLOWANCE));
+                Machine newMachine = new Machine(vID.getText().toString(), vSerialNumber.getText().toString(), new Date(purchaseDate), new Allowance(vID.getText().toString(),Double.parseDouble(vAllowance.getText().toString()) , ALLOWANCE));
                 newMachine.setDailyRentPrice(Double.parseDouble(vMachineByDay.getText().toString()));
                 newMachine.setWeeklyRentPrice(Double.parseDouble(vMachineByWeek.getText().toString()));
                 newMachine.setMonthlyRentPrice(Double.parseDouble(vMachineByMonth.getText().toString()));

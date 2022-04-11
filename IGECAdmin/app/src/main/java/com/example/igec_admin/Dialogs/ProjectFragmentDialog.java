@@ -50,6 +50,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ProjectFragmentDialog extends DialogFragment {
+    private final int PROJECT = 0;
+    private final int NETSALARY = 1;
+    private final int ALLOWANCE = 2;
+    private final int BONUS = 3;
+    private final int PENALTY = 4;
+
+
     // Views
     private TextInputEditText vName, vArea, vStreet, vCity, vTime, vManagerName, vProjectReference;
     private MaterialButton vRegister, vUpdate, vDelete, vAddClient, vAddAllowance;
@@ -362,7 +369,19 @@ public class ProjectFragmentDialog extends DialogFragment {
         allowances = newProject.getAllowancesList();
         db.collection("projects").document(project.getId()).set(newProject).addOnSuccessListener(unused -> {
             newProject.getEmployees().forEach(emp->{
-                db.collection("EmployeesGrossSalary").document(emp.getId()).update("allTypes",allowances);
+                ArrayList<Allowance> allTypes = new ArrayList<>();
+                db.collection("EmployeesGrossSalary").document(emp.getId()).get().addOnSuccessListener((value) -> {
+                    if (!value.exists())
+                        return;
+                    EmployeesGrossSalary employeesGrossSalary;
+                    employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
+                    allTypes.addAll(employeesGrossSalary.getAllTypes());
+                    if (allowances.size() != 0) {
+                        allTypes.removeIf(allowance -> allowance.getType() == PROJECT);
+                        allTypes.addAll(allowances);
+                    }
+                    db.collection("EmployeesGrossSalary").document(emp.getId()).update("allTypes",allTypes);
+                });
             });
             Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
             project.setEmployees(null);

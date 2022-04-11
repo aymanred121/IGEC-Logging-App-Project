@@ -1,5 +1,10 @@
 package com.example.igecuser.Activities;
 
+
+
+import static com.example.igecuser.cryptography.RSAUtil.decrypt;
+import static com.example.igecuser.cryptography.RSAUtil.privateKey;
+
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -84,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean isPasswordRight(String password) {
         try {
-            String decryptedPassword = RSAUtil.decrypt(password, RSAUtil.privateKey);
+            String decryptedPassword = decrypt(password, privateKey);
             if (vPassword.getText() != null && !vPassword.getText().toString().equals(decryptedPassword)) {
                 Toast.makeText(MainActivity.this, "please enter a valid email or password", Toast.LENGTH_SHORT).show();
                 return false;

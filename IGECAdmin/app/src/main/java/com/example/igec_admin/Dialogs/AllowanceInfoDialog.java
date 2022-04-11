@@ -109,7 +109,7 @@ public class AllowanceInfoDialog extends DialogFragment {
             Bundle result = new Bundle();
             Allowance allowance = new Allowance();
             allowance.setName(vAllowanceName.getText().toString());
-            allowance.setAmount(Integer.parseInt(vAllowanceMount.getText().toString()));
+            allowance.setAmount(Double.parseDouble(vAllowanceMount.getText().toString()));
             result.putSerializable("allowance", allowance);
             result.putInt("position", position);
             if (position == -1)

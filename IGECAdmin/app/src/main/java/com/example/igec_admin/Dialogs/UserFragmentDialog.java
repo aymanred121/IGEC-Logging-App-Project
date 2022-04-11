@@ -344,6 +344,7 @@ public class UserFragmentDialog extends DialogFragment {
                     EmployeesGrossSalary employeesGrossSalary;
                     employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
                     allTypes.addAll(employeesGrossSalary.getAllTypes());
+                    allTypes.removeIf(allowance -> allowance.getType() == NETSALARY);
                     allTypes.add(new Allowance("Net salary" ,Double.parseDouble(vSalary.getText().toString()) , NETSALARY ));
                     db.collection("EmployeesGrossSalary").document(employee.getId()).update("allTypes", allTypes);
                 });

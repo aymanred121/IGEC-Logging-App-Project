@@ -118,7 +118,7 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
 
         ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), 0);
         CheckInOutFragment checkInOutFragment = new CheckInOutFragment(currManager);
-        ChangePasswordFragment changePasswordFragment = new ChangePasswordFragment();
+        ChangePasswordFragment changePasswordFragment = new ChangePasswordFragment(currManager);
         GrossSalaryFragment grossSalaryFragment = new GrossSalaryFragment(currManager.getId());
         VacationRequestsFragment vacationRequestsFragment = new VacationRequestsFragment(currManager);
         VacationsLogFragment vacationsLogFragment = new VacationsLogFragment(false, currManager);

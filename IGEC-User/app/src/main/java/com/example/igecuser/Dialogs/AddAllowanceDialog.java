@@ -19,7 +19,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.igecuser.Adapters.AllowanceAdapter;
 import com.example.igecuser.R;
 import com.example.igecuser.fireBase.Allowance;
+import com.example.igecuser.fireBase.Employee;
+import com.example.igecuser.fireBase.EmployeeOverview;
 import com.example.igecuser.fireBase.EmployeesGrossSalary;
+import com.example.igecuser.fireBase.Project;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -28,25 +31,33 @@ import java.util.ArrayList;
 import java.util.stream.IntStream;
 
 public class AddAllowanceDialog extends DialogFragment {
-
+    private final int PROJECT = 0;
+    private final int NETSALARY = 1;
+    private final int ALLOWANCE = 2;
+    private final int BONUS = 3;
+    private final int PENALTY = 4;
     private FloatingActionButton vAddAllowance, vDone;
     private ArrayList<Allowance> allowances;
     private AllowanceAdapter adapter;
     private RecyclerView recyclerView;
     private RecyclerView.LayoutManager layoutManager;
-    private boolean canGivePenalty, canRemove;
-    private String employeeId;
+    private boolean canGivePenalty, canRemove, isProject;
+    private EmployeeOverview employee;
     private EmployeesGrossSalary employeesGrossSalary;
+    private Project project;
+    private Employee manager;
+
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-    public AddAllowanceDialog(ArrayList<Allowance> allowances, boolean canGivePenalty, boolean canRemove) {
+    public AddAllowanceDialog(Employee manager,ArrayList<Allowance> allowances, boolean canGivePenalty, boolean canRemove) {
+        this.manager = manager;
         this.allowances = allowances;
         this.canGivePenalty = canGivePenalty;
         this.canRemove = canRemove;
     }
 
-    public AddAllowanceDialog(String employeeId, boolean canGivePenalty, boolean canRemove) {
-        this.employeeId = employeeId;
+    public AddAllowanceDialog(EmployeeOverview employee, boolean canGivePenalty, boolean canRemove) {
+        this.employee = employee;
         this.canRemove = canRemove;
         this.canGivePenalty = canGivePenalty;
     }
@@ -90,6 +101,7 @@ public class AddAllowanceDialog extends DialogFragment {
 
                 allowances.get(position).setName(allowance.getName());
                 allowances.get(position).setAmount(allowance.getAmount());
+                allowances.get(position).setType(allowance.getType());
                 // Do something with the result
                 adapter.notifyItemChanged(position);
             }
@@ -121,19 +133,18 @@ public class AddAllowanceDialog extends DialogFragment {
         recyclerView.setLayoutManager(layoutManager);
         adapter = new AllowanceAdapter(canRemove);
         recyclerView.setAdapter(adapter);
-        if(allowances != null) {
+        isProject = allowances != null;
+        if (isProject) {
             adapter.setAllowances(allowances);
-        }
-        else
-        {
+        } else {
             allowances = new ArrayList<>();
-            db.collection("EmployeesGrossSalary").document(employeeId).addSnapshotListener((value, error) -> {
+            db.collection("EmployeesGrossSalary").document(employee.getId()).addSnapshotListener((value, error) -> {
                 if (!value.exists())
                     return;
                 allowances.clear();
                 employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
-                //IntStream.range(0, employeesGrossSalary.getPenalties().size()).forEach(i -> employeesGrossSalary.getPenalties().get(i).setAmount(employeesGrossSalary.getPenalties().get(i).getAmount() * -1));
-                allowances.addAll(employeesGrossSalary.getAllTypes());
+                //Adds only Bonuses and penalties
+                employeesGrossSalary.getAllTypes().stream().filter(allowance -> allowance.getType() == PENALTY || allowance.getType() == BONUS).forEach(allowance -> allowances.add(allowance));
                 adapter.setAllowances(allowances);
                 adapter.notifyDataSetChanged();
             });
@@ -144,20 +155,55 @@ public class AddAllowanceDialog extends DialogFragment {
     private View.OnClickListener oclDone = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            dismiss();
+
+            if (!isProject) {
+                db.collection("EmployeesGrossSalary").document(employee.getId()).get().addOnSuccessListener((value) -> {
+                    if (!value.exists())
+                        return;
+                    employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
+                    employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() == PENALTY || allowance.getType() == BONUS);
+                    employeesGrossSalary.getAllTypes().addAll(allowances);
+                    db.collection("EmployeesGrossSalary").document(employee.getId()).update("allTypes", employeesGrossSalary.getAllTypes());
+                    dismiss();
+                });
+            }
+            else
+            {
+                db.collection("projects").document(manager.getProjectID()).get().addOnSuccessListener(documentSnapshot -> {
+                    if (!documentSnapshot.exists())
+                        return;
+                    project = documentSnapshot.toObject(Project.class);
+                    project.setAllowancesList(allowances);
+                    for(EmployeeOverview employee : project.getEmployees())
+                    {
+                        db.collection("EmployeesGrossSalary").document(employee.getId()).get().addOnSuccessListener((value) -> {
+                            if (!value.exists())
+                                return;
+                            employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
+                            //? bug: TODO issue if he has more than one project
+                            employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() == PROJECT);
+                            employeesGrossSalary.getAllTypes().addAll(allowances);
+                            db.collection("EmployeesGrossSalary").document(employee.getId()).update("allTypes", employeesGrossSalary.getAllTypes());
+                        });
+                    }
+                    db.collection("projects").document(manager.getProjectID()).update("allowancesList",allowances);
+                    dismiss();
+                });
+            }
+
         }
     };
     private View.OnClickListener oclAddAllowance = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            AllowanceInfoDialog allowanceInfoDialog = new AllowanceInfoDialog(-1, canGivePenalty);
+            AllowanceInfoDialog allowanceInfoDialog = new AllowanceInfoDialog(-1, canGivePenalty, isProject);
             allowanceInfoDialog.show(getParentFragmentManager(), "");
         }
     };
     private AllowanceAdapter.OnItemClickListener oclItemClickListener = new AllowanceAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position) {
-            AllowanceInfoDialog allowanceInfoDialog = new AllowanceInfoDialog(position, allowances.get(position), canGivePenalty);
+            AllowanceInfoDialog allowanceInfoDialog = new AllowanceInfoDialog(position, allowances.get(position), canGivePenalty, isProject);
             allowanceInfoDialog.show(getParentFragmentManager(), "");
         }
 

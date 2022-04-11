@@ -9,7 +9,7 @@ public class Allowance implements Serializable, Parcelable {
     private String name ;
     private double amount ;
     private int type; // if 0 projectAllowances , if 1 penalties , if 2 bonuses , if 3 personal allowances , if 4 net salary
-
+    //? bugfix :TODO projectId, note
     public Allowance() {
     }
 

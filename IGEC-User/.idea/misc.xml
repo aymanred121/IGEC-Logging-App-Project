@@ -5,6 +5,8 @@
       <map>
         <entry key="../../../../../../../layout/custom_preview.xml" value="0.10104166666666667" />
         <entry key="../../../../../layout/custom_preview.xml" value="0.22083333333333333" />
+        <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/fragment_allowance_info_dialog.xml" value="0.5" />
+        <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/fragment_change_password.xml" value="0.5" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/fragment_check_in_out.xml" value="0.12907608695652173" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/fragment_client_info.xml" value="0.25" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/fragment_machine_check_in_out_dialog.xml" value="0.12907608695652173" />

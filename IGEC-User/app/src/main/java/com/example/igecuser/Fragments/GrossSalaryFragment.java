@@ -1,9 +1,11 @@
 package com.example.igecuser.Fragments;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,7 +30,9 @@ public class GrossSalaryFragment extends Fragment {
     private RecyclerView.LayoutManager layoutManager;
     private ArrayList<Allowance> salarySummaries;
     private EmployeesGrossSalary employeesGrossSalary;
+    private TextView vGrossSalary;
     private final String employeeId;
+    private double salarySummary = 0;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     public GrossSalaryFragment(String employeeId) {
@@ -57,6 +61,7 @@ public class GrossSalaryFragment extends Fragment {
     private void initialize(View view) {
         salarySummaries = new ArrayList<>();
         recyclerView = view.findViewById(R.id.recyclerview);
+        vGrossSalary = view.findViewById(R.id.TextView_GrossSalary);
         recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
         adapter = new AllowanceAdapter(salarySummaries, false);
@@ -67,8 +72,12 @@ public class GrossSalaryFragment extends Fragment {
                 return;
             salarySummaries.clear();
             employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
-            //IntStream.range(0, employeesGrossSalary.getPenalties().size()).forEach(i -> employeesGrossSalary.getPenalties().get(i).setAmount(employeesGrossSalary.getPenalties().get(i).getAmount() * -1));
-            salarySummaries.addAll(employeesGrossSalary.getAllTypes());
+            for (Allowance allowance : employeesGrossSalary.getAllTypes()) {
+                salarySummaries.add(allowance);
+                salarySummary += allowance.getAmount();
+            }
+            vGrossSalary.setText(String.format("%s EGP", salarySummary));
+            vGrossSalary.setTextColor(Color.rgb(salarySummary > 0 ? 0 : 153, salarySummary > 0 ? 153 : 0, 0));
             adapter.setAllowances(salarySummaries);
             adapter.notifyDataSetChanged();
         });

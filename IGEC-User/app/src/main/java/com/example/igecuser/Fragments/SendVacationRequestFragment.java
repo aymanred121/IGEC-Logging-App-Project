@@ -28,7 +28,7 @@ import java.util.Date;
 
 public class SendVacationRequestFragment extends Fragment {
 
-
+    //TODO Add view to show number of available days which is accessed via  -->  currEmployee.getTotalNumberOfVacationDays();
     //Views
     private TextInputEditText vVacationDate, vVacationNote, vVacationDays;
     private TextInputLayout vVacationDateLayout;
@@ -46,6 +46,7 @@ public class SendVacationRequestFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_vacation_request, container, false);
+
     }
 
     @Override
@@ -100,11 +101,20 @@ public class SendVacationRequestFragment extends Fragment {
     }
 
     private boolean ValidateInputs() {
+        boolean accepted = true ;
+        if(currEmployee.getTotalNumberOfVacationDays() - Integer.parseInt(vVacationDays.getText().toString()) < 0)
+        {
+            accepted = false;
+            Toast.makeText(getActivity(), "No available days", Toast.LENGTH_SHORT).show();
+        }
         return !(vVacationNote.getText().toString().isEmpty()
                 ||
                 vVacationDate.getText().toString().isEmpty()
                 ||
-                vVacationDays.getText().toString().isEmpty());
+                vVacationDays.getText().toString().isEmpty()
+                ||
+                !accepted
+        );
     }
 
     private String convertDateToString(Object selection) {

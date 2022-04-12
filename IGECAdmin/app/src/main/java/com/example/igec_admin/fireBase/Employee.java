@@ -9,6 +9,7 @@ public class Employee {
     private String firstName, lastName, title, area, city, street,SSN,projectID,managerID,email,password,id,phoneNumber;
     private double salary;
     private Date hireDate;
+    private int totalNumberOfVacationDays;
 
     public  Employee(){
 
@@ -27,6 +28,7 @@ public class Employee {
         this.email=email;
         this.password=password;
         this.phoneNumber = phoneNumber;
+        totalNumberOfVacationDays = 21;
     }
 
     public Date getHireDate() {
@@ -152,4 +154,13 @@ public class Employee {
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
+
+    public int getTotalNumberOfVacationDays() {
+        return totalNumberOfVacationDays;
+    }
+
+    public void setTotalNumberOfVacationDays(int totalNumberOfVacationDays) {
+        this.totalNumberOfVacationDays = totalNumberOfVacationDays;
+    }
+
 }

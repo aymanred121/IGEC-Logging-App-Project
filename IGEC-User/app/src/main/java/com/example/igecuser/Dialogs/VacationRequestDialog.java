@@ -7,12 +7,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 import com.example.igecuser.R;
+import com.example.igecuser.fireBase.Employee;
 import com.example.igecuser.fireBase.VacationRequest;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
@@ -22,6 +24,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class VacationRequestDialog extends DialogFragment {
 
@@ -103,9 +106,25 @@ public class VacationRequestDialog extends DialogFragment {
     }
 
     // Listeners
-    private final View.OnClickListener oclAcceptRequest = v -> db.collection("Vacation")
-            .document(currVacation.getId())
-            .update("vacationStatus", 1).addOnSuccessListener(unused -> Objects.requireNonNull(getDialog()).dismiss());
+    private final View.OnClickListener oclAcceptRequest = v -> {
+        db.collection("employees").document(currVacation.getEmployee().getId()).get().addOnSuccessListener((value) ->{
+            Employee employee = value.toObject(Employee.class);
+            if(employee.getTotalNumberOfVacationDays() - Integer.parseInt(getDays(currVacation)) < 0)
+            {
+                Toast.makeText(getActivity(), "This vacation can't be accepted duo to available days for this Employee", Toast.LENGTH_LONG).show();
+                return;
+            }
+            db.collection("Vacation")
+                    .document(currVacation.getId())
+                    .update("vacationStatus", 1).addOnSuccessListener(unused -> Objects.requireNonNull(getDialog()).dismiss());
+
+            db.collection("employees")
+                    .document(employee.getId())
+                    .update("totalNumberOfVacationDays"
+                            , employee.getTotalNumberOfVacationDays() - Integer.parseInt(getDays(currVacation)));
+        });
+
+    };
     private final View.OnClickListener oclDeclineRequest = v -> db.collection("Vacation")
             .document(currVacation.getId())
             .update("vacationStatus", -1).addOnSuccessListener(unused -> Objects.requireNonNull(getDialog()).dismiss());

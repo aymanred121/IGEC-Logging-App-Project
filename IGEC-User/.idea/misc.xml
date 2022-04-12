@@ -26,6 +26,7 @@
         <entry key="..\:/Users/maraw/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/fragment_project_summary.xml" value="0.22826086956521738" />
         <entry key="app/src/main/res/drawable/fab_label_background.xml" value="0.1985" />
         <entry key="app/src/main/res/drawable/ic_baseline_person_24.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/ic_user.xml" value="0.144" />
         <entry key="app/src/main/res/drawable/nav_item.xml" value="0.127" />
         <entry key="app/src/main/res/drawable/side_nav_bar.xml" value="0.127" />
         <entry key="app/src/main/res/layout/activity_dashboard.xml" value="0.10144927536231885" />
@@ -48,7 +49,9 @@
         <entry key="app/src/main/res/layout/fragment_manager_project_summary.xml" value="0.10144927536231885" />
         <entry key="app/src/main/res/layout/fragment_project_summary.xml" value="0.25" />
         <entry key="app/src/main/res/layout/fragment_salary_summary_dialog.xml" value="1.0" />
+        <entry key="app/src/main/res/layout/fragment_send_transfer_request.xml" value="0.10144927536231885" />
         <entry key="app/src/main/res/layout/fragment_supplements.xml" value="0.22" />
+        <entry key="app/src/main/res/layout/fragment_transfer_requests.xml" value="0.33" />
         <entry key="app/src/main/res/layout/fragment_vacation_request.xml" value="0.33" />
         <entry key="app/src/main/res/layout/fragment_vacation_requests.xml" value="0.25" />
         <entry key="app/src/main/res/layout/fragment_vacations_log.xml" value="0.2" />
@@ -56,6 +59,7 @@
         <entry key="app/src/main/res/layout/nav_header.xml" value="0.33" />
         <entry key="app/src/main/res/layout/salary_summary_item.xml" value="0.4543761638733706" />
         <entry key="app/src/main/res/layout/supplement_item.xml" value="0.22" />
+        <entry key="app/src/main/res/layout/transfer_request_item.xml" value="0.67" />
         <entry key="app/src/main/res/layout/vacation_request.xml" value="0.10144927536231885" />
         <entry key="app/src/main/res/layout/vacation_request_item.xml" value="0.2" />
         <entry key="app/src/main/res/menu/activity_main_drawer.xml" value="0.19025641025641027" />

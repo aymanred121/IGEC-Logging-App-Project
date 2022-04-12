@@ -68,4 +68,8 @@
     <string name="accept">Yes</string>
     <string name="Note">Note*</string>
     <string name="penalty">Penalty</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="send_a_transfer_request">Send a Transfer Request</string>
+    <string name="transfer_requests">Transfer Requests</string>
 </resources>

@@ -19,6 +19,8 @@ import com.example.igecuser.Fragments.ChangePasswordFragment;
 import com.example.igecuser.Fragments.CheckInOutFragment;
 import com.example.igecuser.Fragments.GrossSalaryFragment;
 import com.example.igecuser.Fragments.ProjectSummaryFragment;
+import com.example.igecuser.Fragments.SendTransferRequest;
+import com.example.igecuser.Fragments.TransferRequests;
 import com.example.igecuser.Fragments.VacationRequestsFragment;
 import com.example.igecuser.Fragments.VacationsLogFragment;
 import com.example.igecuser.R;
@@ -123,6 +125,8 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
         VacationRequestsFragment vacationRequestsFragment = new VacationRequestsFragment(currManager);
         VacationsLogFragment vacationsLogFragment = new VacationsLogFragment(false, currManager);
         ProjectSummaryFragment projectSummaryFragment = new ProjectSummaryFragment(currManager);
+        TransferRequests transferRequests = new TransferRequests(currManager);
+        SendTransferRequest sendTransferRequest = new SendTransferRequest(currManager);
 
 
         viewPagerAdapter.addFragment(checkInOutFragment, getString(R.string.check_in_out));
@@ -130,6 +134,8 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
         viewPagerAdapter.addFragment(grossSalaryFragment, getString(R.string.gross_salary));
         viewPagerAdapter.addFragment(vacationRequestsFragment, getString(R.string.vacation_requests));
         viewPagerAdapter.addFragment(projectSummaryFragment, getString(R.string.ProjectSummary));
+        viewPagerAdapter.addFragment(sendTransferRequest,getString(R.string.send_a_transfer_request));
+        viewPagerAdapter.addFragment(transferRequests,getString(R.string.transfer_requests));
         viewPagerAdapter.addFragment(vacationsLogFragment, getString(R.string.vacations_log));
 
         viewPager.setAdapter(viewPagerAdapter);
@@ -161,8 +167,12 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
             viewPager.setCurrentItem(3, true);
         if (itemId == R.id.item_ProjectSummary)
             viewPager.setCurrentItem(4, true);
+        if(itemId == R.id.item_Send_Transfer_Request)
+            viewPager.setCurrentItem(5,true);
+        if(itemId == R.id.item_Transfer_Requests)
+            viewPager.setCurrentItem(6,true);
         if (itemId == R.id.item_VacationsLog)
-            viewPager.setCurrentItem(5, true);
+            viewPager.setCurrentItem(7, true);
 
     }
 }

@@ -74,12 +74,62 @@ public class TransferRequestsFragment extends Fragment {
             adapter.notifyDataSetChanged();
         });
     }
+    private void updateEmployeeData (TransferRequests request) {
+        db.collection("employees").document(request.getEmployee().getId())
+                .update("projectID" , request.getNewProjectId()
+                        , "managerID" , manager.getId());
 
-    private void updateRequestStatus(String requestTransferId, int status) {
-        db.collection("TransferRequests").document(requestTransferId).update("transferStatus", status).addOnSuccessListener(unused -> {
+        EmployeeOverview temp = new EmployeeOverview(request.getEmployee());
+        temp.setManagerID(manager.getId());
+        temp.setProjectId(request.getNewProjectId());
+        db.collection("EmployeeOverview").document("emp")
+                .update(request.getEmployee().getId() , temp );
+    }
+    private void updateOldProjectData(TransferRequests request) {
+        db.collection("projects").document(request.getOldProjectId()).get().addOnSuccessListener((value) ->
+        {
+            if(value !=null)
+            {
+                Project projectTemp = value.toObject(Project.class);
+                for (EmployeeOverview e: projectTemp.getEmployees()) {
+                    if(e.getId().equals(request.getEmployee().getId())) {
+                        projectTemp.getEmployees().remove(e);
+                        break;
+                    }
+
+                }
+
+                db.collection("projects").document(request.getOldProjectId()).update("employees" ,  projectTemp.getEmployees());
+            }
+        });
+    }
+    private void updateNewProjectData(TransferRequests request) {
+        db.collection("projects").document(request.getNewProjectId()).get().addOnSuccessListener((value) ->
+        {
+            if(value !=null)
+            {
+                Project projectTemp = value.toObject(Project.class);
+                request.getEmployee().setProjectId(request.getNewProjectId());
+                request.getEmployee().setManagerID(manager.getId());
+                projectTemp.getEmployees().add(request.getEmployee());
+                db.collection("projects").document(request.getNewProjectId()).update("employees" ,  projectTemp.getEmployees());
+            }
+        });
+    }
+    private void updateAllowancesData(TransferRequests request) {
+        //TODO CHANGE ALLOWANCES AFTER DISCUSSION
+    }
+    private void updateRequestStatus(TransferRequests request, int status) {
+        db.collection("TransferRequests").document(request.getTransferId()).update("transferStatus", status).addOnSuccessListener(unused -> {
             Toast.makeText(getActivity(), "complete", Toast.LENGTH_SHORT).show();
-            //TODO update project Employees based on the response
-            //TODO update transferred Employee Date based on the response
+            if(status == 1)
+            {
+                updateEmployeeData(request);
+                updateOldProjectData(request);
+                updateNewProjectData(request);
+                updateAllowancesData(request);
+            }
+            else if(status == 0) {/*do nothing*/}
         });
     }
 
@@ -102,7 +152,7 @@ public class TransferRequestsFragment extends Fragment {
                     transferRequestStatus = 1;
                     requests.remove(request);
                     adapter.notifyItemRemoved(position);
-                    updateRequestStatus(request.getTransferId(),transferRequestStatus);
+                    updateRequestStatus(request,transferRequestStatus);
                 }
             });
             builder.setNegativeButton("Reject", new DialogInterface.OnClickListener() {
@@ -111,7 +161,7 @@ public class TransferRequestsFragment extends Fragment {
                     transferRequestStatus = 0;
                     requests.remove(request);
                     adapter.notifyItemRemoved(position);
-                    updateRequestStatus(request.getTransferId(),transferRequestStatus);
+                    updateRequestStatus(request,transferRequestStatus);
                 }
             });
             builder.setNeutralButton("Cancel", new DialogInterface.OnClickListener() {

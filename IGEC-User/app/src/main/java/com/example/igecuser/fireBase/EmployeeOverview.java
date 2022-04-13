@@ -24,6 +24,13 @@ public class EmployeeOverview {
         this.id = id;
         this.projectId = projectId;
     }
+    public EmployeeOverview(EmployeeOverview e) {
+        this.firstName = e.getFirstName();
+        this.lastName = e.getLastName();
+        this.title = e.getTitle();
+        this.id = e.getId();
+        this.projectId = e.getProjectId();
+    }
 
     public String getFirstName() {
         return firstName;

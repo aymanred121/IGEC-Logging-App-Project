@@ -104,7 +104,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
-            android:text="@string/send_request"
+            android:text="@string/send_a_transfer_request"
             android:textAllCaps="false"
             android:textSize="16sp"
             app:cornerRadius="8dp"

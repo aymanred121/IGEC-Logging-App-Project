@@ -2,7 +2,8 @@
     <string name="app_name">User</string>
     <string name="vacation_date">Vacation Date*</string>
     <string name="vacation_reason">Vacation Reason*</string>
-    <string name="send_request">Send</string>
+    <string name="send_request">Send Vacation Request</string>
+    <string name="send_transfer_request">Send transfer Request</string>
     <string name="check_in_out">Check In/Out</string>
     <string name="vacation_request">Vacation Request</string>
     <string name="vacation_days">Vacation Days*</string>

@@ -2,7 +2,14 @@ package com.example.igecuser.fireBase;
 
 public class TransferRequests {
     private EmployeeOverview employee;
-    private String note, oldProjectName, oldProjectId, oldProjectReference, newProjectName, newProjectId, newProjectReference, transferId;
+    private String note,
+            oldProjectName,
+            oldProjectId,
+            oldProjectReference,
+            newProjectName,
+            newProjectId,
+            newProjectReference,
+            transferId;
     private int transferStatus = -1;
 
     /**

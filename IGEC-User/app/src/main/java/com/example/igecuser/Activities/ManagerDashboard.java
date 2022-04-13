@@ -20,7 +20,7 @@ import com.example.igecuser.Fragments.CheckInOutFragment;
 import com.example.igecuser.Fragments.GrossSalaryFragment;
 import com.example.igecuser.Fragments.ProjectSummaryFragment;
 import com.example.igecuser.Fragments.SendTransferRequest;
-import com.example.igecuser.Fragments.TransferRequests;
+import com.example.igecuser.Fragments.TransferRequestsFragment;
 import com.example.igecuser.Fragments.VacationRequestsFragment;
 import com.example.igecuser.Fragments.VacationsLogFragment;
 import com.example.igecuser.R;
@@ -125,7 +125,7 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
         VacationRequestsFragment vacationRequestsFragment = new VacationRequestsFragment(currManager);
         VacationsLogFragment vacationsLogFragment = new VacationsLogFragment(false, currManager);
         ProjectSummaryFragment projectSummaryFragment = new ProjectSummaryFragment(currManager);
-        TransferRequests transferRequests = new TransferRequests(currManager);
+        TransferRequestsFragment transferRequestsFragment = new TransferRequestsFragment(currManager);
         SendTransferRequest sendTransferRequest = new SendTransferRequest(currManager);
 
 
@@ -135,7 +135,7 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
         viewPagerAdapter.addFragment(vacationRequestsFragment, getString(R.string.vacation_requests));
         viewPagerAdapter.addFragment(projectSummaryFragment, getString(R.string.ProjectSummary));
         viewPagerAdapter.addFragment(sendTransferRequest,getString(R.string.send_a_transfer_request));
-        viewPagerAdapter.addFragment(transferRequests,getString(R.string.transfer_requests));
+        viewPagerAdapter.addFragment(transferRequestsFragment,getString(R.string.transfer_requests));
         viewPagerAdapter.addFragment(vacationsLogFragment, getString(R.string.vacations_log));
 
         viewPager.setAdapter(viewPagerAdapter);

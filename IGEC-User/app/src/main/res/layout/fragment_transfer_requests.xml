@@ -3,11 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Fragments.TransferRequests">
+    tools:context=".Fragments.TransferRequestsFragment">
 
    <androidx.recyclerview.widget.RecyclerView
        android:id="@+id/recyclerview"
-       tools:listitem="@layout/transfer_request_item"
+       tools:listitem="@layout/item_transfer_request"
        android:layout_width="match_parent"
        android:layout_height="match_parent"
        android:overScrollMode="never"/>

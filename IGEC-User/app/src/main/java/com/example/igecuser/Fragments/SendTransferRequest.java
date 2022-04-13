@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -75,7 +74,7 @@ public class SendTransferRequest extends Fragment {
                 if (!emp.getId().equals(manager.getId()))
                     EmployeesId.add(emp.getId() + " | " + emp.getFirstName() + " " + emp.getLastName());
 
-            ArrayAdapter<String> IdAdapter = new ArrayAdapter<>(getActivity(), R.layout.dropdown_item, EmployeesId);
+            ArrayAdapter<String> IdAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, EmployeesId);
             selectedEmployee = oldProject.getEmployees().get(0);
             vEmployeesId.setText(String.format("%s | %s %s", selectedEmployee.getId(), selectedEmployee.getFirstName(), selectedEmployee.getLastName()));
             vEmployeesId.setAdapter(IdAdapter);
@@ -110,7 +109,7 @@ public class SendTransferRequest extends Fragment {
                 if (!project.getId().equals(oldProject.getId()))
                     projectsRef.add("IGEC" + project.getReference() + " | " + project.getName());
 
-            ArrayAdapter<String> RefAdapter = new ArrayAdapter<>(getActivity(), R.layout.dropdown_item, projectsRef);
+            ArrayAdapter<String> RefAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, projectsRef);
             newProject = projects.get(0);
             vProjectsReference.setText(String.format("IGEC%s | %s", newProject.getReference(), newProject.getName()));
             vProjectsReference.setAdapter(RefAdapter);

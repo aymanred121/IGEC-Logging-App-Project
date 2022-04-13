@@ -39,7 +39,7 @@ public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.Vacati
     @NonNull
     @Override
     public VacationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.vacation_request_item,parent,false);
+        View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.item_vacation_request,parent,false);
         return new VacationViewHolder(v,listener);
         
     }

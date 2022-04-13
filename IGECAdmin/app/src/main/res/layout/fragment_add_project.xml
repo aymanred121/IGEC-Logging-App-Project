@@ -157,6 +157,7 @@
         app:boxBackgroundMode="outline"
         app:endIconMode="dropdown_menu"
         app:helperTextEnabled="true"
+        android:enabled="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/textInputLayout_Time">
@@ -167,6 +168,7 @@
             android:layout_height="wrap_content"
             android:hint="@string/contractType"
             android:inputType="text"
+            android:enabled="false"
             android:padding="14dp"
             android:singleLine="true" />
 

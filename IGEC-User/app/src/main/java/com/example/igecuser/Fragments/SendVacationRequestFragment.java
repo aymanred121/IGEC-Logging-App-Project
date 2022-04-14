@@ -18,16 +18,18 @@ import com.example.igecuser.fireBase.Employee;
 import com.example.igecuser.fireBase.VacationRequest;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.datepicker.CalendarConstraints;
+import com.google.android.material.datepicker.DateValidatorPointForward;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+
 
 public class SendVacationRequestFragment extends Fragment {
 
@@ -76,6 +78,9 @@ public class SendVacationRequestFragment extends Fragment {
         vVacationDaysLayout = view.findViewById(R.id.textInputLayout_VacationDays);
         vSendRequest = view.findViewById(R.id.Button_SendRequest);
         vDatePickerBuilder.setTitleText("Vacation Date");
+        CalendarConstraints.Builder builder = new CalendarConstraints.Builder();
+        builder.setValidator(DateValidatorPointForward.now());
+        vDatePickerBuilder.setCalendarConstraints(builder.build());
         vDatePicker = vDatePickerBuilder.build();
         remainingDays = currEmployee.getTotalNumberOfVacationDays();
         vVacationDaysLayout.setHelperText(String.format("%d days Remaining", remainingDays));

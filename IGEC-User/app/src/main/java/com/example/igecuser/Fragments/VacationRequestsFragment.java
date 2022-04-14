@@ -78,6 +78,7 @@ public class VacationRequestsFragment extends Fragment {
                     }
                     ArrayList<VacationRequest> vacationRequests = new ArrayList<>();
                     for (DocumentSnapshot vacations : queryDocumentSnapshots) {
+                        //TODO filter passed out vacations
                         vacationRequests.add(vacations.toObject(VacationRequest.class));
                     }
                     adapter.setVacationsList(vacationRequests);

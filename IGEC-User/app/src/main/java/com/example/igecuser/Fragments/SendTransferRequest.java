@@ -24,7 +24,6 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 
@@ -99,8 +98,8 @@ public class SendTransferRequest extends Fragment {
         return db.collection("TransferRequests").document(transferId).set(request);
     }
 
-    private Task<QuerySnapshot> getAllProjects(String projectId) {
-        return db.collection("projects").whereNotEqualTo("id", projectId).get().addOnSuccessListener(queryDocumentSnapshots -> {
+    private void getAllProjects(String projectId) {
+        db.collection("projects").whereNotEqualTo("id", projectId).addSnapshotListener((queryDocumentSnapshots, error) -> {
             if (queryDocumentSnapshots.size() == 0)
                 return;
             projects.addAll((queryDocumentSnapshots.toObjects(Project.class)));
@@ -175,15 +174,13 @@ public class SendTransferRequest extends Fragment {
             }
         }
     };
-    private View.OnClickListener oclSend = new View.OnClickListener() {
+    private final View.OnClickListener oclSend = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            if(!validateInput()) {
+            if (!validateInput()) {
                 Toast.makeText(getActivity(), "Please, fill the transfer date correctly", Toast.LENGTH_SHORT).show();
-                return ;
-            }
-            else
-            {
+                return;
+            } else {
                 sendRequest(selectedEmployee).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void unused) {

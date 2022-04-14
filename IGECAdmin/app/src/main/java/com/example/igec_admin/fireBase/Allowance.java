@@ -9,7 +9,7 @@ import com.google.firebase.database.Exclude;
 import java.io.Serializable;
 
 public class Allowance implements Serializable, Parcelable {
-    private String name ;
+    private String name,projectId="",note;
     private double amount ;
     private int type; // if 0 projectAllowances , if 1 penalties , if 2 bonuses , if 3 personalAllowances , if 4 net salary
     //public enum Type {projectAllowances , penalties , bonuses , personalAllowances}
@@ -87,5 +87,21 @@ public class Allowance implements Serializable, Parcelable {
 
     public void setType(int type) {
         this.type = type;
+    }
+
+    public String getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(String projectId) {
+        this.projectId = projectId;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
     }
 }

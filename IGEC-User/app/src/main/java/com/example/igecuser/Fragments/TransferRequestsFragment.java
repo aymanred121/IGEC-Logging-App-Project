@@ -15,10 +15,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.igecuser.Adapters.TransferAdapter;
-import com.example.igecuser.Adapters.VacationAdapter;
 import com.example.igecuser.R;
+import com.example.igecuser.fireBase.Allowance;
 import com.example.igecuser.fireBase.Employee;
 import com.example.igecuser.fireBase.EmployeeOverview;
+import com.example.igecuser.fireBase.EmployeesGrossSalary;
 import com.example.igecuser.fireBase.Project;
 import com.example.igecuser.fireBase.TransferRequests;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -106,34 +107,45 @@ public class TransferRequestsFragment extends Fragment {
     private void updateNewProjectData(TransferRequests request) {
         db.collection("projects").document(request.getNewProjectId()).get().addOnSuccessListener((value) ->
         {
-            if(value !=null)
-            {
-                Project projectTemp = value.toObject(Project.class);
-                request.getEmployee().setProjectId(request.getNewProjectId());
-                request.getEmployee().setManagerID(manager.getId());
-                projectTemp.getEmployees().add(request.getEmployee());
-                db.collection("projects").document(request.getNewProjectId()).update("employees" ,  projectTemp.getEmployees());
-            }
+            if (value == null) return;
+            Project projectTemp = value.toObject(Project.class);
+            request.getEmployee().setProjectId(request.getNewProjectId());
+            request.getEmployee().setManagerID(manager.getId());
+            projectTemp.getEmployees().add(request.getEmployee());
+            db.collection("projects").document(request.getNewProjectId()).update("employees", projectTemp.getEmployees());
+            updateAllowancesData(request, projectTemp.getAllowancesList());
+
         });
     }
-    private void updateAllowancesData(TransferRequests request) {
-        //TODO CHANGE ALLOWANCES AFTER DISCUSSION
+
+    private void updateAllowancesData(TransferRequests request, ArrayList<Allowance> projectAllowances) {
+        db.collection("EmployeesGrossSalary").document(request.getEmployee().getId()).get().addOnSuccessListener(value -> {
+            if (!value.exists())
+                return;
+            EmployeesGrossSalary temp = value.toObject(EmployeesGrossSalary.class);
+            for (Allowance allowance : projectAllowances) {
+                temp.getAllTypes().removeIf(y -> y.getProjectId().equals(allowance.getProjectId()) && y.getAmount() == allowance.getAmount() && y.getName().equals(allowance.getName()));
+            }
+            temp.getAllTypes().addAll(projectAllowances);
+            db.collection("EmployeesGrossSalary").document(request.getEmployee().getId()).set(temp);
+        });
+
+
     }
+
     private void updateRequestStatus(TransferRequests request, int status) {
         db.collection("TransferRequests").document(request.getTransferId()).update("transferStatus", status).addOnSuccessListener(unused -> {
             Toast.makeText(getActivity(), "complete", Toast.LENGTH_SHORT).show();
-            if(status == 1)
-            {
+            if (status == 1) {
                 updateEmployeeData(request);
                 updateOldProjectData(request);
                 updateNewProjectData(request);
-                updateAllowancesData(request);
             }
             else if(status == 0) {/*do nothing*/}
         });
     }
 
-    private TransferAdapter.OnItemClickListener oclRequest = new TransferAdapter.OnItemClickListener() {
+    private final TransferAdapter.OnItemClickListener oclRequest = new TransferAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position) {
             TransferRequests request = requests.get(position);

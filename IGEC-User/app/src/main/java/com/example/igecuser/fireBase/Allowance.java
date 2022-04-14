@@ -6,9 +6,10 @@ import android.os.Parcelable;
 import java.io.Serializable;
 
 public class Allowance implements Serializable, Parcelable {
-    private String name ;
-    private double amount ;
+    private String name, projectId, note;
+    private double amount;
     private int type; // if 0 projectAllowances , if 1 penalties , if 2 bonuses , if 3 personal allowances , if 4 net salary
+
     //? bugfix :TODO projectId, note
     public Allowance() {
     }
@@ -85,5 +86,25 @@ public class Allowance implements Serializable, Parcelable {
 
     public void setType(int type) {
         this.type = type;
+    }
+
+    public String getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(String projectId) {
+        this.projectId = projectId;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
+
+    public static Creator<Allowance> getCREATOR() {
+        return CREATOR;
     }
 }

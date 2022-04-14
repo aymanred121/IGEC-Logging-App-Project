@@ -48,6 +48,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ProjectFragmentDialog extends DialogFragment {
     private final int PROJECT = 0;
@@ -365,6 +366,11 @@ public class ProjectFragmentDialog extends DialogFragment {
                 , vContractType.getText().toString());
         newProject.setId(project.getId());
         newProject.setClient(client);
+        //Added projectId to each allowance that is coming from project
+        allowances.stream().flatMap(allowance -> {
+            allowance.setProjectId(project.getId());
+            return null;
+        }).collect(Collectors.toList());
         newProject.getAllowancesList().addAll(allowances);
         allowances = newProject.getAllowancesList();
         db.collection("projects").document(project.getId()).set(newProject).addOnSuccessListener(unused -> {

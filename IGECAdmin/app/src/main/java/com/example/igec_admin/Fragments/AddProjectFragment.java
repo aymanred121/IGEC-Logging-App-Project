@@ -43,9 +43,11 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class AddProjectFragment extends Fragment {
 
@@ -92,6 +94,12 @@ public class AddProjectFragment extends Fragment {
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
                 // We use a String here, but any type that can be put in a Bundle is supported
                 allowances = bundle.getParcelableArrayList("allowances");
+
+                //Added projectId to each allowance that is coming from project
+                allowances.stream().flatMap(allowance -> {
+                    allowance.setProjectId(projectID);
+                    return null;
+                }).collect(Collectors.toList());
                 // Do something with the result
             }
         });
@@ -228,8 +236,7 @@ public class AddProjectFragment extends Fragment {
             db.collection("EmployeesGrossSalary").document(emp.getId()).get().addOnSuccessListener((value) -> {
                 if (!value.exists())
                     return;
-                EmployeesGrossSalary employeesGrossSalary;
-                employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
+                EmployeesGrossSalary employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
                 allTypes.addAll(employeesGrossSalary.getAllTypes());
                 if (allowances.size() != 0) {
                     allTypes.addAll(allowances);

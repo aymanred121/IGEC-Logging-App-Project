@@ -99,6 +99,7 @@ public class AllowanceInfoDialog extends DialogFragment {
             vPenalty.setChecked(allowance.getAmount() < 0);
             vAllowanceName.setText(allowance.getName());
             vAllowanceMount.setText(String.valueOf(allowance.getAmount()));
+            vAllowanceNote.setText(allowance.getNote());
         }
     }
 
@@ -121,6 +122,7 @@ public class AllowanceInfoDialog extends DialogFragment {
             Allowance allowance = new Allowance();
             allowance.setName(vAllowanceName.getText().toString());
             allowance.setAmount(vPenalty.isChecked() ? (-1) * Double.parseDouble(vAllowanceMount.getText().toString()) : Double.parseDouble(vAllowanceMount.getText().toString()));
+            allowance.setNote(vAllowanceNote.getText().toString());
             if (isProject)
                 allowance.setType(PROJECT);
             else {

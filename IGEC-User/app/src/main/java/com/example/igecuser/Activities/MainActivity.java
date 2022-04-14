@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     // No break
                 case 2:
-                    // TODO remove hard coded employee delete and fill allEmp with allEmployee data to reset all the old month data and leave only NETSALARY (to be discussed)
+                    // a function to be discussed or deleted duo to change of logic  // TODO remove hard coded employee delete and fill allEmp with allEmployee data to reset all the old month data and leave only NETSALARY (to be discussed)
                     ArrayList<Allowance> allTypes = new ArrayList<>();
                     ArrayList<EmployeeOverview> allEmp = new ArrayList<>();
                     db.collection("EmployeesGrossSalary").document("1Yfa6").get().addOnSuccessListener((value1) -> {

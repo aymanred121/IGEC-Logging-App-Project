@@ -243,6 +243,11 @@ public class ProjectFragmentDialog extends DialogFragment {
         }
         vManagerIDLayout.setEnabled(Team.size() >= 2);
         vManagerID.setEnabled(false);
+        if(Team.size() == 1 ) {
+            vManagerIDLayout.setEnabled(true);
+            vManagerID.setText(Team.get(0).getId());
+            vManagerName.setText(String.format("%s %s", Team.get(0).getFirstName(), Team.get(0).getLastName()));
+        }
         if (!vManagerIDLayout.isEnabled())
             vManagerID.setText("");
         if (TeamID.size() > 0) {

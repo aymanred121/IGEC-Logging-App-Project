@@ -91,7 +91,6 @@ public class AddAllowanceDialog extends DialogFragment {
                 adapter.notifyDataSetChanged();
             }
         });
-
         getParentFragmentManager().setFragmentResultListener("editAllowance", this, new FragmentResultListener() {
             @Override
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
@@ -103,6 +102,7 @@ public class AddAllowanceDialog extends DialogFragment {
                 allowances.get(position).setName(allowance.getName());
                 allowances.get(position).setAmount(allowance.getAmount());
                 allowances.get(position).setType(allowance.getType());
+                allowances.get(position).setNote(note);
                 // Do something with the result
                 adapter.notifyItemChanged(position);
             }

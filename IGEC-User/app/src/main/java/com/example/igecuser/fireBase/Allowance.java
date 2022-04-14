@@ -9,35 +9,38 @@ public class Allowance implements Serializable, Parcelable {
     private String name, projectId, note;
     private double amount;
     private int type; // if 0 projectAllowances , if 1 penalties , if 2 bonuses , if 3 personal allowances , if 4 net salary
-
-    //? bugfix :TODO projectId, note
     public Allowance() {
+        projectId = "";
     }
 
 
     public Allowance(int type) {
         this.type = type;
+        projectId = "";
     }
 
     public Allowance(double amount , int type) {
         this.amount = amount;
         this.type = type;
+        projectId = "";
     }
     public Allowance(String name,double amount , int type) {
         this.name = name;
         this.amount = amount;
         this.type = type;
+        projectId = "";
     }
     public Allowance(String name,double amount) {
         this.name = name;
         this.amount = amount;
+        projectId = "";
     }
 
     protected Allowance(Parcel in) {
         name = in.readString();
         amount = in.readDouble();
         type = in.readInt();
-
+        projectId = "";
     }
 
     public static final Creator<Allowance> CREATOR = new Creator<Allowance>() {

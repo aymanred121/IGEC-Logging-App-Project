@@ -22,9 +22,13 @@ import com.example.igecuser.fireBase.EmployeeOverview;
 import com.example.igecuser.fireBase.EmployeesGrossSalary;
 import com.example.igecuser.fireBase.Project;
 import com.example.igecuser.fireBase.TransferRequests;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.WriteBatch;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TransferRequestsFragment extends Fragment {
 
@@ -35,6 +39,7 @@ public class TransferRequestsFragment extends Fragment {
     private final Employee manager;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private ArrayList<TransferRequests> requests;
+    private final WriteBatch batch = FirebaseFirestore.getInstance().batch();
     public TransferRequestsFragment(Employee manager) {
         this.manager = manager;
     }
@@ -76,32 +81,41 @@ public class TransferRequestsFragment extends Fragment {
         });
     }
     private void updateEmployeeData (TransferRequests request) {
-        db.collection("employees").document(request.getEmployee().getId())
-                .update("projectID" , request.getNewProjectId()
-                        , "managerID" , manager.getId());
+        batch.update( db.collection("employees").document(request.getEmployee().getId()),"projectID" , request.getNewProjectId()
+                , "managerID" , manager.getId());
+//        db.collection("employees").document(request.getEmployee().getId())
+//                .update("projectID" , request.getNewProjectId()
+//                        , "managerID" , manager.getId());
 
-        EmployeeOverview temp = new EmployeeOverview(request.getEmployee());
-        temp.setManagerID(manager.getId());
-        temp.setProjectId(request.getNewProjectId());
-        db.collection("EmployeeOverview").document("emp")
-                .update(request.getEmployee().getId() , temp );
+        ArrayList<String> empInfo = new ArrayList<>();
+        empInfo.add(request.getEmployee().getFirstName());
+        empInfo.add(request.getEmployee().getLastName());
+        empInfo.add(request.getEmployee().getTitle());
+        empInfo.add(request.getEmployee().getManagerID());
+        empInfo.add(request.getEmployee().getProjectId());
+        Map<String, Object> empInfoMap = new HashMap<>();
+        empInfoMap.put(request.getEmployee().getId(), empInfo);
+        batch.update( db.collection("EmployeeOverview").document("emp"),empInfoMap);
+//        db.collection("EmployeeOverview").document("emp")
+//                .update(empInfoMap).addOnSuccessListener(unused -> {
+//                    int x=0;
+//            Toast.makeText(getActivity(), "acc", Toast.LENGTH_SHORT).show();
+//                });
     }
     private void updateOldProjectData(TransferRequests request) {
         db.collection("projects").document(request.getOldProjectId()).get().addOnSuccessListener((value) ->
         {
-            if(value !=null)
-            {
-                Project projectTemp = value.toObject(Project.class);
-                for (EmployeeOverview e: projectTemp.getEmployees()) {
-                    if(e.getId().equals(request.getEmployee().getId())) {
-                        projectTemp.getEmployees().remove(e);
-                        break;
-                    }
-
+            if (value == null) return;
+            Project projectTemp = value.toObject(Project.class);
+            for (EmployeeOverview e: projectTemp.getEmployees()) {
+                if(e.getId().equals(request.getEmployee().getId())) {
+                    projectTemp.getEmployees().remove(e);
+                    break;
                 }
 
-                db.collection("projects").document(request.getOldProjectId()).update("employees" ,  projectTemp.getEmployees());
             }
+
+            db.collection("projects").document(request.getOldProjectId()).update("employees" ,  projectTemp.getEmployees());
         });
     }
     private void updateNewProjectData(TransferRequests request) {
@@ -140,6 +154,7 @@ public class TransferRequestsFragment extends Fragment {
                 updateEmployeeData(request);
                 updateOldProjectData(request);
                 updateNewProjectData(request);
+                batch.commit();
             }
             else if(status == 0) {/*do nothing*/}
         });

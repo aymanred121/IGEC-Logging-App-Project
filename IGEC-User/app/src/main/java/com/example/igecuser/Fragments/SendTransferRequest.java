@@ -43,6 +43,9 @@ public class SendTransferRequest extends Fragment {
     private ArrayList<Pair<TextInputLayout, EditText>> views;
     private MaterialButton vSend;
     private EmployeeOverview selectedEmployee;
+    ArrayList<String> projectsRef;
+    private ArrayAdapter<String> RefAdapter;
+
 
 
     public SendTransferRequest(Employee manager) {
@@ -71,11 +74,11 @@ public class SendTransferRequest extends Fragment {
         vTransferNote = view.findViewById(R.id.TextInput_TransferNote);
         vProjectsReference = view.findViewById(R.id.TextInput_ProjectReferences);
         vEmployeesId = view.findViewById(R.id.TextInput_EmployeeId);
-
         vTransferNoteLayout = view.findViewById(R.id.textInputLayout_TransferNote);
         vEmployeesIdLayout = view.findViewById(R.id.textInputLayout_EmployeeId);
         vProjectReferenceLayout = view.findViewById(R.id.textInputLayout_ProjectReferences);
-
+        projectsRef = new ArrayList<>();
+        RefAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, projectsRef);
         views = new ArrayList<>();
         views.add(new Pair<>(vProjectReferenceLayout, vProjectsReference));
         views.add(new Pair<>(vEmployeesIdLayout, vEmployeesId));
@@ -117,17 +120,18 @@ public class SendTransferRequest extends Fragment {
     }
 
     private void getAllProjects(String projectId) {
-        db.collection("projects").whereNotEqualTo("id", projectId).addSnapshotListener((queryDocumentSnapshots, error) -> {
+        db.collection("projects").whereNotEqualTo("id", projectId).addSnapshotListener((queryDocumentSnapshots,error) -> {
+
             if (queryDocumentSnapshots.size() == 0)
                 return;
+            projectsRef.clear();
             projects.clear();
             projects.addAll((queryDocumentSnapshots.toObjects(Project.class)));
-            ArrayList<String> projectsRef = new ArrayList<>();
+
             for (Project project : projects)
                 if (!project.getId().equals(oldProject.getId()))
                     projectsRef.add("IGEC" + project.getReference() + " | " + project.getName());
 
-            ArrayAdapter<String> RefAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, projectsRef);
             newProject = projects.get(0);
             vProjectsReference.setText(String.format("IGEC%s | %s", newProject.getReference(), newProject.getName()));
             vProjectsReference.setAdapter(RefAdapter);

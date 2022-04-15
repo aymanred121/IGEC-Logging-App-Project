@@ -43,7 +43,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -181,13 +180,9 @@ public class AddProjectFragment extends Fragment {
             TeamID.remove(String.valueOf(employees.get(position).getId()));
             employees.get(position).setProjectId(null);
         }
-        vManagerIDLayout.setEnabled(Team.size() >= 2);
+        vManagerIDLayout.setEnabled(Team.size() >= 1);
         vManagerID.setEnabled(false);
-        if(Team.size() ==1 ) {
-            vManagerIDLayout.setEnabled(true);
-            vManagerID.setText(Team.get(0).getId());
-            vManagerName.setText(String.format("%s %s", Team.get(0).getFirstName(), Team.get(0).getLastName()));
-        }
+
         if (!vManagerIDLayout.isEnabled())
             vManagerID.setText("");
         if (TeamID.size() > 0) {

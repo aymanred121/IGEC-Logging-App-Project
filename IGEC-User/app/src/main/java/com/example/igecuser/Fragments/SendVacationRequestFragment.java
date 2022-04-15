@@ -1,5 +1,6 @@
 package com.example.igecuser.Fragments;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -75,6 +76,7 @@ public class SendVacationRequestFragment extends Fragment {
         this.currEmployee = currEmployee;
     }
 
+    @SuppressLint("DefaultLocale")
     private void Initialize(View view) {
         vVacationDate = view.findViewById(R.id.TextInput_VacationDate);
         vVacationNote = view.findViewById(R.id.TextInput_VacationNote);
@@ -171,6 +173,7 @@ public class SendVacationRequestFragment extends Fragment {
 
         }
 
+        @SuppressLint("DefaultLocale")
         @Override
         public void afterTextChanged(Editable editable) {
             daysAfterVacationIsTaken = vVacationDays.getText().toString().trim().equals("") ? remainingDays : remainingDays - Integer.parseInt(vVacationDays.getText().toString());

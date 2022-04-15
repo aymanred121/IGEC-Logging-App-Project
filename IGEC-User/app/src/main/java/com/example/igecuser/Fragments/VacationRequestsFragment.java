@@ -27,6 +27,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -84,8 +85,13 @@ public class VacationRequestsFragment extends Fragment {
                     }
                     vacationRequests.clear();
                     for (DocumentSnapshot vacations : queryDocumentSnapshots) {
-                        //TODO filter passed out vacations
-                        vacationRequests.add(vacations.toObject(VacationRequest.class));
+                        if(vacations.toObject(VacationRequest.class).getStartDate().before(new Date()))
+                        {
+                            db.collection("Vacation").document(vacations.getId()).update("vacationStatus", -1);
+                        }
+                        else {
+                            vacationRequests.add(vacations.toObject(VacationRequest.class));
+                        }
                     }
                     adapter.setVacationsList(vacationRequests);
                     adapter.notifyDataSetChanged();

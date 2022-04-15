@@ -8,10 +8,10 @@ import androidx.fragment.app.Fragment;
 
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.example.igecuser.R;
 import com.example.igecuser.fireBase.Employee;
@@ -27,6 +27,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -35,7 +36,8 @@ public class SendVacationRequestFragment extends Fragment {
 
     //Views
     private TextInputEditText vVacationDate, vVacationNote, vVacationDays;
-    private TextInputLayout vVacationDateLayout, vVacationDaysLayout;
+    private TextInputLayout vVacationDateLayout, vVacationDaysLayout, vVacationNoteLayout;
+    private ArrayList<Pair<TextInputLayout, TextInputEditText>> views;
     private MaterialButton vSendRequest;
     private MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vDatePicker;
@@ -59,10 +61,13 @@ public class SendVacationRequestFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         Initialize(view);
 
-        vVacationDateLayout.setEndIconOnClickListener(clVacationDate);
+        vVacationDateLayout.setEndIconOnClickListener(oclVacationDate);
+        vVacationDateLayout.setErrorIconOnClickListener(oclVacationDate);
         vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);
-        vSendRequest.setOnClickListener(clSendRequest);
+        vSendRequest.setOnClickListener(oclSendRequest);
         vVacationDays.addTextChangedListener(twVacationDays);
+        vVacationDate.addTextChangedListener(twVacationDate);
+        vVacationNote.addTextChangedListener(twVacationNote);
     }
 
     //Functions
@@ -76,6 +81,14 @@ public class SendVacationRequestFragment extends Fragment {
         vVacationDays = view.findViewById(R.id.TextInput_VacationDays);
         vVacationDateLayout = view.findViewById(R.id.textInputLayout_VacationDate);
         vVacationDaysLayout = view.findViewById(R.id.textInputLayout_VacationDays);
+        vVacationNoteLayout = view.findViewById(R.id.textInputLayout_VacationNote);
+
+        views = new ArrayList<>();
+        views.add(new Pair<>(vVacationDateLayout, vVacationDate));
+        views.add(new Pair<>(vVacationDaysLayout, vVacationDays));
+        views.add(new Pair<>(vVacationNoteLayout, vVacationNote));
+
+
         vSendRequest = view.findViewById(R.id.Button_SendRequest);
         vDatePickerBuilder.setTitleText("Vacation Date");
         CalendarConstraints.Builder builder = new CalendarConstraints.Builder();
@@ -105,35 +118,38 @@ public class SendVacationRequestFragment extends Fragment {
                     db.collection("Vacation").document(vacationID).set(vacationRequest).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void unused) {
-                            db.collection("employees").document(currEmployee.getId()).update("totalNumberOfVacationDays", daysAfterVacationIsTaken).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void unused) {
-                                    remainingDays = daysAfterVacationIsTaken;
-                                    vVacationDaysLayout.setHelperText(String.format("%d days Remaining", daysAfterVacationIsTaken));
-                                    ClearInputs();
-                                }
-                            });
+                            clearInputs();
                         }
                     });
 
                 });
     }
 
-    private void ClearInputs() {
+    private void clearInputs() {
         vVacationDate.setText(null);
         vVacationDays.setText(null);
         vVacationNote.setText(null);
     }
 
-    private boolean ValidateInputs() {
-        return !(vVacationNote.getText().toString().isEmpty()
-                ||
-                vVacationDate.getText().toString().isEmpty()
-                ||
-                (vVacationDays.getText().toString().isEmpty() || Integer.parseInt(vVacationDays.getText().toString()) == 0)
-                ||
-                vVacationDaysLayout.getError() != null
-        );
+    private boolean generateError() {
+
+        for (Pair<TextInputLayout, TextInputEditText> view : views) {
+            if (view.second.getText().toString().trim().isEmpty()) {
+                if (view.first == vVacationDateLayout)
+                    view.first.setErrorIconDrawable(R.drawable.ic_baseline_calendar_month_24);
+
+                view.first.setError("Missing");
+                return true;
+            }
+            if (view.first.getError() != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean validateInputs() {
+        return !generateError();
     }
 
     private String convertDateToString(Object selection) {
@@ -160,6 +176,8 @@ public class SendVacationRequestFragment extends Fragment {
             daysAfterVacationIsTaken = vVacationDays.getText().toString().trim().equals("") ? remainingDays : remainingDays - Integer.parseInt(vVacationDays.getText().toString());
             if (daysAfterVacationIsTaken < 0) {
                 vVacationDaysLayout.setError("Exceeds remaining");
+            } else if (daysAfterVacationIsTaken == remainingDays && !vVacationDays.getText().toString().trim().isEmpty()) {
+                vVacationDaysLayout.setError("Invalid Value");
             } else {
                 vVacationDaysLayout.setHelperText(String.format("%d days Remaining", daysAfterVacationIsTaken));
                 vVacationDaysLayout.setError(null);
@@ -167,15 +185,46 @@ public class SendVacationRequestFragment extends Fragment {
 
         }
     };
-    private View.OnClickListener clSendRequest = v -> {
-        if (ValidateInputs()) {
-            uploadVacationRequest();
+    private TextWatcher twVacationDate = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
-        } else {
-            Toast.makeText(getActivity(), "please, fill vacation request data", Toast.LENGTH_SHORT).show();
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            if (!vVacationDate.getText().toString().trim().isEmpty())
+                vVacationDateLayout.setError(null);
         }
     };
-    private View.OnClickListener clVacationDate = v -> {
+    private TextWatcher twVacationNote = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            if (!vVacationNote.getText().toString().trim().isEmpty())
+                vVacationNoteLayout.setError(null);
+        }
+    };
+    private View.OnClickListener oclSendRequest = v -> {
+        if (validateInputs()) {
+            uploadVacationRequest();
+        }
+    };
+    private View.OnClickListener oclVacationDate = v -> {
         vDatePicker.show(getParentFragmentManager(), "DATE_PICKER");
     };
     private MaterialPickerOnPositiveButtonClickListener pclDatePicker = selection -> {

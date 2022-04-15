@@ -10,37 +10,14 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent">
+        app:layout_constraintTop_toTopOf="parent">
 
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/textInputLayout_AllowanceName"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="32dp"
-        app:boxBackgroundMode="outline"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-
-    <com.google.android.material.textfield.TextInputEditText
-        android:id="@+id/TextInput_AllowanceName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/SupplementName"
-        android:inputType="text"
-        android:padding="14dp"
-        android:singleLine="true" />
-    </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout_AllowanceMount"
+            android:id="@+id/textInputLayout_AllowanceName"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -48,8 +25,35 @@
             android:layout_marginTop="16dp"
             android:layout_marginEnd="32dp"
             app:boxBackgroundMode="outline"
+            app:errorEnabled="true"
+            app:helperTextEnabled="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/TextInput_AllowanceName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/SupplementName"
+                android:inputType="text"
+                android:padding="14dp"
+                android:singleLine="true" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/textInputLayout_AllowanceMount"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="32dp"
+            app:boxBackgroundMode="outline"
             app:endIconMode="clear_text"
             app:endIconTint="@color/primaryColor"
+            app:errorEnabled="true"
+            app:helperTextEnabled="true"
             app:layout_constraintEnd_toStartOf="@id/checkBox_Penalty"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/textInputLayout_AllowanceName">
@@ -68,12 +72,13 @@
             android:id="@+id/checkBox_Penalty"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="32dp"
+            android:layout_marginBottom="16dp"
+            android:text="@string/penalty"
             app:layout_constraintBottom_toBottomOf="@+id/textInputLayout_AllowanceMount"
             app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginEnd="32dp"
             app:layout_constraintStart_toEndOf="@+id/textInputLayout_AllowanceMount"
-            app:layout_constraintTop_toTopOf="@+id/textInputLayout_AllowanceMount"
-            android:text="@string/penalty" />
+            app:layout_constraintTop_toTopOf="@+id/textInputLayout_AllowanceMount" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/textInputLayout_AllowanceNote"
@@ -81,9 +86,11 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="32dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="4dp"
             android:layout_marginEnd="32dp"
             app:boxBackgroundMode="outline"
+            app:errorEnabled="true"
+            app:helperTextEnabled="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/textInputLayout_AllowanceMount">
@@ -99,15 +106,15 @@
 
 
         <com.google.android.material.button.MaterialButton
-        android:id="@+id/button_Done"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="32dp"
-        android:layout_marginTop="16dp"
-        android:text="@string/Done"
-        android:textAllCaps="false"
-        app:layout_constraintTop_toBottomOf="@id/textInputLayout_AllowanceNote"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+            android:id="@+id/button_Done"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="32dp"
+            android:text="@string/Done"
+            android:textAllCaps="false"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/textInputLayout_AllowanceNote" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

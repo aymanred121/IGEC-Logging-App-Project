@@ -5,13 +5,25 @@
       <map>
         <entry key="../../../../../../../layout/custom_preview.xml" value="0.10104166666666667" />
         <entry key="../../../../../layout/custom_preview.xml" value="0.22083333333333333" />
+        <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/activity_vacation_info.xml" value="0.5" />
+        <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/fragment_add_allowance_dialog.xml" value="0.33" />
+        <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/fragment_allowance_info_dialog.xml" value="0.25" />
+        <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/fragment_change_password.xml" value="0.33" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/fragment_check_in_out.xml" value="0.12907608695652173" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/fragment_client_info.xml" value="0.25" />
+        <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/fragment_gross_salary.xml" value="0.22" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/fragment_machine_check_in_out_dialog.xml" value="0.12907608695652173" />
-        <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/fragment_project_summary.xml" value="0.25" />
+        <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/fragment_project_summary.xml" value="0.5" />
+        <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/fragment_send_transfer_request.xml" value="0.25" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/fragment_supplements.xml" value="0.33" />
+        <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/fragment_transfer_requests.xml" value="0.33" />
+        <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/fragment_vacation_request.xml" value="0.5" />
+        <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/fragment_vacation_requests.xml" value="0.1" />
+        <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/item_allowance.xml" value="0.4383033419023136" />
+        <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/item_employee.xml" value="0.67" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/machine_item.xml" value="0.17074275362318841" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/supplement_item.xml" value="0.12907608695652173" />
+        <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/xml/root_preferences.xml" value="0.5" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/fragment_change_password.xml" value="0.31284302963776073" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/fragment_check_in_out.xml" value="0.15534420289855072" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/fragment_checking_in_out_dialog.xml" value="0.17074275362318841" />
@@ -24,7 +36,6 @@
         <entry key="..\:/Users/maraw/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/activity_main.xml" value="0.11302083333333333" />
         <entry key="..\:/Users/maraw/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/activity_vacation_info.xml" value="0.25" />
         <entry key="..\:/Users/maraw/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/fragment_add_allowance_dialog.xml" value="0.22826086956521738" />
-        <entry key="..\:/Users/maraw/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/fragment_allowance_info_dialog.xml" value="0.15625" />
         <entry key="..\:/Users/maraw/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/fragment_check_in_out.xml" value="0.15104166666666666" />
         <entry key="..\:/Users/maraw/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/fragment_machine_check_in_out_dialog.xml" value="0.15104166666666666" />
         <entry key="..\:/Users/maraw/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/fragment_project_summary.xml" value="0.22826086956521738" />

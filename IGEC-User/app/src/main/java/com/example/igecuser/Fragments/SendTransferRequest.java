@@ -3,11 +3,13 @@ package com.example.igecuser.Fragments;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -19,10 +21,12 @@ import com.example.igecuser.fireBase.Employee;
 import com.example.igecuser.fireBase.EmployeeOverview;
 import com.example.igecuser.fireBase.Project;
 import com.example.igecuser.fireBase.TransferRequests;
+import com.google.android.gms.common.util.ArrayUtils;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -35,6 +39,8 @@ public class SendTransferRequest extends Fragment {
     private Project oldProject, newProject;
     private AutoCompleteTextView vProjectsReference, vEmployeesId;
     private TextInputEditText vTransferNote;
+    private TextInputLayout vTransferNoteLayout, vProjectReferenceLayout, vEmployeesIdLayout;
+    private ArrayList<Pair<TextInputLayout, EditText>> views;
     private MaterialButton vSend;
     private EmployeeOverview selectedEmployee;
 
@@ -56,6 +62,7 @@ public class SendTransferRequest extends Fragment {
         initialize(view);
         vProjectsReference.addTextChangedListener(twProjectRef);
         vEmployeesId.addTextChangedListener(twEmployeeID);
+        vTransferNote.addTextChangedListener(twTransferNote);
         vSend.setOnClickListener(oclSend);
     }
 
@@ -64,6 +71,16 @@ public class SendTransferRequest extends Fragment {
         vTransferNote = view.findViewById(R.id.TextInput_TransferNote);
         vProjectsReference = view.findViewById(R.id.TextInput_ProjectReferences);
         vEmployeesId = view.findViewById(R.id.TextInput_EmployeeId);
+
+        vTransferNoteLayout = view.findViewById(R.id.textInputLayout_TransferNote);
+        vEmployeesIdLayout = view.findViewById(R.id.textInputLayout_EmployeeId);
+        vProjectReferenceLayout = view.findViewById(R.id.textInputLayout_ProjectReferences);
+
+        views = new ArrayList<>();
+        views.add(new Pair<>(vProjectReferenceLayout, vProjectsReference));
+        views.add(new Pair<>(vEmployeesIdLayout, vEmployeesId));
+        views.add(new Pair<>(vTransferNoteLayout, vTransferNote));
+
         db.collection("projects").document(manager.getProjectID()).get().addOnSuccessListener(documentSnapshot -> {
             if (!documentSnapshot.exists())
                 return;
@@ -83,6 +100,7 @@ public class SendTransferRequest extends Fragment {
 
 
     }
+
     private Task<Void> sendRequest(EmployeeOverview employee) {
         String transferId = db.collection("TransferRequests").getId();
         TransferRequests request = new TransferRequests();
@@ -102,6 +120,7 @@ public class SendTransferRequest extends Fragment {
         db.collection("projects").whereNotEqualTo("id", projectId).addSnapshotListener((queryDocumentSnapshots, error) -> {
             if (queryDocumentSnapshots.size() == 0)
                 return;
+            projects.clear();
             projects.addAll((queryDocumentSnapshots.toObjects(Project.class)));
             ArrayList<String> projectsRef = new ArrayList<>();
             for (Project project : projects)
@@ -116,22 +135,46 @@ public class SendTransferRequest extends Fragment {
         });
     }
 
-    private boolean validateInput() {
-        return !
-                (
-                        vProjectsReference.getText().toString().isEmpty()
-                                ||
-                                vEmployeesId.getText().toString().isEmpty()
-                                ||
-                                vTransferNote.getText().toString().isEmpty()
-                )
-                ;
+    private boolean generateError() {
+
+        for (Pair<TextInputLayout, EditText> view : views) {
+            if (view.second.getText().toString().trim().isEmpty()) {
+                view.first.setError("Missing");
+                return true;
+            }
+            if (view.first.getError() != null) {
+                return true;
+            }
+        }
+        return false;
     }
-    private void clearInput()
-    {
+
+    private boolean validateInput() {
+
+        return !generateError();
+    }
+
+    private void clearInput() {
         vTransferNote.setText(null);
     }
 
+    private final TextWatcher twTransferNote = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            if (!vTransferNote.getText().toString().trim().isEmpty())
+                vTransferNoteLayout.setError(null);
+        }
+    };
     private final TextWatcher twEmployeeID = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -177,10 +220,7 @@ public class SendTransferRequest extends Fragment {
     private final View.OnClickListener oclSend = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            if (!validateInput()) {
-                Toast.makeText(getActivity(), "Please, fill the transfer date correctly", Toast.LENGTH_SHORT).show();
-                return;
-            } else {
+            if (validateInput()) {
                 sendRequest(selectedEmployee).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void unused) {

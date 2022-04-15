@@ -48,6 +48,7 @@
         app:counterEnabled="true"
         app:counterMaxLength="250"
         app:helperTextEnabled="true"
+        app:errorEnabled="true"
         app:layout_constraintBottom_toTopOf="@+id/Button_Done"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"

@@ -130,7 +130,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     }
 
     private void setCheckInOutBtn() {
-        db.collection("summary").document(id).addSnapshotListener((value, e) -> {
+        db.collection("summary").document(id).get().addOnSuccessListener((value) -> {
             if (!value.exists())
                 isHere = false;
             else {
@@ -139,7 +139,8 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
             vCheckInOut.setBackgroundColor((isHere) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
             vCheckInOut.setText(isHere ? "Out" : "In");
             vAddMachine.setClickable(isHere);
-            vAddMachine.startAnimation(isHere ? show : hide);
+            if (isHere)
+                vAddMachine.startAnimation(show);
         });
     }
 
@@ -367,7 +368,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
             employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
             allTypes.addAll(employeesGrossSalary.getAllTypes());
             allTypes.add(currMachine.getAllowance());
-            GrossSalaryRef.document(currEmployee.getId()).update("allTypes" , allTypes);
+            GrossSalaryRef.document(currEmployee.getId()).update("allTypes", allTypes);
         });
 
 

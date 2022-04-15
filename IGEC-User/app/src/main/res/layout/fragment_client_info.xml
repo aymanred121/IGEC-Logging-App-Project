@@ -13,6 +13,7 @@
         android:layout_marginStart="32dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="32dp"
+        app:errorEnabled="true"
         app:boxBackgroundMode="outline"
         app:helperTextEnabled="true">
 
@@ -34,8 +35,9 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/textInputLayout_CompanyName"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="4dp"
         android:layout_marginEnd="32dp"
+        app:errorEnabled="true"
         app:boxBackgroundMode="outline"
         app:helperTextEnabled="true">
 
@@ -57,10 +59,11 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/textInputLayout_CompanyEmail"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="4dp"
         android:layout_marginEnd="32dp"
         app:boxBackgroundMode="outline"
         app:counterEnabled="true"
+        app:errorEnabled="true"
         app:counterMaxLength="11"
         app:helperTextEnabled="true">
 

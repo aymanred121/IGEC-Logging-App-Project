@@ -138,7 +138,6 @@
         android:layout_alignParentEnd="true"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
-        android:layout_marginBottom="50dp"
         android:backgroundTint="@color/Green"
         android:padding="8dp"
         android:text="@string/accept_request"
@@ -161,7 +160,7 @@
         android:textAllCaps="false"
         android:textColor="@color/white"
         android:textSize="16sp"
-        app:cornerRadius="8dp"/>
+        app:cornerRadius="8dp" />
 
 
 </RelativeLayout>

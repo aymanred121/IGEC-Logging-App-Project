@@ -38,8 +38,8 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
     @Override
     public void onBindViewHolder(@NonNull EmployeeAdapterViewHolder holder, int position) {
         EmployeeOverview EmployeeOverview = employeeOverviews.get(position);
-        holder.vEmployeeName.setText(String.format("%s %s", EmployeeOverview.getFirstName(), EmployeeOverview.getLastName()));
-        holder.vEmployeeID.setText(String.valueOf(EmployeeOverview.getId()));
+        holder.vEmployeeName.setText(String.format("Employee Name: %s %s", EmployeeOverview.getFirstName(), EmployeeOverview.getLastName()));
+        holder.vEmployeeID.setText(String.format("Employee Id: %s", EmployeeOverview.getId()));
         if (project.getEmployeeWorkedTime().get(EmployeeOverview.getId()) == null)
             holder.vWorkingHours.setText("0 Hours");
         else

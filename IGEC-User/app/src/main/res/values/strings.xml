@@ -1,30 +1,14 @@
 <resources>
     <string name="app_name">User</string>
-    <string name="vacation_date">Vacation Date*</string>
-    <string name="vacation_reason">Vacation Reason*</string>
+    <string name="vacation_date">Date</string>
+    <string name="vacation_reason">Note</string>
     <string name="send_request">Send Vacation Request</string>
     <string name="send_transfer_request">Send transfer Request</string>
     <string name="check_in_out">Check In/Out</string>
     <string name="vacation_request">Vacation Request</string>
-    <string name="vacation_days">Vacation Days*</string>
+    <string name="vacation_days">Days</string>
     <string name="vacations_log">Vacations Log</string>
     <string name="vacation_requests">Vacation Requests</string>
-    <!-- Preference Titles -->
-    <string name="messages_header">Messages</string>
-    <string name="sync_header">Sync</string>
-
-    <!-- Messages Preferences -->
-    <string name="signature_title">Your signature</string>
-    <string name="reply_title">Default reply action</string>
-
-    <!-- Sync Preferences -->
-    <string name="sync_title">Sync email periodically</string>
-    <string name="attachment_title">Download incoming attachments</string>
-    <string name="attachment_summary_on">Automatically download attachments for incoming emails
-    </string>
-    <string name="attachment_summary_off">Only download attachments when manually requested</string>
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="employee_id">Employee ID</string>
     <string name="employee_name">Employee Name</string>
     <string name="accept_request">Accept</string>
@@ -41,12 +25,12 @@
 
     <string name="good_morning">Good morning,</string>
     <string name="change_password">Change Password</string>
-    <string name="new_password">New Password*</string>
+    <string name="new_password">New Password</string>
     <string name="confirm_password">Confirm Password</string>
     <string name="No">No</string>
     <string name="Yes">Yes</string>
-    <string name="company_name">Company Name*</string>
-    <string name="company_email">Company Email*</string>
+    <string name="company_name">Company Name</string>
+    <string name="company_email">Company Email</string>
     <string name="company_phone_number">Company Phone Number</string>
     <string name="start_date">Start Date of use</string>
     <string name="Done">Done</string>
@@ -54,24 +38,25 @@
     <string name="gross_salary">Gross Salary</string>
     <string name="reason_for">Reason For:</string>
     <string name="_0_00">0.00 EGP</string>
-    <string name="project_name">Project Name*</string>
-    <string name="project_reference">Project Reference*</string>
+    <string name="project_name">Project Name</string>
+    <string name="project_reference">Project Reference</string>
     <string name="project_allowances">Project Allowances</string>
     <string name="update">Update</string>
     <string name="ProjectSummary">Project Summary</string>
     <string name="do_you_want_to_confirm_this_action">Do you want to confirm this action?</string>
     <string name="Comment">Comment</string>
-    <string name="Mount">Mount*</string>
-    <string name="SupplementName">Name*</string>
+    <string name="Mount">Mount</string>
+    <string name="SupplementName">Name</string>
     <string name="AreUSure">Are You sure?</string>
     <string name="Delete">Delete</string>
     <string name="cancel">No</string>
     <string name="accept">Yes</string>
-    <string name="Note">Note*</string>
+    <string name="Note">Note</string>
     <string name="penalty">Penalty</string>
     <string name="send_a_transfer_request">Send a Transfer Request</string>
     <string name="transfer_requests">Transfer Requests</string>
-    <string name="transfer_note">Transfer Note*</string>
-    <string name="project_reference_name">Project Reference | Name*</string>
-    <string name="employee_id_name">Employee Id | Name*</string>
+    <string name="transfer_note">Transfer Note</string>
+    <string name="project_reference_name">Project Reference | Name</string>
+    <string name="employee_id_name">Employee Id | Name</string>
+    <string name="ChangePassword">Change Password</string>
 </resources>

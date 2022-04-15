@@ -71,6 +71,7 @@ public class GrossSalaryFragment extends Fragment {
             if (!value.exists())
                 return;
             salarySummaries.clear();
+            salarySummary = 0;
             employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
             for (Allowance allowance : employeesGrossSalary.getAllTypes()) {
                 salarySummaries.add(allowance);

@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +25,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.regex.Pattern;
 
@@ -32,11 +34,13 @@ public class ClientInfoDialog extends DialogFragment {
 
     //Views
     private TextInputEditText vCompanyName, vCompanyEmail, vCompanyPhoneNumber;
-    private TextInputLayout vCompanyEmailLayout;
+    private TextInputLayout vCompanyNameLayout, vCompanyEmailLayout, vCompanyPhoneNumberLayout;
+    private ArrayList<Pair<TextInputLayout, TextInputEditText>> views;
     private MaterialButton vDone;
     //Vars
     private float startDate;
     private String note;
+
     public ClientInfoDialog(String note) {
         this.note = note;
     }
@@ -66,27 +70,54 @@ public class ClientInfoDialog extends DialogFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_client_info, container, false);
+        return inflater.inflate(R.layout.fragment_client_info, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
         initialize(view);
         vDone.setOnClickListener(oclDone);
         vCompanyEmail.addTextChangedListener(twEmail);
-        return view;
+        vCompanyName.addTextChangedListener(twName);
+        vCompanyPhoneNumber.addTextChangedListener(twPhone);
+
     }
 
     // Functions
     private void initialize(View view) {
         vCompanyName = view.findViewById(R.id.TextInput_CompanyName);
         vCompanyEmail = view.findViewById(R.id.TextInput_CompanyEmail);
-        vCompanyEmailLayout = view.findViewById(R.id.textInputLayout_CompanyEmail);
         vCompanyPhoneNumber = view.findViewById(R.id.TextInput_CompanyPhoneNumber);
+
+        vCompanyNameLayout = view.findViewById(R.id.textInputLayout_CompanyName);
+        vCompanyEmailLayout = view.findViewById(R.id.textInputLayout_CompanyEmail);
+        vCompanyPhoneNumberLayout = view.findViewById(R.id.textInputLayout_CompanyPhoneNumber);
+
+        views = new ArrayList<>();
+        views.add(new Pair<>(vCompanyNameLayout, vCompanyName));
+        views.add(new Pair<>(vCompanyEmailLayout, vCompanyEmail));
+        views.add(new Pair<>(vCompanyPhoneNumberLayout, vCompanyPhoneNumber));
+
         vDone = view.findViewById(R.id.Button_Done);
     }
 
+    private boolean generateError() {
+
+        for (Pair<TextInputLayout, TextInputEditText> view : views) {
+            if (view.second.getText().toString().trim().isEmpty()) {
+                view.first.setError("Missing");
+                return true;
+            }
+            if (view.first.getError() != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private boolean validateInput() {
-        return !(vCompanyName.getText().toString().isEmpty() ||
-                vCompanyEmail.getText().toString().isEmpty() ||
-                vCompanyPhoneNumber.getText().toString().isEmpty() ||
-                vCompanyEmailLayout.getError() != null);
+        return !generateError();
     }
 
 
@@ -99,7 +130,7 @@ public class ClientInfoDialog extends DialogFragment {
         Bundle bundle = new Bundle();
         Client client = new Client(vCompanyName.getText().toString(), vCompanyEmail.getText().toString(), vCompanyPhoneNumber.getText().toString());
         bundle.putSerializable("client", client);
-        bundle.putString("note",note);
+        bundle.putString("note", note);
         getParentFragmentManager().setFragmentResult("clientInfo", bundle);
         dismiss();
 
@@ -130,6 +161,38 @@ public class ClientInfoDialog extends DialogFragment {
             } else {
                 vCompanyEmailLayout.setError(null);
             }
+        }
+    };
+    private final TextWatcher twName = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            vCompanyNameLayout.setError(null);
+        }
+    };
+    private final TextWatcher twPhone = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            vCompanyPhoneNumberLayout.setError(null);
         }
     };
 

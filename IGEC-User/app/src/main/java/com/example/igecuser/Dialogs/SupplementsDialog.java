@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +31,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
@@ -45,7 +47,7 @@ public class SupplementsDialog extends DialogFragment {
 
     private Machine machine;
     private Employee employee;
-    ArrayList<Supplement> supplements;
+    private ArrayList<Supplement> supplements;
     private MaterialButton vDone;
     private boolean isItAUser;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -56,6 +58,7 @@ public class SupplementsDialog extends DialogFragment {
     private Animation show, hide;
     private RecyclerView recyclerView;
     private SupplementsAdapter adapter;
+    private RecyclerView.LayoutManager layoutManager;
 
 
     @NonNull
@@ -83,20 +86,20 @@ public class SupplementsDialog extends DialogFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_supplements, container, false);
-        initialize(view);
-
-
-        vDone.setOnClickListener(oclDone);
-        return view;
+        return inflater.inflate(R.layout.fragment_supplements, container, false);
     }
 
-    private RecyclerView.LayoutManager layoutManager;
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        initialize(view);
+        vDone.setOnClickListener(oclDone);
+    }
 
-    public SupplementsDialog(boolean isItAUser, Machine machine,Employee employee) {
+    public SupplementsDialog(boolean isItAUser, Machine machine, Employee employee) {
         this.isItAUser = isItAUser;
         this.machine = machine;
-        this.employee= employee;
+        this.employee = employee;
     }
 
     // Functions
@@ -158,11 +161,9 @@ public class SupplementsDialog extends DialogFragment {
     private final View.OnClickListener oclDone = v -> {
         Bundle bundle = new Bundle();
         bundle.putString("supplementState", vComment.getText().toString());
-        bundle.putBoolean("isItAUser",isItAUser);
+        bundle.putBoolean("isItAUser", isItAUser);
         getParentFragmentManager().setFragmentResult("supplements", bundle);
         dismiss();
-
-
 
 
     };

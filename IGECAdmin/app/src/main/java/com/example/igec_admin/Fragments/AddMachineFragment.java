@@ -207,20 +207,14 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
                 for (int i = 0; i < size; i++) {
                     Integer[] finalI = new Integer[1];
                     finalI[0] = i;
-                    supplements.get(i).saveToCloudStorage(storageRef, vID.getText().toString()).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                        @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            if (finalI[0] == size - 1) {
-                                alertDialog.dismiss();
-                            }
-
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
+                    supplements.get(i).saveToCloudStorage(storageRef, vID.getText().toString()).addOnSuccessListener(taskSnapshot -> {
+                        if (finalI[0] == size - 1) {
                             alertDialog.dismiss();
-                            Toast.makeText(getActivity(), "Failed to upload, check your internet", Toast.LENGTH_SHORT).show();
                         }
+
+                    }).addOnFailureListener(e -> {
+                        alertDialog.dismiss();
+                        Toast.makeText(getActivity(), "Failed to upload, check your internet", Toast.LENGTH_SHORT).show();
                     });
                 }
                 saveToInternalStorage();

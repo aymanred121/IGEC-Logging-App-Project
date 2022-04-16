@@ -30,6 +30,8 @@ import com.example.igec_admin.fireBase.Client;
 import com.example.igec_admin.fireBase.EmployeeOverview;
 import com.example.igec_admin.fireBase.EmployeesGrossSalary;
 import com.example.igec_admin.fireBase.Project;
+import com.github.javafaker.Faker;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.datepicker.MaterialDatePicker;
@@ -38,7 +40,9 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.WriteBatch;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -74,6 +78,7 @@ public class AddProjectFragment extends Fragment {
     private final DocumentReference employeeOverviewRef = db.collection("EmployeeOverview")
             .document("emp");
     private final CollectionReference employeeCol = db.collection("employees");
+    private WriteBatch batch = FirebaseFirestore.getInstance().batch();
 
 
     @Override
@@ -162,6 +167,7 @@ public class AddProjectFragment extends Fragment {
         ArrayAdapter<String> ContractAdapter = new ArrayAdapter<>(getActivity(), R.layout.dropdown_item, contract);
         vContractType.setAdapter(ContractAdapter);
         allowances = new ArrayList<>();
+        fakeData();
     }
 
     private void ChangeSelectedTeam(int position) {
@@ -201,14 +207,10 @@ public class AddProjectFragment extends Fragment {
                         return;
                     }
 
-                    String source = documentSnapshot != null && documentSnapshot.getMetadata().hasPendingWrites()
-                            ? "Local" : "Server";
-
-                    if (documentSnapshot.exists()) {
-                        Map<String, ArrayList<String>> empMap;
-                        empMap = (HashMap) documentSnapshot.getData();
-                        retrieveEmployees(empMap);
-                    }
+                    if (!documentSnapshot.exists())
+                        return;
+                    HashMap empMap = (HashMap) documentSnapshot.getData();
+                    retrieveEmployees(empMap);
                 });
     }
 
@@ -224,14 +226,16 @@ public class AddProjectFragment extends Fragment {
             empInfo.add(projectID);
             Map<String, Object> empInfoMap = new HashMap<>();
             empInfoMap.put(emp.getId(), empInfo);
-            employeeOverviewRef.update(empInfoMap);
-            employeeCol.document(emp.getId()).update("managerID", empInfo.get(3), "projectID", projectID).addOnSuccessListener(unused -> {
-                if (counter[0] == Team.size() - 1) {
-                    ClearInputs();
-                    Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
-                }
-                counter[0]++;
-            });
+            //employeeOverviewRef.update(empInfoMap);
+            batch.update(employeeOverviewRef, empInfoMap);
+            batch.update(employeeCol.document(emp.getId()), "managerID", emp.getManagerID(), "projectID", projectID);
+//            employeeCol.document(emp.getId()).update("managerID", empInfo.get(3), "projectID", projectID).addOnSuccessListener(unused -> {
+//                if (counter[0] == Team.size() - 1) {
+//                    ClearInputs();
+//                    Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
+//                }
+//                counter[0]++;
+//            });
             ArrayList<Allowance> allTypes = new ArrayList<>();
             db.collection("EmployeesGrossSalary").document(emp.getId()).get().addOnSuccessListener((value) -> {
                 if (!value.exists())
@@ -241,9 +245,19 @@ public class AddProjectFragment extends Fragment {
                 if (allowances.size() != 0) {
                     allTypes.addAll(allowances);
                 }
-                db.collection("EmployeesGrossSalary").document(emp.getId()).update("allTypes",allTypes);
-            });
+                batch.update(db.collection("EmployeesGrossSalary").document(emp.getId()), "allTypes", allTypes);
+                if(counter[0] == Team.size()-1){
+                    batch.commit().addOnSuccessListener(unused -> {
+                        ClearInputs();
+                        fakeData();
 
+                        Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
+                        batch = FirebaseFirestore.getInstance().batch();
+                    });
+                }
+                counter[0]++;
+                // db.collection("EmployeesGrossSalary").document(emp.getId()).update("allTypes", allTypes);
+            });
         });
 
     }
@@ -263,10 +277,12 @@ public class AddProjectFragment extends Fragment {
         newProject.setClient(client);
         newProject.getAllowancesList().addAll(allowances);
         allowances = newProject.getAllowancesList();
-        db.collection("projects").document(projectID).set(newProject).addOnSuccessListener(unused -> {
-            updateEmployeesDetails(projectID);
-            projectID = db.collection("projects").document().getId().substring(0, 5);
-        });
+        batch.set(db.collection("projects").document(projectID), newProject);
+        updateEmployeesDetails(projectID);
+        projectID = db.collection("projects").document().getId().substring(0, 5);
+
+//        db.collection("projects").document(projectID).set(newProject).addOnSuccessListener(unused -> {
+//        });
 
     }
 
@@ -312,6 +328,17 @@ public class AddProjectFragment extends Fragment {
         vTimeDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
         vTimeDatePicker = vTimeDatePickerBuilder.build();
         vTimeDatePicker.addOnPositiveButtonClickListener(pclTimeDatePicker);
+    }
+    void fakeData(){
+        Faker faker = new Faker();
+        vName.setText(faker.bothify("??????"));
+        vCity.setText(faker.address().cityName());
+        vArea.setText(faker.address().cityName());
+        vStreet.setText(faker.address().streetName());
+        vContractType.setText("lamp sum");
+        startDate = faker.date().birthday().getTime();
+        vTime.setText(convertDateToString(startDate));
+
     }
 
     boolean validateInputs() {

@@ -20,6 +20,7 @@ import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Allowance;
 import com.example.igec_admin.fireBase.Employee;
 import com.example.igec_admin.fireBase.EmployeesGrossSalary;
+import com.github.javafaker.Faker;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
@@ -27,6 +28,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.WriteBatch;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -40,11 +42,7 @@ import java.util.regex.Pattern;
 
 public class AddUserFragment extends Fragment {
 
-    private final int PROJECT = 0;
-    private final int NETSALARY = 1;
-    private final int ALLOWANCE = 2;
-    private final int BONUS = 3;
-    private final int PENALTY = 4;
+
     // Views
     MaterialButton vRegister;
     TextInputEditText vFirstName, vSecondName, vEmail, vPassword, vPhone, vTitle, vSalary, vNationalID, vArea, vCity, vStreet, vHireDate;
@@ -55,6 +53,13 @@ public class AddUserFragment extends Fragment {
     // Vars
     long hireDate;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private final int PROJECT = 0;
+    private final int NETSALARY = 1;
+    private final int ALLOWANCE = 2;
+    private final int BONUS = 3;
+    private final int PENALTY = 4;
+    private final DocumentReference employeeOverviewRef = db.collection("EmployeeOverview").document("emp");
+    private WriteBatch batch = FirebaseFirestore.getInstance().batch();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -92,6 +97,8 @@ public class AddUserFragment extends Fragment {
         vDatePickerBuilder.setTitleText("Hire Date");
         vDatePicker = vDatePickerBuilder.build();
         vRegister = view.findViewById(R.id.button_register);
+        //TODO: remove fakeData() when all testing is finished
+        fakeData();
 
 //        {
 //            vFirstName.setText("test");
@@ -122,34 +129,42 @@ public class AddUserFragment extends Fragment {
         db.collection("employees").whereEqualTo("email", vEmail.getText().toString().trim()).get().addOnSuccessListener(documents -> {
             if (documents.getDocuments().size() != 0) {
                 Toast.makeText(getActivity(), "this Email is already exist", Toast.LENGTH_SHORT).show();
-            } else {
-                DocumentReference employeeOverviewRef = db.collection("EmployeeOverview").document("emp");
-                String id = db.collection("EmployeeOverview").document().getId().substring(0, 5);
-                EmployeesGrossSalary employeesGrossSalary = new EmployeesGrossSalary();
-                employeesGrossSalary.setEmployeeId(id);
-                ArrayList<Allowance> allTypes = new ArrayList<>();
-                allTypes.add(new Allowance("Net salary" , Double.parseDouble(vSalary.getText().toString()) , NETSALARY));
-                employeesGrossSalary.setAllTypes(allTypes);
-                ArrayList<String> empInfo = new ArrayList<>();
-                empInfo.add((vFirstName.getText()).toString());
-                empInfo.add((vSecondName.getText()).toString());
-                empInfo.add((vTitle.getText()).toString());
-                empInfo.add(null); // ManagerID
-                empInfo.add(null); // ProjectID
-                Map<String, Object> empInfoMap = new HashMap<>();
-                empInfoMap.put(id, empInfo);
-                employeeOverviewRef.update(empInfoMap).addOnFailureListener(e -> employeeOverviewRef.set(empInfoMap));
-                Employee newEmployee = fillEmployeeData();
-                newEmployee.setId(id);
-                db.collection("employees").document(id).set(newEmployee).addOnSuccessListener(unused -> {
-                    db.collection("EmployeesGrossSalary").document(id).set(employeesGrossSalary).addOnSuccessListener(unused1 -> {
-                        clearInputs();
-                        Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
-
-                    });
-                });
-
+                return;
             }
+
+            String id = db.collection("EmployeeOverview").document().getId().substring(0, 5);
+            EmployeesGrossSalary employeesGrossSalary = new EmployeesGrossSalary();
+            employeesGrossSalary.setEmployeeId(id);
+            ArrayList<Allowance> allTypes = new ArrayList<>();
+            allTypes.add(new Allowance("Net salary", Double.parseDouble(vSalary.getText().toString()), NETSALARY));
+            employeesGrossSalary.setAllTypes(allTypes);
+            ArrayList<String> empInfo = new ArrayList<>();
+            empInfo.add((vFirstName.getText()).toString());
+            empInfo.add((vSecondName.getText()).toString());
+            empInfo.add((vTitle.getText()).toString());
+            empInfo.add(null); // ManagerID
+            empInfo.add(null); // ProjectID
+            Map<String, Object> empInfoMap = new HashMap<>();
+            empInfoMap.put(id, empInfo);
+            employeeOverviewRef.update(empInfoMap).addOnFailureListener(e -> employeeOverviewRef.set(empInfoMap));
+            Employee newEmployee = fillEmployeeData();
+            newEmployee.setId(id);
+            batch.set(db.collection("employees").document(id), newEmployee);
+            batch.set(db.collection("EmployeesGrossSalary").document(id), employeesGrossSalary);
+            batch.commit().addOnSuccessListener(unused -> {
+                clearInputs();
+                fakeData();
+                Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
+                batch = FirebaseFirestore.getInstance().batch();
+            });
+//            db.collection("employees").document(id).set(newEmployee).addOnSuccessListener(unused -> {
+//                db.collection("EmployeesGrossSalary").document(id).set(employeesGrossSalary).addOnSuccessListener(unused1 -> {
+//                    clearInputs();
+//                    fakeData();
+//                    Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
+//
+//                });
+//            });
         });
     }
 
@@ -194,6 +209,27 @@ public class AddUserFragment extends Fragment {
         vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
         vDatePicker = vDatePickerBuilder.build();
         vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);
+    }
+
+    void fakeData() {
+        Faker faker = new Faker();
+        vFirstName.setText(faker.name().firstName());
+        vSecondName.setText(faker.name().lastName());
+        vEmail.setText(faker.bothify("????##@gmail.com"));
+        vPassword.setText("1");
+        vPhone.setText(faker.phoneNumber().phoneNumber());
+        vTitle.setText("eng");
+        vSalary.setText(faker.numerify("#####"));
+        vArea.setText(faker.address().cityName());
+        vCity.setText(faker.address().cityName());
+        vStreet.setText(faker.address().streetName());
+        hireDate = faker.date().birthday().getTime();
+        vHireDate.setText(convertDateToString(hireDate));
+        vNationalID.setText(faker.numerify("##############"));
+        vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
+        vDatePicker = vDatePickerBuilder.build();
+        vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);
+
     }
 
     boolean validateInputs() {

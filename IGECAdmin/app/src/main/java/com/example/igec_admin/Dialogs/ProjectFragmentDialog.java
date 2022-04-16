@@ -41,6 +41,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.WriteBatch;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -85,6 +86,7 @@ public class ProjectFragmentDialog extends DialogFragment {
     private EmployeeOverview selectedManager;
     private Boolean isDeleted = false;
     private String currProjectID;
+    private WriteBatch batch = FirebaseFirestore.getInstance().batch();
 
     public ProjectFragmentDialog(Project project) {
         this.project = project;
@@ -290,11 +292,11 @@ public class ProjectFragmentDialog extends DialogFragment {
             empInfo.add(empOverview.getProjectId());
             Map<String, Object> empInfoMap = new HashMap<>();
             empInfoMap.put(empOverview.getId(), empInfo);
-            employeeOverviewRef.update(empInfoMap);
-            if (isDeleted)
-                employeeCol.document(empOverview.getId()).update("managerID", empOverview.getManagerID(), "projectID", empOverview.getProjectId());
-            else
-                employeeCol.document(empOverview.getId()).update("managerID", empOverview.getManagerID(), "projectID", currProjectID);
+            batch.update(employeeOverviewRef, empInfoMap);
+            //employeeOverviewRef.update(empInfoMap);
+            // employeeCol.document(empOverview.getId()).update("managerID", empOverview.getManagerID(), "projectID", empOverview.getProjectId());
+            batch.update(employeeCol.document(empOverview.getId()), "managerID", empOverview.getManagerID(), "projectID",empOverview.getProjectId());
+            //   employeeCol.document(empOverview.getId()).update("managerID", empOverview.getManagerID(), "projectID", currProjectID);
 
 
 //            employeeCol.document(empOverview.getId()).update("managerID", empOverview.getManagerID(), "projectID", currProjectID);
@@ -373,39 +375,54 @@ public class ProjectFragmentDialog extends DialogFragment {
         }).collect(Collectors.toList());
         newProject.getAllowancesList().addAll(allowances);
         allowances = newProject.getAllowancesList();
-        db.collection("projects").document(project.getId()).set(newProject).addOnSuccessListener(unused -> {
-            newProject.getEmployees().forEach(emp->{
-                ArrayList<Allowance> allTypes = new ArrayList<>();
-                db.collection("EmployeesGrossSalary").document(emp.getId()).get().addOnSuccessListener((value) -> {
-                    if (!value.exists())
-                        return;
-                    EmployeesGrossSalary employeesGrossSalary;
-                    employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
-                    allTypes.addAll(employeesGrossSalary.getAllTypes());
-                    if (allowances.size() != 0) {
-                        allTypes.removeIf(allowance -> allowance.getType() == PROJECT);
-                        allTypes.addAll(allowances);
-                    }
-                    db.collection("EmployeesGrossSalary").document(emp.getId()).update("allTypes",allTypes);
-                });
+        batch.set(db.collection("projects").document(project.getId()), newProject);
+        final int[] counter = {0};
+        newProject.getEmployees().forEach(emp -> {
+            ArrayList<Allowance> allTypes = new ArrayList<>();
+            db.collection("EmployeesGrossSalary").document(emp.getId()).get().addOnSuccessListener((value) -> {
+                if (!value.exists())
+                    return;
+                EmployeesGrossSalary employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
+                allTypes.addAll(employeesGrossSalary.getAllTypes());
+                if (allowances.size() != 0) {
+                    allTypes.removeIf(allowance -> allowance.getType() == PROJECT);
+                    allTypes.addAll(allowances);
+                }
+                batch.update(db.collection("EmployeesGrossSalary").document(emp.getId()), "allTypes", allTypes);
+                if (counter[0] == newProject.getEmployees().size() - 1) {
+                    batch.commit().addOnSuccessListener(unused1 -> {
+                        Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
+                        batch = FirebaseFirestore.getInstance().batch();
+                        project.setEmployees(null);
+                        employees.clear();
+                        Team.clear();
+                        TeamID.clear();
+                        dismiss();
+                    });
+                }
+                counter[0]++;
+                //  db.collection("EmployeesGrossSalary").document(emp.getId()).update("allTypes", allTypes);
             });
-            Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
-            project.setEmployees(null);
-            employees.clear();
-            Team.clear();
-            TeamID.clear();
-            dismiss();
         });
+
     }
 
     void deleteProject() {
         currProjectID = project.getId();
-        db.collection("projects").document(project.getId()).delete().addOnSuccessListener(unused -> {
-            isDeleted = true;
-            updateEmployeesDetails(currProjectID);
+        batch.delete(db.collection("projects").document(project.getId()));
+        isDeleted = true;
+        updateEmployeesDetails(currProjectID);
+        batch.commit().addOnSuccessListener(unused -> {
+            batch = FirebaseFirestore.getInstance().batch();
             Toast.makeText(getActivity(), "Deleted", Toast.LENGTH_SHORT).show();
             dismiss();
         });
+//        db.collection("projects").document(project.getId()).delete().addOnSuccessListener(unused -> {
+//            isDeleted = true;
+//            updateEmployeesDetails(currProjectID);
+//            Toast.makeText(getActivity(), "Deleted", Toast.LENGTH_SHORT).show();
+//            dismiss();
+//        });
 
     }
 

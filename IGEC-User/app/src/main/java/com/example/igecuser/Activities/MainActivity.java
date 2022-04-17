@@ -167,6 +167,10 @@ public class MainActivity extends AppCompatActivity {
         }
         return true;
     }
+    private void hideError(TextInputLayout textInputLayout) {
+        textInputLayout.setErrorEnabled(textInputLayout.getError() != null);
+
+    }
 
     // Listeners
     private final TextWatcher twEmail = new TextWatcher() {
@@ -193,6 +197,7 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 vEmailLayout.setError(null);
             }
+            hideError(vEmailLayout);
         }
     };
     private final View.OnClickListener clSignIn = new View.OnClickListener() {

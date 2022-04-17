@@ -113,7 +113,7 @@ public class AddAllowanceDialog extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_add_allowance_dialog, container, false);
+        return inflater.inflate(R.layout.dialog_add_allowance, container, false);
     }
 
     @Override

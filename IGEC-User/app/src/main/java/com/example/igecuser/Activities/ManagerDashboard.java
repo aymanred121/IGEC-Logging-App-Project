@@ -37,6 +37,7 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
     private ActionBarDrawerToggle actionBarDrawerToggle;
     private Employee currManager;
     private int selectedTab = 0;
+
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -133,14 +134,14 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
         viewPagerAdapter.addFragment(changePasswordFragment, getString(R.string.change_password));
         viewPagerAdapter.addFragment(grossSalaryFragment, getString(R.string.gross_salary));
         viewPagerAdapter.addFragment(vacationRequestsFragment, getString(R.string.vacation_requests));
-        viewPagerAdapter.addFragment(projectSummaryFragment, getString(R.string.ProjectSummary));
-        viewPagerAdapter.addFragment(sendTransferRequest,getString(R.string.send_a_transfer_request));
-        viewPagerAdapter.addFragment(transferRequestsFragment,getString(R.string.transfer_requests));
         viewPagerAdapter.addFragment(vacationsLogFragment, getString(R.string.vacations_log));
+        viewPagerAdapter.addFragment(sendTransferRequest, getString(R.string.send_a_transfer_request));
+        viewPagerAdapter.addFragment(transferRequestsFragment, getString(R.string.transfer_requests));
+        viewPagerAdapter.addFragment(projectSummaryFragment, getString(R.string.ProjectSummary));
+
 
         viewPager.setAdapter(viewPagerAdapter);
         vNavigationView.getMenu().getItem(0).setChecked(true);
-
 
 
         setSupportActionBar(vToolbar);
@@ -165,13 +166,13 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
             viewPager.setCurrentItem(2, true);
         if (itemId == R.id.item_Vacation_Requests)
             viewPager.setCurrentItem(3, true);
-        if (itemId == R.id.item_ProjectSummary)
-            viewPager.setCurrentItem(4, true);
-        if(itemId == R.id.item_Send_Transfer_Request)
-            viewPager.setCurrentItem(5,true);
-        if(itemId == R.id.item_Transfer_Requests)
-            viewPager.setCurrentItem(6,true);
         if (itemId == R.id.item_VacationsLog)
+            viewPager.setCurrentItem(4, true);
+        if (itemId == R.id.item_Send_Transfer_Request)
+            viewPager.setCurrentItem(5, true);
+        if (itemId == R.id.item_Transfer_Requests)
+            viewPager.setCurrentItem(6, true);
+        if (itemId == R.id.item_ProjectSummary)
             viewPager.setCurrentItem(7, true);
 
     }

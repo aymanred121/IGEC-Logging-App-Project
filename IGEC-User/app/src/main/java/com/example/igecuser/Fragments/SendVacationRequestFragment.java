@@ -150,6 +150,12 @@ public class SendVacationRequestFragment extends Fragment {
         return false;
     }
 
+    private void hideError(TextInputLayout textInputLayout) {
+        textInputLayout.setErrorEnabled(textInputLayout.getError() != null);
+
+    }
+
+
     private boolean validateInputs() {
         return !generateError();
     }
@@ -186,6 +192,7 @@ public class SendVacationRequestFragment extends Fragment {
                 vVacationDaysLayout.setError(null);
             }
 
+            hideError(vVacationDaysLayout);
         }
     };
     private TextWatcher twVacationDate = new TextWatcher() {
@@ -203,6 +210,8 @@ public class SendVacationRequestFragment extends Fragment {
         public void afterTextChanged(Editable editable) {
             if (!vVacationDate.getText().toString().trim().isEmpty())
                 vVacationDateLayout.setError(null);
+
+            hideError(vVacationDateLayout);
         }
     };
     private TextWatcher twVacationNote = new TextWatcher() {
@@ -220,6 +229,8 @@ public class SendVacationRequestFragment extends Fragment {
         public void afterTextChanged(Editable editable) {
             if (!vVacationNote.getText().toString().trim().isEmpty())
                 vVacationNoteLayout.setError(null);
+
+            hideError(vVacationNoteLayout);
         }
     };
     private View.OnClickListener oclSendRequest = v -> {

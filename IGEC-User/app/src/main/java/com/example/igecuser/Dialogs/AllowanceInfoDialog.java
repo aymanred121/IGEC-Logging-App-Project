@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Toast;
 import android.util.Pair;
 
 import androidx.annotation.NonNull;
@@ -80,7 +79,7 @@ public class AllowanceInfoDialog extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_allowance_info_dialog, container, false);
+        return inflater.inflate(R.layout.dialog_allowance_info, container, false);
     }
 
     @Override
@@ -132,6 +131,11 @@ public class AllowanceInfoDialog extends DialogFragment {
         }
         return false;
     }
+    private void hideError(TextInputLayout textInputLayout) {
+        textInputLayout.setErrorEnabled(textInputLayout.getError() != null);
+
+    }
+
 
     private boolean validateInput() {
         return !generateError();
@@ -183,6 +187,8 @@ public class AllowanceInfoDialog extends DialogFragment {
         public void afterTextChanged(Editable editable) {
             if (!vAllowanceName.getText().toString().trim().isEmpty())
                 vAllowanceNameLayout.setError(null);
+            hideError(vAllowanceNameLayout);
+
         }
     };
     private TextWatcher twAllowanceMount = new TextWatcher() {
@@ -198,15 +204,15 @@ public class AllowanceInfoDialog extends DialogFragment {
 
         @Override
         public void afterTextChanged(Editable editable) {
-
             if (!vAllowanceMount.getText().toString().trim().isEmpty()) {
-                if (Double.parseDouble(vAllowanceMount.getText().toString().trim()) == 0)
+                if (vAllowanceMount.getText().toString().equals(".") || Double.parseDouble(vAllowanceMount.getText().toString().trim()) == 0)
                     vAllowanceMountLayout.setError("Invalid Value");
                 else
                     vAllowanceMountLayout.setError(null);
             } else {
                 vAllowanceMountLayout.setError(null);
             }
+            hideError(vAllowanceMountLayout);
         }
     };
     private TextWatcher twAllowanceNote = new TextWatcher() {
@@ -225,6 +231,7 @@ public class AllowanceInfoDialog extends DialogFragment {
 
             if (!vAllowanceNote.getText().toString().trim().isEmpty())
                 vAllowanceNoteLayout.setError(null);
+            hideError(vAllowanceNoteLayout);
         }
     };
 }

@@ -24,7 +24,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/TextView_EmployeeID"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="@dimen/mid"
             android:textColor="@color/black"
             tools:text="Employee Name" />
 
@@ -35,7 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="@dimen/mid"
             android:textColor="@color/black"
             tools:text="Employee Working Hours" />
 

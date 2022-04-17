@@ -47,7 +47,6 @@ public class SendTransferRequest extends Fragment {
     private ArrayAdapter<String> RefAdapter;
 
 
-
     public SendTransferRequest(Employee manager) {
         this.manager = manager;
     }
@@ -83,23 +82,7 @@ public class SendTransferRequest extends Fragment {
         views.add(new Pair<>(vProjectReferenceLayout, vProjectsReference));
         views.add(new Pair<>(vEmployeesIdLayout, vEmployeesId));
         views.add(new Pair<>(vTransferNoteLayout, vTransferNote));
-
-        db.collection("projects").document(manager.getProjectID()).get().addOnSuccessListener(documentSnapshot -> {
-            if (!documentSnapshot.exists())
-                return;
-            oldProject = documentSnapshot.toObject(Project.class);
-            ArrayList<String> EmployeesId = new ArrayList<>();
-            for (EmployeeOverview emp : oldProject.getEmployees())
-                if (!emp.getId().equals(manager.getId()))
-                    EmployeesId.add(emp.getId() + " | " + emp.getFirstName() + " " + emp.getLastName());
-
-            ArrayAdapter<String> IdAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, EmployeesId);
-            selectedEmployee = oldProject.getEmployees().get(0);
-            vEmployeesId.setText(String.format("%s | %s %s", selectedEmployee.getId(), selectedEmployee.getFirstName(), selectedEmployee.getLastName()));
-            vEmployeesId.setAdapter(IdAdapter);
-            getAllProjects(manager.getProjectID());
-
-        });
+        getProject();
 
 
     }
@@ -119,15 +102,49 @@ public class SendTransferRequest extends Fragment {
         return db.collection("TransferRequests").document(transferId).set(request);
     }
 
-    private void getAllProjects(String projectId) {
-        db.collection("projects").whereNotEqualTo("id", projectId).addSnapshotListener((queryDocumentSnapshots,error) -> {
+    private void getAllEmployees() {
+        ArrayList<String> EmployeesId = new ArrayList<>();
+        for (EmployeeOverview emp : oldProject.getEmployees())
+            if (!emp.getId().equals(manager.getId())) {
+                if (selectedEmployee == null)
+                    selectedEmployee = emp;
+                EmployeesId.add(emp.getId() + " | " + emp.getFirstName() + " " + emp.getLastName());
+            }
+        ArrayAdapter<String> IdAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, EmployeesId);
+        vEmployeesId.setText(String.format("%s | %s %s", selectedEmployee.getId(), selectedEmployee.getFirstName(), selectedEmployee.getLastName()));
+        vEmployeesId.setAdapter(IdAdapter);
+    }
 
-            if (queryDocumentSnapshots.size() == 0)
+    private void getProject() {
+        db.collection("projects").document(manager.getProjectID()).get().addOnSuccessListener(documentSnapshot -> {
+            if (!documentSnapshot.exists())
                 return;
+            oldProject = documentSnapshot.toObject(Project.class);
+            getAllProjects(oldProject.getId());
+        });
+    }
+
+    private void freezeViews(boolean freeze) {
+
+        vProjectsReference.setText(freeze ? "No Available Projects" : null);
+        vEmployeesId.setText(freeze ? "No Available Employee" : null);
+        vProjectReferenceLayout.setEnabled(!freeze);
+        vTransferNoteLayout.setEnabled(!freeze);
+        vEmployeesIdLayout.setEnabled(!freeze);
+        vSend.setEnabled(!freeze);
+    }
+
+    private void getAllProjects(String projectId) {
+        db.collection("projects").whereNotEqualTo("id", projectId).addSnapshotListener((queryDocumentSnapshots, error) -> {
+
+            if (queryDocumentSnapshots.size() == 0) {
+                freezeViews(true);
+                return;
+            }
+            freezeViews(false);
             projectsRef.clear();
             projects.clear();
             projects.addAll((queryDocumentSnapshots.toObjects(Project.class)));
-
             for (Project project : projects)
                 if (!project.getId().equals(oldProject.getId()))
                     projectsRef.add("IGEC" + project.getReference() + " | " + project.getName());
@@ -135,7 +152,7 @@ public class SendTransferRequest extends Fragment {
             newProject = projects.get(0);
             vProjectsReference.setText(String.format("IGEC%s | %s", newProject.getReference(), newProject.getName()));
             vProjectsReference.setAdapter(RefAdapter);
-
+            getAllEmployees();
         });
     }
 
@@ -151,6 +168,11 @@ public class SendTransferRequest extends Fragment {
             }
         }
         return false;
+    }
+
+    private void hideError(TextInputLayout textInputLayout) {
+        textInputLayout.setErrorEnabled(textInputLayout.getError() != null);
+
     }
 
     private boolean validateInput() {
@@ -177,6 +199,7 @@ public class SendTransferRequest extends Fragment {
         public void afterTextChanged(Editable editable) {
             if (!vTransferNote.getText().toString().trim().isEmpty())
                 vTransferNoteLayout.setError(null);
+            hideError(vTransferNoteLayout);
         }
     };
     private final TextWatcher twEmployeeID = new TextWatcher() {

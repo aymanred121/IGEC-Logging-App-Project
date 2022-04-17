@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:text="@string/employee_name"
         android:textSize="20sp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="@dimen/high"
         android:layout_marginStart="16dp"
         android:textColor="@color/white"
         />
@@ -23,7 +23,7 @@
         android:layout_height="wrap_content"
         android:text="@string/employee_id"
         android:textSize="16sp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="@dimen/mid"
         android:layout_marginStart="16dp"
         android:textColor="@color/white"
         android:layout_below="@id/EmployeeName"

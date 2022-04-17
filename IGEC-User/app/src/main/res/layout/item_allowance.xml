@@ -39,7 +39,7 @@
             android:layout_height="25dp"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="@dimen/high"
             android:insetLeft="0dp"
             android:insetTop="0dp"
             android:insetRight="0dp"

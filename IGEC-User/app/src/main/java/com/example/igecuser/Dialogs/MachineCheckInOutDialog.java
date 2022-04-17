@@ -49,7 +49,7 @@ public class MachineCheckInOutDialog extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View v =  inflater.inflate(R.layout.fragment_machine_check_in_out_dialog, container, false);
+        View v =  inflater.inflate(R.layout.dialog_machine_check_in_out, container, false);
         CodeScannerView scannerView = v.findViewById(R.id.scanner_view);
         mCodeScanner = new CodeScanner(getActivity(), scannerView);
         mCodeScanner.setDecodeCallback(result -> getActivity().runOnUiThread(() -> {

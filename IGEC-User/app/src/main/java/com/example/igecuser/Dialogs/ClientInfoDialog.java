@@ -19,14 +19,10 @@ import androidx.fragment.app.DialogFragment;
 import com.example.igecuser.R;
 import com.example.igecuser.fireBase.Client;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.datepicker.MaterialDatePicker;
-import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.regex.Pattern;
 
 public class ClientInfoDialog extends DialogFragment {
@@ -70,7 +66,7 @@ public class ClientInfoDialog extends DialogFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_client_info, container, false);
+        return inflater.inflate(R.layout.dialog_client_info, container, false);
     }
 
     @Override
@@ -114,6 +110,11 @@ public class ClientInfoDialog extends DialogFragment {
             }
         }
         return false;
+    }
+
+    private void hideError(TextInputLayout textInputLayout) {
+        textInputLayout.setErrorEnabled(textInputLayout.getError() != null);
+
     }
 
     private boolean validateInput() {
@@ -161,6 +162,7 @@ public class ClientInfoDialog extends DialogFragment {
             } else {
                 vCompanyEmailLayout.setError(null);
             }
+            hideError(vCompanyEmailLayout);
         }
     };
     private final TextWatcher twName = new TextWatcher() {
@@ -177,6 +179,7 @@ public class ClientInfoDialog extends DialogFragment {
         @Override
         public void afterTextChanged(Editable s) {
             vCompanyNameLayout.setError(null);
+            hideError(vCompanyNameLayout);
         }
     };
     private final TextWatcher twPhone = new TextWatcher() {
@@ -193,6 +196,7 @@ public class ClientInfoDialog extends DialogFragment {
         @Override
         public void afterTextChanged(Editable s) {
             vCompanyPhoneNumberLayout.setError(null);
+            hideError(vCompanyPhoneNumberLayout);
         }
     };
 

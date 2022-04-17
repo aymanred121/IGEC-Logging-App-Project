@@ -80,6 +80,11 @@ public class AddProjectFragment extends Fragment {
     private final CollectionReference employeeCol = db.collection("employees");
     private WriteBatch batch = FirebaseFirestore.getInstance().batch();
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        vAddClient.setEnabled(!vOfficeWork.isChecked());
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -159,6 +164,7 @@ public class AddProjectFragment extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
         projectID = db.collection("projects").document().getId().substring(0, 5);
+        vAddClient.setEnabled(!vOfficeWork.isChecked());
         getEmployees();
 
         ArrayList<String> contract = new ArrayList<>();

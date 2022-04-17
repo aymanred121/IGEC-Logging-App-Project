@@ -21,11 +21,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="32dp"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="@dimen/high"
             app:boxBackgroundMode="outline"
-            app:errorEnabled="true"
             app:helperTextEnabled="true"
-            app:layout_constraintBottom_toTopOf="@+id/textInputLayout_VacationNote"
             app:layout_constraintEnd_toStartOf="@id/textInputLayout_VacationDays"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -47,14 +45,14 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
+            android:layout_marginTop="@dimen/high"
             android:layout_marginEnd="32dp"
             app:boxBackgroundMode="outline"
             app:helperText="0 days Remaining"
             app:helperTextEnabled="true"
-            app:layout_constraintBottom_toBottomOf="@+id/textInputLayout_VacationDate"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/textInputLayout_VacationDate"
-            app:layout_constraintTop_toTopOf="@+id/textInputLayout_VacationDate">
+            app:layout_constraintTop_toTopOf="parent">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/TextInput_VacationDays"
@@ -74,15 +72,14 @@
         android:layout_height="230dp"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="@dimen/mid"
         app:boxBackgroundMode="outline"
         app:counterEnabled="true"
         app:counterMaxLength="250"
         app:helperTextEnabled="true"
-        app:errorEnabled="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textInputLayout_VacationDate">
+        app:layout_constraintTop_toBottomOf="@id/textInputLayout_VacationDays">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/TextInput_VacationNote"
@@ -99,6 +96,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
+            android:layout_marginTop="@dimen/mid"
             android:text="@string/send_request"
             android:textAllCaps="false"
             android:textSize="16sp"

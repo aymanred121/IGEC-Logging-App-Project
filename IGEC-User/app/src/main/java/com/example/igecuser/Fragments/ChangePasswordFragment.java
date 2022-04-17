@@ -93,6 +93,10 @@ public class ChangePasswordFragment extends Fragment {
         return false;
     }
 
+    private void hideError(TextInputLayout textInputLayout) {
+        textInputLayout.setErrorEnabled(textInputLayout.getError() != null);
+
+    }
     private void clearInput() {
         vNewPassword.setText(null);
         vConfirmPassword.setText(null);
@@ -106,6 +110,8 @@ public class ChangePasswordFragment extends Fragment {
             return null;
         }
     }
+
+
 
     private View.OnClickListener oclChangePassword = v -> {
         if (validateInput()) {
@@ -126,7 +132,6 @@ public class ChangePasswordFragment extends Fragment {
 
         }
     };
-
     private TextWatcher twConfirmPassword = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -150,6 +155,8 @@ public class ChangePasswordFragment extends Fragment {
             } else {
                 vConfirmPasswordLayout.setError(null);
             }
+
+            hideError(vConfirmPasswordLayout);
         }
 
     };
@@ -175,6 +182,7 @@ public class ChangePasswordFragment extends Fragment {
                 else
                     vConfirmPasswordLayout.setError(null);
             }
+            hideError(vNewPasswordLayout);
         }
     };
 }

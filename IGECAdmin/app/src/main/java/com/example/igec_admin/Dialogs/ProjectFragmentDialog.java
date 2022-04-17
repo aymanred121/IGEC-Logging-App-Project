@@ -307,7 +307,7 @@ public class ProjectFragmentDialog extends DialogFragment {
 
     @SuppressLint("NotifyDataSetChanged")
     void retrieveEmployees(Map<String, ArrayList<String>> empMap) {
-
+        employees.clear();
         for (String key : empMap.keySet()) {
             String firstName = empMap.get(key).get(0);
             String lastName = empMap.get(key).get(1);

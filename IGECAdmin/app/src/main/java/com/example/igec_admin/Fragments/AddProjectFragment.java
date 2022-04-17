@@ -84,6 +84,9 @@ public class AddProjectFragment extends Fragment {
     public void onResume() {
         super.onResume();
         vAddClient.setEnabled(!vOfficeWork.isChecked());
+        TeamID.clear();
+        Team.clear();
+        employees.clear();
     }
 
     @Override

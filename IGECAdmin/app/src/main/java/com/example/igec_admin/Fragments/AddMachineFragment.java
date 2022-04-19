@@ -154,10 +154,13 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
         View view = inflater.inflate(R.layout.fragment_add_machine, container, false);
         Initialize(view);
         getCameraPermission();
-        vIdLayout.setEndIconOnClickListener(oclMachineID);
         vRegister.setOnClickListener(oclRegister);
+        vIdLayout.setEndIconOnClickListener(oclMachineID);
         vPurchaseDateLayout.setEndIconOnClickListener(oclDate);
         vSerialNumberLayout.setEndIconOnClickListener(oclSerialNumber);
+        vIdLayout.setErrorIconOnClickListener(oclMachineID);
+        vPurchaseDateLayout.setErrorIconOnClickListener(oclDate);
+        vSerialNumberLayout.setErrorIconOnClickListener(oclSerialNumber);
         vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);
         vAddSupplement.setOnClickListener(oclAddSupplement);
 
@@ -224,6 +227,15 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
     private boolean generateError() {
         for (Pair<TextInputLayout, TextInputEditText> view : views) {
             if (view.second.getText().toString().trim().isEmpty()) {
+                if(view.first == vIdLayout)
+                    view.first.setErrorIconDrawable(R.drawable.ic_baseline_autorenew_24);
+                else if(view.first == vSerialNumberLayout)
+                    view.first.setErrorIconDrawable(R.drawable.ic_barcode);
+                else if (view.first == vPurchaseDateLayout)
+                    view.first.setErrorIconDrawable(R.drawable.ic_baseline_calendar_month_24);
+
+
+
                 view.first.setError("Missing");
                 return true;
             }

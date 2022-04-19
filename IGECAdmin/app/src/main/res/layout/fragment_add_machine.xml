@@ -192,10 +192,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/vhigh"
-        android:layout_marginTop="@dimen/mid"
+        android:layout_marginTop="@dimen/high"
         android:text="@string/add_supplements"
         android:textAllCaps="false"
-        app:layout_constraintTop_toBottomOf="@id/textInputLayout_MachineByDay"
+        app:layout_constraintTop_toBottomOf="@id/textInputLayout_MachineByWeek"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 

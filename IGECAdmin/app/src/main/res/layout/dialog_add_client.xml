@@ -86,7 +86,7 @@
             android:id="@+id/textInputLayout_Note"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
-            android:layout_height="240dp"
+            android:layout_height="150dp"
             android:layout_below="@id/textInputLayout_CompanyPhoneNumber"
             android:layout_marginStart="@dimen/vhigh"
             android:layout_marginTop="@dimen/low"
@@ -99,7 +99,7 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/TextInput_Note"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
+                android:layout_height="120dp"
                 android:gravity="top"
                 android:hint="@string/note"
                 android:inputType="textMultiLine"

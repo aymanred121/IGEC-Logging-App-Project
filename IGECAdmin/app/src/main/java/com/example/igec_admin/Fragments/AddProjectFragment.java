@@ -64,6 +64,7 @@ public class AddProjectFragment extends Fragment {
     private EmployeeAdapter adapter;
 
     // Vars
+    private ArrayList<String> contract = new ArrayList<>();
     private ArrayList<Pair<TextInputLayout, EditText>> views;
     private ArrayList<Allowance> allowances;
     private Client client;
@@ -85,9 +86,11 @@ public class AddProjectFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        initialize();
-        setUpListeners();
+        vOfficeWork.setChecked(false);
+        vAddClient.setEnabled(true);
         vManagerID.setText(null);
+        vProjectReference.setText(null);
+        setUpContractType();
     }
 
     @Override
@@ -142,6 +145,7 @@ public class AddProjectFragment extends Fragment {
         vCity.addTextChangedListener(twCity);
         vStreet.addTextChangedListener(twStreet);
         vTime.addTextChangedListener(twTime);
+        vContractType.addTextChangedListener(twContractType);
         vManagerID.addTextChangedListener(twManagerID);
 
         vOfficeWork.setOnClickListener(oclOfficeWork);
@@ -184,6 +188,7 @@ public class AddProjectFragment extends Fragment {
         views.add(new Pair<>(vCityLayout, vCity));
         views.add(new Pair<>(vStreetLayout, vStreet));
         views.add(new Pair<>(vTimeLayout, vTime));
+        views.add(new Pair<>(vContractTypeLayout,vContractType));
         views.add(new Pair<>(vManagerIDLayout, vManagerID));
 
         vOfficeWork = view.findViewById(R.id.checkbox_officeWork);
@@ -204,14 +209,17 @@ public class AddProjectFragment extends Fragment {
         projectID = db.collection("projects").document().getId().substring(0, 5);
         vAddClient.setEnabled(!vOfficeWork.isChecked());
         getEmployees();
-        vContractType.setText("lamp sum");
-        ArrayList<String> contract = new ArrayList<>();
+        setUpContractType();
+        allowances = new ArrayList<>();
+        fakeData();
+    }
+    private void setUpContractType()
+    {
+        contract.clear();
         contract.add("lump sum");
         contract.add("timesheet");
         ArrayAdapter<String> ContractAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, contract);
         vContractType.setAdapter(ContractAdapter);
-        allowances = new ArrayList<>();
-        fakeData();
     }
 
     private void ChangeSelectedTeam(int position) {
@@ -549,6 +557,22 @@ public class AddProjectFragment extends Fragment {
         @Override
         public void afterTextChanged(Editable editable) {
             hideError(vTimeLayout);
+        }
+    };
+    private final TextWatcher twContractType = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            hideError(vContractTypeLayout);
         }
     };
     private final TextWatcher twProjectReference = new TextWatcher() {

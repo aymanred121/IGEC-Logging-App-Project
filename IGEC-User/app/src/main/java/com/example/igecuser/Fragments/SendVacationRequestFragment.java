@@ -13,6 +13,7 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.example.igecuser.R;
 import com.example.igecuser.fireBase.Employee;
@@ -26,22 +27,23 @@ import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClic
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 
-public class SendVacationRequestFragment extends Fragment {
+public class SendVacationRequestFragment extends Fragment implements DatePickerDialog.OnDateSetListener {
 
     //Views
     private TextInputEditText vVacationDate, vVacationNote, vVacationDays;
     private TextInputLayout vVacationDateLayout, vVacationDaysLayout, vVacationNoteLayout;
     private ArrayList<Pair<TextInputLayout, TextInputEditText>> views;
     private MaterialButton vSendRequest;
-    private MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
-    private MaterialDatePicker vDatePicker;
+    private DatePickerDialog dpd;
     //Vars
     private int remainingDays, daysAfterVacationIsTaken;
     private long days, startDate;
@@ -64,7 +66,6 @@ public class SendVacationRequestFragment extends Fragment {
 
         vVacationDateLayout.setEndIconOnClickListener(oclVacationDate);
         vVacationDateLayout.setErrorIconOnClickListener(oclVacationDate);
-        vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);
         vSendRequest.setOnClickListener(oclSendRequest);
         vVacationDays.addTextChangedListener(twVacationDays);
         vVacationDate.addTextChangedListener(twVacationDate);
@@ -84,22 +85,51 @@ public class SendVacationRequestFragment extends Fragment {
         vVacationDateLayout = view.findViewById(R.id.textInputLayout_VacationDate);
         vVacationDaysLayout = view.findViewById(R.id.textInputLayout_VacationDays);
         vVacationNoteLayout = view.findViewById(R.id.textInputLayout_VacationNote);
+        vSendRequest = view.findViewById(R.id.Button_SendRequest);
 
         views = new ArrayList<>();
         views.add(new Pair<>(vVacationDateLayout, vVacationDate));
         views.add(new Pair<>(vVacationDaysLayout, vVacationDays));
         views.add(new Pair<>(vVacationNoteLayout, vVacationNote));
 
-
-        vSendRequest = view.findViewById(R.id.Button_SendRequest);
-        vDatePickerBuilder.setTitleText("Vacation Date");
         CalendarConstraints.Builder builder = new CalendarConstraints.Builder();
         builder.setValidator(DateValidatorPointForward.now());
-        vDatePickerBuilder.setCalendarConstraints(builder.build());
-        vDatePicker = vDatePickerBuilder.build();
         remainingDays = currEmployee.getTotalNumberOfVacationDays();
         vVacationDaysLayout.setHelperText(String.format("%d days Remaining", remainingDays));
+        datePickerSetup();
 
+
+    }
+
+    private void datePickerSetup() {
+        Calendar now = Calendar.getInstance();
+        dpd = DatePickerDialog.newInstance(
+                this,
+                now.get(Calendar.YEAR),
+                now.get(Calendar.MONTH),
+                now.get(Calendar.DAY_OF_MONTH)
+        );
+        dpd.setTitle("Vacation Date");
+        dpd.setOkText("Set");
+        dpd.setOkColor(getResources().getColor(R.color.green));
+        dpd.setCancelColor(getResources().getColor(R.color.red));
+        dpd.setMinDate(Calendar.getInstance());
+        Calendar nextYear = Calendar.getInstance();
+        nextYear.add(Calendar.YEAR, 2);
+        nextYear.add(Calendar.MONTH, -nextYear.get(Calendar.MONTH));
+        nextYear.add(Calendar.DAY_OF_YEAR, -nextYear.get(Calendar.DAY_OF_YEAR));
+        dpd.setMaxDate(nextYear);
+        // Calendar friday;
+        Calendar friday;
+        List<Calendar> weekends = new ArrayList<>();
+        int weeks = 104;
+        for (int i = 0; i < (weeks * 7); i += 7) {
+            friday = Calendar.getInstance();
+            friday.add(Calendar.DAY_OF_YEAR, (Calendar.FRIDAY - friday.get(Calendar.DAY_OF_WEEK) + i));
+            weekends.add(friday);
+        }
+        Calendar[] disabledDays = weekends.toArray(new Calendar[weekends.size()]);
+        dpd.setDisabledDays(disabledDays);
     }
 
     private void uploadVacationRequest() {
@@ -160,10 +190,10 @@ public class SendVacationRequestFragment extends Fragment {
         return !generateError();
     }
 
-    private String convertDateToString(Object selection) {
+    private String convertDateToString(long selection) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis((long) selection);
+        calendar.setTimeInMillis(selection);
         return simpleDateFormat.format(calendar.getTime());
     }
 
@@ -239,11 +269,13 @@ public class SendVacationRequestFragment extends Fragment {
         }
     };
     private View.OnClickListener oclVacationDate = v -> {
-        vDatePicker.show(getParentFragmentManager(), "DATE_PICKER");
+        dpd.show(getParentFragmentManager(), "DATE_PICKER");
     };
-    private MaterialPickerOnPositiveButtonClickListener pclDatePicker = selection -> {
-        vVacationDate.setText(convertDateToString(selection));
-        startDate = (long) selection;
-    };
-
+    @Override
+    public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
+        Calendar vacation = Calendar.getInstance();
+        vacation.set(year,monthOfYear,dayOfMonth);
+        vVacationDate.setText(convertDateToString(vacation.getTime().getTime()));
+        startDate = vacation.getTime().getTime();
+    }
 }

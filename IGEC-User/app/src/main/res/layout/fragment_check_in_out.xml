@@ -26,7 +26,7 @@
         android:layout_width="150dp"
         android:layout_height="150dp"
         android:layout_marginTop="@dimen/high"
-        android:backgroundTint="@color/Green"
+        android:backgroundTint="@color/green"
         android:insetLeft="0dp"
         android:insetTop="0dp"
         android:insetRight="0dp"

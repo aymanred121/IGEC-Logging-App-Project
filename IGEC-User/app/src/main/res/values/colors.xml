@@ -12,6 +12,6 @@
     <color name="secondaryTextColor">#ffffff</color>
     <color name="labelBackground">#ededed</color>
     <color name="black_overlay">#66000000</color>
-    <color name="Green">#009900</color>
-    <color name="Red" >#990000</color>
+    <color name="green">#009900</color>
+    <color name="red" >#990000</color>
 </resources>

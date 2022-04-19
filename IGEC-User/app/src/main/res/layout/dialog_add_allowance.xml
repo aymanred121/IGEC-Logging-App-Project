@@ -42,7 +42,7 @@
             android:layout_gravity="bottom|left"
             android:layout_marginStart="32dp"
             android:layout_marginBottom="32dp"
-            android:backgroundTint="@color/Green"
+            android:backgroundTint="@color/green"
             android:rotation="0"
             android:src="@drawable/ic_baseline_done_24" />
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

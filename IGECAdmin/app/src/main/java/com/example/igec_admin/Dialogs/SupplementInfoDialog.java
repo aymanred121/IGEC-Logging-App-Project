@@ -35,6 +35,7 @@ import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Supplement;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,6 +45,7 @@ public class SupplementInfoDialog extends DialogFragment {
 
     private ImageView vSupplementImg;
     private TextInputEditText vSupplementName;
+    private TextInputLayout vSupplementNameLayout;
     private MaterialButton vDone;
     private final Supplement supplement;
     private ActivityResultLauncher<Intent> activityResultLauncher;
@@ -87,7 +89,7 @@ public class SupplementInfoDialog extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_supplement_info_dialog, container, false);
+        return inflater.inflate(R.layout.dialog_supplement_info, container, false);
     }
 
     @Override
@@ -106,29 +108,29 @@ public class SupplementInfoDialog extends DialogFragment {
                 }
             }
         });
-
+        vSupplementName.addTextChangedListener(twName);
     }
 
     private void initialize(View view) {
         vSupplementImg = view.findViewById(R.id.ImageView_Supplement);
         vSupplementName = view.findViewById(R.id.TextInput_SupplementName);
+        vSupplementNameLayout = view.findViewById(R.id.textInputLayout_SupplementName);
         vDone = view.findViewById(R.id.button_Done);
         vSupplementImg.setImageBitmap(supplement.getPhoto());
         vSupplementName.setText(supplement.getName());
     }
 
-    private boolean validateInput()
-    {
-        return !(vSupplementName.getText().toString().isEmpty());
+    private boolean validateInput() {
+        boolean isEmpty = vSupplementName.getText().toString().trim().isEmpty();
+        vSupplementNameLayout.setError(isEmpty ? "Missing" : null);
+        return !isEmpty;
     }
 
     private final View.OnClickListener oclDone = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            if(!validateInput()){
-                Toast.makeText(getActivity(), "please fill Supplement data", Toast.LENGTH_SHORT).show();
-                return;
-            }
+            if (!validateInput()) return;
+
             if (supplementNames != null) {
                 for (int i = 0; i < supplementNames.size(); i++) {
                     if (position != i && supplementNames.get(i).getName().equals(vSupplementName.getText().toString())) {
@@ -153,7 +155,6 @@ public class SupplementInfoDialog extends DialogFragment {
             dismiss();
         }
     };
-
     private final View.OnClickListener oclImg = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -162,17 +163,34 @@ public class SupplementInfoDialog extends DialogFragment {
             File storageDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
 
             try {
-                File imageFile = File.createTempFile(fileName,".jpg", storageDirectory);
+                File imageFile = File.createTempFile(fileName, ".jpg", storageDirectory);
                 currentPhotoPath = imageFile.getAbsolutePath();
 
-                Uri imageUri =  FileProvider.getUriForFile(getActivity(),"com.example.igec_admin.fileprovider",imageFile);
+                Uri imageUri = FileProvider.getUriForFile(getActivity(), "com.example.igec_admin.fileprovider", imageFile);
 
                 Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                takePicture. putExtra(MediaStore.EXTRA_OUTPUT,imageUri);
+                takePicture.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
                 activityResultLauncher.launch(takePicture);
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+    };
+    private TextWatcher twName = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            vSupplementNameLayout.setError(null);
+            vSupplementNameLayout.setErrorEnabled(false);
         }
     };
 

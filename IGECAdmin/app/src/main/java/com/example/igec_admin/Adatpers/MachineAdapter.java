@@ -3,7 +3,6 @@ package com.example.igec_admin.Adatpers;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -83,7 +82,7 @@ public class MachineAdapter extends RecyclerView.Adapter<MachineAdapter.MachineV
     @NonNull
     @Override
     public MachineViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.machine_item,parent,false);
+        View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.item_machine,parent,false);
        MachineViewHolder vvh = new MachineViewHolder(v,listener);
         return vvh;
     }

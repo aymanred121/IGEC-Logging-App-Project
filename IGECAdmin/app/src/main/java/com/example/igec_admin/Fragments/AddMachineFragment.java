@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,7 +28,6 @@ import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Allowance;
 import com.example.igec_admin.fireBase.Machine;
 import com.example.igec_admin.fireBase.Supplement;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
@@ -39,10 +39,8 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 import com.google.zxing.WriterException;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -68,8 +66,8 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
     private final int BONUS = 3;
     private final int PENALTY = 4;
     // Views
-    private TextInputLayout vIDLayout, vPurchaseDateLayout, vSerialNumberLayout;
-    private TextInputEditText vID, vPurchaseDate, vSerialNumber, vAllowance, vMachineByDay, vMachineByWeek, vMachineByMonth;
+    private TextInputLayout vIdLayout, vPurchaseDateLayout, vSerialNumberLayout, vAllowanceLayout, vByDayLayout, vByWeekLayout, vByMonthLayout;
+    private TextInputEditText vId, vPurchaseDate, vSerialNumber, vAllowance, vByDay, vByWeek, vByMonth;
     private ImageView vQRImg;
     private MaterialButton vRegister, vAddSupplement;
     // Vars
@@ -83,205 +81,8 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
     private final FirebaseStorage storage = FirebaseStorage.getInstance();
     private final StorageReference storageRef = storage.getReference();
     private ArrayList<Supplement> supplements;
+    private ArrayList<Pair<TextInputLayout, TextInputEditText>> views;
 
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        getParentFragmentManager().setFragmentResultListener("supplements", this, new FragmentResultListener() {
-            @Override
-            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
-                supplements = bundle.getParcelableArrayList("supplements");
-            }
-        });
-        getParentFragmentManager().setFragmentResultListener("machine", this, new FragmentResultListener() {
-            @Override
-            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
-                vSerialNumber.setText(result.getString("SerialNumber"));
-            }
-        });
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_add_machine, container, false);
-        Initialize(view);
-        getCameraPermission();
-        vIDLayout.setEndIconOnClickListener(oclMachineID);
-        vRegister.setOnClickListener(oclRegister);
-        vID.addTextChangedListener(atlMachineID);
-        vPurchaseDateLayout.setEndIconOnClickListener(oclDate);
-        vSerialNumberLayout.setEndIconOnClickListener(oclSerialNumber);
-        vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);
-        vAddSupplement.setOnClickListener(oclAddSupplement);
-        return view;
-    }
-
-    // Functions
-    private void Initialize(View view) {
-        supplements = new ArrayList<>();
-        vID = view.findViewById(R.id.TextInput_MachineID);
-        vIDLayout = view.findViewById(R.id.textInputLayout_MachineID);
-        vSerialNumberLayout = view.findViewById(R.id.textInputLayout_MachineSerialNumber);
-        vQRImg = view.findViewById(R.id.ImageView_MachineIDIMG);
-        vRegister = view.findViewById(R.id.button_register);
-        vAddSupplement = view.findViewById(R.id.button_addSupplements);
-        vSerialNumber = view.findViewById(R.id.TextInput_MachineSerialNumber);
-        vPurchaseDate = view.findViewById(R.id.TextInput_MachinePurchaseDate);
-        vPurchaseDateLayout = view.findViewById(R.id.textInputLayout_MachinePurchaseDate);
-        vAllowance = view.findViewById(R.id.TextInput_MachineAllowance);
-        vMachineByDay = view.findViewById(R.id.TextInput_MachineByDay);
-        vMachineByWeek = view.findViewById(R.id.TextInput_MachineByWeek);
-        vMachineByMonth = view.findViewById(R.id.TextInput_MachineByMonth);
-        vDatePickerBuilder.setTitleText("Purchase Date");
-        vDatePicker = vDatePickerBuilder.build();
-
-    }
-
-    private void clearInput() {
-        vID.setText(null);
-        vSerialNumber.setText(null);
-        vPurchaseDate.setText(null);
-        vQRImg.setImageResource(R.drawable.ic_baseline_image_24);
-        vAllowance.setText(null);
-        vMachineByDay.setText(null);
-        vMachineByMonth.setText(null);
-        vMachineByWeek.setText(null);
-        supplements.clear();
-        vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
-        vDatePicker = vDatePickerBuilder.build();
-        vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);
-    }
-
-
-    private boolean validateInput() {
-        return !(vID.getText().toString().isEmpty() ||
-                vPurchaseDate.getText().toString().isEmpty() ||
-                vSerialNumber.getText().toString().isEmpty() ||
-                vMachineByDay.getText().toString().isEmpty() ||
-                vMachineByWeek.getText().toString().isEmpty() ||
-                vMachineByMonth.getText().toString().isEmpty() ||
-                vAllowance.getText().toString().isEmpty() ||
-                supplements.size() == 0
-        );
-    }
-
-    private String convertDateToString(long selection) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(selection);
-        return simpleDateFormat.format(calendar.getTime());
-    }
-
-    // Listeners
-    View.OnClickListener oclDate = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            vDatePicker.show(getFragmentManager(), "DATE_PICKER");
-        }
-    };
-    View.OnClickListener oclSerialNumber = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if(getCameraPermission()){
-                MachineSerialNumberDialog machineSerialNumberDialog = new MachineSerialNumberDialog();
-                machineSerialNumberDialog.show(getParentFragmentManager(), "");
-            }
-
-        }
-    };
-
-    View.OnClickListener oclRegister = new View.OnClickListener() {
-        @RequiresApi(api = Build.VERSION_CODES.R)
-        @Override
-        public void onClick(View v) {
-            if (validateInput()) {
-                int size = supplements.size();
-                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
-                builder.setTitle("Uploading...")
-                        .setMessage("Uploading Data")
-                        .setCancelable(false);
-                AlertDialog alertDialog = builder.create();
-                alertDialog.show();
-                for (int i = 0; i < size; i++) {
-                    Integer[] finalI = new Integer[1];
-                    finalI[0] = i;
-                    supplements.get(i).saveToCloudStorage(storageRef, vID.getText().toString()).addOnSuccessListener(taskSnapshot -> {
-                        if (finalI[0] == size - 1) {
-                            alertDialog.dismiss();
-                        }
-
-                    }).addOnFailureListener(e -> {
-                        alertDialog.dismiss();
-                        Toast.makeText(getActivity(), "Failed to upload, check your internet", Toast.LENGTH_SHORT).show();
-                    });
-                }
-                saveToInternalStorage();
-                //saveToCloudStorage();
-                Machine newMachine = new Machine(vID.getText().toString(), vSerialNumber.getText().toString(), new Date(purchaseDate), new Allowance(vID.getText().toString(),Double.parseDouble(vAllowance.getText().toString()) , ALLOWANCE));
-                newMachine.setDailyRentPrice(Double.parseDouble(vMachineByDay.getText().toString()));
-                newMachine.setWeeklyRentPrice(Double.parseDouble(vMachineByWeek.getText().toString()));
-                newMachine.setMonthlyRentPrice(Double.parseDouble(vMachineByMonth.getText().toString()));
-                newMachine.setSupplementsNames(new ArrayList<>());
-                IntStream.range(0, supplements.size()).forEach(i -> newMachine.getSupplementsNames().add(supplements.get(i).getName()));
-                machineCol.document(vID.getText().toString()).set(newMachine).addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void unused) {
-                        Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
-                        clearInput();
-                    }
-                });
-            } else {
-                Toast.makeText(getActivity(), "please, fill the machine data", Toast.LENGTH_SHORT).show();
-            }
-        }
-    };
-
-
-    View.OnClickListener oclMachineID = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            vID.setText(machineCol.document().getId().substring(0, 5));
-        }
-    };
-    TextWatcher atlMachineID = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void afterTextChanged(Editable editable) {
-            qrgEncoder = new QRGEncoder(vID.getText().toString(), null, QRGContents.Type.TEXT, 25 * 25);
-            try {
-                vQRImg.setImageBitmap(qrgEncoder.encodeAsBitmap());
-            } catch (WriterException e) {
-                e.printStackTrace();
-            }
-        }
-    };
-    private final View.OnClickListener oclAddSupplement = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            AddSupplementsDialog addSupplementsDialog = new AddSupplementsDialog(supplements);
-            addSupplementsDialog.show(getParentFragmentManager(), "");
-        }
-    };
-
-
-    MaterialPickerOnPositiveButtonClickListener pclDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
-        @Override
-        public void onPositiveButtonClick(Object selection) {
-            vPurchaseDate.setText(convertDateToString((long) selection));
-            purchaseDate = (long) selection;
-        }
-    };
 
     public void saveToInternalStorage() {
         if (new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + vSerialNumber.getText().toString() + ".jpg").exists())
@@ -306,8 +107,9 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
         }
         return;
     }
+
     @AfterPermissionGranted(CAMERA_REQUEST_CODE)
-    private boolean getCameraPermission(){
+    private boolean getCameraPermission() {
         String[] perms = {Manifest.permission.CAMERA};
         if (EasyPermissions.hasPermissions(getContext(), perms)) {
             return true;
@@ -328,5 +130,331 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
             new AppSettingsDialog.Builder(this).build().show();
         }
     }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        getParentFragmentManager().setFragmentResultListener("supplements", this, new FragmentResultListener() {
+            @Override
+            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
+                supplements = bundle.getParcelableArrayList("supplements");
+            }
+        });
+        getParentFragmentManager().setFragmentResultListener("machine", this, new FragmentResultListener() {
+            @Override
+            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
+                vSerialNumber.setText(result.getString("SerialNumber"));
+            }
+        });
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_add_machine, container, false);
+        Initialize(view);
+        getCameraPermission();
+        vIdLayout.setEndIconOnClickListener(oclMachineID);
+        vRegister.setOnClickListener(oclRegister);
+        vPurchaseDateLayout.setEndIconOnClickListener(oclDate);
+        vSerialNumberLayout.setEndIconOnClickListener(oclSerialNumber);
+        vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);
+        vAddSupplement.setOnClickListener(oclAddSupplement);
+
+        vId.addTextChangedListener(twId);
+        vSerialNumber.addTextChangedListener(twSerialNumber);
+        vPurchaseDate.addTextChangedListener(twPurchaseDate);
+        vAllowance.addTextChangedListener(twAllowance);
+        vByDay.addTextChangedListener(twByDay);
+        vByWeek.addTextChangedListener(twByWeek);
+        vByMonth.addTextChangedListener(twByMonth);
+
+        return view;
+    }
+    // Functions
+
+    private void Initialize(View view) {
+        supplements = new ArrayList<>();
+        vId = view.findViewById(R.id.TextInput_MachineID);
+        vQRImg = view.findViewById(R.id.ImageView_MachineIDIMG);
+        vRegister = view.findViewById(R.id.button_register);
+        vAddSupplement = view.findViewById(R.id.button_addSupplements);
+        vSerialNumber = view.findViewById(R.id.TextInput_MachineSerialNumber);
+        vPurchaseDate = view.findViewById(R.id.TextInput_MachinePurchaseDate);
+        vAllowance = view.findViewById(R.id.TextInput_MachineAllowance);
+        vByDay = view.findViewById(R.id.TextInput_MachineByDay);
+        vByWeek = view.findViewById(R.id.TextInput_MachineByWeek);
+        vByMonth = view.findViewById(R.id.TextInput_MachineByMonth);
+        vDatePickerBuilder.setTitleText("Purchase Date");
+        vDatePicker = vDatePickerBuilder.build();
+
+        vIdLayout = view.findViewById(R.id.textInputLayout_MachineID);
+        vSerialNumberLayout = view.findViewById(R.id.textInputLayout_MachineSerialNumber);
+        vPurchaseDateLayout = view.findViewById(R.id.textInputLayout_MachinePurchaseDate);
+        vAllowanceLayout = view.findViewById(R.id.textInputLayout_MachineAllowance);
+        vByDayLayout = view.findViewById(R.id.textInputLayout_MachineByDay);
+        vByWeekLayout = view.findViewById(R.id.textInputLayout_MachineByWeek);
+        vByMonthLayout = view.findViewById(R.id.textInputLayout_MachineByMonth);
+
+        views = new ArrayList<>();
+        views.add(new Pair<>(vIdLayout, vId));
+        views.add(new Pair<>(vSerialNumberLayout, vSerialNumber));
+        views.add(new Pair<>(vPurchaseDateLayout, vPurchaseDate));
+        views.add(new Pair<>(vAllowanceLayout, vAllowance));
+        views.add(new Pair<>(vByDayLayout, vByDay));
+        views.add(new Pair<>(vByWeekLayout, vByWeek));
+        views.add(new Pair<>(vByMonthLayout, vByMonth));
+    }
+
+    private void clearInput() {
+        vId.setText(null);
+        vSerialNumber.setText(null);
+        vPurchaseDate.setText(null);
+        vQRImg.setImageResource(R.drawable.ic_baseline_image_24);
+        vAllowance.setText(null);
+        vByDay.setText(null);
+        vByMonth.setText(null);
+        vByWeek.setText(null);
+        supplements.clear();
+        vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
+        vDatePicker = vDatePickerBuilder.build();
+        vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);
+    }
+
+    private boolean generateError() {
+        for (Pair<TextInputLayout, TextInputEditText> view : views) {
+            if (view.second.getText().toString().trim().isEmpty()) {
+                view.first.setError("Missing");
+                return true;
+            }
+            if (view.first.getError() != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean validateInput() {
+        if (generateError())
+            return false;
+        boolean noSupplements = supplements.size() == 0;
+        return !noSupplements;
+    }
+
+    private String convertDateToString(long selection) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(selection);
+        return simpleDateFormat.format(calendar.getTime());
+    }
+
+    // Listeners
+    private final View.OnClickListener oclDate = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            vDatePicker.show(getFragmentManager(), "DATE_PICKER");
+        }
+    };
+    private final View.OnClickListener oclSerialNumber = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (getCameraPermission()) {
+                MachineSerialNumberDialog machineSerialNumberDialog = new MachineSerialNumberDialog();
+                machineSerialNumberDialog.show(getParentFragmentManager(), "");
+            }
+
+        }
+    };
+    private final View.OnClickListener oclRegister = new View.OnClickListener() {
+        @RequiresApi(api = Build.VERSION_CODES.R)
+        @Override
+        public void onClick(View v) {
+            if (validateInput()) {
+                int size = supplements.size();
+                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
+                builder.setTitle("Uploading...")
+                        .setMessage("Uploading Data")
+                        .setCancelable(false);
+                AlertDialog alertDialog = builder.create();
+                alertDialog.show();
+                for (int i = 0; i < size; i++) {
+                    Integer[] finalI = new Integer[1];
+                    finalI[0] = i;
+                    supplements.get(i).saveToCloudStorage(storageRef, vId.getText().toString()).addOnSuccessListener(taskSnapshot -> {
+                        if (finalI[0] == size - 1) {
+                            alertDialog.dismiss();
+                        }
+
+                    }).addOnFailureListener(e -> {
+                        alertDialog.dismiss();
+                        Toast.makeText(getActivity(), "Failed to upload, check your internet", Toast.LENGTH_SHORT).show();
+                    });
+                }
+                saveToInternalStorage();
+                //saveToCloudStorage();
+                Machine newMachine = new Machine(vId.getText().toString(), vSerialNumber.getText().toString(), new Date(purchaseDate), new Allowance(vId.getText().toString(), Double.parseDouble(vAllowance.getText().toString()), ALLOWANCE));
+                newMachine.setDailyRentPrice(Double.parseDouble(vByDay.getText().toString()));
+                newMachine.setWeeklyRentPrice(Double.parseDouble(vByWeek.getText().toString()));
+                newMachine.setMonthlyRentPrice(Double.parseDouble(vByMonth.getText().toString()));
+                newMachine.setSupplementsNames(new ArrayList<>());
+                IntStream.range(0, supplements.size()).forEach(i -> newMachine.getSupplementsNames().add(supplements.get(i).getName()));
+                machineCol.document(vId.getText().toString()).set(newMachine).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void unused) {
+                        Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
+                        clearInput();
+                    }
+                });
+            } else {
+                Toast.makeText(getActivity(), "please, fill the machine data", Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
+    private final View.OnClickListener oclMachineID = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            vId.setText(machineCol.document().getId().substring(0, 5));
+        }
+    };
+    private final View.OnClickListener oclAddSupplement = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            AddSupplementsDialog addSupplementsDialog = new AddSupplementsDialog(supplements);
+            addSupplementsDialog.show(getParentFragmentManager(), "");
+        }
+    };
+    private final MaterialPickerOnPositiveButtonClickListener pclDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
+        @Override
+        public void onPositiveButtonClick(Object selection) {
+            vPurchaseDate.setText(convertDateToString((long) selection));
+            purchaseDate = (long) selection;
+        }
+    };
+    private final TextWatcher twId = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            qrgEncoder = new QRGEncoder(vId.getText().toString(), null, QRGContents.Type.TEXT, 25 * 25);
+            try {
+                vQRImg.setImageBitmap(qrgEncoder.encodeAsBitmap());
+            } catch (WriterException e) {
+                e.printStackTrace();
+            }
+            vIdLayout.setError(null);
+            vIdLayout.setErrorEnabled(false);
+        }
+    };
+    private final TextWatcher twSerialNumber = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            vSerialNumberLayout.setError(null);
+            vSerialNumberLayout.setErrorEnabled(false);
+        }
+    };
+    private final TextWatcher twPurchaseDate = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            vPurchaseDateLayout.setError(null);
+            vPurchaseDateLayout.setErrorEnabled(false);
+        }
+    };
+    private final TextWatcher twAllowance = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            vAllowanceLayout.setError(null);
+            vAllowanceLayout.setErrorEnabled(false);
+        }
+    };
+    private final TextWatcher twByDay = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            vByDayLayout.setError(null);
+            vByDayLayout.setErrorEnabled(false);
+        }
+    };
+    private final TextWatcher twByWeek = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            vByWeekLayout.setError(null);
+            vByWeekLayout.setErrorEnabled(false);
+        }
+    };
+    private final TextWatcher twByMonth = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            vByMonthLayout.setError(null);
+            vByMonthLayout.setErrorEnabled(false);
+        }
+    };
+
 
 }

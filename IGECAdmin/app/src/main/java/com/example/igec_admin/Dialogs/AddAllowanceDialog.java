@@ -1,10 +1,8 @@
 package com.example.igec_admin.Dialogs;
 
 import android.app.Dialog;
-import android.content.Intent;
 import android.os.Bundle;
 
-import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
@@ -12,13 +10,11 @@ import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 import com.example.igec_admin.Adatpers.AllowanceAdapter;
 import com.example.igec_admin.R;
@@ -88,7 +84,7 @@ public class AddAllowanceDialog extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_add_allowance_dialog, container, false);
+        return inflater.inflate(R.layout.dialog_add_allowance, container, false);
     }
 
     @Override

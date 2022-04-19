@@ -10,7 +10,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.igec_admin.R;
-import com.example.igec_admin.fireBase.Project;
 import com.example.igec_admin.fireBase.Supplement;
 import com.google.android.material.button.MaterialButton;
 
@@ -27,7 +26,7 @@ public class SupplementAdapter extends RecyclerView.Adapter<SupplementAdapter.Su
     @NonNull
     @Override
     public SupplementViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.supplement_item,parent,false);
+        View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.item_supplement,parent,false);
         return new SupplementViewHolder(v,listener);
     }
 

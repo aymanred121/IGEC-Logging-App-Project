@@ -133,7 +133,6 @@ public class AllowanceInfoDialog extends DialogFragment {
     }
     private void hideError(TextInputLayout textInputLayout) {
         textInputLayout.setErrorEnabled(textInputLayout.getError() != null);
-
     }
 
 

@@ -10,7 +10,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.igec_admin.R;
-import com.example.igec_admin.fireBase.Employee;
 import com.example.igec_admin.fireBase.EmployeeOverview;
 import com.google.android.material.checkbox.MaterialCheckBox;
 
@@ -74,7 +73,7 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
     @NonNull
     @Override
     public EmployeeViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.employee_item, parent, false);
+        View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.item_employee, parent, false);
         return new EmployeeViewHolder(v, listener, isAdd);
     }
 

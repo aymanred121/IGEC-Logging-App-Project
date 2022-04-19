@@ -211,12 +211,12 @@ public class ProjectFragmentDialog extends DialogFragment {
         vTime.setText(String.format("%s", convertDateToString(startDate)));
         getEmployees();
 
-        ArrayAdapter<String> idAdapter = new ArrayAdapter<>(getActivity(), R.layout.dropdown_item, TeamID);
+        ArrayAdapter<String> idAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, TeamID);
         vManagerID.setAdapter(idAdapter);
         ArrayList<String> contract = new ArrayList<>();
         contract.add("lump sum");
         contract.add("timesheet");
-        ArrayAdapter<String> ContractAdapter = new ArrayAdapter<>(getActivity(), R.layout.dropdown_item, contract);
+        ArrayAdapter<String> ContractAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, contract);
         vContractType.setAdapter(ContractAdapter);
     }
 
@@ -248,7 +248,7 @@ public class ProjectFragmentDialog extends DialogFragment {
         if (!vManagerIDLayout.isEnabled())
             vManagerID.setText("");
         if (TeamID.size() > 0) {
-            ArrayAdapter<String> idAdapter = new ArrayAdapter<>(getActivity(), R.layout.dropdown_item, TeamID);
+            ArrayAdapter<String> idAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, TeamID);
             vManagerID.setAdapter(idAdapter);
 
         }

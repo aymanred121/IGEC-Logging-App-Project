@@ -14,7 +14,6 @@ import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.igec_admin.Adatpers.EmployeeAdapter;
 import com.example.igec_admin.Adatpers.MachineLogAdapter;
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Machine;
@@ -74,7 +73,7 @@ public class MachineLogDialog extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_maching_log_dialog, container, false);
+        return inflater.inflate(R.layout.dialog_maching_log, container, false);
     }
 
     @Override

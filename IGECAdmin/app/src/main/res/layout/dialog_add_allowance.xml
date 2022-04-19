@@ -13,7 +13,7 @@
         app:layout_constraintBottom_toTopOf="@id/container"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:listitem="@layout/allowance_item" />
+        tools:listitem="@layout/item_allowance" />
 
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -29,8 +29,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|right"
-            android:layout_marginEnd="32dp"
-            android:layout_marginBottom="32dp"
+            android:layout_marginEnd="@dimen/vhigh"
+            android:layout_marginBottom="@dimen/vhigh"
             android:rotation="0"
             android:src="@drawable/ic_round_add_24" />
 
@@ -40,8 +40,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|left"
-            android:layout_marginStart="32dp"
-            android:layout_marginBottom="32dp"
+            android:layout_marginStart="@dimen/vhigh"
+            android:layout_marginBottom="@dimen/vhigh"
             android:backgroundTint="@color/Green"
             android:rotation="0"
             android:src="@drawable/ic_baseline_done_24" />

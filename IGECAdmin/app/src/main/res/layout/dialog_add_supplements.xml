@@ -10,8 +10,8 @@
         android:id="@+id/progress_bar"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:layout_marginStart="32dp"
-        android:layout_marginEnd="32dp"
+        android:layout_marginStart="@dimen/vhigh"
+        android:layout_marginEnd="@dimen/vhigh"
         android:indeterminate="true"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@+id/recyclerview"
@@ -29,7 +29,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.0"
-        tools:listitem="@layout/supplement_item" />
+        tools:listitem="@layout/item_supplement" />
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/container"
@@ -44,8 +44,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|right"
-            android:layout_marginEnd="32dp"
-            android:layout_marginBottom="32dp"
+            android:layout_marginEnd="@dimen/vhigh"
+            android:layout_marginBottom="@dimen/vhigh"
             android:rotation="0"
             android:src="@drawable/ic_baseline_add_a_photo_24" />
 
@@ -55,8 +55,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|left"
-            android:layout_marginStart="32dp"
-            android:layout_marginBottom="32dp"
+            android:layout_marginStart="@dimen/vhigh"
+            android:layout_marginBottom="@dimen/vhigh"
             android:backgroundTint="@color/Green"
             android:rotation="0"
             android:src="@drawable/ic_baseline_done_24" />

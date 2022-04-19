@@ -6,10 +6,10 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
 
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,16 +23,19 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Pattern;
 
 public class AddClientDialog extends DialogFragment {
 
     //Views
     private TextInputEditText vCompanyName, vCompanyEmail, vCompanyPhoneNumber, vNote;
+    private TextInputLayout vCompanyNameLayout, vCompanyEmailLayout, vCompanyPhoneNumberLayout, vNoteLayout;
     private MaterialButton vDone;
-    private TextInputLayout vEmailLayout;
     private Client client;
-
+    private ArrayList<Pair<TextInputLayout, TextInputEditText>> views;
     public AddClientDialog(Client client) {
         this.client = client;
     }
@@ -62,7 +65,7 @@ public class AddClientDialog extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_add_client_dialog, container, false);
+        return inflater.inflate(R.layout.dialog_add_client, container, false);
     }
 
     @Override
@@ -70,17 +73,30 @@ public class AddClientDialog extends DialogFragment {
         super.onViewCreated(view, savedInstanceState);
         initialize(view);
         vDone.setOnClickListener(oclDone);
+        vCompanyName.addTextChangedListener(twName);
         vCompanyEmail.addTextChangedListener(twEmail);
+        vCompanyPhoneNumber.addTextChangedListener(twPhone);
+        vNote.addTextChangedListener(twNote);
     }
 
     private void initialize(View view) {
+        vNote = view.findViewById(R.id.TextInput_Note);
         vCompanyName = view.findViewById(R.id.TextInput_CompanyName);
         vCompanyEmail = view.findViewById(R.id.TextInput_CompanyEmail);
-        vEmailLayout = view.findViewById(R.id.textInputLayout_CompanyEmail);
         vCompanyPhoneNumber = view.findViewById(R.id.TextInput_CompanyPhoneNumber);
-        vNote = view.findViewById(R.id.TextInput_Note);
+        vCompanyNameLayout = view.findViewById(R.id.textInputLayout_CompanyName);
+        vCompanyEmailLayout = view.findViewById(R.id.textInputLayout_CompanyEmail);
+        vCompanyPhoneNumberLayout = view.findViewById(R.id.textInputLayout_CompanyPhoneNumber);
+        vNoteLayout = view.findViewById(R.id.textInputLayout_Note);
+
         vDone = view.findViewById(R.id.Button_Done);
 
+
+        views = new ArrayList<>();
+        views.add(new Pair<>(vCompanyNameLayout, vCompanyName));
+        views.add(new Pair<>(vCompanyEmailLayout, vCompanyEmail));
+        views.add(new Pair<>(vCompanyPhoneNumberLayout, vCompanyPhoneNumber));
+        views.add(new Pair<>(vNoteLayout, vNote));
         if (client != null) {
             vCompanyName.setText(client.getName());
             vCompanyEmail.setText(client.getEmail());
@@ -90,20 +106,27 @@ public class AddClientDialog extends DialogFragment {
 
     }
 
-    private boolean validateInput() {
-        return
-                !(vCompanyName.getText().toString().isEmpty() ||
-                        vCompanyEmail.getText().toString().isEmpty() ||
-                        vEmailLayout.getError() != null ||
-                        vCompanyPhoneNumber.getText().toString().isEmpty() ||
-                        vNote.getText().toString().isEmpty());
+    private boolean generateError() {
+        for (Pair<TextInputLayout, TextInputEditText> view : views) {
+            if (view.second.getText().toString().trim().isEmpty()) {
+                view.first.setError("Missing");
+                return true;
+            }
+            if (view.first.getError() != null) {
+                return true;
+            }
+        }
+        return false;
+    }
 
+    private boolean validateInput() {
+        return !generateError();
     }
 
     private View.OnClickListener oclDone = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            if(validateInput()) {
+            if (validateInput()) {
                 Client client = new Client();
                 client.setName(vCompanyName.getText().toString());
                 client.setEmail(vCompanyEmail.getText().toString());
@@ -113,10 +136,6 @@ public class AddClientDialog extends DialogFragment {
                 result.putSerializable("client", client);
                 getParentFragmentManager().setFragmentResult("client", result);
                 dismiss();
-            }
-            else
-            {
-                Toast.makeText(getActivity(), "please, fill the client data", Toast.LENGTH_SHORT).show();
             }
         }
     };
@@ -140,10 +159,62 @@ public class AddClientDialog extends DialogFragment {
         @Override
         public void afterTextChanged(Editable s) {
             if (!isValid(s.toString().trim())) {
-                vEmailLayout.setError("Wrong E-mail form");
+                vCompanyEmailLayout.setError("Wrong E-mail form");
             } else {
-                vEmailLayout.setError(null);
+                vCompanyEmailLayout.setError(null);
+                vCompanyEmailLayout.setErrorEnabled(false);
             }
+        }
+    };
+    private TextWatcher twName = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            vCompanyNameLayout.setError(null);
+            vCompanyNameLayout.setErrorEnabled(false);
+        }
+    };
+    private TextWatcher twNote = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            vNoteLayout.setError(null);
+            vNoteLayout.setErrorEnabled(false);
+        }
+    };
+    private TextWatcher twPhone = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            vCompanyPhoneNumberLayout.setError(null);
+            vCompanyPhoneNumberLayout.setErrorEnabled(false);
         }
     };
 }

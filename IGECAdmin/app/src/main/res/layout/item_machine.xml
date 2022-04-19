@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
+    android:layout_margin="@dimen/mid"
     app:cardCornerRadius="5dp">
 
     <RelativeLayout
@@ -22,7 +22,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/TextView_MachineID"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="@dimen/high"
             android:text="test" />
 
         <com.google.android.material.button.MaterialButton
@@ -31,8 +31,8 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_centerVertical="true"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="16dp"
+            android:layout_marginTop="@dimen/high"
+            android:layout_marginEnd="@dimen/high"
             android:layout_toStartOf="@id/Button_Comment"
             android:insetLeft="0dp"
             android:insetTop="0dp"
@@ -43,7 +43,7 @@
             app:icon="@drawable/ic_round_history_24"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
-            app:iconSize="32dp"
+            app:iconSize="@dimen/vhigh"
             app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MyApp.Button.Circle" />
 
         <com.google.android.material.button.MaterialButton
@@ -53,7 +53,7 @@
             android:layout_height="50dp"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="@dimen/high"
             android:insetLeft="0dp"
             android:insetTop="0dp"
             android:insetRight="0dp"
@@ -63,7 +63,7 @@
             app:icon="@drawable/ic_baseline_comment_bank_24"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
-            app:iconSize="32dp"
+            app:iconSize="@dimen/vhigh"
             app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MyApp.Button.Circle" />
 
 

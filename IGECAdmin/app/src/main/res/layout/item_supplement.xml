@@ -3,34 +3,32 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_margin="@dimen/mid"
     app:cardCornerRadius="5dp">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:padding="12dp">
+
+        <ImageView
+            android:id="@+id/TextView_SupplementIMG"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:text="test"
+            tools:src="@drawable/ic_launcher_foreground"
+            tools:tint="@color/black" />
 
         <TextView
-            android:id="@+id/TextView_ReasonFor"
+            android:id="@+id/TextView_SupplementName"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/TextView_SupplementIMG"
             android:layout_centerVertical="true"
-
-            android:text="@string/reason_for"
-            android:textSize="16sp" />
-
-        <TextView
-            android:id="@+id/TextView_MountOf"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_marginEnd="16dp"
-            android:layout_toLeftOf="@id/button_delete"
-            android:drawablePadding="8dp"
-            android:text="@string/_0_00"
-            android:textSize="16sp"
-            app:drawableLeftCompat="@drawable/ic_round_trending_flat_24" />
+            tools:text="Supplement Name"
+            android:textSize="20sp"
+            android:layout_marginStart="@dimen/high"
+            android:layout_height="wrap_content"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/button_delete"
@@ -39,7 +37,7 @@
             android:layout_height="25dp"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="@dimen/high"
             android:backgroundTint="@color/Red"
             android:insetLeft="0dp"
             android:insetTop="0dp"
@@ -53,6 +51,8 @@
             app:iconSize="24dp"
             app:iconTint="@color/white"
             app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MyApp.Button.Circle" />
+
+
 
     </RelativeLayout>
 

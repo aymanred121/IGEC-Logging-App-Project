@@ -28,7 +28,7 @@ public class AllowanceAdapter extends RecyclerView.Adapter<AllowanceAdapter.Allo
     @NonNull
     @Override
     public AllowanceViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.allowance_item, parent, false);
+        View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.item_allowance, parent, false);
         return new AllowanceViewHolder(v, listener);
     }
 

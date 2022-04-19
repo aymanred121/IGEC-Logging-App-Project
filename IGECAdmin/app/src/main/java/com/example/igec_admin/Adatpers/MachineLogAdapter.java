@@ -10,7 +10,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.igec_admin.R;
-import com.example.igec_admin.fireBase.EmployeeOverview;
 import com.example.igec_admin.fireBase.Machine_Employee;
 import com.google.firebase.Timestamp;
 
@@ -28,7 +27,7 @@ public class MachineLogAdapter extends RecyclerView.Adapter<MachineLogAdapter.Ma
     @NonNull
     @Override
     public MachineLogViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.machine_log_item, parent, false);
+        View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.item_machine_log, parent, false);
         MachineLogViewHolder vvh = new MachineLogViewHolder(v);
         return vvh;
     }

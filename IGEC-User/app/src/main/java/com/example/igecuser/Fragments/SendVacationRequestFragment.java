@@ -5,6 +5,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import android.text.Editable;
@@ -24,6 +25,7 @@ import com.google.android.material.datepicker.CalendarConstraints;
 import com.google.android.material.datepicker.DateValidatorPointForward;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -174,7 +176,7 @@ public class SendVacationRequestFragment extends Fragment implements DatePickerD
                 return true;
             }
             if (view.first.getError() != null) {
-                return true;
+                return false;
             }
         }
         return false;
@@ -265,8 +267,28 @@ public class SendVacationRequestFragment extends Fragment implements DatePickerD
     };
     private View.OnClickListener oclSendRequest = v -> {
         if (validateInputs()) {
-            uploadVacationRequest();
+            if(daysAfterVacationIsTaken < 0)
+            {
+                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
+                builder.setTitle("days exceeded by "+daysAfterVacationIsTaken*-1+" ...")
+                        .setMessage("there will be "+daysAfterVacationIsTaken*-1+ " will be considered as Unpaid")
+                        .setCancelable(true)
+                        .setPositiveButton("ok, send" , (dialogInterface, i) -> {
+                            uploadVacationRequest();
+                            dialogInterface.dismiss();
+                        })
+                        .setNegativeButton("No" ,  (dialogInterface, i) -> {
+                            dialogInterface.dismiss();
+                        });
+                AlertDialog alertDialog = builder.create();
+                alertDialog.show();
+            }
+            else{
+                uploadVacationRequest();
+            }
+
         }
+
     };
     private View.OnClickListener oclVacationDate = v -> {
         dpd.show(getParentFragmentManager(), "DATE_PICKER");

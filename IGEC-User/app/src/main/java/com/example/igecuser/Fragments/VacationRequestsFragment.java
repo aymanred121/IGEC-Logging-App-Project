@@ -5,10 +5,12 @@ import static android.content.ContentValues.TAG;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -24,12 +26,7 @@ import com.example.igecuser.fireBase.VacationRequest;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
-import java.util.Objects;
 
 
 public class VacationRequestsFragment extends Fragment {
@@ -40,7 +37,7 @@ public class VacationRequestsFragment extends Fragment {
     private ArrayList<VacationRequest> vacationRequests;
     private final Employee currManager;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
-
+    private String unPaidDays = "";
     public VacationRequestsFragment(Employee currManager) {
         this.currManager = currManager;
     }
@@ -108,18 +105,43 @@ public class VacationRequestsFragment extends Fragment {
         builder.setPositiveButton("Accept", (dialogInterface, i) -> {
             db.collection("employees").document(vacationRequest.getEmployee().getId()).get().addOnSuccessListener((value) -> {
                 Employee employee = value.toObject(Employee.class);
-                if (employee.getTotalNumberOfVacationDays() - Integer.parseInt(getDays(vacationRequest)) < 0) {
-                    Toast.makeText(getActivity(), "This vacation can't be accepted duo to available days for this Employee", Toast.LENGTH_LONG).show();
-                    return;
-                }
-                db.collection("Vacation")
-                        .document(vacationRequest.getId())
-                        .update("vacationStatus", 1);
 
-                db.collection("employees")
-                        .document(employee.getId())
-                        .update("totalNumberOfVacationDays"
-                                , employee.getTotalNumberOfVacationDays() - Integer.parseInt(getDays(vacationRequest)));
+                AlertDialog.Builder editTextBuilder = new AlertDialog.Builder(getActivity());
+                editTextBuilder.setTitle("Title");
+                // Set up the input
+                final EditText input = new EditText(getActivity());
+                // Specify the type of input expected; this, for example, sets the input as a password, and will mask the text
+                input.setInputType(InputType.TYPE_CLASS_NUMBER);
+                editTextBuilder.setView(input);
+                // Set up the buttons
+                editTextBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        unPaidDays = input.getText().toString();
+                        Toast.makeText(getActivity(), unPaidDays, Toast.LENGTH_SHORT).show();
+                    }
+                });
+                editTextBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                editTextBuilder.show();
+                //TODO validate if the entered days are less than days requested in the request
+                //TODO unComment the following lines to update the employee vacation days
+//                if (employee.getTotalNumberOfVacationDays() - Integer.parseInt(getDays(vacationRequest)) < 0) {
+//                    Toast.makeText(getActivity(), "This vacation can't be accepted duo to available days for this Employee", Toast.LENGTH_LONG).show();
+//                    return;
+//                }
+//                db.collection("Vacation")
+//                        .document(vacationRequest.getId())
+//                        .update("vacationStatus", 1);
+//
+//                db.collection("employees")
+//                        .document(employee.getId())
+//                        .update("totalNumberOfVacationDays"
+//                                , employee.getTotalNumberOfVacationDays() - Integer.parseInt(getDays(vacationRequest)));
 
 
             });
@@ -132,6 +154,7 @@ public class VacationRequestsFragment extends Fragment {
         builder.setNeutralButton("Cancel", (dialogInterface, i) -> {
         });
         builder.show();
+
 
     };
 

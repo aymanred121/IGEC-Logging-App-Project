@@ -88,31 +88,6 @@
 
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/textInputLayout_MachineAllowance"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/vhigh"
-        android:layout_marginTop="@dimen/mid"
-        android:layout_marginEnd="@dimen/vhigh"
-        app:boxBackgroundMode="outline"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textInputLayout_MachinePurchaseDate">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/TextInput_MachineAllowance"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/machine_allowance"
-            android:inputType="numberDecimal"
-            android:padding="14dp"
-            android:singleLine="true" />
-
-    </com.google.android.material.textfield.TextInputLayout>
-
-
-    <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textInputLayout_MachineByDay"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
@@ -124,7 +99,7 @@
         app:helperTextEnabled="true"
         app:layout_constraintEnd_toStartOf="@+id/textInputLayout_MachineByWeek"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textInputLayout_MachineAllowance">
+        app:layout_constraintTop_toBottomOf="@id/textInputLayout_MachinePurchaseDate">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/TextInput_MachineByDay"
@@ -149,7 +124,7 @@
         app:helperTextEnabled="true"
         app:layout_constraintEnd_toStartOf="@+id/textInputLayout_MachineByMonth"
         app:layout_constraintStart_toEndOf="@+id/textInputLayout_MachineByDay"
-        app:layout_constraintTop_toBottomOf="@+id/textInputLayout_MachineAllowance">
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout_MachinePurchaseDate">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/TextInput_MachineByWeek"
@@ -174,7 +149,7 @@
         app:helperTextEnabled="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/textInputLayout_MachineByWeek"
-        app:layout_constraintTop_toBottomOf="@+id/textInputLayout_MachineAllowance">
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout_MachinePurchaseDate">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/TextInput_MachineByMonth"

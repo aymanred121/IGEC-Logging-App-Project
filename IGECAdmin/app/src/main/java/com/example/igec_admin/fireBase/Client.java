@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 public class Client implements Serializable {
    private String name , Email , phoneNumber , note ;
+   //TODO: add more fields
 
     public Client(String name, String Email, String phoneNumber, String note) {
         this.name = name;

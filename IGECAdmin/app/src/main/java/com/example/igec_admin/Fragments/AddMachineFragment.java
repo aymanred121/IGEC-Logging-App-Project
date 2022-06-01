@@ -66,8 +66,8 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
     private final int BONUS = 3;
     private final int PENALTY = 4;
     // Views
-    private TextInputLayout vIdLayout, vPurchaseDateLayout, vSerialNumberLayout, vAllowanceLayout, vByDayLayout, vByWeekLayout, vByMonthLayout;
-    private TextInputEditText vId, vPurchaseDate, vSerialNumber, vAllowance, vByDay, vByWeek, vByMonth;
+    private TextInputLayout vIdLayout, vPurchaseDateLayout, vSerialNumberLayout, vByDayLayout, vByWeekLayout, vByMonthLayout;
+    private TextInputEditText vId, vPurchaseDate, vSerialNumber, vByDay, vByWeek, vByMonth;
     private ImageView vQRImg;
     private MaterialButton vRegister, vAddSupplement;
     // Vars
@@ -167,7 +167,6 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
         vId.addTextChangedListener(twId);
         vSerialNumber.addTextChangedListener(twSerialNumber);
         vPurchaseDate.addTextChangedListener(twPurchaseDate);
-        vAllowance.addTextChangedListener(twAllowance);
         vByDay.addTextChangedListener(twByDay);
         vByWeek.addTextChangedListener(twByWeek);
         vByMonth.addTextChangedListener(twByMonth);
@@ -184,7 +183,6 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
         vAddSupplement = view.findViewById(R.id.button_addSupplements);
         vSerialNumber = view.findViewById(R.id.TextInput_MachineSerialNumber);
         vPurchaseDate = view.findViewById(R.id.TextInput_MachinePurchaseDate);
-        vAllowance = view.findViewById(R.id.TextInput_MachineAllowance);
         vByDay = view.findViewById(R.id.TextInput_MachineByDay);
         vByWeek = view.findViewById(R.id.TextInput_MachineByWeek);
         vByMonth = view.findViewById(R.id.TextInput_MachineByMonth);
@@ -194,7 +192,6 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
         vIdLayout = view.findViewById(R.id.textInputLayout_MachineID);
         vSerialNumberLayout = view.findViewById(R.id.textInputLayout_MachineSerialNumber);
         vPurchaseDateLayout = view.findViewById(R.id.textInputLayout_MachinePurchaseDate);
-        vAllowanceLayout = view.findViewById(R.id.textInputLayout_MachineAllowance);
         vByDayLayout = view.findViewById(R.id.textInputLayout_MachineByDay);
         vByWeekLayout = view.findViewById(R.id.textInputLayout_MachineByWeek);
         vByMonthLayout = view.findViewById(R.id.textInputLayout_MachineByMonth);
@@ -203,7 +200,6 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
         views.add(new Pair<>(vIdLayout, vId));
         views.add(new Pair<>(vSerialNumberLayout, vSerialNumber));
         views.add(new Pair<>(vPurchaseDateLayout, vPurchaseDate));
-        views.add(new Pair<>(vAllowanceLayout, vAllowance));
         views.add(new Pair<>(vByDayLayout, vByDay));
         views.add(new Pair<>(vByWeekLayout, vByWeek));
         views.add(new Pair<>(vByMonthLayout, vByMonth));
@@ -214,7 +210,6 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
         vSerialNumber.setText(null);
         vPurchaseDate.setText(null);
         vQRImg.setImageResource(R.drawable.ic_baseline_image_24);
-        vAllowance.setText(null);
         vByDay.setText(null);
         vByMonth.setText(null);
         vByWeek.setText(null);
@@ -304,7 +299,7 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
                 }
                 saveToInternalStorage();
                 //saveToCloudStorage();
-                Machine newMachine = new Machine(vId.getText().toString(), vSerialNumber.getText().toString(), new Date(purchaseDate), new Allowance(vId.getText().toString(), Double.parseDouble(vAllowance.getText().toString()), ALLOWANCE));
+                Machine newMachine = new Machine(vId.getText().toString(), vSerialNumber.getText().toString(), new Date(purchaseDate));
                 newMachine.setDailyRentPrice(Double.parseDouble(vByDay.getText().toString()));
                 newMachine.setWeeklyRentPrice(Double.parseDouble(vByWeek.getText().toString()));
                 newMachine.setMonthlyRentPrice(Double.parseDouble(vByMonth.getText().toString()));
@@ -397,23 +392,6 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
         public void afterTextChanged(Editable editable) {
             vPurchaseDateLayout.setError(null);
             vPurchaseDateLayout.setErrorEnabled(false);
-        }
-    };
-    private final TextWatcher twAllowance = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void afterTextChanged(Editable editable) {
-            vAllowanceLayout.setError(null);
-            vAllowanceLayout.setErrorEnabled(false);
         }
     };
     private final TextWatcher twByDay = new TextWatcher() {

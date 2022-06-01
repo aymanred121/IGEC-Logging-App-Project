@@ -116,7 +116,7 @@ public class LoginActivity extends AppCompatActivity {
                         return;
                     }
                     Intent intent;
-                    if (currEmployee != null && currEmployee.getManagerID().equals("IGEC")) {
+                    if (currEmployee != null && currEmployee.isAdmin()) {
                         intent = new Intent(LoginActivity.this, MainActivity.class);
                         startActivity(intent);
                     }

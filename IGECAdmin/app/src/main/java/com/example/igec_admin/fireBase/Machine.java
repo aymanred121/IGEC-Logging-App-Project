@@ -10,17 +10,6 @@ public class Machine {
     private Boolean isUsed;
     private ArrayList<String> supplementsNames;
 
-
-    public Allowance getAllowance() {
-        return allowance;
-    }
-
-    public void setAllowance(Allowance allowance) {
-        this.allowance = allowance;
-    }
-
-    private Allowance allowance;
-
     public Machine() {
     }
 
@@ -40,11 +29,10 @@ public class Machine {
         this.reference = reference;
     }
 
-    public Machine(String id, String reference, Date buyingDate, Allowance allowance) {
+    public Machine(String id, String reference, Date buyingDate) {
         this.id = id;
         this.reference = reference;
         this.purchaseDate = buyingDate;
-        this.allowance = allowance;
         removeEmployeeDependency();
     }
 

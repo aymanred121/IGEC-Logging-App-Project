@@ -10,7 +10,7 @@ public class Employee {
     private double salary,insuranceAmount;
     private Date hireDate;
     private int totalNumberOfVacationDays;
-    private boolean isAdmin,labourType;
+    private boolean isAdmin, temporary;
 
 
     public  Employee(){
@@ -32,7 +32,7 @@ public class Employee {
         this.phoneNumber = phoneNumber;
         totalNumberOfVacationDays = 21;
         this.insuranceNumber=insuranceNumber;
-        this.labourType=labourType;
+        this.temporary =labourType;
         this.insuranceAmount=insuranceAmount;
         this.isAdmin=isAdmin;
     }
@@ -130,12 +130,12 @@ public class Employee {
         isAdmin = admin;
     }
 
-    public boolean isLabourType() {
-        return labourType;
+    public boolean isTemporary() {
+        return temporary;
     }
 
-    public void setLabourType(boolean labourType) {
-        this.labourType = labourType;
+    public void setTemporary(boolean temporary) {
+        this.temporary = temporary;
     }
 
     public double getInsuranceAmount() {

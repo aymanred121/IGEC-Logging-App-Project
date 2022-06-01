@@ -46,9 +46,9 @@ public class AddUserFragment extends Fragment {
 
 
     // Views
-    private MaterialCheckBox vAdmin,vTemporary;
+    private MaterialCheckBox vAdmin, vTemporary;
     private MaterialButton vRegister;
-    private TextInputEditText vFirstName, vSecondName, vEmail, vPassword, vPhone, vTitle, vSalary, vNationalID, vArea, vCity, vStreet, vHireDate,vInsuranceNumber,vInsuranceAmount;
+    private TextInputEditText vFirstName, vSecondName, vEmail, vPassword, vPhone, vTitle, vSalary, vNationalID, vArea, vCity, vStreet, vHireDate, vInsuranceNumber, vInsuranceAmount;
     private TextInputLayout vHireDateLayout, vEmailLayout;
     private MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vDatePicker;
@@ -150,9 +150,6 @@ public class AddUserFragment extends Fragment {
             empInfo.add((vFirstName.getText()).toString());
             empInfo.add((vSecondName.getText()).toString());
             empInfo.add((vTitle.getText()).toString());
-            if(vAdmin.isChecked())
-                empInfo.add("IGEC"); // ManagerID
-            else
             empInfo.add(null); // ManagerID
             empInfo.add(null); // ProjectID
             Map<String, Object> empInfoMap = new HashMap<>();
@@ -196,7 +193,7 @@ public class AddUserFragment extends Fragment {
                 vInsuranceNumber.getText().toString(),
                 vTemporary.isChecked(),
                 Double.parseDouble(vInsuranceAmount.getText().toString())
-                ,vAdmin.isChecked());
+                , vAdmin.isChecked());
     }
 
     private String encryptedPassword() {
@@ -220,6 +217,8 @@ public class AddUserFragment extends Fragment {
         vCity.setText(null);
         vStreet.setText(null);
         vHireDate.setText(null);
+        vInsuranceAmount.setText(null);
+        vInsuranceNumber.setText(null);
         vNationalID.setText(null);
         vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
         vDatePicker = vDatePickerBuilder.build();
@@ -273,10 +272,9 @@ public class AddUserFragment extends Fragment {
     // Listeners
     View.OnClickListener clRegister = v -> {
         if (validateInputs()) {
-            if(!vAdmin.isChecked())
-            addEmployee();
-            else
-            {
+            if (!vAdmin.isChecked())
+                addEmployee();
+            else {
                 MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
                 builder.setTitle(getString(R.string.admin_register_title))
                         .setMessage(getString(R.string.AreUSure))

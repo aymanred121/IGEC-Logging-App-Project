@@ -64,9 +64,9 @@
             android:layout_marginStart="@dimen/vhigh"
             android:layout_marginTop="@dimen/low"
             android:layout_marginEnd="@dimen/vhigh"
+            app:boxBackgroundMode="outline"
             app:counterEnabled="true"
             app:counterMaxLength="11"
-            app:boxBackgroundMode="outline"
             app:helperTextEnabled="true">
 
             <com.google.android.material.textfield.TextInputEditText
@@ -81,13 +81,89 @@
                 android:singleLine="true" />
         </com.google.android.material.textfield.TextInputLayout>
 
+        <LinearLayout
+            android:id="@+id/container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/textInputLayout_CompanyPhoneNumber"
+            android:layout_marginStart="@dimen/vhigh"
+            android:layout_marginEnd="@dimen/vhigh"
+            android:orientation="horizontal">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/textInputLayout_PerHour"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/mid"
+                android:layout_weight="1"
+                app:boxBackgroundMode="outline"
+                app:helperTextEnabled="true"
+                app:suffixText="%">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/TextInput_PerHour"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="top"
+                    android:hint="@string/per_hour"
+                    android:inputType="numberDecimal"
+
+                    android:padding="14dp"
+                    android:singleLine="true" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/textInputLayout_OverTime"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="@dimen/mid"
+                android:layout_weight="1"
+                app:boxBackgroundMode="outline"
+                app:helperTextEnabled="true"
+                app:suffixText="%">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/TextInput_OverTime"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="top"
+                    android:hint="@string/over_time"
+                    android:inputType="numberDecimal"
+                    android:padding="14dp"
+                    android:singleLine="true" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/textInputLayout_PerFriday"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:boxBackgroundMode="outline"
+                app:helperTextEnabled="true"
+                app:suffixText="%">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/TextInput_PerFriday"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="top"
+                    android:hint="@string/per_friday"
+                    android:inputType="numberDecimal"
+                    android:padding="14dp"
+                    android:singleLine="true" />
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/textInputLayout_Note"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="150dp"
-            android:layout_below="@id/textInputLayout_CompanyPhoneNumber"
+            android:layout_below="@id/container"
             android:layout_marginStart="@dimen/vhigh"
             android:layout_marginTop="@dimen/low"
             android:layout_marginEnd="@dimen/vhigh"

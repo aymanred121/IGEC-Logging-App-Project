@@ -62,4 +62,7 @@
     <string name="insurance_number">Insurance Number</string>
     <string name="insurance_amount">Insurance Amount</string>
     <string name="month">Month</string>
+    <string name="per_hour">Per Hour</string>
+    <string name="over_time">Over Time</string>
+    <string name="per_friday">Per Friday</string>
 </resources>

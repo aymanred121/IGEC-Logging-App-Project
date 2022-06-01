@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
 public class AddClientDialog extends DialogFragment {
 
     //Views
-    private TextInputEditText vCompanyName, vCompanyEmail, vCompanyPhoneNumber, vNote;
+    private TextInputEditText vCompanyName, vCompanyEmail, vCompanyPhoneNumber, vNote,vPerHour,vOverTime,vPerFriday;
     private TextInputLayout vCompanyNameLayout, vCompanyEmailLayout, vCompanyPhoneNumberLayout, vNoteLayout;
     private MaterialButton vDone;
     private Client client;
@@ -87,8 +87,10 @@ public class AddClientDialog extends DialogFragment {
         vCompanyNameLayout = view.findViewById(R.id.textInputLayout_CompanyName);
         vCompanyEmailLayout = view.findViewById(R.id.textInputLayout_CompanyEmail);
         vCompanyPhoneNumberLayout = view.findViewById(R.id.textInputLayout_CompanyPhoneNumber);
+        vPerHour = view.findViewById(R.id.TextInput_PerHour);
+        vOverTime = view.findViewById(R.id.TextInput_OverTime);
+        vPerFriday = view.findViewById(R.id.TextInput_PerFriday);
         vNoteLayout = view.findViewById(R.id.textInputLayout_Note);
-
         vDone = view.findViewById(R.id.Button_Done);
 
 

@@ -173,10 +173,10 @@ public class UserFragmentDialog extends DialogFragment {
         vSSN.setText(employee.getSSN());
         vPassword.setText(employee.getDecryptedPassword());
         vPhone.setText(employee.getPhoneNumber());
-        vAdmin.setChecked(employee.getManagerID().equals("IGEC"));
-        //TODO vTemporary.setChecked(employee.isTemporary());
-        //TODO vInsuranceNumber.setText(employee.getInsuranceNumber());
-        //TODO vInsuranceAmount.setText(String.valueOf(employee.getInsuranceAmount()));
+        vAdmin.setChecked(employee.isAdmin());
+        vTemporary.setChecked(employee.isTemporary());
+        vInsuranceNumber.setText(employee.getInsuranceNumber());
+        vInsuranceAmount.setText(String.valueOf(employee.getInsuranceAmount()));
         vHireDate.setText(convertDateToString(employee.getHireDate().getTime()));
         hireDate = employee.getHireDate().getTime();
         vDatePickerBuilder.setTitleText("Hire Date");

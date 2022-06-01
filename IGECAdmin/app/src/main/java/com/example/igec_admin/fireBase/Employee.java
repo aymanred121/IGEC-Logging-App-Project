@@ -6,18 +6,18 @@ import com.google.firebase.firestore.Exclude;
 import java.util.Date;
 
 public class Employee {
-    private String firstName, lastName, title, area, city, street,SSN,projectID,managerID,email,password,id,phoneNumber,insuranceNumber,labourType;
+    private String firstName, lastName, title, area, city, street,SSN,projectID,managerID,email,password,id,phoneNumber,insuranceNumber;
     private double salary,insuranceAmount;
     private Date hireDate;
     private int totalNumberOfVacationDays;
-    private boolean isAdmin;
+    private boolean isAdmin,labourType;
 
 
     public  Employee(){
 
     }
 
-    public Employee(String firstName, String lastName, String Title, String area, String City, String Street, double salary, String SSN, Date hireDate, String email, String password,String phoneNumber,String insuranceNumber,String labourType,double insuranceAmount,boolean isAdmin) {
+    public Employee(String firstName, String lastName, String Title, String area, String City, String Street, double salary, String SSN, Date hireDate, String email, String password,String phoneNumber,String insuranceNumber,boolean labourType,double insuranceAmount,boolean isAdmin) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.title = Title;
@@ -122,11 +122,19 @@ public class Employee {
         this.insuranceNumber = insuranceNumber;
     }
 
-    public String getLabourType() {
+    public boolean isAdmin() {
+        return isAdmin;
+    }
+
+    public void setAdmin(boolean admin) {
+        isAdmin = admin;
+    }
+
+    public boolean isLabourType() {
         return labourType;
     }
 
-    public void setLabourType(String labourType) {
+    public void setLabourType(boolean labourType) {
         this.labourType = labourType;
     }
 

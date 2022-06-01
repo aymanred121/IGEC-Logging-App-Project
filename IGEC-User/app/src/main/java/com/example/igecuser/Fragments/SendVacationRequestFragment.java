@@ -115,7 +115,7 @@ public class SendVacationRequestFragment extends Fragment implements DatePickerD
         dpd.setOkText("Set");
         dpd.setOkColor(getResources().getColor(R.color.green));
         dpd.setCancelColor(getResources().getColor(R.color.red));
-        dpd.setMinDate(Calendar.getInstance());
+        //dpd.setMinDate(Calendar.getInstance());
         Calendar nextYear = Calendar.getInstance();
         nextYear.add(Calendar.YEAR, 2);
         nextYear.add(Calendar.MONTH, -nextYear.get(Calendar.MONTH));

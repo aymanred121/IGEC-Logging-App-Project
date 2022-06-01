@@ -85,13 +85,7 @@ public class VacationRequestsFragment extends Fragment {
                     }
                     vacationRequests.clear();
                     for (DocumentSnapshot vacations : queryDocumentSnapshots) {
-                        if(vacations.toObject(VacationRequest.class).getStartDate().before(new Date()))
-                        {
-                            db.collection("Vacation").document(vacations.getId()).update("vacationStatus", -1);
-                        }
-                        else {
-                            vacationRequests.add(vacations.toObject(VacationRequest.class));
-                        }
+                        vacationRequests.add(vacations.toObject(VacationRequest.class));
                     }
                     adapter.setVacationsList(vacationRequests);
                     adapter.notifyDataSetChanged();

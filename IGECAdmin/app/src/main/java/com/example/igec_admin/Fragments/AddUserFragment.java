@@ -261,6 +261,8 @@ public class AddUserFragment extends Fragment {
                         vStreet.getText().toString().isEmpty() ||
                         vHireDate.getText().toString().isEmpty() ||
                         vNationalID.getText().toString().isEmpty() ||
+                        vInsuranceAmount.getText().toString().isEmpty() ||
+                        vInsuranceNumber.getText().toString().isEmpty() ||
                         vNationalID.getText().toString().length() != 14);
     }
 

@@ -193,8 +193,8 @@ public class AddUserFragment extends Fragment {
                 vEmail.getText().toString().trim(),
                 encryptedPassword(),
                 vPhone.getText().toString(),
-                vTemporary.isChecked() ? "temporary" : "permanent",
                 vInsuranceNumber.getText().toString(),
+                vTemporary.isChecked(),
                 Double.parseDouble(vInsuranceAmount.getText().toString())
                 ,vAdmin.isChecked());
     }

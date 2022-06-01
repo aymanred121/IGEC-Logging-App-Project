@@ -4,17 +4,17 @@ import java.io.Serializable;
 
 public class Client implements Serializable {
    private String name , Email , phoneNumber , note ;
-   //TODO: add more fields
+   private double defaultPrice  , overTimePrice , FridaysPrice;
 
-    public Client(String name, String Email, String phoneNumber, String note) {
+
+    public Client(String name, String email, String phoneNumber, String note, double defaultPrice, double overTimePrice, double fridaysPrice) {
         this.name = name;
-        this.Email = Email;
+        Email = email;
         this.phoneNumber = phoneNumber;
         this.note = note;
-    }
-    public Client()
-    {
-
+        this.defaultPrice = defaultPrice;
+        this.overTimePrice = overTimePrice;
+        FridaysPrice = fridaysPrice;
     }
 
     public String getNote() {
@@ -47,5 +47,29 @@ public class Client implements Serializable {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public double getDefaultPrice() {
+        return defaultPrice;
+    }
+
+    public void setDefaultPrice(double defaultPrice) {
+        this.defaultPrice = defaultPrice;
+    }
+
+    public double getOverTimePrice() {
+        return overTimePrice;
+    }
+
+    public void setOverTimePrice(double overTimePrice) {
+        this.overTimePrice = overTimePrice;
+    }
+
+    public double getFridaysPrice() {
+        return FridaysPrice;
+    }
+
+    public void setFridaysPrice(double fridaysPrice) {
+        FridaysPrice = fridaysPrice;
     }
 }

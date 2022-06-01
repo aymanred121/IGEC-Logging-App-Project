@@ -129,11 +129,14 @@ public class AddClientDialog extends DialogFragment {
         @Override
         public void onClick(View v) {
             if (validateInput()) {
-                Client client = new Client();
-                client.setName(vCompanyName.getText().toString());
-                client.setEmail(vCompanyEmail.getText().toString());
-                client.setPhoneNumber(vCompanyPhoneNumber.getText().toString());
-                client.setNote(vNote.getText().toString());
+                Client client = new Client(
+                        vCompanyName.getText().toString(),
+                        vCompanyEmail.getText().toString(),
+                        vCompanyPhoneNumber.getText().toString(),
+                        vNote.getText().toString(),
+                        Double.parseDouble(vPerHour.getText().toString()),
+                        Double.parseDouble(vOverTime.getText().toString()),
+                        Double.parseDouble(vPerFriday.getText().toString()));
                 Bundle result = new Bundle();
                 result.putSerializable("client", client);
                 getParentFragmentManager().setFragmentResult("client", result);

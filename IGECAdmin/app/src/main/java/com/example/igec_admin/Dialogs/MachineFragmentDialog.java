@@ -53,7 +53,7 @@ public class MachineFragmentDialog extends DialogFragment {
 
     // Views
     private TextInputLayout vIDLayout, vPurchaseDateLayout,vSerialNumberLayout;
-    private TextInputEditText vID, vPurchaseDate, vSerialNumber, vAllowance, vMachineByDay, vMachineByWeek, vMachineByMonth;
+    private TextInputEditText vID, vPurchaseDate, vSerialNumber, vMachineByDay, vMachineByWeek, vMachineByMonth;
     private MaterialButton vRegister, vDelete, vUpdate, vAddSupplements;
     private ImageView vQRImg;
 
@@ -138,7 +138,6 @@ public class MachineFragmentDialog extends DialogFragment {
         vIDLayout = view.findViewById(R.id.textInputLayout_MachineID);
         vQRImg = view.findViewById(R.id.ImageView_MachineIDIMG);
         vAddSupplements = view.findViewById(R.id.button_addSupplements);
-        vAllowance = view.findViewById(R.id.TextInput_MachineAllowance);
         vMachineByDay = view.findViewById(R.id.TextInput_MachineByDay);
         vMachineByWeek = view.findViewById(R.id.TextInput_MachineByWeek);
         vMachineByMonth = view.findViewById(R.id.TextInput_MachineByMonth);
@@ -154,7 +153,6 @@ public class MachineFragmentDialog extends DialogFragment {
         vID.setText(machine.getId());
         purchaseDate = machine.getPurchaseDate().getTime();
         vPurchaseDate.setText(convertDateToString(machine.getPurchaseDate().getTime()));
-        vAllowance.setText(String.valueOf(machine.getAllowance().getAmount()));
         vMachineByDay.setText(String.valueOf(machine.getDailyRentPrice()));
         vMachineByWeek.setText(String.valueOf(machine.getWeeklyRentPrice()));
         vMachineByMonth.setText(String.valueOf(machine.getMonthlyRentPrice()));
@@ -261,9 +259,7 @@ public class MachineFragmentDialog extends DialogFragment {
                 vSerialNumber.getText().toString().isEmpty() ||
                 vMachineByDay.getText().toString().isEmpty() ||
                 vMachineByWeek.getText().toString().isEmpty() ||
-                vMachineByMonth.getText().toString().isEmpty() ||
-                vAllowance.getText().toString().isEmpty()
-        );
+                vMachineByMonth.getText().toString().isEmpty());
     }
 
     private String convertDateToString(long selection) {

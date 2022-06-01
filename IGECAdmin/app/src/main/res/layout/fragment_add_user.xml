@@ -45,9 +45,9 @@
             android:layout_marginEnd="@dimen/vhigh"
             app:boxBackgroundMode="outline"
             app:helperTextEnabled="true"
-            app:layout_constraintTop_toBottomOf="@id/textInputLayout_FirstName"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
+            app:layout_constraintTop_toBottomOf="@id/textInputLayout_FirstName">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/TextInput_SecondName"
@@ -410,10 +410,10 @@
             android:layout_marginBottom="@dimen/vhigh"
             android:text="@string/register"
             android:textAllCaps="false"
-            app:layout_constraintTop_toBottomOf="@id/textInputLayout_NationalID"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/textInputLayout_NationalID" />
 
 
         <com.google.android.material.button.MaterialButton
@@ -425,9 +425,9 @@
             android:text="@string/update"
             android:textAllCaps="false"
             android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/textInputLayout_NationalID"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/textInputLayout_NationalID" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/button_delete"
@@ -438,9 +438,9 @@
             android:text="@string/delete"
             android:textAllCaps="false"
             android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/textInputLayout_NationalID"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/textInputLayout_NationalID" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </ScrollView>

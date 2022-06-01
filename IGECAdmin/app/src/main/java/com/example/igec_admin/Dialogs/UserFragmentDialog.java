@@ -28,6 +28,7 @@ import com.example.igec_admin.fireBase.EmployeeOverview;
 import com.example.igec_admin.fireBase.EmployeesGrossSalary;
 import com.example.igec_admin.fireBase.Project;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -62,6 +63,7 @@ public class UserFragmentDialog extends DialogFragment {
     private final int BONUS = 3;
     private final int PENALTY = 4;
     // Views
+    private MaterialCheckBox vAdmin,vTemporary;
     private MaterialButton vUpdate;
     private MaterialButton vDelete;
     private TextInputEditText vFirstName;
@@ -77,6 +79,7 @@ public class UserFragmentDialog extends DialogFragment {
     private TextInputEditText vStreet;
     private TextInputEditText vHireDate;
     private TextInputEditText vPhone;
+    private TextInputEditText vInsuranceNumber,vInsuranceAmount;
     private TextInputLayout vHireDateLayout;
     private final MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vDatePicker;
@@ -119,7 +122,7 @@ public class UserFragmentDialog extends DialogFragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_add_user, container, false);
-        Initialize(view);
+        initialize(view);
         // Listeners
         vEmail.addTextChangedListener(twEmail);
         vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);
@@ -131,7 +134,7 @@ public class UserFragmentDialog extends DialogFragment {
     }
 
     // Functions
-    private void Initialize(View view) {
+    private void initialize(View view) {
         vFirstName = view.findViewById(R.id.TextInput_FirstName);
         vSecondName = view.findViewById(R.id.TextInput_SecondName);
         vEmail = view.findViewById(R.id.TextInput_Email);
@@ -145,6 +148,10 @@ public class UserFragmentDialog extends DialogFragment {
         vCity = view.findViewById(R.id.TextInput_City);
         vStreet = view.findViewById(R.id.TextInput_Street);
         vHireDate = view.findViewById(R.id.TextInput_HireDate);
+        vAdmin = view.findViewById(R.id.CheckBox_Admin);
+        vInsuranceNumber = view.findViewById(R.id.TextInput_InsuranceNumber);
+        vInsuranceAmount = view.findViewById(R.id.TextInput_InsuranceAmount);
+        vTemporary = view.findViewById(R.id.CheckBox_Temporary);
         vPhone = view.findViewById(R.id.TextInput_Phone);
         vHireDateLayout = view.findViewById(R.id.textInputLayout_HireDate);
         MaterialButton vRegister = view.findViewById(R.id.button_register);
@@ -166,6 +173,10 @@ public class UserFragmentDialog extends DialogFragment {
         vSSN.setText(employee.getSSN());
         vPassword.setText(employee.getDecryptedPassword());
         vPhone.setText(employee.getPhoneNumber());
+        vAdmin.setChecked(employee.getManagerID().equals("IGEC"));
+        //TODO vTemporary.setChecked(employee.isTemporary());
+        //TODO vInsuranceNumber.setText(employee.getInsuranceNumber());
+        //TODO vInsuranceAmount.setText(String.valueOf(employee.getInsuranceAmount()));
         vHireDate.setText(convertDateToString(employee.getHireDate().getTime()));
         hireDate = employee.getHireDate().getTime();
         vDatePickerBuilder.setTitleText("Hire Date");
@@ -191,6 +202,8 @@ public class UserFragmentDialog extends DialogFragment {
                         vStreet.getText().toString().isEmpty() ||
                         vHireDate.getText().toString().isEmpty() ||
                         vSSN.getText().toString().isEmpty() ||
+                        vInsuranceAmount.getText().toString().isEmpty() ||
+                        vInsuranceNumber.getText().toString().isEmpty() ||
                         vSSN.getText().toString().length() != 14);
     }
 

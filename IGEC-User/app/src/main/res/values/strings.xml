@@ -59,4 +59,5 @@
     <string name="project_reference_name">Project Reference | Name</string>
     <string name="employee_id_name">Employee Id | Name</string>
     <string name="ChangePassword">Change Password</string>
+    <string name="perDay">Per Day</string>
 </resources>

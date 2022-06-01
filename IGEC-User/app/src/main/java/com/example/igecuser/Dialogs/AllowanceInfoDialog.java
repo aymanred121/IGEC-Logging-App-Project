@@ -34,7 +34,7 @@ public class AllowanceInfoDialog extends DialogFragment {
     private TextInputEditText vAllowanceName, vAllowanceMount, vAllowanceNote;
     private TextInputLayout vAllowanceNameLayout, vAllowanceMountLayout, vAllowanceNoteLayout;
     private ArrayList<Pair<TextInputLayout, TextInputEditText>> views;
-    private MaterialCheckBox vPenalty;
+    private MaterialCheckBox vPenalty, vPerDay;
     private MaterialButton vDone;
     private int position;
     private Allowance allowance = null;
@@ -87,6 +87,8 @@ public class AllowanceInfoDialog extends DialogFragment {
         super.onViewCreated(view, savedInstanceState);
         initialize(view);
         vDone.setOnClickListener(oclDone);
+        vPenalty.setOnClickListener(oclPenalty);
+        vPerDay.setOnClickListener(oclPerDay);
         vAllowanceName.addTextChangedListener(twAllowanceName);
         vAllowanceMount.addTextChangedListener(twAllowanceMount);
         vAllowanceNote.addTextChangedListener(twAllowanceNote);
@@ -109,7 +111,8 @@ public class AllowanceInfoDialog extends DialogFragment {
         vPenalty = view.findViewById(R.id.checkBox_Penalty);
         vDone = view.findViewById(R.id.button_Done);
         vPenalty.setVisibility(canGivePenalty ? View.VISIBLE : View.GONE);
-
+        vPerDay = view.findViewById(R.id.checkBox_PerDay);
+        vPerDay.setVisibility(vPenalty.isChecked() ? View.VISIBLE : View.GONE);
         if (allowance != null) {
             vPenalty.setChecked(allowance.getAmount() < 0);
             vAllowanceName.setText(allowance.getName());
@@ -131,6 +134,7 @@ public class AllowanceInfoDialog extends DialogFragment {
         }
         return false;
     }
+
     private void hideError(TextInputLayout textInputLayout) {
         textInputLayout.setErrorEnabled(textInputLayout.getError() != null);
     }
@@ -140,6 +144,22 @@ public class AllowanceInfoDialog extends DialogFragment {
         return !generateError();
     }
 
+    private View.OnClickListener oclPerDay = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            vAllowanceMountLayout.setSuffixText(vPerDay.isChecked() ? "£" : "Day(s)");
+        }
+    };
+    private View.OnClickListener oclPenalty = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            if (!vPenalty.isChecked())
+                vAllowanceMountLayout.setSuffixText("Day(s)");
+            vPerDay.setChecked(false);
+            vPerDay.setVisibility(vPenalty.isChecked() ? View.VISIBLE : View.GONE);
+
+        }
+    };
     private View.OnClickListener oclDone = new View.OnClickListener() {
         @Override
         public void onClick(View v) {

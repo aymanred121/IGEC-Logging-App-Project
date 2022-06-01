@@ -57,8 +57,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|right"
-            android:layout_marginBottom="32dp"
             android:layout_marginEnd="32dp"
+            android:layout_marginBottom="32dp"
             android:rotation="0"
             android:src="@drawable/ic_baseline_construction_24"
             android:visibility="invisible" />

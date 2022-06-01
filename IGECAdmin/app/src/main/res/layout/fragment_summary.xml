@@ -1,12 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:listitem="@layout/item_project"
-    android:id="@+id/recyclerview"
     tools:context=".Fragments.SummaryFragment">
 
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textInputLayout_SelectedMonth"
+        style="@style/DatePicker"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/vhigh"
+        android:layout_marginTop="@dimen/mid"
+        android:layout_marginEnd="@dimen/vhigh"
+        app:boxBackgroundMode="outline"
+        app:helperTextEnabled="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/TextInput_SelectedMonth"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:enabled="false"
+            android:hint="@string/month"
+            android:inputType="date"
+            android:padding="14dp"
+            android:singleLine="true" />
 
-</androidx.recyclerview.widget.RecyclerView>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerview"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="@dimen/vhigh"
+        android:layout_marginTop="@dimen/high"
+        android:layout_marginEnd="@dimen/vhigh"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textInputLayout_SelectedMonth"
+        tools:listitem="@layout/item_project" />
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:elevation="1dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_createCSV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|right"
+            android:layout_marginEnd="32dp"
+            android:layout_marginBottom="32dp"
+            android:rotation="0"
+            android:src="@drawable/ic_baseline_note_add_24"
+            android:backgroundTint="@color/Green"/>
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

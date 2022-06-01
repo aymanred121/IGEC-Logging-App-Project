@@ -6,16 +6,18 @@ import com.google.firebase.firestore.Exclude;
 import java.util.Date;
 
 public class Employee {
-    private String firstName, lastName, title, area, city, street,SSN,projectID,managerID,email,password,id,phoneNumber;
-    private double salary;
+    private String firstName, lastName, title, area, city, street,SSN,projectID,managerID,email,password,id,phoneNumber,insuranceNumber,labourType;
+    private double salary,insuranceAmount;
     private Date hireDate;
     private int totalNumberOfVacationDays;
+    private boolean isAdmin;
+
 
     public  Employee(){
 
     }
 
-    public Employee(String firstName, String lastName, String Title, String area, String City, String Street, double salary, String SSN, Date hireDate, String email, String password,String phoneNumber) {
+    public Employee(String firstName, String lastName, String Title, String area, String City, String Street, double salary, String SSN, Date hireDate, String email, String password,String phoneNumber,String insuranceNumber,String labourType,double insuranceAmount,boolean isAdmin) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.title = Title;
@@ -29,7 +31,12 @@ public class Employee {
         this.password=password;
         this.phoneNumber = phoneNumber;
         totalNumberOfVacationDays = 21;
+        this.insuranceNumber=insuranceNumber;
+        this.labourType=labourType;
+        this.insuranceAmount=insuranceAmount;
+        this.isAdmin=isAdmin;
     }
+
 
     public Date getHireDate() {
         return hireDate;
@@ -105,6 +112,30 @@ public class Employee {
 
     public String getSSN() {
         return SSN;
+    }
+
+    public String getInsuranceNumber() {
+        return insuranceNumber;
+    }
+
+    public void setInsuranceNumber(String insuranceNumber) {
+        this.insuranceNumber = insuranceNumber;
+    }
+
+    public String getLabourType() {
+        return labourType;
+    }
+
+    public void setLabourType(String labourType) {
+        this.labourType = labourType;
+    }
+
+    public double getInsuranceAmount() {
+        return insuranceAmount;
+    }
+
+    public void setInsuranceAmount(double insuranceAmount) {
+        this.insuranceAmount = insuranceAmount;
     }
 
     public void setSSN(String SSN) {

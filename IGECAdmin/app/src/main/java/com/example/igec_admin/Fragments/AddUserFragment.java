@@ -192,7 +192,11 @@ public class AddUserFragment extends Fragment {
                 new Date(hireDate),
                 vEmail.getText().toString().trim(),
                 encryptedPassword(),
-                vPhone.getText().toString()).setManagerID(vAdmin.isChecked() ? "IGEC" : null);
+                vPhone.getText().toString(),
+                vTemporary.isChecked() ? "temporary" : "permanent",
+                vInsuranceNumber.getText().toString(),
+                Double.parseDouble(vInsuranceAmount.getText().toString())
+                ,vAdmin.isChecked());
     }
 
     private String encryptedPassword() {
@@ -261,7 +265,9 @@ public class AddUserFragment extends Fragment {
                         vStreet.getText().toString().isEmpty() ||
                         vHireDate.getText().toString().isEmpty() ||
                         vNationalID.getText().toString().isEmpty() ||
-                        vNationalID.getText().toString().length() != 14);
+                        vNationalID.getText().toString().length() != 14 ||
+                        vInsuranceNumber.getText().toString().isEmpty() ||
+                        vInsuranceAmount.getText().toString().isEmpty());
     }
 
     // Listeners

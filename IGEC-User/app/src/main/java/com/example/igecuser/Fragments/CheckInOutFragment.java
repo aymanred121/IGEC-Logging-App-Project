@@ -39,6 +39,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -48,6 +49,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.AppSettingsDialog;
@@ -283,6 +285,25 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         checkIn.put("employee", currEmployee);
         checkIn.put("lastCheckInTime", summary.getLastCheckInTime());
         db.collection("summary").document(id).set(checkIn);
+
+        db.collection("EmployeesGrossSalary").document(currEmployee.getId()).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                if (!documentSnapshot.exists())
+                    return;
+                EmployeesGrossSalary employeeGrossSalary = documentSnapshot.toObject(EmployeesGrossSalary.class);
+                ArrayList<Allowance> allTypes = employeeGrossSalary.getAllTypes();
+                //return the first appearance of transportation type in allType array
+                for(Allowance i :allTypes){
+                    if(i.getName().equalsIgnoreCase("Transportation")){
+                       allTypes.add(new Allowance("Transportation",i.getAmount()));
+                        break;
+                    }
+                    }
+                db.collection("EmployeesGrossSalary").document(currEmployee.getId()).update("allTypes", allTypes);
+            }
+
+        });
         Toast.makeText(getContext(), "Checked In successfully!", Toast.LENGTH_SHORT).show();
     }
 

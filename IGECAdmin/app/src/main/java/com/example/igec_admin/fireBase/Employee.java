@@ -113,8 +113,9 @@ public class Employee {
     public String getManagerID() {
         return managerID;
     }
-    public void setManagerID(String managerID) {
+    public Employee setManagerID(String managerID) {
         this.managerID = managerID;
+        return this;
     }
 
     public String getEmail() {

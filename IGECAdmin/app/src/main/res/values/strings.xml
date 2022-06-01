@@ -56,4 +56,9 @@
     <string name="Delete">Delete</string>
     <string name="cancel">No</string>
     <string name="accept">Yes</string>
+    <string name="admin">Admin</string>
+    <string name="admin_register_title">Admin Authorities</string>
+    <string name="temporary">Temporary</string>
+    <string name="insurance_number">Insurance Number</string>
+    <string name="insurance_amount">Insurance Amount</string>
 </resources>

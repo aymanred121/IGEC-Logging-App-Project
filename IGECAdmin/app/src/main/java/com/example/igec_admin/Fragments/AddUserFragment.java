@@ -22,8 +22,10 @@ import com.example.igec_admin.fireBase.Employee;
 import com.example.igec_admin.fireBase.EmployeesGrossSalary;
 import com.github.javafaker.Faker;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.DocumentReference;
@@ -44,11 +46,12 @@ public class AddUserFragment extends Fragment {
 
 
     // Views
-    MaterialButton vRegister;
-    TextInputEditText vFirstName, vSecondName, vEmail, vPassword, vPhone, vTitle, vSalary, vNationalID, vArea, vCity, vStreet, vHireDate;
-    TextInputLayout vHireDateLayout, vEmailLayout;
-    MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
-    MaterialDatePicker vDatePicker;
+    private MaterialCheckBox vAdmin,vTemporary;
+    private MaterialButton vRegister;
+    private TextInputEditText vFirstName, vSecondName, vEmail, vPassword, vPhone, vTitle, vSalary, vNationalID, vArea, vCity, vStreet, vHireDate,vInsuranceNumber,vInsuranceAmount;
+    private TextInputLayout vHireDateLayout, vEmailLayout;
+    private MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
+    private MaterialDatePicker vDatePicker;
 
     // Vars
     long hireDate;
@@ -76,6 +79,7 @@ public class AddUserFragment extends Fragment {
         vHireDateLayout.setEndIconOnClickListener(oclHireDate);
         vRegister.setOnClickListener(clRegister);
         vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);
+        vAdmin.setOnClickListener(oclAdmin);
     }
 
     // Functions
@@ -87,7 +91,11 @@ public class AddUserFragment extends Fragment {
         vPassword = view.findViewById(R.id.TextInput_Password);
         vPhone = view.findViewById(R.id.TextInput_Phone);
         vTitle = view.findViewById(R.id.TextInput_Title);
+        vAdmin = view.findViewById(R.id.CheckBox_Admin);
+        vTemporary = view.findViewById(R.id.CheckBox_Temporary);
         vSalary = view.findViewById(R.id.TextInput_Salary);
+        vInsuranceNumber = view.findViewById(R.id.TextInput_InsuranceNumber);
+        vInsuranceAmount = view.findViewById(R.id.TextInput_InsuranceAmount);
         vNationalID = view.findViewById(R.id.TextInput_NationalID);
         vArea = view.findViewById(R.id.TextInput_Area);
         vCity = view.findViewById(R.id.TextInput_City);
@@ -142,6 +150,9 @@ public class AddUserFragment extends Fragment {
             empInfo.add((vFirstName.getText()).toString());
             empInfo.add((vSecondName.getText()).toString());
             empInfo.add((vTitle.getText()).toString());
+            if(vAdmin.isChecked())
+                empInfo.add("IGEC"); // ManagerID
+            else
             empInfo.add(null); // ManagerID
             empInfo.add(null); // ProjectID
             Map<String, Object> empInfoMap = new HashMap<>();
@@ -181,7 +192,7 @@ public class AddUserFragment extends Fragment {
                 new Date(hireDate),
                 vEmail.getText().toString().trim(),
                 encryptedPassword(),
-                vPhone.getText().toString());
+                vPhone.getText().toString()).setManagerID(vAdmin.isChecked() ? "IGEC" : null);
     }
 
     private String encryptedPassword() {
@@ -220,6 +231,9 @@ public class AddUserFragment extends Fragment {
         vPhone.setText(faker.phoneNumber().phoneNumber());
         vTitle.setText("eng");
         vSalary.setText(faker.numerify("#####"));
+        vInsuranceNumber.setText(faker.numerify("#####"));
+        vInsuranceAmount.setText(faker.numerify("#####"));
+        vTemporary.setChecked(faker.bool().bool());
         vArea.setText(faker.address().cityName());
         vCity.setText(faker.address().cityName());
         vStreet.setText(faker.address().streetName());
@@ -253,7 +267,20 @@ public class AddUserFragment extends Fragment {
     // Listeners
     View.OnClickListener clRegister = v -> {
         if (validateInputs()) {
+            if(!vAdmin.isChecked())
             addEmployee();
+            else
+            {
+                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
+                builder.setTitle(getString(R.string.admin_register_title))
+                        .setMessage(getString(R.string.AreUSure))
+                        .setNegativeButton(getString(R.string.cancel), (dialogInterface, i) -> {
+                        })
+                        .setPositiveButton(getString(R.string.accept), (dialogInterface, i) -> {
+                            addEmployee();
+                        })
+                        .show();
+            }
         } else {
             Toast.makeText(getActivity(), "please, fill the user data", Toast.LENGTH_SHORT).show();
         }
@@ -266,7 +293,6 @@ public class AddUserFragment extends Fragment {
 
         vDatePicker.show(getFragmentManager(), "DATE_PICKER");
     };
-
     TextWatcher twEmail = new TextWatcher() {
         private final Pattern mPattern = Pattern.compile("(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)])");
 
@@ -292,6 +318,10 @@ public class AddUserFragment extends Fragment {
                 vEmailLayout.setError(null);
             }
         }
+    };
+    View.OnClickListener oclAdmin = v -> {
+        vTemporary.setEnabled(!vAdmin.isChecked());
+        vTemporary.setChecked(!vAdmin.isChecked() && vTemporary.isChecked());
     };
 
 

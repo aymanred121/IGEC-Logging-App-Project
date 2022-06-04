@@ -18,12 +18,15 @@ import androidx.fragment.app.DialogFragment;
 
 import com.example.igecuser.R;
 import com.example.igecuser.fireBase.Allowance;
+import com.example.igecuser.fireBase.Employee;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class AllowanceInfoDialog extends DialogFragment {
     private final int PROJECT = 0;
@@ -39,19 +42,25 @@ public class AllowanceInfoDialog extends DialogFragment {
     private int position;
     private Allowance allowance = null;
     private boolean canGivePenalty, isProject;
+    private String EmployeeID;
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-    public AllowanceInfoDialog(int position, boolean canGivePenalty, boolean isProject) {
+    public AllowanceInfoDialog(int position, boolean canGivePenalty, boolean isProject , String id) {
         this.position = position;
         this.canGivePenalty = canGivePenalty;
         this.isProject = isProject;
+        this.EmployeeID  = id;
     }
 
-    public AllowanceInfoDialog(int position, Allowance allowance, boolean canGivePenalty, boolean isProject) {
+    public AllowanceInfoDialog(int position, Allowance allowance, boolean canGivePenalty, boolean isProject ,String id) {
         this.position = position;
         this.allowance = allowance;
         this.canGivePenalty = canGivePenalty;
         this.isProject = isProject;
+        this.EmployeeID  = id;
     }
+
+
 
     @NonNull
     @Override
@@ -160,33 +169,69 @@ public class AllowanceInfoDialog extends DialogFragment {
 
         }
     };
-    private View.OnClickListener oclDone = new View.OnClickListener() {
+    private final View.OnClickListener oclDone = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             if (validateInput()) {
                 Bundle result = new Bundle();
                 Allowance allowance = new Allowance();
                 allowance.setName(vAllowanceName.getText().toString());
-                allowance.setAmount(vPenalty.isChecked() ? (-1) * Double.parseDouble(vAllowanceMount.getText().toString()) : Double.parseDouble(vAllowanceMount.getText().toString()));
-                allowance.setNote(vAllowanceNote.getText().toString());
-                if (isProject)
-                    allowance.setType(PROJECT);
+                AtomicReference<Double> amount = new AtomicReference<>(Double.parseDouble(vAllowanceMount.getText().toString()));
+
+
+                if (vPerDay.isChecked()) {
+                    Employee[] temp = new Employee[1];
+                    double[] baseSalary = new double[1];
+                    db.collection("employees").document(EmployeeID).get().addOnSuccessListener(value -> {
+                        if (!value.exists()) return;
+                        temp[0] = value.toObject(Employee.class);
+                        baseSalary[0] = temp[0].getSalary();
+                        amount.updateAndGet(v1 -> new Double((double) (v1 * (baseSalary[0] / 30))));
+                        allowance.setAmount(vPenalty.isChecked() ? (-1) * amount.get() : amount.get());
+                        allowance.setNote(vAllowanceNote.getText().toString());
+                        if (isProject)
+                            allowance.setType(PROJECT);
+                        else {
+                            if (vPenalty.isChecked())
+                                allowance.setType(PENALTY);
+                            else
+                                allowance.setType(BONUS);
+                        }
+
+                        result.putSerializable("allowance", allowance);
+                        result.putString("note", vAllowanceNote.getText().toString());
+                        result.putInt("position", position);
+                        if (position == -1)
+                            getParentFragmentManager().setFragmentResult("addAllowance", result);
+                        else
+                            getParentFragmentManager().setFragmentResult("editAllowance", result);
+
+                        dismiss();
+                    });
+                }
                 else {
-                    if (vPenalty.isChecked())
-                        allowance.setType(PENALTY);
+                    allowance.setAmount(vPenalty.isChecked() ? (-1) * amount.get() : amount.get());
+                    allowance.setNote(vAllowanceNote.getText().toString());
+                    if (isProject)
+                        allowance.setType(PROJECT);
+                    else {
+                        if (vPenalty.isChecked())
+                            allowance.setType(PENALTY);
+                        else
+                            allowance.setType(BONUS);
+                    }
+
+                    result.putSerializable("allowance", allowance);
+                    result.putString("note", vAllowanceNote.getText().toString());
+                    result.putInt("position", position);
+                    if (position == -1)
+                        getParentFragmentManager().setFragmentResult("addAllowance", result);
                     else
-                        allowance.setType(BONUS);
+                        getParentFragmentManager().setFragmentResult("editAllowance", result);
+
+                    dismiss();
                 }
 
-                result.putSerializable("allowance", allowance);
-                result.putString("note", vAllowanceNote.getText().toString());
-                result.putInt("position", position);
-                if (position == -1)
-                    getParentFragmentManager().setFragmentResult("addAllowance", result);
-                else
-                    getParentFragmentManager().setFragmentResult("editAllowance", result);
-
-                dismiss();
             }
         }
 
@@ -253,4 +298,11 @@ public class AllowanceInfoDialog extends DialogFragment {
             hideError(vAllowanceNoteLayout);
         }
     };
+    public String getEmployeeID() {
+        return EmployeeID;
+    }
+
+    public void setEmployeeID(String employeeID) {
+        EmployeeID = employeeID;
+    }
 }

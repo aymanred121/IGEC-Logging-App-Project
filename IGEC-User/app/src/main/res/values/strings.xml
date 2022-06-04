@@ -60,4 +60,5 @@
     <string name="employee_id_name">Employee Id | Name</string>
     <string name="ChangePassword">Change Password</string>
     <string name="perDay">Per Day</string>
+    <string name="gift">Gift</string>
 </resources>

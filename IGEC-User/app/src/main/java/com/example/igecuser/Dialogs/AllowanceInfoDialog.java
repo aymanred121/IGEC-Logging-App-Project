@@ -37,7 +37,7 @@ public class AllowanceInfoDialog extends DialogFragment {
     private TextInputEditText vAllowanceName, vAllowanceMount, vAllowanceNote;
     private TextInputLayout vAllowanceNameLayout, vAllowanceMountLayout, vAllowanceNoteLayout;
     private ArrayList<Pair<TextInputLayout, TextInputEditText>> views;
-    private MaterialCheckBox vPenalty, vPerDay;
+    private MaterialCheckBox vPenalty, vMode;
     private MaterialButton vDone;
     private int position;
     private Allowance allowance = null;
@@ -52,14 +52,13 @@ public class AllowanceInfoDialog extends DialogFragment {
         this.EmployeeID  = id;
     }
 
-    public AllowanceInfoDialog(int position, Allowance allowance, boolean canGivePenalty, boolean isProject ,String id) {
+    public AllowanceInfoDialog(int position, Allowance allowance, boolean canGivePenalty, boolean isProject, String id) {
         this.position = position;
         this.allowance = allowance;
         this.canGivePenalty = canGivePenalty;
         this.isProject = isProject;
-        this.EmployeeID  = id;
+        this.EmployeeID = id;
     }
-
 
 
     @NonNull
@@ -97,7 +96,7 @@ public class AllowanceInfoDialog extends DialogFragment {
         initialize(view);
         vDone.setOnClickListener(oclDone);
         vPenalty.setOnClickListener(oclPenalty);
-        vPerDay.setOnClickListener(oclPerDay);
+        vMode.setOnClickListener(oclPerDay);
         vAllowanceName.addTextChangedListener(twAllowanceName);
         vAllowanceMount.addTextChangedListener(twAllowanceMount);
         vAllowanceNote.addTextChangedListener(twAllowanceNote);
@@ -119,9 +118,9 @@ public class AllowanceInfoDialog extends DialogFragment {
 
         vPenalty = view.findViewById(R.id.checkBox_Penalty);
         vDone = view.findViewById(R.id.button_Done);
+        vMode = view.findViewById(R.id.checkBox_PerDay);
         vPenalty.setVisibility(canGivePenalty ? View.VISIBLE : View.GONE);
-        vPerDay = view.findViewById(R.id.checkBox_PerDay);
-        vPerDay.setVisibility(vPenalty.isChecked() ? View.VISIBLE : View.GONE);
+        vMode.setVisibility(canGivePenalty ? View.VISIBLE : View.GONE);
         if (allowance != null) {
             vPenalty.setChecked(allowance.getAmount() < 0);
             vAllowanceName.setText(allowance.getName());
@@ -156,16 +155,29 @@ public class AllowanceInfoDialog extends DialogFragment {
     private View.OnClickListener oclPerDay = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            vAllowanceMountLayout.setSuffixText(vPerDay.isChecked() ? "£" : "Day(s)");
+            if(vPenalty.isChecked())
+            {
+                vAllowanceMountLayout.setSuffixText(vMode.isChecked()? "Days(s)" : "£");
+            }
+            else
+            {
+                vAllowanceMountLayout.setSuffixText("£");
+            }
         }
     };
     private View.OnClickListener oclPenalty = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            if (!vPenalty.isChecked())
-                vAllowanceMountLayout.setSuffixText("Day(s)");
-            vPerDay.setChecked(false);
-            vPerDay.setVisibility(vPenalty.isChecked() ? View.VISIBLE : View.GONE);
+            if(vPenalty.isChecked())
+            {
+                vMode.setChecked(false);
+                vMode.setText("Days");
+            }
+            else
+            {
+                vMode.setChecked(false);
+                vMode.setText("Gift");
+            }
 
         }
     };
@@ -177,9 +189,7 @@ public class AllowanceInfoDialog extends DialogFragment {
                 Allowance allowance = new Allowance();
                 allowance.setName(vAllowanceName.getText().toString());
                 AtomicReference<Double> amount = new AtomicReference<>(Double.parseDouble(vAllowanceMount.getText().toString()));
-
-
-                if (vPerDay.isChecked()) {
+                if (vMode.isChecked()) {
                     Employee[] temp = new Employee[1];
                     double[] baseSalary = new double[1];
                     db.collection("employees").document(EmployeeID).get().addOnSuccessListener(value -> {
@@ -208,8 +218,7 @@ public class AllowanceInfoDialog extends DialogFragment {
 
                         dismiss();
                     });
-                }
-                else {
+                } else {
                     allowance.setAmount(vPenalty.isChecked() ? (-1) * amount.get() : amount.get());
                     allowance.setNote(vAllowanceNote.getText().toString());
                     if (isProject)
@@ -298,6 +307,7 @@ public class AllowanceInfoDialog extends DialogFragment {
             hideError(vAllowanceNoteLayout);
         }
     };
+
     public String getEmployeeID() {
         return EmployeeID;
     }

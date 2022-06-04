@@ -96,6 +96,7 @@ public class AddProjectFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         getParentFragmentManager().setFragmentResultListener("client", this, new FragmentResultListener() {
             @Override
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
@@ -156,6 +157,7 @@ public class AddProjectFragment extends Fragment {
         vTimeDatePicker.addOnPositiveButtonClickListener(pclTimeDatePicker);
         vAddAllowance.setOnClickListener(oclAddAllowance);
     }
+
     private void initialize() {
         employees = new ArrayList<>();
         TeamID = new ArrayList<>();
@@ -188,7 +190,7 @@ public class AddProjectFragment extends Fragment {
         views.add(new Pair<>(vCityLayout, vCity));
         views.add(new Pair<>(vStreetLayout, vStreet));
         views.add(new Pair<>(vTimeLayout, vTime));
-        views.add(new Pair<>(vContractTypeLayout,vContractType));
+        views.add(new Pair<>(vContractTypeLayout, vContractType));
         views.add(new Pair<>(vManagerIDLayout, vManagerID));
 
         vOfficeWork = view.findViewById(R.id.checkbox_officeWork);
@@ -212,9 +214,10 @@ public class AddProjectFragment extends Fragment {
         setUpContractType();
         allowances = new ArrayList<>();
         fakeData();
+
     }
-    private void setUpContractType()
-    {
+
+    private void setUpContractType() {
         contract.clear();
         contract.add("lump sum");
         contract.add("timesheet");
@@ -253,6 +256,12 @@ public class AddProjectFragment extends Fragment {
     void getEmployees() {
         employeeOverviewRef
                 .addSnapshotListener((documentSnapshot, e) -> {
+                    TeamID.clear();
+                    Team.clear();
+                    vManagerID.setText(null);
+                    vManagerName.setText(null);
+                    vManagerID.setEnabled(false);
+                    vManagerName.setEnabled(false);
                     if (e != null) {
                         Log.w(TAG, "Listen failed.", e);
                         return;
@@ -508,7 +517,7 @@ public class AddProjectFragment extends Fragment {
 
         @Override
         public void afterTextChanged(Editable editable) {
-           hideError(vAreaLayout);
+            hideError(vAreaLayout);
         }
     };
     private final TextWatcher twCity = new TextWatcher() {
@@ -540,7 +549,7 @@ public class AddProjectFragment extends Fragment {
 
         @Override
         public void afterTextChanged(Editable editable) {
-           hideError(vStreetLayout);
+            hideError(vStreetLayout);
         }
     };
     private final TextWatcher twTime = new TextWatcher() {

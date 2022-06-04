@@ -32,7 +32,7 @@ public class AddClientDialog extends DialogFragment {
 
     //Views
     private TextInputEditText vCompanyName, vCompanyEmail, vCompanyPhoneNumber, vNote,vPerHour,vOverTime,vPerFriday;
-    private TextInputLayout vCompanyNameLayout, vCompanyEmailLayout, vCompanyPhoneNumberLayout, vNoteLayout;
+    private TextInputLayout vCompanyNameLayout, vCompanyEmailLayout, vCompanyPhoneNumberLayout, vNoteLayout,vPerHourLayout,vOverTimeLayout,vPerFridayLayout;
     private MaterialButton vDone;
     private Client client;
     private ArrayList<Pair<TextInputLayout, TextInputEditText>> views;
@@ -77,6 +77,9 @@ public class AddClientDialog extends DialogFragment {
         vCompanyEmail.addTextChangedListener(twEmail);
         vCompanyPhoneNumber.addTextChangedListener(twPhone);
         vNote.addTextChangedListener(twNote);
+        vPerHour.addTextChangedListener(twPerHour);
+        vOverTime.addTextChangedListener(twOverTime);
+        vPerFriday.addTextChangedListener(twPerFriday);
     }
 
     private void initialize(View view) {
@@ -90,6 +93,9 @@ public class AddClientDialog extends DialogFragment {
         vPerHour = view.findViewById(R.id.TextInput_PerHour);
         vOverTime = view.findViewById(R.id.TextInput_OverTime);
         vPerFriday = view.findViewById(R.id.TextInput_PerFriday);
+        vPerHourLayout = view.findViewById(R.id.textInputLayout_PerHour);
+        vOverTimeLayout  = view.findViewById(R.id.textInputLayout_OverTime);
+        vPerFridayLayout  = view.findViewById(R.id.textInputLayout_PerFriday);
         vNoteLayout = view.findViewById(R.id.textInputLayout_Note);
         vDone = view.findViewById(R.id.Button_Done);
 
@@ -99,11 +105,17 @@ public class AddClientDialog extends DialogFragment {
         views.add(new Pair<>(vCompanyEmailLayout, vCompanyEmail));
         views.add(new Pair<>(vCompanyPhoneNumberLayout, vCompanyPhoneNumber));
         views.add(new Pair<>(vNoteLayout, vNote));
+        views.add(new Pair<>(vPerHourLayout, vPerHour));
+        views.add(new Pair<>(vOverTimeLayout, vOverTime));
+        views.add(new Pair<>(vPerFridayLayout, vPerFriday));
         if (client != null) {
             vCompanyName.setText(client.getName());
             vCompanyEmail.setText(client.getEmail());
             vCompanyPhoneNumber.setText(client.getPhoneNumber());
             vNote.setText(client.getNote());
+            vPerHour.setText(String.valueOf(client.getDefaultPrice()));
+            vOverTime.setText(String.valueOf(client.getOverTimePrice()));
+            vPerFriday.setText(String.valueOf(client.getFridaysPrice()));
         }
 
     }
@@ -220,6 +232,57 @@ public class AddClientDialog extends DialogFragment {
         public void afterTextChanged(Editable s) {
             vCompanyPhoneNumberLayout.setError(null);
             vCompanyPhoneNumberLayout.setErrorEnabled(false);
+        }
+    };
+    private TextWatcher twPerHour = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            vPerHourLayout.setError(null);
+            vPerHourLayout.setErrorEnabled(false);
+        }
+    };
+    private TextWatcher twOverTime = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            vOverTimeLayout.setError(null);
+            vOverTimeLayout.setErrorEnabled(false);
+        }
+    };
+    private TextWatcher twPerFriday = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            vPerFridayLayout.setError(null);
+            vPerFridayLayout.setErrorEnabled(false);
         }
     };
 }

@@ -6,7 +6,10 @@ public class Client implements Serializable {
    private String name , Email , phoneNumber , note ;
    private double defaultPrice  , overTimePrice , FridaysPrice;
 
+   public Client()
+   {
 
+   }
     public Client(String name, String email, String phoneNumber, String note, double defaultPrice, double overTimePrice, double fridaysPrice) {
         this.name = name;
         Email = email;

@@ -1,8 +1,5 @@
 package com.example.igec_admin.Fragments;
 
-import android.content.Context;
-import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -11,9 +8,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.os.Environment;
-import android.os.ParcelFileDescriptor;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,7 +19,7 @@ import com.example.igec_admin.fireBase.Allowance;
 import com.example.igec_admin.fireBase.Employee;
 import com.example.igec_admin.fireBase.EmployeesGrossSalary;
 import com.example.igec_admin.fireBase.Project;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.example.igec_admin.utilites.CsvWriter;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -33,19 +27,11 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.whiteelephant.monthpicker.MonthPickerDialog;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.StringJoiner;
 
 public class SummaryFragment extends Fragment {
 
@@ -130,48 +116,43 @@ public class SummaryFragment extends Fragment {
         }
         else
         {
-            //TODO: Create CSV
+            //TODO: Add condition to retrieve only the selected month data
            db.collection("EmployeesGrossSalary").get().addOnSuccessListener(queryDocumentSnapshots -> {
-               StringBuilder sb = new StringBuilder();
-               String header = "Name,Basic,Cuts,Transportation,personal,others";
-               sb.append(header).append('\n');
-               final String[] transportationString = new String[1];
-               final String[] penaltiesString = new String[1];
-               final String[] others = {""};
-               final String[] employeeString = new String[1];
+               CsvWriter csvWriter = new CsvWriter();
+               String[] header = {"Name","Basic","Cuts","Transportation","personal","others"};
+               csvWriter.addHeader(header);
                final int[] counter = new int[1];
                for(QueryDocumentSnapshot q : queryDocumentSnapshots){
-                   EmployeesGrossSalary employeesGrossSalary = q.toObject(EmployeesGrossSalary.class);
                    db.collection("employees").document(q.getId()).get().addOnSuccessListener(documentSnapshot -> {
                        Employee emp = documentSnapshot.toObject(Employee.class);
-                       //sb.append(emp.getFirstName()+" "+emp.getLastName()).append(",").append((emp.getSalary())).append(",");
-                       employeeString[0] = emp.getFirstName()+" "+emp.getLastName() +","+emp.getSalary();
-                       for(Allowance allowance : q.toObject(EmployeesGrossSalary.class).getAllTypes()){
-                           if(allowance.getName().equalsIgnoreCase("Transportation"))
-                               transportationString[0] = String.valueOf(allowance.getAmount());
-                           if(allowance.getType() == 4)
-                               penaltiesString[0] = String.valueOf(allowance.getAmount());
-                           else
-                               others[0] += allowance.getAmount() + ",";
+                       String cuts = " ";
+                       String transportation = " ";
+                       String personal = " ";
+                       String others = "[";
+                       for(Allowance allowance : q.toObject(EmployeesGrossSalary.class).getAllTypes()) {
+                            if (allowance.getName().equalsIgnoreCase("Transportation")) {
+                                transportation = String.valueOf(allowance.getAmount());
+                            }
+                            switch (allowance.getType()) {
+                                case 4:
+                                    cuts = String.valueOf(allowance.getAmount());
+                                    break;
+                                case 3:
+                                    personal = String.valueOf(allowance.getAmount());
+                                    break;
+                                default:
+                                    others += allowance.getAmount() + "-";
+                            }
                        }
-                       others[0]=others[0].substring(0,others[0].length()-1);
-                       sb.append(employeeString[0]).append(',').append(penaltiesString[0]).append(',').append(transportationString[0]).append(',').append(others[0]).append('\n');
+                       others = others.length() != 1 ? others.substring(0, others.length() - 1) + "]" : " ";
+                       csvWriter.addDataRow(emp.getFirstName()+" "+emp.getLastName(),String.valueOf(emp.getSalary()),cuts,transportation,personal,others,"\n");
                        counter[0]++;
                        if(counter[0]==queryDocumentSnapshots.size()) {
-                           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                              // saveToFile(sb.toString(),(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "/test123.csv"));
-                               File gpxfile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS), "test123.csv");
-                               FileWriter writer = null;
-                               try {
-                                   writer = new FileWriter(gpxfile);
-                                   writer.append(sb.toString());
-                                   writer.flush();
-                                   writer.close();
-                               } catch (IOException e) {
-                                   e.printStackTrace();
-                               }
-
-                               Toast.makeText(getActivity(), "done", Toast.LENGTH_SHORT).show();
+                           try {
+                               csvWriter.build("test123");
+                               Toast.makeText(getActivity(), "CSV file created", Toast.LENGTH_SHORT).show();
+                           } catch (IOException e) {
+                               e.printStackTrace();
                            }
                        }
                    });

@@ -117,7 +117,12 @@ public class SummaryFragment extends Fragment {
         else
         {
             //TODO: Add condition to retrieve only the selected month data
-           db.collection("EmployeesGrossSalary").get().addOnSuccessListener(queryDocumentSnapshots -> {
+            String[] selectedDate = selectedMonthEdit.getText().toString().split("/");
+           db.collection("EmployeesGrossSalary")
+                   //.whereEqualTo("year", Integer.parseInt(selectedDate[1]))
+                   //.whereEqualTo("month", Integer.parseInt(selectedDate[0]))
+                   .get()
+                   .addOnSuccessListener(queryDocumentSnapshots -> {
                CsvWriter csvWriter = new CsvWriter();
                String[] header = {"Name","Basic","Cuts","Transportation","personal","others"};
                csvWriter.addHeader(header);
@@ -128,11 +133,10 @@ public class SummaryFragment extends Fragment {
                        String cuts = " ";
                        String transportation = " ";
                        String personal = " ";
-                       String others = "[";
+                       String others = "\"{";
                        for(Allowance allowance : q.toObject(EmployeesGrossSalary.class).getAllTypes()) {
-                            if (allowance.getName().equalsIgnoreCase("Transportation")) {
+                            if (allowance.getName().equalsIgnoreCase("Transportation"))
                                 transportation = String.valueOf(allowance.getAmount());
-                            }
                             switch (allowance.getType()) {
                                 case 4:
                                     cuts = String.valueOf(allowance.getAmount());
@@ -141,10 +145,10 @@ public class SummaryFragment extends Fragment {
                                     personal = String.valueOf(allowance.getAmount());
                                     break;
                                 default:
-                                    others += allowance.getAmount() + "-";
+                                    others += allowance.getAmount() + ",";
                             }
                        }
-                       others = others.length() != 1 ? others.substring(0, others.length() - 1) + "]" : " ";
+                       others = others.length() != 2 ? others.substring(0, others.length() - 1) + "}\"" : " ";
                        csvWriter.addDataRow(emp.getFirstName()+" "+emp.getLastName(),String.valueOf(emp.getSalary()),cuts,transportation,personal,others,"\n");
                        counter[0]++;
                        if(counter[0]==queryDocumentSnapshots.size()) {

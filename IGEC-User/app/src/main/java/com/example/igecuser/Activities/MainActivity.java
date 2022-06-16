@@ -59,7 +59,6 @@ public class MainActivity extends AppCompatActivity {
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         setContentView(R.layout.activity_main);
         initialize();
-        monthStart();
         // Listeners
         vEmail.addTextChangedListener(twEmail);
         vSignIn.setOnClickListener(clSignIn);
@@ -76,60 +75,6 @@ public class MainActivity extends AppCompatActivity {
         vEmail.setText("admin@gmail.com");
         vPassword.setText("1");
 
-    }
-    private void monthStart()
-    {
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
-        String currentDateAndTime = sdf.format(new Date());
-        String day = currentDateAndTime.substring(0,2);
-        String month = currentDateAndTime.substring(3,5);
-        String Year = currentDateAndTime.substring(6,10);
-        db.collection("Cloud").document("ifFirstDay").get().addOnSuccessListener((value) -> {
-            int op = -1;
-
-            if(!value.exists()) op = 0;
-
-            else if (Integer.parseInt(value.get("ifFirstDay").toString()) == 2 &&
-                    (value.get("IfDoneFor "+month+'-'+Year)== null || Integer.parseInt(value.get("IfDoneFor "+month+'-'+Year).toString()) == 0)) op = 1;
-
-            else if(Integer.parseInt(value.get("ifFirstDay").toString()) == 1) op = 2;
-
-            switch (op)
-            {
-                case 0:
-                    if(Integer.parseInt(day) == 1)
-                    {
-                        HashMap<String, Integer> temp = new HashMap<>();
-                        temp.put("ifFirstDay",1);
-                        temp.put("IfDoneFor "+month+'-'+Year,0);
-                        db.collection("Cloud").document("ifFirstDay").set(temp);
-                    }
-                    // No break
-                case 2:
-                    // a function to be discussed or deleted duo to change of logic  // TODO remove hard coded employee delete and fill allEmp with allEmployee data to reset all the old month data and leave only NETSALARY (to be discussed)
-                    ArrayList<Allowance> allTypes = new ArrayList<>();
-                    ArrayList<EmployeeOverview> allEmp = new ArrayList<>();
-                    db.collection("EmployeesGrossSalary").document("1Yfa6").get().addOnSuccessListener((value1) -> {
-                        if (!value1.exists())
-                            return;
-                        EmployeesGrossSalary employeesGrossSalary;
-                        employeesGrossSalary = value1.toObject(EmployeesGrossSalary.class);
-                        allTypes.addAll(employeesGrossSalary.getAllTypes());
-                        allTypes.removeIf(allowance -> allowance.getType() != NETSALARY);
-                        db.collection("EmployeesGrossSalary").document("1Yfa6").update("allTypes", allTypes);
-                    });
-                    db.collection("Cloud").document("ifFirstDay").update("ifFirstDay",2 ,"IfDoneFor "+month+'-'+Year , 1 );
-                    break;
-                case 1:
-                    if(Integer.parseInt(day) == 1)
-                    {
-                        db.collection("Cloud").document("ifFirstDay").update("ifFirstDay",1);
-                    }
-                    break;
-                case -1 :
-                    break;
-            }
-        });
     }
 
     @RequiresApi(api = Build.VERSION_CODES.Q)

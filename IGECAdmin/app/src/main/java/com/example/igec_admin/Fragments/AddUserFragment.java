@@ -157,8 +157,11 @@ public class AddUserFragment extends Fragment {
             employeeOverviewRef.update(empInfoMap).addOnFailureListener(e -> employeeOverviewRef.set(empInfoMap));
             Employee newEmployee = fillEmployeeData();
             newEmployee.setId(id);
+            //get year from hire date
+            String year = vHireDate.getText().toString().substring(6, 10);
+            String month = vHireDate.getText().toString().substring(3, 5);
             batch.set(db.collection("employees").document(id), newEmployee);
-            batch.set(db.collection("EmployeesGrossSalary").document(id), employeesGrossSalary);
+            batch.set(db.collection("EmployeesGrossSalary").document(id).collection(year).document(month), employeesGrossSalary);
             batch.commit().addOnSuccessListener(unused -> {
                 clearInputs();
                 fakeData();

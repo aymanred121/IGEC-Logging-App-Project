@@ -123,9 +123,9 @@ public class SummaryFragment extends Fragment {
                    //.whereEqualTo("month", Integer.parseInt(selectedDate[0]))
                    .get()
                    .addOnSuccessListener(queryDocumentSnapshots -> {
-               CsvWriter csvWriter = new CsvWriter();
-               String[] header = {"Name","Basic","Cuts","Transportation","personal","others"};
-               csvWriter.addHeader(header);
+                       String[] header = {"Name","Basic","Cuts","Transportation","personal","others"};
+                       CsvWriter csvWriter = new CsvWriter(header);
+
                final int[] counter = new int[1];
                for(QueryDocumentSnapshot q : queryDocumentSnapshots){
                    db.collection("employees").document(q.getId()).get().addOnSuccessListener(documentSnapshot -> {

@@ -3,6 +3,11 @@ package com.example.igec_admin.fireBase;
 import java.util.ArrayList;
 
 public class EmployeesGrossSalary {
+    /*
+    * year -> months
+    * month -> data
+    * data :empid,alltypes
+    * */
     private String employeeId;
     private ArrayList<Allowance> allTypes = new ArrayList<>();
 

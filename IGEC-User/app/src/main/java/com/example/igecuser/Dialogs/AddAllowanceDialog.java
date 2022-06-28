@@ -1,5 +1,6 @@
 package com.example.igecuser.Dialogs;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -25,8 +26,11 @@ import com.example.igecuser.fireBase.Project;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.stream.Collectors;
 
 public class AddAllowanceDialog extends DialogFragment {
@@ -156,7 +160,11 @@ public class AddAllowanceDialog extends DialogFragment {
     private final View.OnClickListener oclDone = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-
+            @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+            String currentDateAndTime = sdf.format(new Date());
+            String day = currentDateAndTime.substring(0,2);
+            String month = currentDateAndTime.substring(3,5);
+            String year = currentDateAndTime.substring(6,10);
             if (!isProject) {
                 db.collection("EmployeesGrossSalary").document(employee.getId()).get().addOnSuccessListener((value) -> {
                     if (!value.exists())
@@ -165,6 +173,7 @@ public class AddAllowanceDialog extends DialogFragment {
                     employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() == PENALTY || allowance.getType() == BONUS);
                     employeesGrossSalary.getAllTypes().addAll(allowances);
                     db.collection("EmployeesGrossSalary").document(employee.getId()).update("allTypes", employeesGrossSalary.getAllTypes());
+                    db.collection("EmployeesGrossSalary").document(employee.getId()).collection(year).document(month).set(employeesGrossSalary, SetOptions.mergeFields("allTypes"));
                     dismiss();
                 });
             } else {
@@ -187,6 +196,7 @@ public class AddAllowanceDialog extends DialogFragment {
                             employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() == PROJECT && allowance.getProjectId().equals(project.getId()));
                             employeesGrossSalary.getAllTypes().addAll(allowances);
                             db.collection("EmployeesGrossSalary").document(employee.getId()).update("allTypes", employeesGrossSalary.getAllTypes());
+                            db.collection("EmployeesGrossSalary").document(employee.getId()).collection(year).document(month).set(employeesGrossSalary, SetOptions.mergeFields("allTypes"));
                         });
                     }
                     db.collection("projects").document(manager.getProjectID()).update("allowancesList", allowances);

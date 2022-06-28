@@ -162,6 +162,7 @@ public class AddUserFragment extends Fragment {
             String month = vHireDate.getText().toString().substring(3, 5);
             batch.set(db.collection("employees").document(id), newEmployee);
             batch.set(db.collection("EmployeesGrossSalary").document(id).collection(year).document(month), employeesGrossSalary);
+            batch.set(db.collection("EmployeesGrossSalary").document(id), employeesGrossSalary);
             batch.commit().addOnSuccessListener(unused -> {
                 clearInputs();
                 fakeData();

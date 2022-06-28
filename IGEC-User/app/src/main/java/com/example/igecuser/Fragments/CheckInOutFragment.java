@@ -42,6 +42,8 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.SetOptions;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -293,9 +295,10 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         String day = currentDateAndTime.substring(0,2);
         String month = currentDateAndTime.substring(3,5);
         String year = currentDateAndTime.substring(6,10);
-        db.collection("EmployeesGrossSalary").document(currEmployee.getId()).collection(year).document(month).get().addOnSuccessListener(documentSnapshot -> {
-            if (!documentSnapshot.exists())
+        db.collection("EmployeesGrossSalary").document(currEmployee.getId()).get().addOnSuccessListener(documentSnapshot -> {
+            if (!documentSnapshot.exists()){
                 return;
+            }
             EmployeesGrossSalary employeeGrossSalary = documentSnapshot.toObject(EmployeesGrossSalary.class);
             ArrayList<Allowance> allTypes = employeeGrossSalary.getAllTypes();
             //return the first appearance of transportation type in allType array
@@ -307,7 +310,10 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                     break;
                 }
                 }
+            employeeGrossSalary.setAllTypes(allTypes);
             db.collection("EmployeesGrossSalary").document(currEmployee.getId()).update("allTypes", allTypes);
+            db.collection("EmployeesGrossSalary").document(currEmployee.getId()).collection(year).document(month).set(employeeGrossSalary, SetOptions.merge());
+
         });
 
         Toast.makeText(getContext(), "Checked In successfully!", Toast.LENGTH_SHORT).show();
@@ -387,6 +393,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                 .addOnSuccessListener(unused1 -> {
                     machineEmployee.document(machineEmpId).set(machineEmployee1).addOnSuccessListener(unused -> Toast.makeText(getContext(), "Machine: " + currMachine.getReference() + " checked In successfully", Toast.LENGTH_SHORT).show());
                 });
+        //todo: to be removed
         ArrayList<Allowance> allTypes = new ArrayList<>();
         db.collection("EmployeesGrossSalary").document(currEmployee.getId()).get().addOnSuccessListener((value) -> {
             if (!value.exists())

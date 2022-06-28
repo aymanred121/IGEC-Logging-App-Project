@@ -42,6 +42,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.WriteBatch;
 
 import java.text.SimpleDateFormat;
@@ -276,6 +277,8 @@ public class AddProjectFragment extends Fragment {
 
 
     private void updateEmployeesDetails(String projectID) {
+        String year = vTime.getText().toString().substring(6, 10);
+        String month = vTime.getText().toString().substring(3, 5);
         final int[] counter = {0};
         Team.forEach(emp -> {
             ArrayList<String> empInfo = new ArrayList<>();
@@ -305,13 +308,18 @@ public class AddProjectFragment extends Fragment {
                 if (allowances.size() != 0) {
                     allTypes.addAll(allowances);
                 }
+
                 batch.update(db.collection("EmployeesGrossSalary").document(emp.getId()), "allTypes", allTypes);
+                batch.set(db.collection("EmployeesGrossSalary").document(emp.getId()).collection(year).document(month),new HashMap<String,Object>(){{
+                    put("allTypes",allTypes);
+                }}, SetOptions.merge());
                 if (counter[0] == Team.size() - 1) {
                     batch.commit().addOnSuccessListener(unused -> {
                         ClearInputs();
                         fakeData();
-
                         Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
+                        batch = FirebaseFirestore.getInstance().batch();
+                    }).addOnFailureListener(unused->{
                         batch = FirebaseFirestore.getInstance().batch();
                     });
                 }

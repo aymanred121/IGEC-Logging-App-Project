@@ -1,5 +1,6 @@
 package com.example.igecuser.Fragments;
 
+import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -19,7 +20,9 @@ import com.example.igecuser.fireBase.Allowance;
 import com.example.igecuser.fireBase.EmployeesGrossSalary;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.stream.IntStream;
 
 public class GrossSalaryFragment extends Fragment {
@@ -67,7 +70,12 @@ public class GrossSalaryFragment extends Fragment {
         adapter = new AllowanceAdapter(salarySummaries, false);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
-        db.collection("EmployeesGrossSalary").document(employeeId).addSnapshotListener((value, error) -> {
+        @SuppressLint("SimpleDateFormat")
+        SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+        String currentDateAndTime = sdf.format(new Date());
+        String month = currentDateAndTime.substring(3,5);
+        String year = currentDateAndTime.substring(6,10);
+        db.collection("EmployeesGrossSalary").document(employeeId).collection(year).document(month).addSnapshotListener((value, error) -> {
             if (!value.exists())
                 return;
             salarySummaries.clear();

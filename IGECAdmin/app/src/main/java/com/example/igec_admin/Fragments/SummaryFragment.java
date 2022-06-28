@@ -118,7 +118,9 @@ public class SummaryFragment extends Fragment {
         {
             //TODO: Add condition to retrieve only the selected month data
             String[] selectedDate = selectedMonthEdit.getText().toString().split("/");
-           db.collection("EmployeesGrossSalary")
+            String year = selectedDate[1];
+            String month = selectedDate[0];
+            db.collection("EmployeesGrossSalary")
                    //.whereEqualTo("year", Integer.parseInt(selectedDate[1]))
                    //.whereEqualTo("month", Integer.parseInt(selectedDate[0]))
                    .get()
@@ -127,14 +129,15 @@ public class SummaryFragment extends Fragment {
                        CsvWriter csvWriter = new CsvWriter(header);
 
                final int[] counter = new int[1];
-               for(QueryDocumentSnapshot q : queryDocumentSnapshots){
-                   db.collection("employees").document(q.getId()).get().addOnSuccessListener(documentSnapshot -> {
+               for(QueryDocumentSnapshot queryDocumentSnapshot : queryDocumentSnapshots){
+                   //db.collection("EmployeesGrossSalary").document(queryDocumentSnapshot.getId()).collection(year).document(month).get().addOnSuccessListener()
+                   db.collection("employees").document(queryDocumentSnapshot.getId()).get().addOnSuccessListener(documentSnapshot -> {
                        Employee emp = documentSnapshot.toObject(Employee.class);
                        String cuts = " ";
                        String transportation = " ";
                        String personal = " ";
                        String others = "\"{";
-                       for(Allowance allowance : q.toObject(EmployeesGrossSalary.class).getAllTypes()) {
+                       for(Allowance allowance : queryDocumentSnapshot.toObject(EmployeesGrossSalary.class).getAllTypes()) {
                             if (allowance.getName().equalsIgnoreCase("Transportation"))
                                 transportation = String.valueOf(allowance.getAmount());
                             switch (allowance.getType()) {

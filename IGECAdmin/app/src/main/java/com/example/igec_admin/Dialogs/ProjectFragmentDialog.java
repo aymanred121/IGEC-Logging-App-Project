@@ -44,6 +44,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.WriteBatch;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -87,7 +88,6 @@ public class ProjectFragmentDialog extends DialogFragment {
     private Boolean isDeleted = false;
     private String currProjectID;
     private WriteBatch batch = FirebaseFirestore.getInstance().batch();
-
     public ProjectFragmentDialog(Project project) {
         this.project = project;
     }
@@ -346,7 +346,6 @@ public class ProjectFragmentDialog extends DialogFragment {
     }
 
     void updateProject() {
-
 //        HashMap<String, Object> updatedProjectData = new HashMap<>();
 //        updatedProjectData.put("estimatedEndDate", new Date(endDate));
 //        updatedProjectData.put("startDate", new Date(startDate));
@@ -380,6 +379,10 @@ public class ProjectFragmentDialog extends DialogFragment {
         newProject.getEmployees().forEach(emp -> {
             ArrayList<Allowance> allTypes = new ArrayList<>();
             db.collection("EmployeesGrossSalary").document(emp.getId()).get().addOnSuccessListener((value) -> {
+                String year = String.valueOf(LocalDate.now().getYear());
+                String month = String.valueOf(LocalDate.now().getMonthValue());
+                if(month.length()==1)
+                    month= "0"+month;
                 if (!value.exists())
                     return;
                 EmployeesGrossSalary employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
@@ -389,6 +392,8 @@ public class ProjectFragmentDialog extends DialogFragment {
                     allTypes.addAll(allowances);
                 }
                 batch.update(db.collection("EmployeesGrossSalary").document(emp.getId()), "allTypes", allTypes);
+                //todo: check if that logic applies if the current month already has value not present in the base
+                batch.update(db.collection("EmployeesGrossSalary").document(emp.getId()).collection(year).document(month), "allTypes", allTypes);
                 if (counter[0] == newProject.getEmployees().size() - 1) {
                     batch.commit().addOnSuccessListener(unused1 -> {
                         Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();

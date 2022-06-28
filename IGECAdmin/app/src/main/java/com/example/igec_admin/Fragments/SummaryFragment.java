@@ -116,53 +116,58 @@ public class SummaryFragment extends Fragment {
         }
         else
         {
-            //TODO: Add condition to retrieve only the selected month data
             String[] selectedDate = selectedMonthEdit.getText().toString().split("/");
-            String year = selectedDate[1];
-            String month = selectedDate[0];
             db.collection("EmployeesGrossSalary")
-                   //.whereEqualTo("year", Integer.parseInt(selectedDate[1]))
-                   //.whereEqualTo("month", Integer.parseInt(selectedDate[0]))
                    .get()
                    .addOnSuccessListener(queryDocumentSnapshots -> {
                        String[] header = {"Name","Basic","Cuts","Transportation","personal","others"};
                        CsvWriter csvWriter = new CsvWriter(header);
-
-               final int[] counter = new int[1];
+                       final int[] counter = new int[1];
                for(QueryDocumentSnapshot queryDocumentSnapshot : queryDocumentSnapshots){
-                   //db.collection("EmployeesGrossSalary").document(queryDocumentSnapshot.getId()).collection(year).document(month).get().addOnSuccessListener()
-                   db.collection("employees").document(queryDocumentSnapshot.getId()).get().addOnSuccessListener(documentSnapshot -> {
-                       Employee emp = documentSnapshot.toObject(Employee.class);
-                       String cuts = " ";
-                       String transportation = " ";
-                       String personal = " ";
-                       String others = "\"{";
-                       for(Allowance allowance : queryDocumentSnapshot.toObject(EmployeesGrossSalary.class).getAllTypes()) {
-                            if (allowance.getName().equalsIgnoreCase("Transportation"))
-                                transportation = String.valueOf(allowance.getAmount());
-                            switch (allowance.getType()) {
-                                case 4:
-                                    cuts = String.valueOf(allowance.getAmount());
-                                    break;
-                                case 3:
-                                    personal = String.valueOf(allowance.getAmount());
-                                    break;
-                                default:
-                                    others += allowance.getAmount() + ",";
-                            }
+                   String year = selectedDate[1];
+                   String month = selectedDate[0];
+                   if(month.length()==1)
+                       month="0"+month;
+                   db.collection("EmployeesGrossSalary").document(queryDocumentSnapshot.getId()).collection(year).document(month).get().addOnSuccessListener(documentSnapshot1 -> {
+                       if(!documentSnapshot1.exists())
+                       {
+                           counter[0]++;
+                           return;
                        }
-                       others = others.length() != 2 ? others.substring(0, others.length() - 1) + "}\"" : " ";
-                       csvWriter.addDataRow(emp.getFirstName()+" "+emp.getLastName(),String.valueOf(emp.getSalary()),cuts,transportation,personal,others,"\n");
-                       counter[0]++;
-                       if(counter[0]==queryDocumentSnapshots.size()) {
-                           try {
-                               csvWriter.build("test123");
-                               Toast.makeText(getActivity(), "CSV file created", Toast.LENGTH_SHORT).show();
-                           } catch (IOException e) {
-                               e.printStackTrace();
+                       db.collection("employees").document(queryDocumentSnapshot.getId()).get().addOnSuccessListener(documentSnapshot -> {
+                           Employee emp = documentSnapshot.toObject(Employee.class);
+                           String cuts = " ";
+                           String transportation = " ";
+                           String personal = " ";
+                           String others = "\"{";
+                           for(Allowance allowance : documentSnapshot1.toObject(EmployeesGrossSalary.class).getAllTypes()) {
+                               if (allowance.getName().equalsIgnoreCase("Transportation"))
+                                   transportation = String.valueOf(allowance.getAmount());
+                               switch (allowance.getType()) {
+                                   case 4:
+                                       cuts = String.valueOf(allowance.getAmount());
+                                       break;
+                                   case 3:
+                                       personal = String.valueOf(allowance.getAmount());
+                                       break;
+                                   default:
+                                       others += allowance.getAmount() + ",";
+                               }
                            }
-                       }
+                           others = others.length() != 2 ? others.substring(0, others.length() - 1) + "}\"" : " ";
+                           csvWriter.addDataRow(emp.getFirstName()+" "+emp.getLastName(),String.valueOf(emp.getSalary()),cuts,transportation,personal,others);
+                           counter[0]++;
+                           if(counter[0]==queryDocumentSnapshots.size()) {
+                               try {
+                                   csvWriter.build("test123");
+                                   Toast.makeText(getActivity(), "CSV file created", Toast.LENGTH_SHORT).show();
+                               } catch (IOException e) {
+                                   e.printStackTrace();
+                               }
+                           }
+                       });
                    });
+
                }
            });
         }

@@ -142,9 +142,9 @@ public class AddUserFragment extends Fragment {
 
             String id = db.collection("EmployeeOverview").document().getId().substring(0, 5);
             EmployeesGrossSalary employeesGrossSalary = new EmployeesGrossSalary();
-            employeesGrossSalary.setEmployeeId(id);
             ArrayList<Allowance> allTypes = new ArrayList<>();
             allTypes.add(new Allowance("Net salary", Double.parseDouble(vSalary.getText().toString()), NETSALARY));
+            employeesGrossSalary.setEmployeeId(id);
             employeesGrossSalary.setAllTypes(allTypes);
             ArrayList<String> empInfo = new ArrayList<>();
             empInfo.add((vFirstName.getText()).toString());

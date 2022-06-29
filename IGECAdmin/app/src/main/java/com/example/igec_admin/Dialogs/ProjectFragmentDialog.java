@@ -392,20 +392,46 @@ public class ProjectFragmentDialog extends DialogFragment {
                     allTypes.addAll(allowances);
                 }
                 batch.update(db.collection("EmployeesGrossSalary").document(emp.getId()), "allTypes", allTypes);
-                //todo: check if that logic applies if the current month already has value not present in the base
-                batch.update(db.collection("EmployeesGrossSalary").document(emp.getId()).collection(year).document(month), "allTypes", allTypes);
-                if (counter[0] == newProject.getEmployees().size() - 1) {
-                    batch.commit().addOnSuccessListener(unused1 -> {
-                        Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
-                        batch = FirebaseFirestore.getInstance().batch();
-                        project.setEmployees(null);
-                        employees.clear();
-                        Team.clear();
-                        TeamID.clear();
-                        dismiss();
-                    });
-                }
-                counter[0]++;
+                db.collection("EmployeesGrossSalary").document(emp.getId()).collection(year).document(month)
+                        .get().addOnSuccessListener(documentSnapshot -> {
+                                    if(!documentSnapshot.exists()){
+                                        //new month
+                                        batch.set(db.collection("EmployeesGrossSalary").document(documentSnapshot.getReference().getPath()), employeesGrossSalary);
+                                        if (counter[0] == newProject.getEmployees().size() - 1) {
+                                            batch.commit().addOnSuccessListener(unused1 -> {
+                                                Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
+                                                batch = FirebaseFirestore.getInstance().batch();
+                                                project.setEmployees(null);
+                                                employees.clear();
+                                                Team.clear();
+                                                TeamID.clear();
+                                                dismiss();
+                                            });
+                                        }
+                                        counter[0]++;
+                                        return;
+                                    }
+                            allTypes.clear();
+                            EmployeesGrossSalary employeesGrossSalary1 = documentSnapshot.toObject(EmployeesGrossSalary.class);
+                            allTypes.addAll(employeesGrossSalary1.getAllTypes());
+                            if (allowances.size() != 0) {
+                                allTypes.removeIf(allowance -> allowance.getType() == PROJECT);
+                                allTypes.addAll(allowances);
+                            }
+                            batch.update(db.collection("EmployeesGrossSalary").document(documentSnapshot.getReference().getPath()), "allTypes", allTypes);
+                            if (counter[0] == newProject.getEmployees().size() - 1) {
+                                batch.commit().addOnSuccessListener(unused1 -> {
+                                    Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
+                                    batch = FirebaseFirestore.getInstance().batch();
+                                    project.setEmployees(null);
+                                    employees.clear();
+                                    Team.clear();
+                                    TeamID.clear();
+                                    dismiss();
+                                });
+                            }
+                            counter[0]++;
+                        });
                 //  db.collection("EmployeesGrossSalary").document(emp.getId()).update("allTypes", allTypes);
             });
         });

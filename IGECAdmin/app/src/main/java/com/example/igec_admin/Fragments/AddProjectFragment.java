@@ -289,16 +289,8 @@ public class AddProjectFragment extends Fragment {
             empInfo.add(projectID);
             Map<String, Object> empInfoMap = new HashMap<>();
             empInfoMap.put(emp.getId(), empInfo);
-            //employeeOverviewRef.update(empInfoMap);
             batch.update(employeeOverviewRef, empInfoMap);
             batch.update(employeeCol.document(emp.getId()), "managerID", emp.getManagerID(), "projectID", projectID);
-//            employeeCol.document(emp.getId()).update("managerID", empInfo.get(3), "projectID", projectID).addOnSuccessListener(unused -> {
-//                if (counter[0] == Team.size() - 1) {
-//                    ClearInputs();
-//                    Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
-//                }
-//                counter[0]++;
-//            });
             ArrayList<Allowance> allTypes = new ArrayList<>();
             db.collection("EmployeesGrossSalary").document(emp.getId()).get().addOnSuccessListener((value) -> {
                 if (!value.exists())
@@ -308,23 +300,45 @@ public class AddProjectFragment extends Fragment {
                 if (allowances.size() != 0) {
                     allTypes.addAll(allowances);
                 }
-
                 batch.update(db.collection("EmployeesGrossSalary").document(emp.getId()), "allTypes", allTypes);
-                batch.set(db.collection("EmployeesGrossSalary").document(emp.getId()).collection(year).document(month),new HashMap<String,Object>(){{
-                    put("allTypes",allTypes);
-                }}, SetOptions.merge());
-                if (counter[0] == Team.size() - 1) {
-                    batch.commit().addOnSuccessListener(unused -> {
-                        ClearInputs();
-                        fakeData();
-                        Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
-                        batch = FirebaseFirestore.getInstance().batch();
-                    }).addOnFailureListener(unused->{
-                        batch = FirebaseFirestore.getInstance().batch();
-                    });
-                }
-                counter[0]++;
-                // db.collection("EmployeesGrossSalary").document(emp.getId()).update("allTypes", allTypes);
+
+                db.collection("EmployeesGrossSalary").document(emp.getId()).collection(year).document(month).get().addOnSuccessListener(documentSnapshot -> {
+                    if(!documentSnapshot.exists()){
+                        batch.set(db.collection("EmployeesGrossSalary").document(emp.getId()).collection(year).document(month),employeesGrossSalary);
+                        if (counter[0] == Team.size() - 1) {
+                            batch.commit().addOnSuccessListener(unused -> {
+                                ClearInputs();
+                                fakeData();
+                                Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
+                                batch = FirebaseFirestore.getInstance().batch();
+                            }).addOnFailureListener(unused->{
+                                batch = FirebaseFirestore.getInstance().batch();
+                            });
+                        }
+                        counter[0]++;
+                    return;
+                    }
+                    allTypes.clear();
+                    EmployeesGrossSalary employeesGrossSalary1 = documentSnapshot.toObject(EmployeesGrossSalary.class);
+                    allTypes.addAll(employeesGrossSalary1.getAllTypes());
+                    if (allowances.size() != 0) {
+                        allTypes.addAll(allowances);
+                    }
+                    batch.set(db.collection("EmployeesGrossSalary").document(emp.getId()).collection(year).document(month),new HashMap<String,Object>(){{
+                        put("allTypes",allTypes);
+                    }}, SetOptions.merge());
+                    if (counter[0] == Team.size() - 1) {
+                        batch.commit().addOnSuccessListener(unused -> {
+                            ClearInputs();
+                            fakeData();
+                            Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
+                            batch = FirebaseFirestore.getInstance().batch();
+                        }).addOnFailureListener(unused->{
+                            batch = FirebaseFirestore.getInstance().batch();
+                        });
+                    }
+                    counter[0]++;
+                });
             });
         });
 

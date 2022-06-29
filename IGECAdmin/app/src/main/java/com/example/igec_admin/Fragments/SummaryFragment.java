@@ -1,5 +1,6 @@
 package com.example.igec_admin.Fragments;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -8,6 +9,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,6 +47,8 @@ public class SummaryFragment extends Fragment {
     // Vars
     private ProjectAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
+    private String year,month;
+    private MonthPickerDialog.Builder builder;
     ArrayList<Project> projects = new ArrayList();
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     CollectionReference projectRef = db.collection("projects");
@@ -94,7 +98,7 @@ public class SummaryFragment extends Fragment {
 
     private final View.OnClickListener oclMonthPicker = v -> {
         final Calendar today = Calendar.getInstance();
-        MonthPickerDialog.Builder builder = new MonthPickerDialog.Builder(getActivity(),
+        builder = new MonthPickerDialog.Builder(getActivity(),
                 new MonthPickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(int selectedMonth, int selectedYear) {
@@ -119,66 +123,89 @@ public class SummaryFragment extends Fragment {
         else
         {
             String[] selectedDate = selectedMonthEdit.getText().toString().split("/");
-            db.collection("EmployeesGrossSalary")
-                   .get()
-                   .addOnSuccessListener(queryDocumentSnapshots -> {
-                       String[] header = {"Name","Basic","Cuts","Transportation","personal","others"};
-                       CsvWriter csvWriter = new CsvWriter(header);
-                       final int[] counter = new int[1];
-               for(QueryDocumentSnapshot queryDocumentSnapshot : queryDocumentSnapshots){
-                   String year = selectedDate[1];
-                   String month = selectedDate[0];
-                   if(month.length()==1)
-                       month="0"+month;
-                   db.collection("EmployeesGrossSalary").document(queryDocumentSnapshot.getId()).collection(year).document(month).get().addOnSuccessListener(documentSnapshot1 -> {
-                       if(!documentSnapshot1.exists())
-                       {
-                           counter[0]++;
-                           return;
-                       }
-                       db.collection("employees").document(queryDocumentSnapshot.getId()).get().addOnSuccessListener(documentSnapshot -> {
-                           Employee emp = documentSnapshot.toObject(Employee.class);
-                           String cuts = " ";
-                           String transportation = " ";
-                           String personal = " ";
-                           String others = "\"{";
-                           for(Allowance allowance : documentSnapshot1.toObject(EmployeesGrossSalary.class).getAllTypes()) {
-                               if (allowance.getName().equalsIgnoreCase("Transportation"))
-                                   transportation = String.valueOf(allowance.getAmount());
-                               switch (allowance.getType()) {
-                                   case 4:
-                                       cuts = String.valueOf(allowance.getAmount());
-                                       break;
-                                   case 3:
-                                       personal = String.valueOf(allowance.getAmount());
-                                       break;
-                                   default:
-                                       others += allowance.getAmount() + ",";
-                               }
-                           }
-                           others = others.length() != 2 ? others.substring(0, others.length() - 1) + "}\"" : " ";
-                           csvWriter.addDataRow(emp.getFirstName()+" "+emp.getLastName(),String.valueOf(emp.getSalary()),cuts,transportation,personal,others);
-                           counter[0]++;
-                           if(counter[0]==queryDocumentSnapshots.size()) {
-                               try {
-                                   csvWriter.build("test123");
-                                   Toast.makeText(getActivity(), "CSV file created", Toast.LENGTH_SHORT).show();
-                               } catch (IOException e) {
-                                   e.printStackTrace();
-                               }
-                           }
-                       });
-                   });
+            db.collection("employees")
+                    .get()
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        String[] header = {"Name","Basic","Cuts","Transportation","personal","others"};
+                        CsvWriter csvWriter = new CsvWriter(header);
+                        final int[] counter = new int[1];
+                        for(QueryDocumentSnapshot queryDocumentSnapshot : queryDocumentSnapshots){
+                             year = selectedDate[1];
+                             month = selectedDate[0];
+                            if(month.length()==1)
+                                month="0"+month;
+                            db.collection("EmployeesGrossSalary").document(queryDocumentSnapshot.getId()).collection(year).document(month).get().addOnSuccessListener(documentSnapshot1 -> {
+                                if(!documentSnapshot1.exists())
+                                {
+                                    counter[0]++;
+                                    return;
+                                }
+                                Employee emp = queryDocumentSnapshot.toObject(Employee.class);
+                                String cuts = " ";
+                                String transportation = " ";
+                                String personal = " ";
+                                String others = "\"{";
+                                for(Allowance allowance : documentSnapshot1.toObject(EmployeesGrossSalary.class).getAllTypes()) {
+                                    if (allowance.getName().equalsIgnoreCase("Transportation"))
+                                        transportation = String.valueOf(allowance.getAmount());
+                                    switch (allowance.getType()) {
+                                        case 4:
+                                            cuts = String.valueOf(allowance.getAmount());
+                                            break;
+                                        case 3:
+                                            personal = String.valueOf(allowance.getAmount());
+                                            break;
+                                        default:
+                                            others += allowance.getAmount() + ",";
+                                    }
+                                }
+                                others = others.length() != 2 ? others.substring(0, others.length() - 1) + "}\"" : " ";
+                                csvWriter.addDataRow(emp.getFirstName()+" "+emp.getLastName(),String.valueOf(emp.getSalary()),cuts,transportation,personal,others);
+                                counter[0]++;
+                                if(counter[0]==queryDocumentSnapshots.size()) {
+                                    try {
+                                        csvWriter.build("test123");
+                                        Toast.makeText(getActivity(), "CSV file created", Toast.LENGTH_SHORT).show();
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            });
 
-               }
-           });
+                        }
+                    });
         }
     };
     private ProjectAdapter.OnItemClickListener oclEmployees = new ProjectAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position) {
-            EmployeeFragmentDialog employeeFragmentDialog = new EmployeeFragmentDialog(projects.get(position));
-            employeeFragmentDialog.show(getParentFragmentManager(), "");
+            final Calendar today = Calendar.getInstance();
+            if(selectedMonthEdit.getText().toString().isEmpty()){
+                builder = new MonthPickerDialog.Builder(getActivity(),
+                        (selectedMonth, selectedYear) -> {
+                            selectedMonthLayout.setError(null);
+                            selectedMonthLayout.setErrorEnabled(false);
+                        }, today.get(Calendar.YEAR), today.get(Calendar.MONTH)
+                );
+                MonthPickerDialog dateBuild = builder.setActivatedMonth(today.get(Calendar.MONTH))
+                        .setMinYear(today.get(Calendar.YEAR) - 1)
+                        .setActivatedYear(today.get(Calendar.YEAR))
+                        .setMaxYear(today.get(Calendar.YEAR) + 1)
+                        .setTitle("Select Month")
+                        .build();
+                dateBuild.show();
+            }else{
+                String[] selectedDate = selectedMonthEdit.getText().toString().split("/");
+                year = selectedDate[1];
+                month = selectedDate[0];
+                if(month.length()==1) {
+                    month="0"+month;
+                }
+            }
+
+                EmployeeFragmentDialog employeeFragmentDialog = new EmployeeFragmentDialog(projects.get(position),year,month);
+                employeeFragmentDialog.show(getParentFragmentManager(), "");
+
         }
     };
 }

@@ -127,7 +127,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         rotateBackwardHide = AnimationUtils.loadAnimation(getActivity(), R.anim.rotate_backward_hide);
         show = AnimationUtils.loadAnimation(getActivity(), R.anim.show);
         hide = AnimationUtils.loadAnimation(getActivity(), R.anim.hide);
-        id = LocalDate.now().toString() + currEmployee.getId();
+        id = currEmployee.getId();
         setCheckInOutBtn();
 
 
@@ -136,7 +136,12 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     }
 
     private void setCheckInOutBtn() {
-        db.collection("summary").document(id).get().addOnSuccessListener((value) -> {
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+        String currentDateAndTime = sdf.format(new Date());
+        String day = currentDateAndTime.substring(0,2);
+        String month = currentDateAndTime.substring(3,5);
+        String year = currentDateAndTime.substring(6,10);
+        db.collection("summary").document(id).collection(year+"-"+month).document(day).get().addOnSuccessListener((value) -> {
             if (!value.exists())
                 isHere = false;
             else {
@@ -214,13 +219,19 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                         fusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
                             @Override
                             public void onSuccess(Location location) {
+                                @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+                                String currentDateAndTime = sdf.format(new Date());
+                                String day = currentDateAndTime.substring(0,2);
+                                String month = currentDateAndTime.substring(3,5);
+                                String year = currentDateAndTime.substring(6,10);
+
                                 longitude = location.getLongitude();
                                 latitude = location.getLatitude();
 
                                 Summary summary = new Summary(latitude, longitude);
                                 HashMap<String, Object> checkOutDetails = new HashMap<>(summary.getGeoMap());
                                 checkOutDetails.put("Time", Timestamp.now());
-                                db.collection("summary").document(id).get().addOnSuccessListener(documentSnapshot -> {
+                                db.collection("summary").document(id).collection(year+"-"+month).document(day).get().addOnSuccessListener(documentSnapshot -> {
                                     if (!documentSnapshot.exists()) {
                                         employeeCheckIn(summary);
                                     } else {
@@ -229,7 +240,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                             employeeCheckOut(summary1, checkOutDetails);
                                         } else {
                                             summary1.setLastCheckInTime(Timestamp.now());
-                                            db.collection("summary").document(id).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null);
+                                            db.collection("summary").document(id).collection(year+"-"+month).document(day).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null);
                                         }
                                     }
                                 });
@@ -265,12 +276,19 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     };
 
     private void employeeCheckOut(Summary summary1, HashMap<String, Object> checkOut) {
+        //get current year and month from date
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+        String currentDateAndTime = sdf.format(new Date());
+        String day = currentDateAndTime.substring(0,2);
+        String month = currentDateAndTime.substring(3,5);
+        String year = currentDateAndTime.substring(6,10);
+
         long checkInTime = (summary1.getLastCheckInTime()).getSeconds();
         long checkOutTime = Timestamp.now().getSeconds();
         long workingTime = (checkOutTime - checkInTime);
         summary1.setCheckOut(checkOut);
         summary1.setWorkedTime(FieldValue.increment(workingTime));
-        db.collection("summary").document(id).update("checkOut", checkOut, "workingTime", FieldValue.increment(workingTime))
+        db.collection("summary").document(id).collection(year+"-"+month).document(day).update("checkOut", checkOut, "workingTime", FieldValue.increment(workingTime))
                 .addOnSuccessListener(unused -> {
                     Toast.makeText(getContext(), "Checked Out successfully!", Toast.LENGTH_SHORT).show();
                     db.collection("projects").document(currEmployee.getProjectID())
@@ -280,21 +298,21 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     }
 
     private void employeeCheckIn(Summary summary) {
-
-        summary.setLastCheckInTime(Timestamp.now());
-        HashMap<String, Object> checkInDetails = new HashMap<>(summary.getGeoMap());
-        checkInDetails.put("Time", Timestamp.now());
-        HashMap<String, Object> checkIn = new HashMap<>();
-        checkIn.put("checkIn", checkInDetails);
-        checkIn.put("employee", currEmployee);
-        checkIn.put("lastCheckInTime", summary.getLastCheckInTime());
-        db.collection("summary").document(id).set(checkIn);
         //get current year and month from date
         @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
         String currentDateAndTime = sdf.format(new Date());
         String day = currentDateAndTime.substring(0,2);
         String month = currentDateAndTime.substring(3,5);
         String year = currentDateAndTime.substring(6,10);
+
+        summary.setLastCheckInTime(Timestamp.now());
+        HashMap<String, Object> checkInDetails = new HashMap<>(summary.getGeoMap());
+        checkInDetails.put("Time", Timestamp.now());
+        HashMap<String, Object> checkIn = new HashMap<>();
+        checkIn.put("checkIn", checkInDetails);
+        checkIn.put("projectId", currEmployee.getProjectID());
+        checkIn.put("lastCheckInTime", summary.getLastCheckInTime());
+        db.collection("summary").document(id).collection(year+"-"+month).document(day).set(checkIn);
         db.collection("EmployeesGrossSalary").document(currEmployee.getId()).get().addOnSuccessListener(documentSnapshot -> {
             if (!documentSnapshot.exists()){
                 return;

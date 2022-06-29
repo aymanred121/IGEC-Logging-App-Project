@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.example.igec_admin.Adatpers.ProjectAdapter;
+import com.example.igec_admin.Dialogs.EmployeeFragmentDialog;
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Allowance;
 import com.example.igec_admin.fireBase.Employee;
@@ -61,6 +62,7 @@ public class SummaryFragment extends Fragment {
         selectedMonthLayout.setEndIconOnClickListener(oclMonthPicker);
         selectedMonthLayout.setErrorIconOnClickListener(oclMonthPicker);
         selectedMonthLayout.setErrorIconDrawable(R.drawable.ic_baseline_calendar_month_24);
+        adapter.setOnItemClickListener(oclEmployees);
         createCSV.setOnClickListener(oclCSV);
     }
 
@@ -170,6 +172,13 @@ public class SummaryFragment extends Fragment {
 
                }
            });
+        }
+    };
+    private ProjectAdapter.OnItemClickListener oclEmployees = new ProjectAdapter.OnItemClickListener() {
+        @Override
+        public void onItemClick(int position) {
+            EmployeeFragmentDialog employeeFragmentDialog = new EmployeeFragmentDialog(projects.get(position));
+            employeeFragmentDialog.show(getParentFragmentManager(), "");
         }
     };
 }

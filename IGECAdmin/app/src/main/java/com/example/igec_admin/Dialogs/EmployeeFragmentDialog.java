@@ -15,12 +15,17 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.igec_admin.Adatpers.EmployeeAdapter;
+import com.example.igec_admin.Fragments.MonthSummaryDialog;
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Project;
+import com.example.igec_admin.utilites.WorkingDay;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class EmployeeFragmentDialog extends DialogFragment {
 
@@ -28,14 +33,14 @@ public class EmployeeFragmentDialog extends DialogFragment {
     private EmployeeAdapter adapter;
     private RecyclerView recyclerView;
     private RecyclerView.LayoutManager layoutManager;
-    private String year,month;
+    private String year, month;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
 
-    public EmployeeFragmentDialog(Project project,String year,String month) {
+    public EmployeeFragmentDialog(Project project, String year, String month) {
         this.project = project;
-        this.year=year;
-        this.month=month;
+        this.year = year;
+        this.month = month;
     }
 
     @Override
@@ -72,31 +77,36 @@ public class EmployeeFragmentDialog extends DialogFragment {
         adapter.setOnItemClickListener(oclEmployee);
     }
 
-    private void initialize(View view){
+    private void initialize(View view) {
         recyclerView = view.findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
-        adapter = new EmployeeAdapter(project.getEmployees(),false);
+        adapter = new EmployeeAdapter(project.getEmployees(), false);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
 //        getEmployees();
 
     }
+
     private EmployeeAdapter.OnItemClickListener oclEmployee = new EmployeeAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position) {
+            ArrayList<WorkingDay> workingDays = new ArrayList<>();
             String id = project.getEmployees().get(position).getId();
-            db.collection("summary").document(id).collection(year+"-"+month)
-                    .whereEqualTo("projectId",project.getId())
+            db.collection("summary").document(id).collection(year + "-" + month)
+                    .whereEqualTo("projectId", project.getId())
                     .get().addOnSuccessListener(queryDocumentSnapshots -> {
-                if (queryDocumentSnapshots.size()==0)
-                    return;
-                for (QueryDocumentSnapshot q : queryDocumentSnapshots){
-                    String day = q.getId();
-                    double hours = ((long)q.getData().get("workingTime"))/3600.0;
-                    //todo display day and hours at their right places
-                }
-            });
+                        if (queryDocumentSnapshots.size() == 0)
+                            return;
+                        for (QueryDocumentSnapshot q : queryDocumentSnapshots) {
+                            String day = q.getId();
+                            double hours = ((q.getData().get("workingTime") == null) ? 0 : ((long) (q.getData().get("workingTime"))) / 3600.0);
+                            workingDays.add(new WorkingDay(day, month, year, hours));
+                        }
+                        MonthSummaryDialog monthSummaryDialog = new MonthSummaryDialog(workingDays);
+                        monthSummaryDialog.show(getParentFragmentManager(), "");
+                    });
+
         }
 
         @Override

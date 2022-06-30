@@ -7,7 +7,7 @@ import java.util.Date;
 
 public class Employee {
     private String firstName, lastName, title, area, city, street,SSN,projectID,managerID,email,password,id,phoneNumber,insuranceNumber;
-    private double salary,insuranceAmount;
+    private double salary,insuranceAmount,overTime;
     private Date hireDate;
     private int totalNumberOfVacationDays;
     private boolean isAdmin, temporary;
@@ -17,7 +17,7 @@ public class Employee {
 
     }
 
-    public Employee(String firstName, String lastName, String Title, String area, String City, String Street, double salary, String SSN, Date hireDate, String email, String password,String phoneNumber,String insuranceNumber,boolean labourType,double insuranceAmount,boolean isAdmin) {
+    public Employee(String firstName, String lastName, String Title, String area, String City, String Street, double salary,double overTime, String SSN, Date hireDate, String email, String password,String phoneNumber,String insuranceNumber,boolean labourType,double insuranceAmount,boolean isAdmin) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.title = Title;
@@ -35,6 +35,7 @@ public class Employee {
         this.temporary =labourType;
         this.insuranceAmount=insuranceAmount;
         this.isAdmin=isAdmin;
+        this.overTime=overTime;
     }
 
 
@@ -203,4 +204,11 @@ public class Employee {
         this.totalNumberOfVacationDays = totalNumberOfVacationDays;
     }
 
+    public double getOverTime() {
+        return overTime;
+    }
+
+    public void setOverTime(double overTime) {
+        this.overTime = overTime;
+    }
 }

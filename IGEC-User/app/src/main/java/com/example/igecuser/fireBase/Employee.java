@@ -5,7 +5,7 @@ import java.util.Date;
 @SuppressWarnings("serial")
 public class Employee implements Serializable {
     private String firstName, lastName, title, area, city, street, SSN, projectID, managerID, email, password, id, phoneNumber;
-    private double salary;
+    private double salary,overTime;
     private Date hireDate;
     private int totalNumberOfVacationDays;
 
@@ -14,7 +14,7 @@ public class Employee implements Serializable {
 
     }
 
-    public Employee(String firstName, String lastName, String Title, String area, String City, String Street, String projectID, double salary, String SSN, Date hireDate, String email, String password, String phoneNumber) {
+    public Employee(String firstName, String lastName, String Title, String area, String City, String Street, String projectID, double salary,double overTime, String SSN, Date hireDate, String email, String password, String phoneNumber) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.title = Title;
@@ -29,6 +29,7 @@ public class Employee implements Serializable {
         this.password = password;
         this.phoneNumber = phoneNumber;
         totalNumberOfVacationDays = 21;
+        this.overTime=overTime;
     }
 
     public Date getHireDate() {
@@ -155,5 +156,13 @@ public class Employee implements Serializable {
 
     public void setTotalNumberOfVacationDays(int totalNumberOfVacationDays) {
         this.totalNumberOfVacationDays = totalNumberOfVacationDays;
+    }
+
+    public double getOverTime() {
+        return overTime;
+    }
+
+    public void setOverTime(double overTime) {
+        this.overTime = overTime;
     }
 }

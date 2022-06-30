@@ -181,6 +181,7 @@ public class AddUserFragment extends Fragment {
     }
 
     private Employee fillEmployeeData() {
+        double overTime =  (Double.parseDouble(vSalary.getText().toString())/30.0/10.0)*1.5;
         return new Employee(
                 (vFirstName.getText()).toString(),
                 (vSecondName.getText()).toString(),
@@ -189,6 +190,7 @@ public class AddUserFragment extends Fragment {
                 (vCity.getText()).toString(),
                 (vStreet.getText()).toString(),
                 Double.parseDouble(vSalary.getText().toString()),
+               overTime,
                 ((vNationalID.getText()).toString()),
                 new Date(hireDate),
                 vEmail.getText().toString().trim(),

@@ -286,10 +286,40 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         long checkInTime = (summary1.getLastCheckInTime()).getSeconds();
         long checkOutTime = Timestamp.now().getSeconds();
         long workingTime = (checkOutTime - checkInTime);
+        //check if working time is greater than 8 hrs
         summary1.setCheckOut(checkOut);
         summary1.setWorkedTime(FieldValue.increment(workingTime));
         db.collection("summary").document(id).collection(year+"-"+month).document(day).update("checkOut", checkOut, "workingTime", FieldValue.increment(workingTime))
                 .addOnSuccessListener(unused -> {
+                    db.collection("summary").document(id).collection(year+"-"+month).document(day).get().addOnSuccessListener(doc->{
+                       long workingTime1 =  (long)doc.getData().get("workingTime");
+                        long overTime = (workingTime1-28800);
+                        if (overTime < 0) {
+                            overTime = 0;
+                        }
+                        overTime=overTime/3600;
+
+                        long finalOverTime = overTime;
+                        db.document(doc.getReference().getPath()).set(new HashMap<String,Object>(){{
+                            put("overTime", finalOverTime);
+                        }},SetOptions.merge());
+                        Allowance overTimeAllowance=new Allowance();
+                        overTimeAllowance.setAmount(finalOverTime*currEmployee.getOverTime());
+                        overTimeAllowance.setName("overTime");
+                        overTimeAllowance.setNote(String.valueOf(finalOverTime));
+                        overTimeAllowance.setProjectId(currEmployee.getProjectID());
+                        //todo: to be determined
+                        //overTimeAllowance.setType();
+                        db.collection("EmployeesGrossSalary").document(id).collection(year).document(month).get().addOnSuccessListener(doc1 ->{
+                           EmployeesGrossSalary emp = doc1.toObject(EmployeesGrossSalary.class);
+                            ArrayList<Allowance> allowanceArrayList = emp.getAllTypes();
+                            if (allowanceArrayList != null) {
+                                allowanceArrayList.removeIf(x->x.getName().equals("overTime"));
+                            }
+                            allowanceArrayList.add(overTimeAllowance);
+                            db.collection("EmployeesGrossSalary").document(id).collection(year).document(month).update("allTypes",allowanceArrayList);
+                        });
+                    });
                     Toast.makeText(getContext(), "Checked Out successfully!", Toast.LENGTH_SHORT).show();
                     db.collection("projects").document(currEmployee.getProjectID())
                             .update("employeeWorkedTime." + currEmployee.getId(), FieldValue.increment(workingTime));

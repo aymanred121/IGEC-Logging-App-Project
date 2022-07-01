@@ -1,5 +1,6 @@
 package com.example.igecuser.Fragments;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -26,7 +27,9 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.WriteBatch;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -83,9 +86,6 @@ public class TransferRequestsFragment extends Fragment {
     private void updateEmployeeData (TransferRequests request) {
         batch.update( db.collection("employees").document(request.getEmployee().getId()),"projectID" , request.getNewProjectId()
                 , "managerID" , manager.getId());
-//        db.collection("employees").document(request.getEmployee().getId())
-//                .update("projectID" , request.getNewProjectId()
-//                        , "managerID" , manager.getId());
 
         ArrayList<String> empInfo = new ArrayList<>();
         empInfo.add(request.getEmployee().getFirstName());
@@ -96,16 +96,11 @@ public class TransferRequestsFragment extends Fragment {
         Map<String, Object> empInfoMap = new HashMap<>();
         empInfoMap.put(request.getEmployee().getId(), empInfo);
         batch.update( db.collection("EmployeeOverview").document("emp"),empInfoMap);
-//        db.collection("EmployeeOverview").document("emp")
-//                .update(empInfoMap).addOnSuccessListener(unused -> {
-//                    int x=0;
-//            Toast.makeText(getActivity(), "acc", Toast.LENGTH_SHORT).show();
-//                });
     }
     private void updateOldProjectData(TransferRequests request) {
         db.collection("projects").document(request.getOldProjectId()).get().addOnSuccessListener((value) ->
         {
-            if (value == null) return;
+            if (!value.exists()) return;
             Project projectTemp = value.toObject(Project.class);
             for (EmployeeOverview e: projectTemp.getEmployees()) {
                 if(e.getId().equals(request.getEmployee().getId())) {
@@ -114,14 +109,13 @@ public class TransferRequestsFragment extends Fragment {
                 }
 
             }
-
             db.collection("projects").document(request.getOldProjectId()).update("employees" ,  projectTemp.getEmployees());
         });
     }
     private void updateNewProjectData(TransferRequests request) {
         db.collection("projects").document(request.getNewProjectId()).get().addOnSuccessListener((value) ->
         {
-            if (value == null) return;
+            if (!value.exists()) return;
             Project projectTemp = value.toObject(Project.class);
             request.getEmployee().setProjectId(request.getNewProjectId());
             request.getEmployee().setManagerID(manager.getId());
@@ -133,15 +127,26 @@ public class TransferRequestsFragment extends Fragment {
     }
 
     private void updateAllowancesData(TransferRequests request, ArrayList<Allowance> projectAllowances) {
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+        String currentDateAndTime = sdf.format(new Date());
+        String day = currentDateAndTime.substring(0,2);
+        String month = currentDateAndTime.substring(3,5);
+        String year = currentDateAndTime.substring(6,10);
         db.collection("EmployeesGrossSalary").document(request.getEmployee().getId()).get().addOnSuccessListener(value -> {
             if (!value.exists())
                 return;
             EmployeesGrossSalary temp = value.toObject(EmployeesGrossSalary.class);
-            for (Allowance allowance : projectAllowances) {
-                temp.getAllTypes().removeIf(y -> y.getProjectId().equals(allowance.getProjectId()) && y.getAmount() == allowance.getAmount() && y.getName().equals(allowance.getName()));
-            }
+            temp.getAllTypes().removeIf(x->x.getProjectId().equals(request.getOldProjectId()));
             temp.getAllTypes().addAll(projectAllowances);
-            db.collection("EmployeesGrossSalary").document(request.getEmployee().getId()).set(temp);
+            db.collection("EmployeesGrossSalary").document(request.getEmployee().getId()).update("allTypes", temp.getAllTypes());
+            db.collection("EmployeesGrossSalary").document(request.getEmployee().getId()).collection(year).document(month).get().addOnSuccessListener(doc->{
+                if (!doc.exists())
+                    return;
+                EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
+                employeesGrossSalary.getBaseAllowances().removeIf(a->a.getProjectId().trim().equals(request.getOldProjectId()));
+                employeesGrossSalary.getBaseAllowances().addAll(projectAllowances);
+                db.document(doc.getReference().getPath()).update("baseAllowances", employeesGrossSalary.getBaseAllowances());
+            });
         });
 
 

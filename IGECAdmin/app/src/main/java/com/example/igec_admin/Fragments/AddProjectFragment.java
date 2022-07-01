@@ -291,20 +291,18 @@ public class AddProjectFragment extends Fragment {
             empInfoMap.put(emp.getId(), empInfo);
             batch.update(employeeOverviewRef, empInfoMap);
             batch.update(employeeCol.document(emp.getId()), "managerID", emp.getManagerID(), "projectID", projectID);
-            ArrayList<Allowance> allTypes = new ArrayList<>();
             db.collection("EmployeesGrossSalary").document(emp.getId()).get().addOnSuccessListener((value) -> {
                 if (!value.exists())
                     return;
                 EmployeesGrossSalary employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
-                allTypes.addAll(employeesGrossSalary.getAllTypes());
                 if (allowances.size() != 0) {
-                    allTypes.addAll(allowances);
+                    employeesGrossSalary.getAllTypes().addAll(allowances);
                 }
-                batch.update(db.collection("EmployeesGrossSalary").document(emp.getId()), "allTypes", allTypes);
+                batch.update(db.collection("EmployeesGrossSalary").document(emp.getId()), "allTypes", employeesGrossSalary.getAllTypes());
 
                 db.collection("EmployeesGrossSalary").document(emp.getId()).collection(year).document(month).get().addOnSuccessListener(documentSnapshot -> {
                     if(!documentSnapshot.exists()){
-                        batch.set(db.collection("EmployeesGrossSalary").document(emp.getId()).collection(year).document(month),employeesGrossSalary);
+                        batch.set(db.document(documentSnapshot.getReference().getPath()),employeesGrossSalary);
                         if (counter[0] == Team.size() - 1) {
                             batch.commit().addOnSuccessListener(unused -> {
                                 clearInputs();
@@ -318,15 +316,11 @@ public class AddProjectFragment extends Fragment {
                         counter[0]++;
                     return;
                     }
-                    allTypes.clear();
                     EmployeesGrossSalary employeesGrossSalary1 = documentSnapshot.toObject(EmployeesGrossSalary.class);
-                    allTypes.addAll(employeesGrossSalary1.getAllTypes());
                     if (allowances.size() != 0) {
-                        allTypes.addAll(allowances);
+                        employeesGrossSalary1.getAllTypes().addAll(allowances);
                     }
-                    batch.set(db.collection("EmployeesGrossSalary").document(emp.getId()).collection(year).document(month),new HashMap<String,Object>(){{
-                        put("allTypes",allTypes);
-                    }}, SetOptions.merge());
+                    batch.update(db.document(documentSnapshot.getReference().getPath()),"allTypes",employeesGrossSalary1.getAllTypes());
                     if (counter[0] == Team.size() - 1) {
                         batch.commit().addOnSuccessListener(unused -> {
                             clearInputs();

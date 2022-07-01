@@ -19,7 +19,7 @@ import androidx.fragment.app.DialogFragment;
 import com.example.igecuser.R;
 import com.example.igecuser.fireBase.Allowance;
 import com.example.igecuser.fireBase.Employee;
-import com.example.igecuser.utilites.allowances;
+import com.example.igecuser.utilites.allowancesEnum;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.textfield.TextInputEditText;
@@ -206,10 +206,10 @@ public class AllowanceInfoDialog extends DialogFragment {
                         allowance.setNote(vAllowanceNote.getText().toString());
                         if (vPenalty.isChecked()) {
                             allowance.setAmount(-1 * amount.get());
-                            allowance.setType(allowances.PENALTY.ordinal());
+                            allowance.setType(allowancesEnum.PENALTY.ordinal());
                         } else {
                             allowance.setAmount(amount.get());
-                            allowance.setType(vMode.isChecked()? allowances.GIFT.ordinal():allowances.BONUS.ordinal());
+                            allowance.setType(vMode.isChecked()? allowancesEnum.GIFT.ordinal(): allowancesEnum.BONUS.ordinal());
                         }
 
                         result.putSerializable("allowance", allowance);

@@ -158,6 +158,7 @@ public class SummaryFragment extends Fragment {
                                 for (Allowance allowance : documentSnapshot1.toObject(EmployeesGrossSalary.class).getAllTypes()) {
                                     if (allowance.getName().trim().equalsIgnoreCase("Transportation"))
                                         transportation = String.valueOf(allowance.getAmount());
+                                    //todo use allowancesEnum instead of magic numbers
                                     switch (allowance.getType()) {
                                         case 4:
                                             cuts = String.valueOf(allowance.getAmount());

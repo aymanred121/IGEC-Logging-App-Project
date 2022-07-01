@@ -279,6 +279,14 @@ public class ProjectFragmentDialog extends DialogFragment {
             if (isDeleted || empOverview.getProjectId() == null) {
                 empOverview.setManagerID(null);
                 empOverview.setProjectId(null);
+                db.collection("EmployeesGrossSalary").document(empOverview.getId()).get().addOnSuccessListener(doc->{
+                   if(!doc.exists())
+                       return;
+                    EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
+                   employeesGrossSalary.getAllTypes().removeIf(x->x.getProjectId().equals(currProjectID));
+                   db.document(doc.getReference().getPath()).update("allTypes",employeesGrossSalary.getAllTypes());
+                });
+                //todo: tbd should we remove the project allowances from the current month as well?
                 Team.remove(empOverview);
             }
             if (empOverview.getId().equals(vManagerID.getText().toString()) && !isDeleted) {
@@ -294,14 +302,8 @@ public class ProjectFragmentDialog extends DialogFragment {
             Map<String, Object> empInfoMap = new HashMap<>();
             empInfoMap.put(empOverview.getId(), empInfo);
             batch.update(employeeOverviewRef, empInfoMap);
-            //employeeOverviewRef.update(empInfoMap);
-            // employeeCol.document(empOverview.getId()).update("managerID", empOverview.getManagerID(), "projectID", empOverview.getProjectId());
             batch.update(employeeCol.document(empOverview.getId()), "managerID", empOverview.getManagerID(), "projectID",empOverview.getProjectId());
-            //   employeeCol.document(empOverview.getId()).update("managerID", empOverview.getManagerID(), "projectID", currProjectID);
-
-
-//            employeeCol.document(empOverview.getId()).update("managerID", empOverview.getManagerID(), "projectID", currProjectID);
-        }
+           }
 
     }
 
@@ -347,14 +349,6 @@ public class ProjectFragmentDialog extends DialogFragment {
     }
 
     void updateProject() {
-//        HashMap<String, Object> updatedProjectData = new HashMap<>();
-//        updatedProjectData.put("estimatedEndDate", new Date(endDate));
-//        updatedProjectData.put("startDate", new Date(startDate));
-//        updatedProjectData.put("name", vName.getText().toString());
-//        updatedProjectData.put("managerName", vManagerName.getText().toString());
-//        updatedProjectData.put("managerID", vManagerID.getText().toString());
-//        updatedProjectData.put("location", "");
-//        updatedProjectData.put("employees", Team);
         updateEmployeesDetails(project.getId());
         Project newProject = new Project(vManagerName.getText().toString()
                 , vManagerID.getText().toString()
@@ -439,7 +433,6 @@ public class ProjectFragmentDialog extends DialogFragment {
                             }
                             counter[0]++;
                         });
-                //  db.collection("EmployeesGrossSalary").document(emp.getId()).update("allTypes", allTypes);
             });
         });
 
@@ -456,12 +449,6 @@ public class ProjectFragmentDialog extends DialogFragment {
             vDelete.setEnabled(true);
             dismiss();
         });
-//        db.collection("projects").document(project.getId()).delete().addOnSuccessListener(unused -> {
-//            isDeleted = true;
-//            updateEmployeesDetails(currProjectID);
-//            Toast.makeText(getActivity(), "Deleted", Toast.LENGTH_SHORT).show();
-//            dismiss();
-//        });
 
     }
 

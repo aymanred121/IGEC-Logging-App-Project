@@ -397,7 +397,7 @@ public class ProjectFragmentDialog extends DialogFragment {
                         .get().addOnSuccessListener(documentSnapshot -> {
                                     if(!documentSnapshot.exists()){
                                         //new month
-                                        batch.set(db.collection("EmployeesGrossSalary").document(documentSnapshot.getReference().getPath()), employeesGrossSalary);
+                                        batch.set(db.document(documentSnapshot.getReference().getPath()), employeesGrossSalary);
                                         if (counter[0] == newProject.getEmployees().size() - 1) {
                                             batch.commit().addOnSuccessListener(unused1 -> {
                                                 Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();

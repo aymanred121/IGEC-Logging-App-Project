@@ -3,13 +3,9 @@ package com.example.igec_admin.fireBase;
 import java.util.ArrayList;
 
 public class EmployeesGrossSalary {
-    /*
-    * year -> months
-    * month -> data
-    * data :empid,alltypes
-    * */
     private String employeeId;
     private ArrayList<Allowance> allTypes = new ArrayList<>();
+    private ArrayList<Allowance> baseAllowances = new ArrayList<>();
 
     public EmployeesGrossSalary() {
     }
@@ -36,5 +32,11 @@ public class EmployeesGrossSalary {
         this.allTypes = allTypes;
     }
 
+    public ArrayList<Allowance> getBaseAllowances() {
+        return baseAllowances;
+    }
 
+    public void setBaseAllowances(ArrayList<Allowance> baseAllowances) {
+        this.baseAllowances = baseAllowances;
+    }
 }

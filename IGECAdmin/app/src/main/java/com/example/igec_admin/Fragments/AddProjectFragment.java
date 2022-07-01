@@ -32,6 +32,7 @@ import com.example.igec_admin.fireBase.Client;
 import com.example.igec_admin.fireBase.EmployeeOverview;
 import com.example.igec_admin.fireBase.EmployeesGrossSalary;
 import com.example.igec_admin.fireBase.Project;
+import com.example.igec_admin.utilites.allowancesEnum;
 import com.github.javafaker.Faker;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.checkbox.MaterialCheckBox;
@@ -113,11 +114,11 @@ public class AddProjectFragment extends Fragment {
                 // We use a String here, but any type that can be put in a Bundle is supported
                 allowances = bundle.getParcelableArrayList("allowances");
 
-                //Added projectId to each allowance that is coming from project
-                allowances.stream().flatMap(allowance -> {
+                //Added projectId to each allowance that is coming from project and set type to project
+                allowances.forEach(allowance -> {
+                    allowance.setType(allowancesEnum.PROJECT.ordinal());
                     allowance.setProjectId(projectID);
-                    return null;
-                }).collect(Collectors.toList());
+                });
                 // Do something with the result
             }
         });
@@ -302,6 +303,8 @@ public class AddProjectFragment extends Fragment {
 
                 db.collection("EmployeesGrossSalary").document(emp.getId()).collection(year).document(month).get().addOnSuccessListener(documentSnapshot -> {
                     if(!documentSnapshot.exists()){
+                        employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() == allowancesEnum.PROJECT.ordinal());
+                        employeesGrossSalary.setBaseAllowances(allowances);
                         batch.set(db.document(documentSnapshot.getReference().getPath()),employeesGrossSalary);
                         if (counter[0] == Team.size() - 1) {
                             batch.commit().addOnSuccessListener(unused -> {
@@ -317,10 +320,8 @@ public class AddProjectFragment extends Fragment {
                     return;
                     }
                     EmployeesGrossSalary employeesGrossSalary1 = documentSnapshot.toObject(EmployeesGrossSalary.class);
-                    if (allowances.size() != 0) {
-                        employeesGrossSalary1.getAllTypes().addAll(allowances);
-                    }
-                    batch.update(db.document(documentSnapshot.getReference().getPath()),"allTypes",employeesGrossSalary1.getAllTypes());
+                        employeesGrossSalary1.setBaseAllowances(allowances);
+                    batch.set(db.document(documentSnapshot.getReference().getPath()),employeesGrossSalary1,SetOptions.mergeFields("baseAllowances"));
                     if (counter[0] == Team.size() - 1) {
                         batch.commit().addOnSuccessListener(unused -> {
                             clearInputs();
@@ -357,8 +358,6 @@ public class AddProjectFragment extends Fragment {
         updateEmployeesDetails(projectID);
         projectID = db.collection("projects").document().getId().substring(0, 5);
 
-//        db.collection("projects").document(projectID).set(newProject).addOnSuccessListener(unused -> {
-//        });
 
     }
 

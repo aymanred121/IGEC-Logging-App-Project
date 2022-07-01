@@ -7,6 +7,8 @@ import java.util.ArrayList;
 public class EmployeesGrossSalary {
     private String employeeId;
     private ArrayList<Allowance> allTypes = new ArrayList<>();
+    private ArrayList<Allowance> baseAllowances = new ArrayList<>();
+
 
     public EmployeesGrossSalary() {
     }
@@ -33,4 +35,11 @@ public class EmployeesGrossSalary {
         this.allTypes = allTypes;
     }
 
+    public ArrayList<Allowance> getBaseAllowances() {
+        return baseAllowances;
+    }
+
+    public void setBaseAllowances(ArrayList<Allowance> baseAllowances) {
+        this.baseAllowances = baseAllowances;
+    }
 }

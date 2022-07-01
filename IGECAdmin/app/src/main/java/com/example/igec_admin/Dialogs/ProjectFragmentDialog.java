@@ -31,6 +31,7 @@ import com.example.igec_admin.fireBase.Client;
 import com.example.igec_admin.fireBase.EmployeeOverview;
 import com.example.igec_admin.fireBase.EmployeesGrossSalary;
 import com.example.igec_admin.fireBase.Project;
+import com.example.igec_admin.utilites.allowancesEnum;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.checkbox.MaterialCheckBox;
@@ -54,11 +55,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ProjectFragmentDialog extends DialogFragment {
-    private final int PROJECT = 0;
-    private final int NETSALARY = 1;
-    private final int ALLOWANCE = 2;
-    private final int BONUS = 3;
-    private final int PENALTY = 4;
 
 
     // Views
@@ -89,6 +85,8 @@ public class ProjectFragmentDialog extends DialogFragment {
     private Boolean isDeleted = false;
     private String currProjectID;
     private WriteBatch batch = FirebaseFirestore.getInstance().batch();
+    private final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+
     public ProjectFragmentDialog(Project project) {
         this.project = project;
     }
@@ -272,7 +270,9 @@ public class ProjectFragmentDialog extends DialogFragment {
     }
 
     private void updateEmployeesDetails(String projectID) {
-
+        String currentDateAndTime = sdf.format(new Date());
+        String month = currentDateAndTime.substring(3,5);
+        String year = currentDateAndTime.substring(6,10);
         for (EmployeeOverview empOverview : employees) {
             currProjectID = projectID;
             ArrayList<String> empInfo = new ArrayList<>();
@@ -286,7 +286,8 @@ public class ProjectFragmentDialog extends DialogFragment {
                    employeesGrossSalary.getAllTypes().removeIf(x->x.getProjectId().equals(currProjectID));
                    db.document(doc.getReference().getPath()).update("allTypes",employeesGrossSalary.getAllTypes());
                 });
-                //todo: tbd should we remove the project allowances from the current month as well?
+                db.collection("EmployeesGrossSalary").document(empOverview.getId()).collection(year).document(month).update("baseAllowances",null);
+
                 Team.remove(empOverview);
             }
             if (empOverview.getId().equals(vManagerID.getText().toString()) && !isDeleted) {
@@ -372,25 +373,24 @@ public class ProjectFragmentDialog extends DialogFragment {
         batch.set(db.collection("projects").document(project.getId()), newProject);
         final int[] counter = {0};
         newProject.getEmployees().forEach(emp -> {
-            ArrayList<Allowance> allTypes = new ArrayList<>();
+            String currentDateAndTime = sdf.format(new Date());
+            String month = currentDateAndTime.substring(3,5);
+            String year = currentDateAndTime.substring(6,10);
             db.collection("EmployeesGrossSalary").document(emp.getId()).get().addOnSuccessListener((value) -> {
-                String year = String.valueOf(LocalDate.now().getYear());
-                String month = String.valueOf(LocalDate.now().getMonthValue());
-                if(month.length()==1)
-                    month= "0"+month;
                 if (!value.exists())
                     return;
                 EmployeesGrossSalary employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
-                allTypes.addAll(employeesGrossSalary.getAllTypes());
                 if (allowances.size() != 0) {
-                    allTypes.removeIf(allowance -> allowance.getType() == PROJECT);
-                    allTypes.addAll(allowances);
+                    employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() ==  allowancesEnum.PROJECT.ordinal());
+                    employeesGrossSalary.getAllTypes().addAll(allowances);
                 }
-                batch.update(db.collection("EmployeesGrossSalary").document(emp.getId()), "allTypes", allTypes);
+                batch.update(db.collection("EmployeesGrossSalary").document(emp.getId()), "allTypes", employeesGrossSalary.getAllTypes());
                 db.collection("EmployeesGrossSalary").document(emp.getId()).collection(year).document(month)
                         .get().addOnSuccessListener(documentSnapshot -> {
                                     if(!documentSnapshot.exists()){
                                         //new month
+                                        employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() == allowancesEnum.PROJECT.ordinal());
+                                        employeesGrossSalary.setBaseAllowances(allowances);
                                         batch.set(db.document(documentSnapshot.getReference().getPath()), employeesGrossSalary);
                                         if (counter[0] == newProject.getEmployees().size() - 1) {
                                             batch.commit().addOnSuccessListener(unused1 -> {
@@ -407,14 +407,7 @@ public class ProjectFragmentDialog extends DialogFragment {
                                         counter[0]++;
                                         return;
                                     }
-                            allTypes.clear();
-                            EmployeesGrossSalary employeesGrossSalary1 = documentSnapshot.toObject(EmployeesGrossSalary.class);
-                            allTypes.addAll(employeesGrossSalary1.getAllTypes());
-                            if (allowances.size() != 0) {
-                                allTypes.removeIf(allowance -> allowance.getType() == PROJECT);
-                                allTypes.addAll(allowances);
-                            }
-                            batch.update(db.document(documentSnapshot.getReference().getPath()), "allTypes", allTypes);
+                            batch.update(db.document(documentSnapshot.getReference().getPath()), "baseAllowances", allowances);
                             if (counter[0] == newProject.getEmployees().size() - 1) {
                                 batch.commit().addOnSuccessListener(unused1 -> {
                                     Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();

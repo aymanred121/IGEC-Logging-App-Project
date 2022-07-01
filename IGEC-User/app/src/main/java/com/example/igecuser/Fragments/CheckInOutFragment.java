@@ -30,6 +30,7 @@ import com.example.igecuser.fireBase.Machine;
 import com.example.igecuser.fireBase.MachineDefectsLog;
 import com.example.igecuser.fireBase.Machine_Employee;
 import com.example.igecuser.fireBase.Summary;
+import com.example.igecuser.utilites.allowancesEnum;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -261,13 +262,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                     vAddMachine.startAnimation(isHere ? show : hide);
                                 }
                             }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Toast.makeText(getContext(), "Please enable GPS!", Toast.LENGTH_SHORT).show();
-
-                            }
-                        });
+                        }).addOnFailureListener(e -> Toast.makeText(getContext(), "Please enable GPS!", Toast.LENGTH_SHORT).show());
                     })
                     .show();
         }
@@ -347,39 +342,41 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                //new month
                db.collection("EmployeesGrossSalary").document(currEmployee.getId()).get().addOnSuccessListener(documentSnapshot -> {
                    if (!documentSnapshot.exists()) return;
-                   EmployeesGrossSalary employeeGrossSalary = documentSnapshot.toObject(EmployeesGrossSalary.class);
-                   updateEmployeeGrossSalary(employeeGrossSalary);
+                   EmployeesGrossSalary employeesGrossSalary = documentSnapshot.toObject(EmployeesGrossSalary.class);
+                   employeesGrossSalary.setBaseAllowances(employeesGrossSalary.getAllTypes().stream().filter(x->x.getType()==allowancesEnum.PROJECT.ordinal()).collect(Collectors.toCollection(ArrayList::new)));
+                   employeesGrossSalary.getAllTypes().removeIf(x->x.getType()==allowancesEnum.PROJECT.ordinal());
+                   for(Allowance i :employeesGrossSalary.getBaseAllowances()){
+                       //todo check what allowances to duplicate each day
+                       if(i.getName().equalsIgnoreCase("Transportation")){
+                           Allowance transportation = new Allowance("Transportation",i.getAmount());
+                           transportation.setNote(day);
+                           employeesGrossSalary.getAllTypes().add(transportation);
+                           break;
+                       }
+                   }
+                   db.collection("EmployeesGrossSalary").document(doc.getReference().getPath()).set(employeesGrossSalary, SetOptions.merge());
+
                });
                return;
            }
            EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
-            updateEmployeeGrossSalary(employeesGrossSalary);
-
+            for(Allowance i :employeesGrossSalary.getBaseAllowances()){
+                //todo check what allowances to duplicate each day
+                if(i.getName().equalsIgnoreCase("Transportation")){
+                    Allowance transportation = new Allowance("Transportation",i.getAmount());
+                    transportation.setNote(day);
+                    transportation.setProjectId(i.getProjectId());
+                    employeesGrossSalary.getAllTypes().add(transportation);
+                    break;
+                }
+            }
+            db.collection("EmployeesGrossSalary").document(currEmployee.getId()).collection(year).document(month).set(employeesGrossSalary, SetOptions.merge());
 
         });
 
         Toast.makeText(getContext(), "Checked In successfully!", Toast.LENGTH_SHORT).show();
     }
 
-    private void updateEmployeeGrossSalary(EmployeesGrossSalary employeesGrossSalary) {
-        String currentDateAndTime = sdf.format(new Date());
-        String day = currentDateAndTime.substring(0,2);
-        String month = currentDateAndTime.substring(3,5);
-        String year = currentDateAndTime.substring(6,10);
-        ArrayList<Allowance> allTypes = employeesGrossSalary.getAllTypes();
-        //return the first appearance of transportation type in allType array
-        for(Allowance i :allTypes){
-            if(i.getName().equalsIgnoreCase("Transportation")){
-                Allowance transportation = new Allowance("Transportation",i.getAmount());
-                transportation.setNote(day);
-                allTypes.add(transportation);
-                break;
-            }
-        }
-        employeesGrossSalary.setAllTypes(allTypes);
-        db.collection("EmployeesGrossSalary").document(currEmployee.getId()).collection(year).document(month).set(employeesGrossSalary, SetOptions.merge());
-
-    }
 
     private final View.OnClickListener oclInside = view -> {
         MachineCheckInOutDialog machineCheckInOutDialog = new MachineCheckInOutDialog(true);

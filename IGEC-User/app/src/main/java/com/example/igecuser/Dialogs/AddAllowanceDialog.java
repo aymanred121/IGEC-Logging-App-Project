@@ -209,14 +209,14 @@ public class AddAllowanceDialog extends DialogFragment {
     private final View.OnClickListener oclAddAllowance = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            AllowanceInfoDialog allowanceInfoDialog = new AllowanceInfoDialog(-1, canGivePenalty, isProject, employee.getId());
+            AllowanceInfoDialog allowanceInfoDialog = new AllowanceInfoDialog(-1, canGivePenalty, isProject, (employee != null)? employee.getId() : null);
             allowanceInfoDialog.show(getParentFragmentManager(), "");
         }
     };
     private final AllowanceAdapter.OnItemClickListener oclItemClickListener = new AllowanceAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position) {
-            AllowanceInfoDialog allowanceInfoDialog = new AllowanceInfoDialog(position, allowances.get(position), canGivePenalty, isProject , employee.getId());
+            AllowanceInfoDialog allowanceInfoDialog = new AllowanceInfoDialog(position, allowances.get(position), canGivePenalty, isProject , (employee != null)? employee.getId() : null);
             allowanceInfoDialog.show(getParentFragmentManager(), "");
         }
 

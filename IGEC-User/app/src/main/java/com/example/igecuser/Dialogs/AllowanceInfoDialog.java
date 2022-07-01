@@ -45,11 +45,11 @@ public class AllowanceInfoDialog extends DialogFragment {
     private String EmployeeID;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-    public AllowanceInfoDialog(int position, boolean canGivePenalty, boolean isProject , String id) {
+    public AllowanceInfoDialog(int position, boolean canGivePenalty, boolean isProject, String id) {
         this.position = position;
         this.canGivePenalty = canGivePenalty;
         this.isProject = isProject;
-        this.EmployeeID  = id;
+        this.EmployeeID = id;
     }
 
     public AllowanceInfoDialog(int position, Allowance allowance, boolean canGivePenalty, boolean isProject, String id) {
@@ -123,6 +123,7 @@ public class AllowanceInfoDialog extends DialogFragment {
         vMode.setVisibility(canGivePenalty ? View.VISIBLE : View.GONE);
         if (allowance != null) {
             vPenalty.setChecked(allowance.getAmount() < 0);
+            vMode.setText(vPenalty.isChecked() ? "Days(s)" : "Gift");
             vAllowanceName.setText(allowance.getName());
             vAllowanceMount.setText(String.valueOf(allowance.getAmount()));
             vAllowanceNote.setText(allowance.getNote());
@@ -155,12 +156,9 @@ public class AllowanceInfoDialog extends DialogFragment {
     private View.OnClickListener oclPerDay = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            if(vPenalty.isChecked())
-            {
-                vAllowanceMountLayout.setSuffixText(vMode.isChecked()? "Days(s)" : "£");
-            }
-            else
-            {
+            if (vPenalty.isChecked()) {
+                vAllowanceMountLayout.setSuffixText(vMode.isChecked() ? "Days(s)" : "£");
+            } else {
                 vAllowanceMountLayout.setSuffixText("£");
             }
         }
@@ -168,13 +166,10 @@ public class AllowanceInfoDialog extends DialogFragment {
     private View.OnClickListener oclPenalty = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            if(vPenalty.isChecked())
-            {
+            if (vPenalty.isChecked()) {
                 vMode.setChecked(false);
                 vMode.setText("Days");
-            }
-            else
-            {
+            } else {
                 vMode.setChecked(false);
                 vMode.setText("Gift");
             }
@@ -189,23 +184,38 @@ public class AllowanceInfoDialog extends DialogFragment {
                 Allowance allowance = new Allowance();
                 allowance.setName(vAllowanceName.getText().toString());
                 AtomicReference<Double> amount = new AtomicReference<>(Double.parseDouble(vAllowanceMount.getText().toString()));
-                if (vMode.isChecked()) {
+                if (isProject) {
+                    allowance.setName(vAllowanceName.getText().toString());
+                    allowance.setAmount(Double.parseDouble(vAllowanceMount.getText().toString()));
+                    allowance.setNote(vAllowanceNote.getText().toString());
+
+                    result.putSerializable("allowance", allowance);
+                    result.putString("note", vAllowanceNote.getText().toString());
+                    result.putInt("position", position);
+                    if (position == -1)
+                        getParentFragmentManager().setFragmentResult("addAllowance", result);
+                    else
+                        getParentFragmentManager().setFragmentResult("editAllowance", result);
+                    dismiss();
+
+                } else {
                     Employee[] temp = new Employee[1];
                     double[] baseSalary = new double[1];
                     db.collection("employees").document(EmployeeID).get().addOnSuccessListener(value -> {
                         if (!value.exists()) return;
                         temp[0] = value.toObject(Employee.class);
                         baseSalary[0] = temp[0].getSalary();
-                        amount.updateAndGet(v1 -> new Double((double) (v1 * (baseSalary[0] / 30))));
-                        allowance.setAmount(vPenalty.isChecked() ? (-1) * amount.get() : amount.get());
+                        //TODO: gift mode need to be corrected
+                        if (vMode.isChecked())
+                            amount.updateAndGet(v1 -> new Double((double) (v1 * (baseSalary[0] / 30))));
+
                         allowance.setNote(vAllowanceNote.getText().toString());
-                        if (isProject)
-                            allowance.setType(PROJECT);
-                        else {
-                            if (vPenalty.isChecked())
-                                allowance.setType(PENALTY);
-                            else
-                                allowance.setType(BONUS);
+                        if (vPenalty.isChecked()) {
+                            allowance.setAmount(-1 * amount.get());
+                            allowance.setType(PENALTY);
+                        } else {
+                            allowance.setAmount(amount.get());
+                            allowance.setType(BONUS);
                         }
 
                         result.putSerializable("allowance", allowance);
@@ -218,29 +228,7 @@ public class AllowanceInfoDialog extends DialogFragment {
 
                         dismiss();
                     });
-                } else {
-                    allowance.setAmount(vPenalty.isChecked() ? (-1) * amount.get() : amount.get());
-                    allowance.setNote(vAllowanceNote.getText().toString());
-                    if (isProject)
-                        allowance.setType(PROJECT);
-                    else {
-                        if (vPenalty.isChecked())
-                            allowance.setType(PENALTY);
-                        else
-                            allowance.setType(BONUS);
-                    }
-
-                    result.putSerializable("allowance", allowance);
-                    result.putString("note", vAllowanceNote.getText().toString());
-                    result.putInt("position", position);
-                    if (position == -1)
-                        getParentFragmentManager().setFragmentResult("addAllowance", result);
-                    else
-                        getParentFragmentManager().setFragmentResult("editAllowance", result);
-
-                    dismiss();
                 }
-
             }
         }
 

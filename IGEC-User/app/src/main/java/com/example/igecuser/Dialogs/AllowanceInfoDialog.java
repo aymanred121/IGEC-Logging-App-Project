@@ -19,6 +19,7 @@ import androidx.fragment.app.DialogFragment;
 import com.example.igecuser.R;
 import com.example.igecuser.fireBase.Allowance;
 import com.example.igecuser.fireBase.Employee;
+import com.example.igecuser.utilites.allowances;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.textfield.TextInputEditText;
@@ -29,11 +30,6 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class AllowanceInfoDialog extends DialogFragment {
-    private final int PROJECT = 0;
-    private final int NETSALARY = 1;
-    private final int ALLOWANCE = 2;
-    private final int BONUS = 3;
-    private final int PENALTY = 4;
     private TextInputEditText vAllowanceName, vAllowanceMount, vAllowanceNote;
     private TextInputLayout vAllowanceNameLayout, vAllowanceMountLayout, vAllowanceNoteLayout;
     private ArrayList<Pair<TextInputLayout, TextInputEditText>> views;
@@ -205,17 +201,15 @@ public class AllowanceInfoDialog extends DialogFragment {
                         if (!value.exists()) return;
                         temp[0] = value.toObject(Employee.class);
                         baseSalary[0] = temp[0].getSalary();
-                        //TODO: gift mode need to be corrected
-                        if (vMode.isChecked())
+                        if (vMode.isChecked() && vPenalty.isChecked())
                             amount.updateAndGet(v1 -> new Double((double) (v1 * (baseSalary[0] / 30))));
-
                         allowance.setNote(vAllowanceNote.getText().toString());
                         if (vPenalty.isChecked()) {
                             allowance.setAmount(-1 * amount.get());
-                            allowance.setType(PENALTY);
+                            allowance.setType(allowances.PENALTY.ordinal());
                         } else {
                             allowance.setAmount(amount.get());
-                            allowance.setType(BONUS);
+                            allowance.setType(vMode.isChecked()? allowances.GIFT.ordinal():allowances.BONUS.ordinal());
                         }
 
                         result.putSerializable("allowance", allowance);

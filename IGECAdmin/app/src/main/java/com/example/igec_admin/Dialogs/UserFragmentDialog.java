@@ -279,6 +279,7 @@ public class UserFragmentDialog extends DialogFragment {
 
     private HashMap<String, Object> fillEmployeeData() {
         HashMap<String, Object> empMap = new HashMap<>();
+        empMap.put("overTime" , (Double.parseDouble(vSalary.getText().toString())/30.0/10.0)*1.5);
         empMap.put("area", vArea.getText().toString());
         empMap.put("street", vStreet.getText().toString());
         empMap.put("city", vCity.getText().toString());

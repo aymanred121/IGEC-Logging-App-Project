@@ -190,7 +190,7 @@ public class AddUserFragment extends Fragment {
                 (vCity.getText()).toString(),
                 (vStreet.getText()).toString(),
                 Double.parseDouble(vSalary.getText().toString()),
-               overTime,
+                overTime,
                 ((vNationalID.getText()).toString()),
                 new Date(hireDate),
                 vEmail.getText().toString().trim(),
@@ -198,8 +198,8 @@ public class AddUserFragment extends Fragment {
                 vPhone.getText().toString(),
                 vInsuranceNumber.getText().toString(),
                 vTemporary.isChecked(),
-                Double.parseDouble(vInsuranceAmount.getText().toString())
-                , vAdmin.isChecked());
+                Double.parseDouble(vInsuranceAmount.getText().toString()),
+                vAdmin.isChecked());
     }
 
     private String encryptedPassword() {

@@ -93,6 +93,7 @@ public class EmployeeFragmentDialog extends DialogFragment {
         public void onItemClick(int position) {
             ArrayList<WorkingDay> workingDays = new ArrayList<>();
             String id = project.getEmployees().get(position).getId();
+            String empName = project.getEmployees().get(position).getFirstName()+" "+project.getEmployees().get(position).getLastName();
             db.collection("summary").document(id).collection(year + "-" + month)
                     .whereEqualTo("projectId", project.getId())
                     .get().addOnSuccessListener(queryDocumentSnapshots -> {
@@ -101,7 +102,7 @@ public class EmployeeFragmentDialog extends DialogFragment {
                         for (QueryDocumentSnapshot q : queryDocumentSnapshots) {
                             String day = q.getId();
                             double hours = ((q.getData().get("workingTime") == null) ? 0 : ((long) (q.getData().get("workingTime"))) / 3600.0);
-                            workingDays.add(new WorkingDay(day, month, year, hours));
+                            workingDays.add(new WorkingDay(day, month, year, hours,empName));
                         }
                         MonthSummaryDialog monthSummaryDialog = new MonthSummaryDialog(workingDays);
                         monthSummaryDialog.show(getParentFragmentManager(), "");

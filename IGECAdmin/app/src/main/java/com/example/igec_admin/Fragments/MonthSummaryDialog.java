@@ -1,5 +1,6 @@
 package com.example.igec_admin.Fragments;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -24,9 +25,16 @@ import com.example.igec_admin.fireBase.EmployeesGrossSalary;
 import com.example.igec_admin.utilites.CsvWriter;
 import com.example.igec_admin.utilites.WorkingDay;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.StringJoiner;
+import java.util.stream.IntStream;
 
 public class MonthSummaryDialog extends DialogFragment {
 
@@ -36,6 +44,7 @@ public class MonthSummaryDialog extends DialogFragment {
     private RecyclerView.LayoutManager layoutManager;
     private ArrayList<WorkingDay> workingDays;
     private FloatingActionButton createCSV;
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     public MonthSummaryDialog(ArrayList<WorkingDay> workingDays) {
         this.workingDays = workingDays;
@@ -86,6 +95,54 @@ public class MonthSummaryDialog extends DialogFragment {
 
     }
     private final View.OnClickListener oclCSV = v -> {
-        Toast.makeText(getActivity(), "HIII", Toast.LENGTH_SHORT).show();
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+        String currentDateAndTime = sdf.format(new Date());
+        String month = workingDays.get(0).getMonth();
+        String year = workingDays.get(0).getYear();
+        String empName = workingDays.get(0).getEmpName();
+        ArrayList<Integer> monthsWith31Days = new ArrayList<>();
+        monthsWith31Days.add(1);
+        monthsWith31Days.add(3);
+        monthsWith31Days.add(5);
+        monthsWith31Days.add(7);
+        monthsWith31Days.add(8);
+        monthsWith31Days.add(10);
+        monthsWith31Days.add(12);
+        StringJoiner header = new StringJoiner(",");
+        String[] dataRow;
+        header.add("Name");
+        if(monthsWith31Days.contains(Integer.parseInt(month))){
+            //create header with 31 days
+            for(int i = 1; i <= 31; i++){
+                header.add(String.valueOf(i));
+            }
+            dataRow = new String[32];
+        }else if(Integer.parseInt(month) == 2){
+            //create header with 28 days
+            for(int i = 1; i <= 28; i++){
+                header.add(String.valueOf(i));
+            }
+            dataRow = new String[29];
+        }else{
+                //create header with 30 days
+                for(int i = 1; i <= 30; i++){
+                    header.add(String.valueOf(i));
+                }
+                dataRow = new String[31];
+            }
+        dataRow[0] = empName;
+        CsvWriter csvWriter = new CsvWriter(header.toString().split(","));
+        for(WorkingDay w : workingDays){
+            dataRow[Integer.parseInt(w.getDay())] = String.valueOf(w.getHours());
+        }
+        IntStream.range(1, dataRow.length).filter(i -> dataRow[i] == null).forEach(i -> dataRow[i] = "0");
+        csvWriter.addDataRow(dataRow);
+        try {
+            csvWriter.build(empName+"-"+year+"-"+month);
+            Toast.makeText(getActivity(), "csv Saved!", Toast.LENGTH_SHORT).show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     };
 }

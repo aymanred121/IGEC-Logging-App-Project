@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:overScrollMode="never"
     android:scrollbars="vertical"
+    tools:listitem="@layout/item_project"
     tools:context=".Fragments.ProjectsFragment">
 
 </androidx.recyclerview.widget.RecyclerView>

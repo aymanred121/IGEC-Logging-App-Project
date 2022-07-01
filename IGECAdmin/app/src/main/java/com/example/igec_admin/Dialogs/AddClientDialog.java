@@ -141,6 +141,7 @@ public class AddClientDialog extends DialogFragment {
         @Override
         public void onClick(View v) {
             if (validateInput()) {
+                vDone.setEnabled(false);
                 Client client = new Client(
                         vCompanyName.getText().toString(),
                         vCompanyEmail.getText().toString(),
@@ -152,6 +153,7 @@ public class AddClientDialog extends DialogFragment {
                 Bundle result = new Bundle();
                 result.putSerializable("client", client);
                 getParentFragmentManager().setFragmentResult("client", result);
+                vDone.setEnabled(true);
                 dismiss();
             }
         }

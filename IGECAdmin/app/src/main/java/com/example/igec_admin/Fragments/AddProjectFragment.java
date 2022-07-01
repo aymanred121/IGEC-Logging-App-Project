@@ -307,7 +307,7 @@ public class AddProjectFragment extends Fragment {
                         batch.set(db.collection("EmployeesGrossSalary").document(emp.getId()).collection(year).document(month),employeesGrossSalary);
                         if (counter[0] == Team.size() - 1) {
                             batch.commit().addOnSuccessListener(unused -> {
-                                ClearInputs();
+                                clearInputs();
                                 fakeData();
                                 Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
                                 batch = FirebaseFirestore.getInstance().batch();
@@ -329,7 +329,7 @@ public class AddProjectFragment extends Fragment {
                     }}, SetOptions.merge());
                     if (counter[0] == Team.size() - 1) {
                         batch.commit().addOnSuccessListener(unused -> {
-                            ClearInputs();
+                            clearInputs();
                             fakeData();
                             Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
                             batch = FirebaseFirestore.getInstance().batch();
@@ -397,7 +397,8 @@ public class AddProjectFragment extends Fragment {
 
     }
 
-    void ClearInputs() {
+    void clearInputs() {
+        vRegister.setEnabled(true);
         vName.setText(null);
         vCity.setText(null);
         vArea.setText(null);
@@ -462,6 +463,7 @@ public class AddProjectFragment extends Fragment {
     };
     private final View.OnClickListener clRegister = v -> {
         if (validateInputs()) {
+            vRegister.setEnabled(false);
             addProject();
         }
     };

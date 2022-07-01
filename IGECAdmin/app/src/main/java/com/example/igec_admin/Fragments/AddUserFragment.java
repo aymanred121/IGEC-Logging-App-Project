@@ -212,6 +212,7 @@ public class AddUserFragment extends Fragment {
     }
 
     void clearInputs() {
+        vRegister.setEnabled(true);
         vFirstName.setText(null);
         vSecondName.setText(null);
         vEmail.setText(null);
@@ -278,6 +279,7 @@ public class AddUserFragment extends Fragment {
     // Listeners
     View.OnClickListener clRegister = v -> {
         if (validateInputs()) {
+            vRegister.setEnabled(false);
             if (!vAdmin.isChecked())
                 addEmployee();
             else {

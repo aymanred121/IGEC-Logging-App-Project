@@ -52,7 +52,7 @@ public class MachineFragmentDialog extends DialogFragment {
 
 
     // Views
-    private TextInputLayout vIDLayout, vPurchaseDateLayout,vSerialNumberLayout;
+    private TextInputLayout vIDLayout, vPurchaseDateLayout, vSerialNumberLayout;
     private TextInputEditText vID, vPurchaseDate, vSerialNumber, vMachineByDay, vMachineByWeek, vMachineByMonth;
     private MaterialButton vRegister, vDelete, vUpdate, vAddSupplements;
     private ImageView vQRImg;
@@ -187,6 +187,7 @@ public class MachineFragmentDialog extends DialogFragment {
         }
         machineCol.document(machine.getId()).delete().addOnSuccessListener(unused -> {
             Toast.makeText(getActivity(), "Deleted", Toast.LENGTH_SHORT).show();
+            vDelete.setEnabled(true);
             dismiss();
         });
     }
@@ -208,7 +209,7 @@ public class MachineFragmentDialog extends DialogFragment {
                     .setCancelable(false);
             AlertDialog alertDialog = builder.create();
             alertDialog.show();
-            if(supplements.size()>0) {
+            if (supplements.size() > 0) {
                 machine.getSupplementsNames().clear();
                 IntStream.range(0, supplements.size()).forEach(i -> machine.getSupplementsNames().add(supplements.get(i).getName()));
             }
@@ -247,6 +248,7 @@ public class MachineFragmentDialog extends DialogFragment {
                 }
             });
             Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
+            vUpdate.setEnabled(true);
             dismiss();
         });
 
@@ -276,7 +278,10 @@ public class MachineFragmentDialog extends DialogFragment {
             vDatePicker.show(getFragmentManager(), "DATE_PICKER");
         }
     };
-    private final View.OnClickListener oclUpdate = v -> updateMachine();
+    private final View.OnClickListener oclUpdate = v -> {
+        vUpdate.setEnabled(false);
+        updateMachine();
+    };
     private final View.OnClickListener oclAddSupplement = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -297,10 +302,12 @@ public class MachineFragmentDialog extends DialogFragment {
     };
     private final View.OnClickListener oclDelete = v -> {
 
+        vDelete.setEnabled(false);
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
         builder.setTitle(getString(R.string.Delete))
                 .setMessage(getString(R.string.AreUSure))
                 .setNegativeButton(getString(R.string.cancel), (dialogInterface, i) -> {
+                    vDelete.setEnabled(true);
                 })
                 .setPositiveButton(getString(R.string.accept), (dialogInterface, i) -> {
                     deleteMachine();

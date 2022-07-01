@@ -6,7 +6,7 @@
     android:layout_margin="@dimen/mid"
     app:cardCornerRadius="5dp">
 
-    <RelativeLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="12dp">
@@ -15,25 +15,26 @@
             android:id="@+id/TextView_MachineID"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="test" />
+            android:text="test"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/TextView_MachineCodeName"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_below="@id/TextView_MachineID"
             android:layout_marginTop="@dimen/high"
-            android:text="test" />
+            android:layout_marginEnd="@dimen/mid"
+            android:text="test"
+            app:layout_constraintEnd_toStartOf="@id/Button_Log"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/TextView_MachineID" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/Button_Log"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:layout_centerVertical="true"
-            android:layout_marginTop="@dimen/high"
             android:layout_marginEnd="@dimen/high"
-            android:layout_toStartOf="@id/Button_Comment"
             android:insetLeft="0dp"
             android:insetTop="0dp"
             android:insetRight="0dp"
@@ -44,16 +45,15 @@
             app:iconGravity="textStart"
             app:iconPadding="0dp"
             app:iconSize="@dimen/vhigh"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/Button_Comment"
+            app:layout_constraintTop_toTopOf="parent"
             app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MyApp.Button.Circle" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/Button_Comment"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:layout_marginTop="@dimen/high"
             android:insetLeft="0dp"
             android:insetTop="0dp"
             android:insetRight="0dp"
@@ -64,9 +64,12 @@
             app:iconGravity="textStart"
             app:iconPadding="0dp"
             app:iconSize="@dimen/vhigh"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
             app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MyApp.Button.Circle" />
 
 
-    </RelativeLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </com.google.android.material.card.MaterialCardView>

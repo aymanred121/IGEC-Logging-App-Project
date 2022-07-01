@@ -206,6 +206,7 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
     }
 
     private void clearInput() {
+        vRegister.setEnabled(true);
         vId.setText(null);
         vSerialNumber.setText(null);
         vPurchaseDate.setText(null);
@@ -277,6 +278,7 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
         @Override
         public void onClick(View v) {
             if (validateInput()) {
+                vRegister.setEnabled(false);
                 int size = supplements.size();
                 MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
                 builder.setTitle("Uploading...")

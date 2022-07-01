@@ -119,6 +119,7 @@ public class AllowanceInfoDialog extends DialogFragment {
         @Override
         public void onClick(View v) {
             if (!validateInput()) return;
+            vDone.setEnabled(false);
             Bundle result = new Bundle();
             Allowance allowance = new Allowance();
             allowance.setName(vAllowanceName.getText().toString());
@@ -129,7 +130,7 @@ public class AllowanceInfoDialog extends DialogFragment {
                 getParentFragmentManager().setFragmentResult("addAllowance", result);
             else
                 getParentFragmentManager().setFragmentResult("editAllowance", result);
-
+            vDone.setEnabled(true);
             dismiss();
         }
     };

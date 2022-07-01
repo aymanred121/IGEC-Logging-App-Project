@@ -241,6 +241,7 @@ public class UserFragmentDialog extends DialogFragment {
             for (QueryDocumentSnapshot d : queryDocumentSnapshots) {
                 summaryCOl.document(d.getId()).update("Employee", updatedEmployeeMap);
             }
+            vUpdate.setEnabled(true);
             Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
             dismiss();
         });
@@ -315,6 +316,7 @@ public class UserFragmentDialog extends DialogFragment {
             employeeOverviewRef.update(employee.getId(), FieldValue.delete()).addOnSuccessListener(unused1 -> {
                 if (employee.getProjectID() == null) {
                     Toast.makeText(getActivity(), "Deleted", Toast.LENGTH_SHORT).show();
+                    vDelete.setEnabled(true);
                     dismiss();
                     return;
                 }
@@ -328,6 +330,7 @@ public class UserFragmentDialog extends DialogFragment {
                                     vacationCol.document(d.getId()).delete();
                                 }
                                 Toast.makeText(getActivity(), "Deleted", Toast.LENGTH_SHORT).show();
+                                vDelete.setEnabled(true);
                                 dismiss();
                             });
                         });
@@ -370,23 +373,28 @@ public class UserFragmentDialog extends DialogFragment {
     // Listeners
     private View.OnClickListener clUpdate = v -> {
         if (!validateInputs()) {
+
             Toast.makeText(getActivity(), "please, fill the project data", Toast.LENGTH_SHORT).show();
             return;
         }
+        vUpdate.setEnabled(false);
         updateEmployee();
 
     };
     private View.OnClickListener clDelete = v -> {
+        vDelete.setEnabled(false);
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
         builder.setTitle(getString(R.string.Delete))
                 .setMessage(getString(R.string.AreUSure))
                 .setNegativeButton(getString(R.string.cancel), (dialogInterface, i) -> {
+                    vDelete.setEnabled(true);
                 })
                 .setPositiveButton(getString(R.string.accept), (dialogInterface, i) -> {
                     deleteEmployee();
                     dialogInterface.dismiss();
                 })
                 .show();
+
     };
 
 

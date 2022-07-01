@@ -400,6 +400,7 @@ public class ProjectFragmentDialog extends DialogFragment {
                                         if (counter[0] == newProject.getEmployees().size() - 1) {
                                             batch.commit().addOnSuccessListener(unused1 -> {
                                                 Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
+                                                vUpdate.setEnabled(true);
                                                 batch = FirebaseFirestore.getInstance().batch();
                                                 project.setEmployees(null);
                                                 employees.clear();
@@ -422,6 +423,7 @@ public class ProjectFragmentDialog extends DialogFragment {
                             if (counter[0] == newProject.getEmployees().size() - 1) {
                                 batch.commit().addOnSuccessListener(unused1 -> {
                                     Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
+                                    vUpdate.setEnabled(true);
                                     batch = FirebaseFirestore.getInstance().batch();
                                     project.setEmployees(null);
                                     employees.clear();
@@ -446,6 +448,7 @@ public class ProjectFragmentDialog extends DialogFragment {
         batch.commit().addOnSuccessListener(unused -> {
             batch = FirebaseFirestore.getInstance().batch();
             Toast.makeText(getActivity(), "Deleted", Toast.LENGTH_SHORT).show();
+            vDelete.setEnabled(true);
             dismiss();
         });
 //        db.collection("projects").document(project.getId()).delete().addOnSuccessListener(unused -> {
@@ -530,16 +533,19 @@ public class ProjectFragmentDialog extends DialogFragment {
     };
     View.OnClickListener clUpdate = v -> {
         if (validateInputs()) {
+            vUpdate.setEnabled(true);
             updateProject();
         } else {
             Toast.makeText(getActivity(), "please, fill the project data", Toast.LENGTH_SHORT).show();
         }
     };
     View.OnClickListener clDelete = v -> {
+        vDelete.setEnabled(false);
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
         builder.setTitle(getString(R.string.Delete))
                 .setMessage(getString(R.string.AreUSure))
                 .setNegativeButton(getString(R.string.cancel), (dialogInterface, i) -> {
+                    vDelete.setEnabled(true);
                 })
                 .setPositiveButton(getString(R.string.accept), (dialogInterface, i) -> {
                     deleteProject();

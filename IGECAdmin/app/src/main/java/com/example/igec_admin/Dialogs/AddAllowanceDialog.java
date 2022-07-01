@@ -110,9 +110,11 @@ public class AddAllowanceDialog extends DialogFragment {
     private View.OnClickListener oclDone = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            vDone.setEnabled(false);
             Bundle result = new Bundle();
             result.putSerializable("allowances", allowances);
             getParentFragmentManager().setFragmentResult("allowances", result);
+            vDone.setEnabled(true);
             dismiss();
         }
     };

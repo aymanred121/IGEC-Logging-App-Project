@@ -130,7 +130,7 @@ public class SupplementInfoDialog extends DialogFragment {
         @Override
         public void onClick(View v) {
             if (!validateInput()) return;
-
+            vDone.setEnabled(false);
             if (supplementNames != null) {
                 for (int i = 0; i < supplementNames.size(); i++) {
                     if (position != i && supplementNames.get(i).getName().equals(vSupplementName.getText().toString())) {

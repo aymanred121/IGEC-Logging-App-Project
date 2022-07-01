@@ -258,11 +258,13 @@ public class AddSupplementsDialog extends DialogFragment {
     private final View.OnClickListener oclDone = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            vDone.setEnabled(false);
             Bundle result = new Bundle();
             result.putSerializable("supplements", updatedSupplements);
             result.putStringArrayList("oldNames", oldNames);
             getParentFragmentManager().setFragmentResult("supplements", result);
             saveUpdated = true;
+            vDone.setEnabled(true);
             dismiss();
         }
     };

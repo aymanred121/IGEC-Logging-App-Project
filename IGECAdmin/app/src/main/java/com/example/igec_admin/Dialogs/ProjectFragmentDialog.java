@@ -31,6 +31,7 @@ import com.example.igec_admin.fireBase.Client;
 import com.example.igec_admin.fireBase.EmployeeOverview;
 import com.example.igec_admin.fireBase.EmployeesGrossSalary;
 import com.example.igec_admin.fireBase.Project;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.datepicker.MaterialDatePicker;
@@ -419,7 +420,7 @@ public class ProjectFragmentDialog extends DialogFragment {
                                 allTypes.removeIf(allowance -> allowance.getType() == PROJECT);
                                 allTypes.addAll(allowances);
                             }
-                            batch.update(db.collection("EmployeesGrossSalary").document(documentSnapshot.getReference().getPath()), "allTypes", allTypes);
+                            batch.update(db.document(documentSnapshot.getReference().getPath()), "allTypes", allTypes);
                             if (counter[0] == newProject.getEmployees().size() - 1) {
                                 batch.commit().addOnSuccessListener(unused1 -> {
                                     Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
@@ -429,7 +430,11 @@ public class ProjectFragmentDialog extends DialogFragment {
                                     employees.clear();
                                     Team.clear();
                                     TeamID.clear();
+                                    batch=FirebaseFirestore.getInstance().batch();
                                     dismiss();
+                                }).addOnFailureListener(e -> {
+                                    Log.d("batchError",e.toString());
+                                    batch=FirebaseFirestore.getInstance().batch();
                                 });
                             }
                             counter[0]++;

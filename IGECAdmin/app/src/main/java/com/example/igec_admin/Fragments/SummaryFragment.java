@@ -139,6 +139,14 @@ public class SummaryFragment extends Fragment {
                                 month = "0" + month;
                             db.collection("EmployeesGrossSalary").document(queryDocumentSnapshot.getId()).collection(year).document(month).get().addOnSuccessListener(documentSnapshot1 -> {
                                 if (!documentSnapshot1.exists()) {
+                                    if (counter[0] == queryDocumentSnapshots.size()-1) {
+                                        try {
+                                            csvWriter.build(year+"-"+month);
+                                            Toast.makeText(getActivity(), "CSV file created", Toast.LENGTH_SHORT).show();
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
                                     counter[0]++;
                                     return;
                                 }
@@ -148,7 +156,7 @@ public class SummaryFragment extends Fragment {
                                 String personal = " ";
                                 String others = "\"{";
                                 for (Allowance allowance : documentSnapshot1.toObject(EmployeesGrossSalary.class).getAllTypes()) {
-                                    if (allowance.getName().equalsIgnoreCase("Transportation"))
+                                    if (allowance.getName().trim().equalsIgnoreCase("Transportation"))
                                         transportation = String.valueOf(allowance.getAmount());
                                     switch (allowance.getType()) {
                                         case 4:
@@ -163,15 +171,15 @@ public class SummaryFragment extends Fragment {
                                 }
                                 others = others.length() != 2 ? others.substring(0, others.length() - 1) + "}\"" : " ";
                                 csvWriter.addDataRow(emp.getFirstName() + " " + emp.getLastName(), String.valueOf(emp.getSalary()), cuts, transportation, personal, others);
-                                counter[0]++;
-                                if (counter[0] == queryDocumentSnapshots.size()) {
+                                if (counter[0] == queryDocumentSnapshots.size()-1) {
                                     try {
-                                        csvWriter.build("test123");
+                                        csvWriter.build(year+"-"+month);
                                         Toast.makeText(getActivity(), "CSV file created", Toast.LENGTH_SHORT).show();
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                     }
                                 }
+                                counter[0]++;
                             });
 
                         }

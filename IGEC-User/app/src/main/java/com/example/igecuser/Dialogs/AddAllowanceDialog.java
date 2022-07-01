@@ -24,11 +24,13 @@ import com.example.igecuser.fireBase.EmployeeOverview;
 import com.example.igecuser.fireBase.EmployeesGrossSalary;
 import com.example.igecuser.fireBase.Project;
 import com.example.igecuser.utilites.allowancesEnum;
+import com.google.android.gms.common.util.NumberUtils;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
+import com.google.zxing.common.StringUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -231,7 +233,7 @@ public class AddAllowanceDialog extends DialogFragment {
                                     return;
                                 }
                                 EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
-                                employeesGrossSalary.getAllTypes().removeIf(x->x.getProjectId().equals(project.getId()) &&!x.getNote().trim().equalsIgnoreCase(day));
+                                employeesGrossSalary.getAllTypes().removeIf(x->x.getProjectId().equals(project.getId()) &&!x.getNote().trim().matches("-?\\d+(\\.\\d+)?"));
                                 employeesGrossSalary.getAllTypes().addAll(allowances);
                                 db.document(doc.getReference().getPath()).update("allTypes", employeesGrossSalary.getAllTypes());
 

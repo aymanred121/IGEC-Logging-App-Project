@@ -46,9 +46,10 @@
 
         <ImageView
             android:id="@+id/ImageView_VacationStatus"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="@dimen/vhigh"
+            android:layout_height="@dimen/vhigh"
             android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
             android:src="@drawable/ic_baseline_circle_24" />
 
 

@@ -32,8 +32,8 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/Button_Log"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="@dimen/vhigh"
+            android:layout_height="@dimen/vhigh"
             android:layout_marginEnd="@dimen/high"
             android:insetLeft="0dp"
             android:insetTop="0dp"
@@ -44,7 +44,7 @@
             app:icon="@drawable/ic_round_history_24"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
-            app:iconSize="@dimen/vhigh"
+            app:iconSize="@dimen/high"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/Button_Comment"
             app:layout_constraintTop_toTopOf="parent"
@@ -52,8 +52,8 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/Button_Comment"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="@dimen/vhigh"
+            android:layout_height="@dimen/vhigh"
             android:insetLeft="0dp"
             android:insetTop="0dp"
             android:insetRight="0dp"
@@ -63,7 +63,7 @@
             app:icon="@drawable/ic_baseline_comment_bank_24"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
-            app:iconSize="@dimen/vhigh"
+            app:iconSize="@dimen/high"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"

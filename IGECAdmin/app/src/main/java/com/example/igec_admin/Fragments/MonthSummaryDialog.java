@@ -19,22 +19,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.igec_admin.Adatpers.WorkingDayAdapter;
-import com.example.igec_admin.Adatpers.EmployeeAdapter;
 import com.example.igec_admin.R;
-import com.example.igec_admin.fireBase.Allowance;
-import com.example.igec_admin.fireBase.Employee;
-import com.example.igec_admin.fireBase.EmployeesGrossSalary;
-import com.example.igec_admin.fireBase.Project;
 import com.example.igec_admin.utilites.CsvWriter;
 import com.example.igec_admin.utilites.WorkingDay;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.StringJoiner;
 import java.util.stream.IntStream;
@@ -77,7 +70,7 @@ public class MonthSummaryDialog extends DialogFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.month_summary, container, false);
+        return inflater.inflate(R.layout.fragment_month_summary, container, false);
     }
 
     @Override

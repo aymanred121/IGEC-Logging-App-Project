@@ -35,11 +35,12 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/button_delete"
             style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
+            android:layout_width="@dimen/vhigh"
+            android:layout_height="@dimen/vhigh"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
             android:layout_marginTop="@dimen/high"
+            android:backgroundTint="@color/Red"
             android:insetLeft="0dp"
             android:insetTop="0dp"
             android:insetRight="0dp"
@@ -49,8 +50,8 @@
             app:icon="@drawable/ic_round_close_24"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
-            app:iconSize="24dp"
-            app:iconTint="@color/red"
+            app:iconSize="@dimen/high"
+            app:iconTint="@color/white"
             app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MyApp.Button.Circle" />
 
     </RelativeLayout>

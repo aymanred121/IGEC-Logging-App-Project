@@ -2,6 +2,8 @@ package com.example.igec_admin.Fragments;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,6 +24,7 @@ import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Allowance;
 import com.example.igec_admin.fireBase.Employee;
 import com.example.igec_admin.fireBase.EmployeesGrossSalary;
+import com.example.igec_admin.fireBase.Project;
 import com.example.igec_admin.utilites.CsvWriter;
 import com.example.igec_admin.utilites.WorkingDay;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -81,10 +84,11 @@ public class MonthSummaryDialog extends DialogFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         initialize(view);
+        adapter.setOnItemClickListener(oclWorkingDay);
         createCSV.setOnClickListener(oclCSV);
     }
-    void initialize(View view)
-    {
+
+    void initialize(View view) {
         createCSV = view.findViewById(R.id.fab_createCSV);
         recyclerView = view.findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
@@ -94,6 +98,7 @@ public class MonthSummaryDialog extends DialogFragment {
         recyclerView.setAdapter(adapter);
 
     }
+
     private final View.OnClickListener oclCSV = v -> {
         @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
         String currentDateAndTime = sdf.format(new Date());
@@ -111,38 +116,55 @@ public class MonthSummaryDialog extends DialogFragment {
         StringJoiner header = new StringJoiner(",");
         String[] dataRow;
         header.add("Name");
-        if(monthsWith31Days.contains(Integer.parseInt(month))){
+        if (monthsWith31Days.contains(Integer.parseInt(month))) {
             //create header with 31 days
-            for(int i = 1; i <= 31; i++){
+            for (int i = 1; i <= 31; i++) {
                 header.add(String.valueOf(i));
             }
             dataRow = new String[32];
-        }else if(Integer.parseInt(month) == 2){
+        } else if (Integer.parseInt(month) == 2) {
             //create header with 28 days
-            for(int i = 1; i <= 28; i++){
+            for (int i = 1; i <= 28; i++) {
                 header.add(String.valueOf(i));
             }
             dataRow = new String[29];
-        }else{
-                //create header with 30 days
-                for(int i = 1; i <= 30; i++){
-                    header.add(String.valueOf(i));
-                }
-                dataRow = new String[31];
+        } else {
+            //create header with 30 days
+            for (int i = 1; i <= 30; i++) {
+                header.add(String.valueOf(i));
             }
+            dataRow = new String[31];
+        }
         dataRow[0] = empName;
         CsvWriter csvWriter = new CsvWriter(header.toString().split(","));
-        for(WorkingDay w : workingDays){
+        for (WorkingDay w : workingDays) {
             dataRow[Integer.parseInt(w.getDay())] = String.valueOf(w.getHours());
         }
         IntStream.range(1, dataRow.length).filter(i -> dataRow[i] == null).forEach(i -> dataRow[i] = "0");
         csvWriter.addDataRow(dataRow);
         try {
-            csvWriter.build(empName+"-"+year+"-"+month);
+            csvWriter.build(empName + "-" + year + "-" + month);
             Toast.makeText(getActivity(), "csv Saved!", Toast.LENGTH_SHORT).show();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
+    };
+    private final WorkingDayAdapter.OnItemClickListener oclWorkingDay = new WorkingDayAdapter.OnItemClickListener() {
+        @Override
+        public void onItemClick(int position) {
+            // Create a Uri from an intent string. Use the result to create an Intent.
+            WorkingDay current = workingDays.get(position);
+            String location = String.format("geo:<%s>,<%s>?q=<%s>,<%s>(%s)", current.getCheckIn().getLat(), current.getCheckIn().getLng(), current.getCheckIn().getLat(), current.getCheckIn().getLng(), current.getProjectName() + "\n" + current.getProjectLocation());
+            Uri gmmIntentUri = Uri.parse(location);
+
+            // Create an Intent from gmmIntentUri. Set the action to ACTION_VIEW
+            Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+            // Make the Intent explicit by setting the Google Maps package
+            mapIntent.setPackage("com.google.android.apps.maps");
+
+            // Attempt to start an activity that can handle the Intent
+            startActivity(mapIntent);
+        }
     };
 }

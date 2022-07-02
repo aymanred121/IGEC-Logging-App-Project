@@ -17,13 +17,13 @@ import java.util.ArrayList;
 public class WorkingDayAdapter extends RecyclerView.Adapter<WorkingDayAdapter.DayViewHolder> {
 
     private ArrayList<WorkingDay> workingDays;
-    private EmployeeAdapter.OnItemClickListener listener;
+    private WorkingDayAdapter.OnItemClickListener listener;
 
     public interface OnItemClickListener {
         void onItemClick(int position);
     }
 
-    public void setOnItemClickListener(EmployeeAdapter.OnItemClickListener listener) {
+    public void setOnItemClickListener(WorkingDayAdapter.OnItemClickListener listener) {
         this.listener = listener;
     }
 
@@ -39,7 +39,7 @@ public class WorkingDayAdapter extends RecyclerView.Adapter<WorkingDayAdapter.Da
         public TextView vDay;
         public TextView vHours;
 
-        public DayViewHolder(@NonNull View itemView, EmployeeAdapter.OnItemClickListener listener) {
+        public DayViewHolder(@NonNull View itemView, WorkingDayAdapter.OnItemClickListener listener) {
             super(itemView);
             vDay = itemView.findViewById(R.id.TextView_day);
             vHours = itemView.findViewById(R.id.TextView_hours);

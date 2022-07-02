@@ -1,5 +1,7 @@
 package com.example.igec_admin.utilites;
 
+import com.example.igec_admin.fireBase.Project;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -10,8 +12,9 @@ public class WorkingDay {
     private double hours;
     private String name,empName;
     private LocationDetails checkIn, checkOut;
+    private String projectName,projectLocation;
 
-    public WorkingDay(String day, String month, String year, double hours,String empName ,LocationDetails checkIn, LocationDetails checkOut) {
+    public WorkingDay(String day, String month, String year, double hours, String empName , LocationDetails checkIn, LocationDetails checkOut, String projectName,String projectLocation) {
         this.day = day;
         this.hours = hours;
         this.month = month;
@@ -19,6 +22,8 @@ public class WorkingDay {
         this.empName = empName;
         this.checkIn = checkIn;
         this.checkOut = checkOut;
+        this.projectName = projectName;
+        this.projectLocation = projectLocation;
     }
 
     public String getDay() {
@@ -63,6 +68,22 @@ public class WorkingDay {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public LocationDetails getCheckIn() {
+        return checkIn;
+    }
+
+    public LocationDetails getCheckOut() {
+        return checkOut;
+    }
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public String getProjectLocation() {
+        return projectLocation;
     }
 
     public String getName() throws ParseException {

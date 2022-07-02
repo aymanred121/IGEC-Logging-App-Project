@@ -18,6 +18,7 @@ import com.example.igec_admin.Adatpers.EmployeeAdapter;
 import com.example.igec_admin.Fragments.MonthSummaryDialog;
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Project;
+import com.example.igec_admin.utilites.LocationDetails;
 import com.example.igec_admin.utilites.WorkingDay;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -25,7 +26,9 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 public class EmployeeFragmentDialog extends DialogFragment {
 
@@ -99,10 +102,19 @@ public class EmployeeFragmentDialog extends DialogFragment {
                     .get().addOnSuccessListener(queryDocumentSnapshots -> {
                         if (queryDocumentSnapshots.size() == 0)
                             return;
+
                         for (QueryDocumentSnapshot q : queryDocumentSnapshots) {
                             String day = q.getId();
                             double hours = ((q.getData().get("workingTime") == null) ? 0 : ((long) (q.getData().get("workingTime"))) / 3600.0);
-                            workingDays.add(new WorkingDay(day, month, year, hours,empName));
+                            String checkInGeoHash = (String) ((HashMap<String,Object>) Objects.requireNonNull(q.getData().get("checkIn"))).get("geohash");
+                            double checkInLat = (double) ((HashMap<String,Object>) Objects.requireNonNull(q.getData().get("checkIn"))).get("lat");
+                            double checkInLng = (double) ((HashMap<String,Object>) Objects.requireNonNull(q.getData().get("checkIn"))).get("lng");
+                            String checkOutGeoHash = (String) ((HashMap<String,Object>) Objects.requireNonNull(q.getData().get("checkOut"))).get("geohash");
+                            double checkOutLat = (double) ((HashMap<String,Object>) Objects.requireNonNull(q.getData().get("checkOut"))).get("lat");
+                            double checkOutLng = (double) ((HashMap<String,Object>) Objects.requireNonNull(q.getData().get("checkOut"))).get("lng");
+                            LocationDetails checkInLocation =new LocationDetails( checkInGeoHash, checkInLat, checkInLng);
+                            LocationDetails checkOutLocation =new LocationDetails( checkOutGeoHash, checkOutLat, checkOutLng);
+                            workingDays.add(new WorkingDay(day, month, year, hours,empName,checkInLocation,checkOutLocation));
                         }
                         MonthSummaryDialog monthSummaryDialog = new MonthSummaryDialog(workingDays);
                         monthSummaryDialog.show(getParentFragmentManager(), "");

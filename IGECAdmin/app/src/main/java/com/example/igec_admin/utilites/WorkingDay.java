@@ -9,13 +9,16 @@ public class WorkingDay {
     private String month, year;
     private double hours;
     private String name,empName;
+    private LocationDetails checkIn, checkOut;
 
-    public WorkingDay(String day, String month, String year, double hours,String empName) {
+    public WorkingDay(String day, String month, String year, double hours,String empName ,LocationDetails checkIn, LocationDetails checkOut) {
         this.day = day;
         this.hours = hours;
         this.month = month;
         this.year = year;
         this.empName = empName;
+        this.checkIn = checkIn;
+        this.checkOut = checkOut;
     }
 
     public String getDay() {

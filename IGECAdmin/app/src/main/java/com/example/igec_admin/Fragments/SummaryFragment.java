@@ -23,6 +23,7 @@ import com.example.igec_admin.fireBase.Employee;
 import com.example.igec_admin.fireBase.EmployeesGrossSalary;
 import com.example.igec_admin.fireBase.Project;
 import com.example.igec_admin.utilites.CsvWriter;
+import com.example.igec_admin.utilites.allowancesEnum;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -167,16 +168,14 @@ public class SummaryFragment extends Fragment {
                                     if (allowance.getName().trim().equalsIgnoreCase("overTime"))
                                         overTime += allowance.getAmount();
                                     //todo use allowancesEnum instead of magic numbers
-                                    switch (allowance.getType()) {
-                                        case 4:
-                                            cuts += allowance.getAmount();
-                                            break;
-                                        case 2:
-                                        case 3:
-                                            personal += allowance.getAmount();
-                                            break;
-                                        default:
-                                            nextMonth += allowance.getAmount();
+                                    if (allowance.getType() == allowancesEnum.PENALTY.ordinal()) {
+                                        cuts += allowance.getAmount();
+                                    } else if (allowance.getType() == allowancesEnum.GIFT.ordinal() || allowance.getType() == allowancesEnum.BONUS.ordinal()) {
+                                        personal += allowance.getAmount();
+                                    } else if (allowance.getType() == allowancesEnum.OVERTIME.ordinal()) {
+                                        overTime += allowance.getAmount();
+                                    } else {
+                                        nextMonth += allowance.getAmount();
                                     }
                                 }
                                 nextMonth = other + personal;

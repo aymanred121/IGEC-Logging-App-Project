@@ -293,7 +293,6 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                             overTime = 0;
                         }
                         overTime=overTime/3600;
-
                         long finalOverTime = overTime;
                         db.document(doc.getReference().getPath()).set(new HashMap<String,Object>(){{
                             put("overTime", finalOverTime);
@@ -302,9 +301,8 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                         overTimeAllowance.setAmount(finalOverTime*currEmployee.getOverTime());
                         overTimeAllowance.setName("overTime");
                         overTimeAllowance.setNote(day);
+                        overTimeAllowance.setType(allowancesEnum.OVERTIME.ordinal());
                         overTimeAllowance.setProjectId(currEmployee.getProjectID());
-                        //todo: to be determined
-                        //overTimeAllowance.setType();
                         db.collection("EmployeesGrossSalary").document(id).collection(year).document(month).get().addOnSuccessListener(doc1 ->{
                            EmployeesGrossSalary emp = doc1.toObject(EmployeesGrossSalary.class);
                             ArrayList<Allowance> allowanceArrayList = emp.getAllTypes();

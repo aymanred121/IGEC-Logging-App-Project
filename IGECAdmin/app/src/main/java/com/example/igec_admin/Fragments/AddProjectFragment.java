@@ -277,14 +277,19 @@ public class AddProjectFragment extends Fragment {
         String day = vTime.getText().toString().substring(0, 2);
         String year = vTime.getText().toString().substring(6, 10);
         String month = vTime.getText().toString().substring(3, 5);
-        int dayInt = Integer.parseInt(day);
-        if(dayInt<25){
-            month = Integer.parseInt(month)-1+"";
-            if(month.length()==1){
-                month = "0"+month;
+        if(Integer.parseInt(day)<25){
+            if(Integer.parseInt(month)-1 == 0){
+                month = "12";
+                year = Integer.parseInt(year)-1+"";
+            }else{
+                month = Integer.parseInt(month)-1+"";
+                if(month.length()==1){
+                    month = "0"+month;
+                }
             }
         }
         final String finalMonth = month;
+        final String finalYear = year;
         final int[] counter = {0};
         Team.forEach(emp -> {
             ArrayList<String> empInfo = new ArrayList<>();
@@ -306,7 +311,7 @@ public class AddProjectFragment extends Fragment {
                 }
                 batch.update(db.collection("EmployeesGrossSalary").document(emp.getId()), "allTypes", employeesGrossSalary.getAllTypes());
 
-                db.collection("EmployeesGrossSalary").document(emp.getId()).collection(year).document(finalMonth).get().addOnSuccessListener(documentSnapshot -> {
+                db.collection("EmployeesGrossSalary").document(emp.getId()).collection(finalYear).document(finalMonth).get().addOnSuccessListener(documentSnapshot -> {
                     if(!documentSnapshot.exists()){
 //                        employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() == allowancesEnum.PROJECT.ordinal());
 //                        employeesGrossSalary.setBaseAllowances(allowances);

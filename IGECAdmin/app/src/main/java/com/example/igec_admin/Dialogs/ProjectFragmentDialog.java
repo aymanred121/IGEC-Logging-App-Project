@@ -378,14 +378,21 @@ public class ProjectFragmentDialog extends DialogFragment {
             String day = currentDateAndTime.substring(0,2);
             String month = currentDateAndTime.substring(3,5);
             String year = currentDateAndTime.substring(6,10);
-            int dayInt = Integer.parseInt(day);
-            if(dayInt<25){
-                month = Integer.parseInt(month)-1+"";
-                if(month.length()==1){
-                    month = "0"+month;
+            if(Integer.parseInt(day)<25){
+                if(Integer.parseInt(month)-1 == 0){
+                    month = "12";
+                    year = Integer.parseInt(year)-1+"";
                 }
+                else{
+                    month = Integer.parseInt(month)-1+"";
+                    if(month.length()==1){
+                        month = "0"+month;
+                    }
+                }
+
             }
             final String finalMonth = month;
+            final String finalYear = year;
             db.collection("EmployeesGrossSalary").document(emp.getId()).get().addOnSuccessListener((value) -> {
                 if (!value.exists())
                     return;
@@ -395,7 +402,7 @@ public class ProjectFragmentDialog extends DialogFragment {
                     employeesGrossSalary.getAllTypes().addAll(allowances);
                 }
                 batch.update(db.collection("EmployeesGrossSalary").document(emp.getId()), "allTypes", employeesGrossSalary.getAllTypes());
-                db.collection("EmployeesGrossSalary").document(emp.getId()).collection(year).document(finalMonth)
+                db.collection("EmployeesGrossSalary").document(emp.getId()).collection(finalYear).document(finalMonth)
                         .get().addOnSuccessListener(documentSnapshot -> {
                                     if(!documentSnapshot.exists()){
                                         //new month

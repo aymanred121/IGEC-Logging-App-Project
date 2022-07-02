@@ -166,12 +166,18 @@ public class AddAllowanceDialog extends DialogFragment {
             String year = currentDateAndTime.substring(6,10);
             int dayInt = Integer.parseInt(day);
             if(dayInt<25){
-                month = Integer.parseInt(month)-1+"";
-                if(month.length()==1){
-                    month = "0"+month;
+                if(Integer.parseInt(month)-1 == 0){
+                    month = "12";
+                    year = Integer.parseInt(year)-1+"";
+                }else{
+                    month = Integer.parseInt(month)-1+"";
+                    if(month.length()==1){
+                        month = "0"+month;
+                    }
                 }
             }
             final String finalMonth = month;
+            final String finalYear = year;
             //todo tbd what is permanent and what is oneTime only
             ArrayList<Allowance> oneTimeAllowances = new ArrayList<>();
             ArrayList<Allowance> permanentAllowances = new ArrayList<>();
@@ -194,7 +200,7 @@ public class AddAllowanceDialog extends DialogFragment {
                     employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() == allowancesEnum.PENALTY.ordinal() || allowance.getType() == allowancesEnum.BONUS.ordinal());
                     employeesGrossSalary.getAllTypes().addAll(permanentAllowances);
                     db.collection("EmployeesGrossSalary").document(employee.getId()).update("allTypes", employeesGrossSalary.getAllTypes());
-                    db.collection("EmployeesGrossSalary").document(employee.getId()).collection(year).document(finalMonth).get().addOnSuccessListener(doc->{
+                    db.collection("EmployeesGrossSalary").document(employee.getId()).collection(finalYear).document(finalMonth).get().addOnSuccessListener(doc->{
                         if(!doc.exists()){
                             //new month
                             employeesGrossSalary.setBaseAllowances(employeesGrossSalary.getAllTypes().stream().filter(x->x.getType()==allowancesEnum.PROJECT.ordinal()).collect(Collectors.toCollection(ArrayList::new)));
@@ -234,13 +240,13 @@ public class AddAllowanceDialog extends DialogFragment {
                             employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() == allowancesEnum.PROJECT.ordinal() && allowance.getProjectId().equals(project.getId()));
                             employeesGrossSalary.getAllTypes().addAll(allowances);
                             db.collection("EmployeesGrossSalary").document(employee.getId()).update("allTypes",employeesGrossSalary.getAllTypes());
-                            db.collection("EmployeesGrossSalary").document(employee.getId()).collection(year).document(finalMonth).get().addOnSuccessListener(doc->{
+                            db.collection("EmployeesGrossSalary").document(employee.getId()).collection(finalYear).document(finalMonth).get().addOnSuccessListener(doc->{
                                 if(!doc.exists()){
                                     //new month
                                     employeesGrossSalary.setBaseAllowances(employeesGrossSalary.getAllTypes().stream().filter(x->x.getType()==allowancesEnum.PROJECT.ordinal()).collect(Collectors.toCollection(ArrayList::new)));
                                     employeesGrossSalary.getBaseAllowances().addAll(allowances);
                                     employeesGrossSalary.getAllTypes().removeIf(x->x.getType()==allowancesEnum.PROJECT.ordinal());
-                                    db.collection("EmployeesGrossSalary").document(employee.getId()).collection(year).document(finalMonth).set(employeesGrossSalary, SetOptions.mergeFields("allTypes","baseAllowances"));
+                                    db.collection("EmployeesGrossSalary").document(employee.getId()).collection(finalYear).document(finalMonth).set(employeesGrossSalary, SetOptions.mergeFields("allTypes","baseAllowances"));
                                     return;
                                 }
                                 EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);

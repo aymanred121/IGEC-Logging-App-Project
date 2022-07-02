@@ -48,7 +48,7 @@ public class SummaryFragment extends Fragment {
     // Vars
     private ProjectAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
-    private String year, month;
+    private String year, month,prevMonth,prevYear;
     ArrayList<Project> projects = new ArrayList();
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     CollectionReference projectRef = db.collection("projects");
@@ -111,6 +111,16 @@ public class SummaryFragment extends Fragment {
                         if (month.length() == 1) {
                             month = "0" + month;
                         }
+                        if((Integer.parseInt(month) -1)<1){
+                            prevMonth = "12";
+                            prevYear = Integer.parseInt(year)-1 +"";
+                        }else{
+                            prevMonth =  (Integer.parseInt(month) -1)+"";
+                            prevYear = year;
+                        }
+                        if (prevMonth.length() == 1) {
+                            prevMonth = "0" + prevMonth;
+                        }
                     }
                 }, today.get(Calendar.YEAR), today.get(Calendar.MONTH));
         builder.setActivatedMonth(today.get(Calendar.MONTH))
@@ -134,12 +144,68 @@ public class SummaryFragment extends Fragment {
                         CsvWriter csvWriter = new CsvWriter(header);
                         final int[] counter = new int[1];
                         for (QueryDocumentSnapshot queryDocumentSnapshot : queryDocumentSnapshots) {
-                            year = selectedDate[1];
-                            month = selectedDate[0];
                             if (month.length() == 1)
                                 month = "0" + month;
-                            db.collection("EmployeesGrossSalary").document(queryDocumentSnapshot.getId()).collection(year).document(month).get().addOnSuccessListener(documentSnapshot1 -> {
-                                if (!documentSnapshot1.exists()) {
+                            db.collection("EmployeesGrossSalary").document(queryDocumentSnapshot.getId()).collection(prevYear).document(prevMonth).get().addOnSuccessListener(doc->{
+                                db.collection("EmployeesGrossSalary").document(queryDocumentSnapshot.getId()).collection(year).document(month).get().addOnSuccessListener(documentSnapshot1 -> {
+                                    if (!documentSnapshot1.exists()) {
+                                        if (counter[0] == queryDocumentSnapshots.size()-1) {
+                                            try {
+                                                csvWriter.build(year+"-"+month);
+                                                Toast.makeText(getActivity(), "CSV file created", Toast.LENGTH_SHORT).show();
+                                            } catch (IOException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                        counter[0]++;
+                                        return;
+                                    }
+                                    Employee emp = queryDocumentSnapshot.toObject(Employee.class);
+                                    double cuts  = 0 ;
+                                    double transportation = 0 ;
+                                    double other = 0 ;
+                                    double overTime = 0;
+                                    double personal = 0;
+                                    double nextMonth = 0;
+                                    double currentMonth = 0;
+                                    double previousMonth = 0;
+                                    for (Allowance allowance : documentSnapshot1.toObject(EmployeesGrossSalary.class).getAllTypes()) {
+                                        if(allowance.getType() == allowancesEnum.NETSALARY.ordinal())
+                                            continue;
+                                        if (allowance.getName().trim().equalsIgnoreCase("Transportation"))
+                                            transportation +=allowance.getAmount();
+                                        if (allowance.getType() == allowancesEnum.PENALTY.ordinal()) {
+                                            cuts += allowance.getAmount();
+                                        } else if (allowance.getType() == allowancesEnum.GIFT.ordinal() || allowance.getType() == allowancesEnum.BONUS.ordinal()) {
+                                            personal += allowance.getAmount();
+                                        } else if (allowance.getType() == allowancesEnum.OVERTIME.ordinal()) {
+                                            overTime += allowance.getAmount();
+                                        } else {
+                                            other += allowance.getAmount();
+                                        }
+                                    }
+                                    nextMonth = other + personal;
+                                    currentMonth = transportation+emp.getSalary()+cuts+overTime;
+                                    if(!doc.exists())
+                                    previousMonth = 0;
+                                    else{
+                                        for (Allowance allowance : doc.toObject(EmployeesGrossSalary.class).getAllTypes()) {
+                                            if(allowance.getType() == allowancesEnum.NETSALARY.ordinal())
+                                                continue;
+                                            if (allowance.getName().trim().equalsIgnoreCase("Transportation"))
+                                                continue;
+                                            if (allowance.getType() == allowancesEnum.PENALTY.ordinal()) {
+                                                continue;
+                                            } else if (allowance.getType() == allowancesEnum.GIFT.ordinal() || allowance.getType() == allowancesEnum.BONUS.ordinal()) {
+                                                previousMonth += allowance.getAmount();
+                                            } else if (allowance.getType() == allowancesEnum.OVERTIME.ordinal()) {
+                                                continue;
+                                            } else {
+                                                previousMonth += allowance.getAmount();
+                                            }
+                                        }
+                                    }
+                                    csvWriter.addDataRow(emp.getFirstName() + " " + emp.getLastName(), String.valueOf(emp.getSalary()), String.valueOf(overTime), String.valueOf(cuts), String.valueOf(transportation) , String.valueOf(other), String.valueOf(personal), String.valueOf(nextMonth) , String.valueOf(currentMonth) , String.valueOf(previousMonth));
                                     if (counter[0] == queryDocumentSnapshots.size()-1) {
                                         try {
                                             csvWriter.build(year+"-"+month);
@@ -149,45 +215,8 @@ public class SummaryFragment extends Fragment {
                                         }
                                     }
                                     counter[0]++;
-                                    return;
-                                }
-                                Employee emp = queryDocumentSnapshot.toObject(Employee.class);
-                                double cuts  = 0 ;
-                                double transportation = 0 ;
-                                double other = 0 ;
-                                double overTime = 0;
-                                double personal = 0;
-                                double nextMonth = 0;
-                                double currentMonth = 0;
-                                double previousMonth = 0;
-                                for (Allowance allowance : documentSnapshot1.toObject(EmployeesGrossSalary.class).getAllTypes()) {
-                                    if(allowance.getType() == allowancesEnum.NETSALARY.ordinal())
-                                        continue;
-                                    if (allowance.getName().trim().equalsIgnoreCase("Transportation"))
-                                        transportation +=allowance.getAmount();
-                                    if (allowance.getType() == allowancesEnum.PENALTY.ordinal()) {
-                                        cuts += allowance.getAmount();
-                                    } else if (allowance.getType() == allowancesEnum.GIFT.ordinal() || allowance.getType() == allowancesEnum.BONUS.ordinal()) {
-                                        personal += allowance.getAmount();
-                                    } else if (allowance.getType() == allowancesEnum.OVERTIME.ordinal()) {
-                                        overTime += allowance.getAmount();
-                                    } else {
-                                        other += allowance.getAmount();
-                                    }
-                                }
-                                nextMonth = other + personal;
-                                currentMonth = transportation+emp.getSalary()+cuts+overTime;
-                                previousMonth = 10000;
-                                csvWriter.addDataRow(emp.getFirstName() + " " + emp.getLastName(), String.valueOf(emp.getSalary()), String.valueOf(overTime), String.valueOf(cuts), String.valueOf(transportation) , String.valueOf(other), String.valueOf(personal), String.valueOf(nextMonth) , String.valueOf(currentMonth) , String.valueOf(previousMonth));
-                                if (counter[0] == queryDocumentSnapshots.size()-1) {
-                                    try {
-                                        csvWriter.build(year+"-"+month);
-                                        Toast.makeText(getActivity(), "CSV file created", Toast.LENGTH_SHORT).show();
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                                counter[0]++;
+                                });
+
                             });
 
                         }

@@ -1,14 +1,14 @@
 package com.example.igecuser.Activities;
 
 
-
 import static com.example.igecuser.cryptography.RSAUtil.decrypt;
 import static com.example.igecuser.cryptography.RSAUtil.privateKey;
 
-import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -19,20 +19,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
 import com.example.igecuser.R;
-import com.example.igecuser.fireBase.Allowance;
 import com.example.igecuser.fireBase.Employee;
-import com.example.igecuser.fireBase.EmployeeOverview;
-import com.example.igecuser.fireBase.EmployeesGrossSalary;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
@@ -58,11 +51,27 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         setContentView(R.layout.activity_main);
+        validateDate(this);
         initialize();
         // Listeners
         vEmail.addTextChangedListener(twEmail);
         vSignIn.setOnClickListener(clSignIn);
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        validateDate(this);
+
+    }
+
+    public void validateDate(Context c) {
+        if (Settings.Global.getInt(c.getContentResolver(), Settings.Global.AUTO_TIME, 0) != 1) {
+            Intent intent = new Intent(MainActivity.this, SplashScreen_DateInaccurate.class);
+            startActivity(intent);
+            finish();
+        }
     }
 
     // Functions
@@ -112,6 +121,7 @@ public class MainActivity extends AppCompatActivity {
         }
         return true;
     }
+
     private void hideError(TextInputLayout textInputLayout) {
         textInputLayout.setErrorEnabled(textInputLayout.getError() != null);
 
@@ -154,29 +164,29 @@ public class MainActivity extends AppCompatActivity {
                     .whereEqualTo("email", (vEmail.getText() != null) ? vEmail.getText().toString() : "")
                     .limit(1)
                     .get().addOnSuccessListener(queryDocumentSnapshots -> {
-                if (queryDocumentSnapshots.size() == 0) {
-                    Toast.makeText(MainActivity.this, "please enter a valid email or password", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                DocumentSnapshot d = queryDocumentSnapshots.getDocuments().get(0);
-                if (d.exists()) {
-                    Employee currEmployee = d.toObject(Employee.class);
-                    if (currEmployee != null && !isPasswordRight(currEmployee.getPassword())) {
-                        return;
-                    }
-                    Intent intent;
-                    if (currEmployee != null && currEmployee.getManagerID() == null) {
-                        Toast.makeText(MainActivity.this, "you are not assigned to any project", Toast.LENGTH_SHORT).show();
-                        return;
-                    } else if (currEmployee != null && currEmployee.getManagerID().equals("adminID")) {
-                        intent = new Intent(MainActivity.this, ManagerDashboard.class);
-                    } else {
-                        intent = new Intent(MainActivity.this, EmployeeDashboard.class);
-                    }
-                    intent.putExtra("emp", currEmployee);
-                    startActivity(intent);
-                }
-            });
+                        if (queryDocumentSnapshots.size() == 0) {
+                            Toast.makeText(MainActivity.this, "please enter a valid email or password", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        DocumentSnapshot d = queryDocumentSnapshots.getDocuments().get(0);
+                        if (d.exists()) {
+                            Employee currEmployee = d.toObject(Employee.class);
+                            if (currEmployee != null && !isPasswordRight(currEmployee.getPassword())) {
+                                return;
+                            }
+                            Intent intent;
+                            if (currEmployee != null && currEmployee.getManagerID() == null) {
+                                Toast.makeText(MainActivity.this, "you are not assigned to any project", Toast.LENGTH_SHORT).show();
+                                return;
+                            } else if (currEmployee != null && currEmployee.getManagerID().equals("adminID")) {
+                                intent = new Intent(MainActivity.this, ManagerDashboard.class);
+                            } else {
+                                intent = new Intent(MainActivity.this, EmployeeDashboard.class);
+                            }
+                            intent.putExtra("emp", currEmployee);
+                            startActivity(intent);
+                        }
+                    });
         }
 
 

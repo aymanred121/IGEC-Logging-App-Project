@@ -5,8 +5,11 @@
       <map>
         <entry key="../../../../../../../layout/custom_preview.xml" value="0.10104166666666667" />
         <entry key="../../../../../layout/custom_preview.xml" value="0.22083333333333333" />
+        <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/drawable/ic_baseline_access_time_24.xml" value="0.168" />
+        <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/activity_employee_dashboard.xml" value="0.13134057971014493" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/activity_main.xml" value="0.5" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/activity_manager_dashboard.xml" value="0.18432971014492755" />
+        <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/activity_splash_screen_date_incorrect.xml" value="0.2" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/activity_vacation_info.xml" value="0.25" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/dialog_add_allowance.xml" value="0.19972826086956522" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/dialog_allowance_info.xml" value="0.25" />

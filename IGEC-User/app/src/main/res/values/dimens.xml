@@ -4,4 +4,6 @@
     <dimen name="mid" >8dp</dimen>
     <dimen name="high">16dp</dimen>
     <dimen name="vhigh">32dp</dimen>
+    <dimen name="extreme">64dp</dimen>
+    <dimen name="vextreme">128dp</dimen>
 </resources>

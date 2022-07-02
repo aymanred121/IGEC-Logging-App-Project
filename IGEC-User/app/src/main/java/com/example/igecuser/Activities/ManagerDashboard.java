@@ -1,7 +1,10 @@
 package com.example.igecuser.Activities;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
@@ -43,13 +46,18 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_manager_dashboard);
-
-
+        validateDate(this);
         initialize();
         // Listeners
         vDrawerLayout.addDrawerListener(actionBarDrawerToggle);
         vDrawerLayout.addDrawerListener(drawerListener);
         viewPager.addOnPageChangeListener(viewPagerListener);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        validateDate(this);
     }
 
     //Listeners
@@ -175,5 +183,13 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
         if (itemId == R.id.item_ProjectSummary)
             viewPager.setCurrentItem(7, true);
 
+    }
+
+    public void validateDate(Context c) {
+        if (Settings.Global.getInt(c.getContentResolver(), Settings.Global.AUTO_TIME, 0) != 1) {
+            Intent intent = new Intent(ManagerDashboard.this, SplashScreen_DateInaccurate.class);
+            startActivity(intent);
+            finish();
+        }
     }
 }

@@ -61,4 +61,6 @@
     <string name="ChangePassword">Change Password</string>
     <string name="perDay">Per Day</string>
     <string name="gift">Gift</string>
+    <string name="date_is_inaccurate">Date is inaccurate</string>
+    <string name="adjust_date">Adjust Date</string>
 </resources>

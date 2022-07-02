@@ -129,7 +129,7 @@ public class SummaryFragment extends Fragment {
             db.collection("employees")
                     .get()
                     .addOnSuccessListener(queryDocumentSnapshots -> {
-                        String[] header = {"Name", "Basic", "Cuts", "Transportation", "personal", "others"};
+                        String[] header = {"Name", "Basic","over time", "Cuts", "Transportation", "other", "personal" , "Next month" , "current month" , "previous month"};
                         CsvWriter csvWriter = new CsvWriter(header);
                         final int[] counter = new int[1];
                         for (QueryDocumentSnapshot queryDocumentSnapshot : queryDocumentSnapshots) {
@@ -153,25 +153,76 @@ public class SummaryFragment extends Fragment {
                                 Employee emp = queryDocumentSnapshot.toObject(Employee.class);
                                 String cuts = " ";
                                 String transportation = " ";
+                                String other = " ";
+                                String overTime = " ";
                                 String personal = " ";
-                                String others = "\"{";
+                                String nextMonth = " ";
+                                String currentMonth = " ";
+                                String previousMonth = " ";
                                 for (Allowance allowance : documentSnapshot1.toObject(EmployeesGrossSalary.class).getAllTypes()) {
                                     if (allowance.getName().trim().equalsIgnoreCase("Transportation"))
                                         transportation = String.valueOf(allowance.getAmount());
+                                    if (allowance.getName().trim().equalsIgnoreCase("other"))
+                                        other = String.valueOf(allowance.getAmount());
+                                    if (allowance.getName().trim().equalsIgnoreCase("overTime"))
+                                        overTime = String.valueOf(allowance.getAmount());
                                     //todo use allowancesEnum instead of magic numbers
                                     switch (allowance.getType()) {
                                         case 4:
                                             cuts = String.valueOf(allowance.getAmount());
                                             break;
+                                        case 2:
                                         case 3:
                                             personal = String.valueOf(allowance.getAmount());
                                             break;
                                         default:
-                                            others += allowance.getAmount() + ",";
+                                            nextMonth += allowance.getAmount() + ",";
                                     }
                                 }
-                                others = others.length() != 2 ? others.substring(0, others.length() - 1) + "}\"" : " ";
-                                csvWriter.addDataRow(emp.getFirstName() + " " + emp.getLastName(), String.valueOf(emp.getSalary()), cuts, transportation, personal, others);
+                                Double DoublePersonal;
+                                Double DoubleOther;
+                                Double DoubleCuts;
+                                Double DoubleTransportation;
+                                Double DoubleoverTime;
+                                try {
+                                    DoublePersonal = Double.parseDouble(personal);
+                                }
+                                catch (NumberFormatException e)
+                                {
+                                    DoublePersonal = 0.0;
+                                }
+                                try {
+                                    DoubleCuts = Double.parseDouble(cuts);
+                                }
+                                catch (NumberFormatException e)
+                                {
+                                    DoubleCuts = 0.0;
+                                }
+                                try {
+                                    DoubleOther = Double.parseDouble(other);
+                                }
+                                catch (NumberFormatException e)
+                                {
+                                    DoubleOther = 0.0;
+                                }
+                                try {
+                                    DoubleTransportation = Double.parseDouble(transportation);
+                                }
+                                catch (NumberFormatException e)
+                                {
+                                    DoubleTransportation = 0.0;
+                                }
+                                try {
+                                    DoubleoverTime = Double.parseDouble(overTime);
+                                }
+                                catch (NumberFormatException e)
+                                {
+                                    DoubleoverTime = 0.0;
+                                }
+                                nextMonth = String.valueOf(DoubleOther + DoublePersonal);
+                                currentMonth = String.valueOf(DoubleTransportation+emp.getSalary()+DoubleCuts+DoubleoverTime);
+                                previousMonth = "10000";
+                                csvWriter.addDataRow(emp.getFirstName() + " " + emp.getLastName(), String.valueOf(emp.getSalary()), overTime, cuts, transportation , other, personal, nextMonth , currentMonth , previousMonth);
                                 if (counter[0] == queryDocumentSnapshots.size()-1) {
                                     try {
                                         csvWriter.build(year+"-"+month);

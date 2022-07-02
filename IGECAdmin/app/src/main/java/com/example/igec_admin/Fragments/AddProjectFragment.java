@@ -115,10 +115,6 @@ public class AddProjectFragment extends Fragment {
                 allowances = bundle.getParcelableArrayList("allowances");
 
                 //Added projectId to each allowance that is coming from project and set type to project
-                allowances.forEach(allowance -> {
-                    allowance.setType(allowancesEnum.PROJECT.ordinal());
-                    allowance.setProjectId(projectID);
-                });
                 // Do something with the result
             }
         });
@@ -355,6 +351,10 @@ public class AddProjectFragment extends Fragment {
         newProject.getAllowancesList().addAll(allowances);
         allowances = newProject.getAllowancesList();
         batch.set(db.collection("projects").document(projectID), newProject);
+        allowances.forEach(allowance -> {
+            allowance.setType(allowancesEnum.PROJECT.ordinal());
+            allowance.setProjectId(projectID);
+        });
         updateEmployeesDetails(projectID);
         projectID = db.collection("projects").document().getId().substring(0, 5);
 

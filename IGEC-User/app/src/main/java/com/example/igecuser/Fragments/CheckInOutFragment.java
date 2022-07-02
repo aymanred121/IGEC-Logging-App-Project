@@ -346,13 +346,8 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                    employeesGrossSalary.setBaseAllowances(employeesGrossSalary.getAllTypes().stream().filter(x->x.getType()==allowancesEnum.PROJECT.ordinal()).collect(Collectors.toCollection(ArrayList::new)));
                    employeesGrossSalary.getAllTypes().removeIf(x->x.getType()==allowancesEnum.PROJECT.ordinal());
                    for(Allowance i :employeesGrossSalary.getBaseAllowances()){
-                       //todo check what allowances to duplicate each day
-                       if(i.getName().equalsIgnoreCase("Transportation")){
-                           Allowance transportation = new Allowance("Transportation",i.getAmount());
-                           transportation.setNote(day);
-                           employeesGrossSalary.getAllTypes().add(transportation);
-                           break;
-                       }
+                       i.setNote(day);
+                       employeesGrossSalary.getAllTypes().add(i);
                    }
                    db.collection("EmployeesGrossSalary").document(doc.getReference().getPath()).set(employeesGrossSalary, SetOptions.merge());
 
@@ -361,14 +356,8 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
            }
            EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
             for(Allowance i :employeesGrossSalary.getBaseAllowances()){
-                //todo check what allowances to duplicate each day
-                if(i.getName().equalsIgnoreCase("Transportation")){
-                    Allowance transportation = new Allowance("Transportation",i.getAmount());
-                    transportation.setNote(day);
-                    transportation.setProjectId(i.getProjectId());
-                    employeesGrossSalary.getAllTypes().add(transportation);
-                    break;
-                }
+                i.setNote(day);
+                employeesGrossSalary.getAllTypes().add(i);
             }
             db.collection("EmployeesGrossSalary").document(currEmployee.getId()).collection(year).document(month).set(employeesGrossSalary, SetOptions.merge());
 

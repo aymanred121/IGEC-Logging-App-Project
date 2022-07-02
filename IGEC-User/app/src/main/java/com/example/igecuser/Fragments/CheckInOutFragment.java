@@ -301,7 +301,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                         Allowance overTimeAllowance=new Allowance();
                         overTimeAllowance.setAmount(finalOverTime*currEmployee.getOverTime());
                         overTimeAllowance.setName("overTime");
-                        overTimeAllowance.setNote(String.valueOf(finalOverTime));
+                        overTimeAllowance.setNote(day);
                         overTimeAllowance.setProjectId(currEmployee.getProjectID());
                         //todo: to be determined
                         //overTimeAllowance.setType();
@@ -309,7 +309,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                            EmployeesGrossSalary emp = doc1.toObject(EmployeesGrossSalary.class);
                             ArrayList<Allowance> allowanceArrayList = emp.getAllTypes();
                             if (allowanceArrayList != null) {
-                                allowanceArrayList.removeIf(x->x.getName().equals("overTime"));
+                                allowanceArrayList.removeIf(x->x.getName().equals("overTime") && x.getNote().trim().equals(day));
                             }
                             allowanceArrayList.add(overTimeAllowance);
                             db.collection("EmployeesGrossSalary").document(id).collection(year).document(month).update("allTypes",allowanceArrayList);

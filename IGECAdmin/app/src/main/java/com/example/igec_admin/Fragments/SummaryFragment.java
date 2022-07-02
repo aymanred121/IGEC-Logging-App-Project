@@ -162,7 +162,7 @@ public class SummaryFragment extends Fragment {
                                 for (Allowance allowance : documentSnapshot1.toObject(EmployeesGrossSalary.class).getAllTypes()) {
                                     if (allowance.getName().trim().equalsIgnoreCase("Transportation"))
                                         transportation +=allowance.getAmount();
-                                    if (allowance.getName().trim().equalsIgnoreCase("other"))
+                                    else
                                         other += allowance.getAmount();
                                     if (allowance.getName().trim().equalsIgnoreCase("overTime"))
                                         overTime += allowance.getAmount();

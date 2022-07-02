@@ -161,13 +161,10 @@ public class SummaryFragment extends Fragment {
                                 double currentMonth = 0;
                                 double previousMonth = 0;
                                 for (Allowance allowance : documentSnapshot1.toObject(EmployeesGrossSalary.class).getAllTypes()) {
+                                    if(allowance.getType() == allowancesEnum.NETSALARY.ordinal())
+                                        continue;
                                     if (allowance.getName().trim().equalsIgnoreCase("Transportation"))
                                         transportation +=allowance.getAmount();
-                                    else
-                                        other += allowance.getAmount();
-                                    if (allowance.getName().trim().equalsIgnoreCase("overTime"))
-                                        overTime += allowance.getAmount();
-                                    //todo use allowancesEnum instead of magic numbers
                                     if (allowance.getType() == allowancesEnum.PENALTY.ordinal()) {
                                         cuts += allowance.getAmount();
                                     } else if (allowance.getType() == allowancesEnum.GIFT.ordinal() || allowance.getType() == allowancesEnum.BONUS.ordinal()) {
@@ -175,7 +172,7 @@ public class SummaryFragment extends Fragment {
                                     } else if (allowance.getType() == allowancesEnum.OVERTIME.ordinal()) {
                                         overTime += allowance.getAmount();
                                     } else {
-                                        nextMonth += allowance.getAmount();
+                                        other += allowance.getAmount();
                                     }
                                 }
                                 nextMonth = other + personal;

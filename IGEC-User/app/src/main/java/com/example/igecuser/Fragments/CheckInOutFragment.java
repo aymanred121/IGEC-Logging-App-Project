@@ -2,8 +2,11 @@ package com.example.igecuser.Fragments;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +18,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentResultListener;
 
@@ -130,6 +134,11 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         hide = AnimationUtils.loadAnimation(getActivity(), R.anim.hide);
         id = currEmployee.getId();
         setCheckInOutBtn();
+        //check if the gps permission is granted
+        if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            //ask for permission
+            getLocationPermissions();
+        }
 
 
         vGreeting.setText(String.format("%s\n%s", getString(R.string.good_morning), currEmployee.getFirstName()));
@@ -137,7 +146,6 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     }
 
     private void setCheckInOutBtn() {
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
         String currentDateAndTime = sdf.format(new Date());
         String day = currentDateAndTime.substring(0,2);
         String month = currentDateAndTime.substring(3,5);
@@ -220,7 +228,10 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                         fusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
                             @Override
                             public void onSuccess(Location location) {
-                                @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+                                if(location == null){
+                                    Toast.makeText(getActivity(), "please enable GPS!", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
                                 String currentDateAndTime = sdf.format(new Date());
                                 String day = currentDateAndTime.substring(0,2);
                                 String month = currentDateAndTime.substring(3,5);
@@ -272,21 +283,27 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
 
     private void employeeCheckOut(Summary summary1, HashMap<String, Object> checkOut) {
         //get current year and month from date
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
         String currentDateAndTime = sdf.format(new Date());
         String day = currentDateAndTime.substring(0,2);
         String month = currentDateAndTime.substring(3,5);
         String year = currentDateAndTime.substring(6,10);
-
+        int dayInt = Integer.parseInt(day);
+        if(dayInt<25){
+            month = Integer.parseInt(month)-1+"";
+            if(month.length()==1){
+                month = "0"+month;
+            }
+        }
         long checkInTime = (summary1.getLastCheckInTime()).getSeconds();
         long checkOutTime = Timestamp.now().getSeconds();
         long workingTime = (checkOutTime - checkInTime);
         //check if working time is greater than 8 hrs
         summary1.setCheckOut(checkOut);
         summary1.setWorkedTime(FieldValue.increment(workingTime));
+        String finalMonth = month;
         db.collection("summary").document(id).collection(year+"-"+month).document(day).update("checkOut", checkOut, "workingTime", FieldValue.increment(workingTime))
                 .addOnSuccessListener(unused -> {
-                    db.collection("summary").document(id).collection(year+"-"+month).document(day).get().addOnSuccessListener(doc->{
+                    db.collection("summary").document(id).collection(year+"-"+ finalMonth).document(day).get().addOnSuccessListener(doc->{
                        long workingTime1 =  (long)doc.getData().get("workingTime");
                         long overTime = (workingTime1-28800);
                         if (overTime < 0) {
@@ -303,14 +320,14 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                         overTimeAllowance.setNote(day);
                         overTimeAllowance.setType(allowancesEnum.OVERTIME.ordinal());
                         overTimeAllowance.setProjectId(currEmployee.getProjectID());
-                        db.collection("EmployeesGrossSalary").document(id).collection(year).document(month).get().addOnSuccessListener(doc1 ->{
+                        db.collection("EmployeesGrossSalary").document(id).collection(year).document(finalMonth).get().addOnSuccessListener(doc1 ->{
                            EmployeesGrossSalary emp = doc1.toObject(EmployeesGrossSalary.class);
                             ArrayList<Allowance> allowanceArrayList = emp.getAllTypes();
                             if (allowanceArrayList != null) {
                                 allowanceArrayList.removeIf(x->x.getName().equals("overTime") && x.getNote().trim().equals(day));
                             }
                             allowanceArrayList.add(overTimeAllowance);
-                            db.collection("EmployeesGrossSalary").document(id).collection(year).document(month).update("allTypes",allowanceArrayList);
+                            db.collection("EmployeesGrossSalary").document(id).collection(year).document(finalMonth).update("allTypes",allowanceArrayList);
                         });
                     });
                     Toast.makeText(getContext(), "Checked Out successfully!", Toast.LENGTH_SHORT).show();
@@ -326,7 +343,14 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         String day = currentDateAndTime.substring(0,2);
         String month = currentDateAndTime.substring(3,5);
         String year = currentDateAndTime.substring(6,10);
-
+        //each month starts in 25th and end 24th of the next month
+        int dayInt = Integer.parseInt(day);
+        if(dayInt<25){
+            month = Integer.parseInt(month)-1+"";
+            if(month.length()==1){
+                month = "0"+month;
+            }
+        }
         summary.setLastCheckInTime(Timestamp.now());
         HashMap<String, Object> checkInDetails = new HashMap<>(summary.getGeoMap());
         checkInDetails.put("Time", Timestamp.now());
@@ -335,6 +359,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         checkIn.put("projectId", currEmployee.getProjectID());
         checkIn.put("lastCheckInTime", summary.getLastCheckInTime());
         db.collection("summary").document(id).collection(year+"-"+month).document(day).set(checkIn);
+        String finalMonth = month;
         db.collection("EmployeesGrossSalary").document(currEmployee.getId()).collection(year).document(month).get().addOnSuccessListener(doc -> {
            if(!doc.exists()){
                //new month
@@ -347,7 +372,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                        i.setNote(day);
                        employeesGrossSalary.getAllTypes().add(i);
                    }
-                   db.collection("EmployeesGrossSalary").document(doc.getReference().getPath()).set(employeesGrossSalary, SetOptions.merge());
+                   db.document(doc.getReference().getPath()).set(employeesGrossSalary, SetOptions.merge());
 
                });
                return;
@@ -357,7 +382,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                 i.setNote(day);
                 employeesGrossSalary.getAllTypes().add(i);
             }
-            db.collection("EmployeesGrossSalary").document(currEmployee.getId()).collection(year).document(month).set(employeesGrossSalary, SetOptions.merge());
+            db.collection("EmployeesGrossSalary").document(currEmployee.getId()).collection(year).document(finalMonth).set(employeesGrossSalary, SetOptions.merge());
 
         });
 

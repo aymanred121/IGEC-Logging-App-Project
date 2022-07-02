@@ -20,6 +20,7 @@ import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Allowance;
 import com.example.igec_admin.fireBase.Employee;
 import com.example.igec_admin.fireBase.EmployeesGrossSalary;
+import com.example.igec_admin.utilites.allowancesEnum;
 import com.github.javafaker.Faker;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.checkbox.MaterialCheckBox;
@@ -56,11 +57,6 @@ public class AddUserFragment extends Fragment {
     // Vars
     long hireDate;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private final int PROJECT = 0;
-    private final int NETSALARY = 1;
-    private final int ALLOWANCE = 2;
-    private final int BONUS = 3;
-    private final int PENALTY = 4;
     private final DocumentReference employeeOverviewRef = db.collection("EmployeeOverview").document("emp");
     private WriteBatch batch = FirebaseFirestore.getInstance().batch();
 
@@ -143,7 +139,7 @@ public class AddUserFragment extends Fragment {
             String id = db.collection("EmployeeOverview").document().getId().substring(0, 5);
             EmployeesGrossSalary employeesGrossSalary = new EmployeesGrossSalary();
             ArrayList<Allowance> allTypes = new ArrayList<>();
-            allTypes.add(new Allowance("Net salary", Double.parseDouble(vSalary.getText().toString()), NETSALARY));
+            allTypes.add(new Allowance("Net salary", Double.parseDouble(vSalary.getText().toString()), allowancesEnum.NETSALARY.ordinal()));
             employeesGrossSalary.setEmployeeId(id);
             employeesGrossSalary.setAllTypes(allTypes);
             ArrayList<String> empInfo = new ArrayList<>();
@@ -161,7 +157,7 @@ public class AddUserFragment extends Fragment {
             String year = vHireDate.getText().toString().substring(6, 10);
             String month = vHireDate.getText().toString().substring(3, 5);
             batch.set(db.collection("employees").document(id), newEmployee);
-            batch.set(db.collection("EmployeesGrossSalary").document(id).collection(year).document(month), employeesGrossSalary);
+            //batch.set(db.collection("EmployeesGrossSalary").document(id).collection(year).document(month), employeesGrossSalary);
             batch.set(db.collection("EmployeesGrossSalary").document(id), employeesGrossSalary);
             batch.commit().addOnSuccessListener(unused -> {
                 clearInputs();
@@ -169,14 +165,6 @@ public class AddUserFragment extends Fragment {
                 Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
                 batch = FirebaseFirestore.getInstance().batch();
             });
-//            db.collection("employees").document(id).set(newEmployee).addOnSuccessListener(unused -> {
-//                db.collection("EmployeesGrossSalary").document(id).set(employeesGrossSalary).addOnSuccessListener(unused1 -> {
-//                    clearInputs();
-//                    fakeData();
-//                    Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
-//
-//                });
-//            });
         });
     }
 

@@ -255,7 +255,8 @@ public class ProjectFragmentDialog extends DialogFragment {
     }
 
     void getEmployees() {
-        employeeOverviewRef
+        db.collection("EmployeeOverview")
+                .document("emp")
                 .addSnapshotListener((documentSnapshot, e) -> {
                     if (e != null) {
                         Log.w(TAG, "Listen failed.", e);
@@ -287,7 +288,6 @@ public class ProjectFragmentDialog extends DialogFragment {
                    db.document(doc.getReference().getPath()).update("allTypes",employeesGrossSalary.getAllTypes());
                 });
                 db.collection("EmployeesGrossSalary").document(empOverview.getId()).collection(year).document(month).update("baseAllowances",null);
-
                 Team.remove(empOverview);
             }
             if (empOverview.getId().equals(vManagerID.getText().toString()) && !isDeleted) {
@@ -302,7 +302,8 @@ public class ProjectFragmentDialog extends DialogFragment {
             empInfo.add(empOverview.getProjectId());
             Map<String, Object> empInfoMap = new HashMap<>();
             empInfoMap.put(empOverview.getId(), empInfo);
-            batch.update(employeeOverviewRef, empInfoMap);
+            batch.update(db.collection("EmployeeOverview")
+                    .document("emp"), empInfoMap);
             batch.update(employeeCol.document(empOverview.getId()), "managerID", empOverview.getManagerID(), "projectID",empOverview.getProjectId());
            }
 
@@ -374,8 +375,17 @@ public class ProjectFragmentDialog extends DialogFragment {
         final int[] counter = {0};
         newProject.getEmployees().forEach(emp -> {
             String currentDateAndTime = sdf.format(new Date());
+            String day = currentDateAndTime.substring(0,2);
             String month = currentDateAndTime.substring(3,5);
             String year = currentDateAndTime.substring(6,10);
+            int dayInt = Integer.parseInt(day);
+            if(dayInt<25){
+                month = Integer.parseInt(month)-1+"";
+                if(month.length()==1){
+                    month = "0"+month;
+                }
+            }
+            final String finalMonth = month;
             db.collection("EmployeesGrossSalary").document(emp.getId()).get().addOnSuccessListener((value) -> {
                 if (!value.exists())
                     return;
@@ -385,13 +395,13 @@ public class ProjectFragmentDialog extends DialogFragment {
                     employeesGrossSalary.getAllTypes().addAll(allowances);
                 }
                 batch.update(db.collection("EmployeesGrossSalary").document(emp.getId()), "allTypes", employeesGrossSalary.getAllTypes());
-                db.collection("EmployeesGrossSalary").document(emp.getId()).collection(year).document(month)
+                db.collection("EmployeesGrossSalary").document(emp.getId()).collection(year).document(finalMonth)
                         .get().addOnSuccessListener(documentSnapshot -> {
                                     if(!documentSnapshot.exists()){
                                         //new month
-                                        employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() == allowancesEnum.PROJECT.ordinal());
-                                        employeesGrossSalary.setBaseAllowances(allowances);
-                                        batch.set(db.document(documentSnapshot.getReference().getPath()), employeesGrossSalary);
+//                                        employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() == allowancesEnum.PROJECT.ordinal());
+//                                        employeesGrossSalary.setBaseAllowances(allowances);
+//                                        batch.set(db.document(documentSnapshot.getReference().getPath()), employeesGrossSalary);
                                         if (counter[0] == newProject.getEmployees().size() - 1) {
                                             batch.commit().addOnSuccessListener(unused1 -> {
                                                 Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
@@ -407,7 +417,10 @@ public class ProjectFragmentDialog extends DialogFragment {
                                         counter[0]++;
                                         return;
                                     }
-                            batch.update(db.document(documentSnapshot.getReference().getPath()), "baseAllowances", allowances);
+                                    EmployeesGrossSalary employeesGrossSalary1 = documentSnapshot.toObject(EmployeesGrossSalary.class);
+                                    employeesGrossSalary1.getBaseAllowances().removeIf(allowance -> allowance.getType() ==  allowancesEnum.PROJECT.ordinal());
+                                    employeesGrossSalary1.getBaseAllowances().addAll(allowances);
+                            batch.update(db.document(documentSnapshot.getReference().getPath()), "baseAllowances", employeesGrossSalary1.getBaseAllowances());
                             if (counter[0] == newProject.getEmployees().size() - 1) {
                                 batch.commit().addOnSuccessListener(unused1 -> {
                                     Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();

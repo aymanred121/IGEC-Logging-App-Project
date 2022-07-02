@@ -439,17 +439,16 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                 .addOnSuccessListener(unused1 -> {
                     machineEmployee.document(machineEmpId).set(machineEmployee1).addOnSuccessListener(unused -> Toast.makeText(getContext(), "Machine: " + currMachine.getReference() + " checked In successfully", Toast.LENGTH_SHORT).show());
                 });
-        //todo: to be removed
-        ArrayList<Allowance> allTypes = new ArrayList<>();
-        db.collection("EmployeesGrossSalary").document(currEmployee.getId()).get().addOnSuccessListener((value) -> {
-            if (!value.exists())
-                return;
-            EmployeesGrossSalary employeesGrossSalary;
-            employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
-            allTypes.addAll(employeesGrossSalary.getAllTypes());
-            allTypes.add(currMachine.getAllowance());
-            db.collection("EmployeesGrossSalary").document(currEmployee.getId()).update("allTypes", allTypes);
-        });
+//        ArrayList<Allowance> allTypes = new ArrayList<>();
+//        db.collection("EmployeesGrossSalary").document(currEmployee.getId()).get().addOnSuccessListener((value) -> {
+//            if (!value.exists())
+//                return;
+//            EmployeesGrossSalary employeesGrossSalary;
+//            employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
+//            allTypes.addAll(employeesGrossSalary.getAllTypes());
+//            allTypes.add(currMachine.getAllowance());
+//            db.collection("EmployeesGrossSalary").document(currEmployee.getId()).update("allTypes", allTypes);
+//        });
 
 
     }

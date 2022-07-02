@@ -92,8 +92,7 @@ public class SendTransferRequest extends Fragment {
     }
 
     private Task<Void> sendRequest(EmployeeOverview employee) {
-        //?bug todo all requests goes to one document
-        String transferId = db.collection("TransferRequests").getId();
+        String transferId = db.collection("TransferRequests").document().getId();
         TransferRequests request = new TransferRequests();
         request.setTransferId(transferId);
         request.setEmployee(employee);

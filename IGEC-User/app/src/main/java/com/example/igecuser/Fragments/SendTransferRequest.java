@@ -115,8 +115,15 @@ public class SendTransferRequest extends Fragment {
                 EmployeesId.add(emp.getId() + " | " + emp.getFirstName() + " " + emp.getLastName());
             }
         ArrayAdapter<String> IdAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, EmployeesId);
-        vEmployeesId.setText(String.format("%s | %s %s", selectedEmployee.getId(), selectedEmployee.getFirstName(), selectedEmployee.getLastName()));
+        if (selectedEmployee != null) // no employees to make a transfer request
+            vEmployeesId.setText(String.format("%s | %s %s", selectedEmployee.getId(), selectedEmployee.getFirstName(), selectedEmployee.getLastName()));
+        else
+        {
+            freezeViews(true);
+        }
         vEmployeesId.setAdapter(IdAdapter);
+        vProjectsReference.setEnabled(false);
+        vEmployeesId.setEnabled(false);
     }
 
     private void getProject() {
@@ -262,14 +269,14 @@ public class SendTransferRequest extends Fragment {
             }
         }
     };
+
     //save string to txt file
     private void saveToFile(String data, String filename) {
         try {
             OutputStreamWriter outputStreamWriter = new OutputStreamWriter(getActivity().openFileOutput(filename, Context.MODE_PRIVATE));
             outputStreamWriter.write(data);
             outputStreamWriter.close();
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             Log.e("Exception", "File write failed: " + e.toString());
         }
     }

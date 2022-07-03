@@ -52,7 +52,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class AddProjectFragment extends Fragment {
 

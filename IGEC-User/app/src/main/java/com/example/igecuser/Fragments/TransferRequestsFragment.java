@@ -42,7 +42,7 @@ public class TransferRequestsFragment extends Fragment {
     private final Employee manager;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private ArrayList<TransferRequests> requests;
-    private final WriteBatch batch = FirebaseFirestore.getInstance().batch();
+    private WriteBatch batch = FirebaseFirestore.getInstance().batch();
     public TransferRequestsFragment(Employee manager) {
         this.manager = manager;
     }
@@ -91,8 +91,8 @@ public class TransferRequestsFragment extends Fragment {
         empInfo.add(request.getEmployee().getFirstName());
         empInfo.add(request.getEmployee().getLastName());
         empInfo.add(request.getEmployee().getTitle());
-        empInfo.add(request.getEmployee().getManagerID());
-        empInfo.add(request.getEmployee().getProjectId());
+        empInfo.add(manager.getId());
+        empInfo.add(manager.getProjectID());
         Map<String, Object> empInfoMap = new HashMap<>();
         empInfoMap.put(request.getEmployee().getId(), empInfo);
         batch.update( db.collection("EmployeeOverview").document("emp"),empInfoMap);
@@ -153,6 +153,7 @@ public class TransferRequestsFragment extends Fragment {
     }
 
     private void updateRequestStatus(TransferRequests request, int status) {
+        batch = FirebaseFirestore.getInstance().batch();
         db.collection("TransferRequests").document(request.getTransferId()).update("transferStatus", status).addOnSuccessListener(unused -> {
             Toast.makeText(getActivity(), "complete", Toast.LENGTH_SHORT).show();
             if (status == 1) {

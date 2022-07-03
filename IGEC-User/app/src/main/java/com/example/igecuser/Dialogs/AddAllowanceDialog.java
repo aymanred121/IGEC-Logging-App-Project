@@ -178,7 +178,6 @@ public class AddAllowanceDialog extends DialogFragment {
             }
             final String finalMonth = month;
             final String finalYear = year;
-            //todo tbd what is permanent and what is oneTime only
             ArrayList<Allowance> oneTimeAllowances = new ArrayList<>();
             ArrayList<Allowance> permanentAllowances = new ArrayList<>();
             if (!isProject) {

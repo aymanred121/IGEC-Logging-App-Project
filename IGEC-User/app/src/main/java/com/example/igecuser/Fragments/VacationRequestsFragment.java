@@ -39,9 +39,11 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.stream.Collectors;
 
 
 public class VacationRequestsFragment extends Fragment {
@@ -174,12 +176,25 @@ public class VacationRequestsFragment extends Fragment {
                 cost.setType(allowancesEnum.PENALTY.ordinal());
                 cost.setProjectId(vacationRequest.getEmployee().getProjectID());
                 cost.setNote(String.format("%d", unPaidDays));
-
                 db.collection("EmployeesGrossSalary")
                         .document(vacationRequest.getEmployee().getId())
                         .collection(year)
                         .document(month)
-                        .update("allTypes", FieldValue.arrayUnion(cost));
+                        .get().addOnSuccessListener(doc->{
+                    if(!doc.exists()){
+                        //new month
+                        db.collection("EmployeesGrossSalary").document(vacationRequest.getEmployee().getId()).get().addOnSuccessListener(documentSnapshot -> {
+                            if (!documentSnapshot.exists()) return;
+                            EmployeesGrossSalary employeesGrossSalary = documentSnapshot.toObject(EmployeesGrossSalary.class);
+                            employeesGrossSalary.setBaseAllowances(employeesGrossSalary.getAllTypes().stream().filter(x->x.getType()==allowancesEnum.PROJECT.ordinal()).collect(Collectors.toCollection(ArrayList::new)));
+                            employeesGrossSalary.getAllTypes().removeIf(x->x.getType()==allowancesEnum.PROJECT.ordinal());
+                            employeesGrossSalary.getBaseAllowances().add(cost);
+                            db.document(doc.getReference().getPath()).set(employeesGrossSalary, SetOptions.merge());
+                        });
+                        return;
+                    }
+                    db.document(doc.getReference().getPath()).update("allTypes",FieldValue.arrayUnion(cost));
+                        });
 
 
             }

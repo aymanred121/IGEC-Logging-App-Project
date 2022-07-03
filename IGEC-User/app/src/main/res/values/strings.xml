@@ -64,4 +64,5 @@
     <string name="date_is_inaccurate">Date is inaccurate</string>
     <string name="adjust_date">Adjust Date</string>
     <string name="month">Month</string>
+    <string name="note">Note:</string>
 </resources>

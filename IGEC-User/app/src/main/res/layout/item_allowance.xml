@@ -16,8 +16,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-
             android:text="@string/reason_for"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/TextView_Note"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/TextView_ReasonFor"
+            android:layout_marginTop="@dimen/high"
+            android:text="@string/note"
             android:textSize="16sp" />
 
         <TextView

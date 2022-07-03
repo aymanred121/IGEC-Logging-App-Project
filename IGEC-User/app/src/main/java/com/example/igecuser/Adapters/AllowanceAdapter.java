@@ -42,6 +42,7 @@ public class AllowanceAdapter extends RecyclerView.Adapter<AllowanceAdapter.Allo
     public void onBindViewHolder(@NonNull AllowanceViewHolder holder, int position) {
         Allowance allowance = allowances.get(position);
         holder.vName.setText(allowance.getName());
+        holder.vNote.setText(allowance.getNote() == null ? "" : String.format("Note: %s", allowance.getNote()));
         holder.vAmount.setText(String.format("%s EGP", allowance.getAmount()));
         if (allowance.getName().equals("Net salary")) return;
         if (allowance.getAmount() > 0) {
@@ -95,7 +96,7 @@ public class AllowanceAdapter extends RecyclerView.Adapter<AllowanceAdapter.Allo
     }
 
     public static class AllowanceViewHolder extends RecyclerView.ViewHolder {
-        public TextView vName, vAmount;
+        public TextView vName, vAmount, vNote;
         public MaterialButton vDelete;
 
         public AllowanceViewHolder(@NonNull View itemView, OnItemClickListener listener, boolean canRemove) {
@@ -103,6 +104,7 @@ public class AllowanceAdapter extends RecyclerView.Adapter<AllowanceAdapter.Allo
 
             vName = itemView.findViewById(R.id.TextView_ReasonFor);
             vAmount = itemView.findViewById(R.id.TextView_MountOf);
+            vNote = itemView.findViewById(R.id.TextView_Note);
 
             if (canRemove) {
                 vDelete = itemView.findViewById(R.id.button_delete);

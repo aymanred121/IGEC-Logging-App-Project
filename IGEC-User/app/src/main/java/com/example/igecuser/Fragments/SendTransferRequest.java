@@ -107,6 +107,8 @@ public class SendTransferRequest extends Fragment {
     }
 
     private void getAllEmployees() {
+        vEmployeesId.setText(null);
+        selectedEmployee = null;
         ArrayList<String> EmployeesId = new ArrayList<>();
         for (EmployeeOverview emp : oldProject.getEmployees())
             if (!emp.getId().equals(manager.getId())) {

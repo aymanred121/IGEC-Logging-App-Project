@@ -65,7 +65,7 @@ public class ProjectSummaryFragment extends Fragment {
     // Functions
     private void initialize(View view) {
 
-        db.collection("projects").document(manager.getProjectID()).get().addOnSuccessListener(documentSnapshot -> {
+        db.collection("projects").document(manager.getProjectID()).addSnapshotListener((documentSnapshot, error) -> {
             if (!documentSnapshot.exists())
                 return;
             project = documentSnapshot.toObject(Project.class);
@@ -96,10 +96,11 @@ public class ProjectSummaryFragment extends Fragment {
         });
 
     }
+
     private final View.OnClickListener oclShowProjectAllowances = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            AddAllowanceDialog employeeSummaryDialog = new AddAllowanceDialog(manager,projectAllowance, false, true);
+            AddAllowanceDialog employeeSummaryDialog = new AddAllowanceDialog(manager, projectAllowance, false, true);
             employeeSummaryDialog.show(getParentFragmentManager(), "");
         }
     };

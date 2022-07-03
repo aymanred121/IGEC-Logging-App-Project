@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -82,12 +83,19 @@ public class GrossSalaryFragment extends Fragment {
         @SuppressLint("SimpleDateFormat")
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
         String currentDateAndTime = sdf.format(new Date());
-        String month = currentDateAndTime.substring(3, 5);
-        String year = currentDateAndTime.substring(6, 10);
+        month = currentDateAndTime.substring(3, 5);
+        year = currentDateAndTime.substring(6, 10);
+        selectedMonthEdit.setText(String.format("%s/%s", month, year));
+        getGrossSalary();
+
+    }
+    private void getGrossSalary()
+    {
+        salarySummaries.clear();
+        adapter.notifyDataSetChanged();
         db.collection("EmployeesGrossSalary").document(employeeId).collection(year).document(month).addSnapshotListener((value, error) -> {
             if (!value.exists())
                 return;
-            salarySummaries.clear();
             salarySummary = 0;
             employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
             for (Allowance allowance : employeesGrossSalary.getAllTypes()) {
@@ -124,10 +132,11 @@ public class GrossSalaryFragment extends Fragment {
                         if (month.length() == 1) {
                             month = "0" + month;
                         }
+                        getGrossSalary();
                     }
                 }, today.get(Calendar.YEAR), today.get(Calendar.MONTH));
-        builder.setActivatedMonth(today.get(Calendar.MONTH))
-                .setActivatedYear(today.get(Calendar.YEAR))
+        builder.setActivatedMonth(Integer.parseInt(month)-1)
+                .setActivatedYear(Integer.parseInt(year))
                 .setTitle("Select Month")
                 .build().show();
 

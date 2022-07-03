@@ -42,8 +42,11 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
         holder.vEmployeeID.setText(String.format("Employee Id: %s", EmployeeOverview.getId()));
         if (project.getEmployeeWorkedTime().get(EmployeeOverview.getId()) == null)
             holder.vWorkingHours.setText("0 Hours");
-        else
-            holder.vWorkingHours.setText(String.format("%s Hours", project.getEmployeeWorkedTime().get(EmployeeOverview.getId())));
+        else{
+            double workingTime = (double) project.getEmployeeWorkedTime().get(EmployeeOverview.getId());
+            workingTime /=3600.0;
+            holder.vWorkingHours.setText(String.format("%s Hours", workingTime));
+        }
     }
 
     @Override

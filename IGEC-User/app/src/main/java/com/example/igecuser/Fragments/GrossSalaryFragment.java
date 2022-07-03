@@ -18,16 +18,22 @@ import com.example.igecuser.Adapters.AllowanceAdapter;
 import com.example.igecuser.R;
 import com.example.igecuser.fireBase.Allowance;
 import com.example.igecuser.fireBase.EmployeesGrossSalary;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.whiteelephant.monthpicker.MonthPickerDialog;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.stream.IntStream;
 
 public class GrossSalaryFragment extends Fragment {
 
 
+    private TextInputLayout selectedMonthLayout;
+    private TextInputEditText selectedMonthEdit;
     private RecyclerView recyclerView;
     private AllowanceAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
@@ -35,6 +41,7 @@ public class GrossSalaryFragment extends Fragment {
     private EmployeesGrossSalary employeesGrossSalary;
     private TextView vGrossSalary;
     private final String employeeId;
+    private String year,month,prevMonth,prevYear;
     private double salarySummary = 0;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -62,6 +69,8 @@ public class GrossSalaryFragment extends Fragment {
 
     // Functions
     private void initialize(View view) {
+        selectedMonthEdit = view.findViewById(R.id.TextInput_SelectedMonth);
+        selectedMonthLayout = view.findViewById(R.id.textInputLayout_SelectedMonth);
         salarySummaries = new ArrayList<>();
         recyclerView = view.findViewById(R.id.recyclerview);
         vGrossSalary = view.findViewById(R.id.TextView_GrossSalary);
@@ -73,8 +82,8 @@ public class GrossSalaryFragment extends Fragment {
         @SuppressLint("SimpleDateFormat")
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
         String currentDateAndTime = sdf.format(new Date());
-        String month = currentDateAndTime.substring(3,5);
-        String year = currentDateAndTime.substring(6,10);
+        String month = currentDateAndTime.substring(3, 5);
+        String year = currentDateAndTime.substring(6, 10);
         db.collection("EmployeesGrossSalary").document(employeeId).collection(year).document(month).addSnapshotListener((value, error) -> {
             if (!value.exists())
                 return;
@@ -97,7 +106,30 @@ public class GrossSalaryFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         initialize(view);
         adapter.setOnItemClickListener(onItemClickListener);
+        selectedMonthLayout.setEndIconOnClickListener(oclMonthPicker);
     }
 
+    private final View.OnClickListener oclMonthPicker = v -> {
+        final Calendar today = Calendar.getInstance();
+        MonthPickerDialog.Builder builder = new MonthPickerDialog.Builder(getActivity(),
+                new MonthPickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(int selectedMonth, int selectedYear) {
+                        selectedMonthLayout.setError(null);
+                        selectedMonthLayout.setErrorEnabled(false);
+                        selectedMonthEdit.setText(String.format("%d/%d", selectedMonth + 1, selectedYear));
+                        String[] selectedDate = selectedMonthEdit.getText().toString().split("/");
+                        year = selectedDate[1];
+                        month = selectedDate[0];
+                        if (month.length() == 1) {
+                            month = "0" + month;
+                        }
+                    }
+                }, today.get(Calendar.YEAR), today.get(Calendar.MONTH));
+        builder.setActivatedMonth(today.get(Calendar.MONTH))
+                .setActivatedYear(today.get(Calendar.YEAR))
+                .setTitle("Select Month")
+                .build().show();
 
+    };
 }

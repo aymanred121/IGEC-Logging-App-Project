@@ -28,25 +28,34 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.igecuser.Adapters.VacationAdapter;
 import com.example.igecuser.R;
+import com.example.igecuser.fireBase.Allowance;
 import com.example.igecuser.fireBase.Employee;
+import com.example.igecuser.fireBase.EmployeesGrossSalary;
 import com.example.igecuser.fireBase.VacationRequest;
+import com.example.igecuser.utilites.allowancesEnum;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 
 
 public class VacationRequestsFragment extends Fragment {
 
+    private Employee employee;
+    private int requestedDays;
+    private AlertDialog dialog;
     private RecyclerView recyclerView;
     private VacationAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
     private ArrayList<VacationRequest> vacationRequests;
     private final Employee currManager;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private String unPaidDays = "";
+    private int unPaidDays;
 
     public VacationRequestsFragment(Employee currManager) {
         this.currManager = currManager;
@@ -78,6 +87,112 @@ public class VacationRequestsFragment extends Fragment {
         recyclerView.setAdapter(adapter);
         loadVacations();
 
+
+    }
+
+    private void showUnpaidDialog(int requestedDays, VacationRequest vacationRequest) {
+        AlertDialog.Builder editTextBuilder = new AlertDialog.Builder(getActivity());
+        final TextInputLayout layout = new TextInputLayout(new ContextThemeWrapper(getActivity(), R.style.Widget_MaterialComponents_TextInputLayout_OutlinedBox));
+        layout.setEndIconMode(TextInputLayout.END_ICON_CLEAR_TEXT);
+        FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        layoutParams.height = 250;
+        layoutParams.width = FrameLayout.MarginLayoutParams.MATCH_PARENT;
+        layoutParams.setMargins(50, 20, 50, 10);
+        layout.setLayoutParams(layoutParams);
+        layout.setHint("Unpaid Days");
+        layout.setBoxBackgroundColor(ContextCompat.getColor(getActivity(), android.R.color.white));
+        layout.setBoxBackgroundMode(TextInputLayout.BOX_BACKGROUND_OUTLINE);
+        final TextInputEditText editText = new TextInputEditText(layout.getContext());
+        editText.setText("0");
+        editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+        editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(2)});
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+                try {
+                    unPaidDays = Integer.parseInt(editable.toString());
+                } catch (Exception e) {
+                    unPaidDays = 0;
+                }
+                int allowed = requestedDays - employee.getTotalNumberOfVacationDays();
+                if (unPaidDays > requestedDays)
+                    layout.setError(String.format("You can't set more than %d days", requestedDays));
+                else if (allowed > 0 && unPaidDays < allowed)
+                    layout.setError(String.format("You must set an unPaid Days with at least %d days", allowed));
+                else {
+                    layout.setError(null);
+                    layout.setErrorEnabled(false);
+                }
+
+
+                ((AlertDialog) dialog).getButton(AlertDialog.BUTTON_POSITIVE).setEnabled(layout.getError() == null);
+
+
+            }
+        });
+        layout.addView(editText);
+        editTextBuilder.setView(layout);
+        editTextBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                db.collection("Vacation")
+                        .document(vacationRequest.getId())
+                        .update("vacationStatus", 1);
+                db.collection("employees")
+                        .document(employee.getId())
+                        .update("totalNumberOfVacationDays"
+                                , employee.getTotalNumberOfVacationDays() - (requestedDays - unPaidDays));
+                final Calendar today = Calendar.getInstance();
+                int sameMonth = today.get(Calendar.MONTH) + 1, nextMonth = today.get(Calendar.MONTH) + 2;
+                String day, month, year;
+                year = String.valueOf(today.get(Calendar.YEAR));
+                month = String.format("%02d", sameMonth);
+                day = String.format("%02d", today.get(Calendar.DAY_OF_MONTH));
+                if (today.get(Calendar.DAY_OF_MONTH) > 25) {
+                    if (nextMonth > 12) {
+                        year = String.valueOf(today.get(Calendar.YEAR) + 1);
+                        month = String.format("%02d", today.get(Calendar.JANUARY));
+                    } else {
+                        month = String.format("%02d", nextMonth);
+                    }
+                }
+                double vacationCost = -((vacationRequest.getEmployee().getSalary() / 30.0) * unPaidDays);
+                Allowance cost = new Allowance();
+                cost.setName("unpaid " + unPaidDays + " days ");
+                cost.setAmount(vacationCost);
+                cost.setType(allowancesEnum.PENALTY.ordinal());
+                cost.setProjectId(vacationRequest.getEmployee().getProjectID());
+                cost.setNote(String.format("%d", unPaidDays));
+
+                db.collection("EmployeesGrossSalary")
+                        .document(vacationRequest.getEmployee().getId())
+                        .collection(year)
+                        .document(month)
+                        .update("allTypes", FieldValue.arrayUnion(cost));
+
+
+            }
+        });
+        editTextBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        dialog = editTextBuilder.create();
+        dialog.show();
+        layout.setLayoutParams(layoutParams);
 
     }
 
@@ -114,81 +229,9 @@ public class VacationRequestsFragment extends Fragment {
         builder.setTitle("Note");
         builder.setPositiveButton("Accept", (dialogInterface, i) -> {
             db.collection("employees").document(vacationRequest.getEmployee().getId()).get().addOnSuccessListener((value) -> {
-                Employee employee = value.toObject(Employee.class);
-                int requestedDays = getDays(vacationRequest);
-                AlertDialog.Builder editTextBuilder = new AlertDialog.Builder(getActivity());
-                final TextInputLayout layout = new TextInputLayout(new ContextThemeWrapper(getActivity(), R.style.Widget_MaterialComponents_TextInputLayout_OutlinedBox));
-                FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-                layoutParams.height = 250;
-                layoutParams.width = FrameLayout.MarginLayoutParams.MATCH_PARENT;
-                layoutParams.setMargins(50, 20, 50, 10);
-                layout.setLayoutParams(layoutParams);
-                layout.setHint("Unpaid Days");
-                layout.setBoxBackgroundColor(ContextCompat.getColor(getActivity(), android.R.color.white));
-                layout.setBoxBackgroundMode(TextInputLayout.BOX_BACKGROUND_OUTLINE);
-                final TextInputEditText editText = new TextInputEditText(layout.getContext());
-                editText.setInputType(InputType.TYPE_CLASS_NUMBER);
-                editText.setFilters(new InputFilter[] { new InputFilter.LengthFilter(2) });
-                editText.addTextChangedListener(new TextWatcher() {
-                    @Override
-                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-                    }
-
-                    @Override
-                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-                    }
-
-                    @Override
-                    public void afterTextChanged(Editable editable) {
-                        int days;
-                        try {
-                            days = Integer.parseInt(editable.toString());
-                        }catch (Exception e) {
-                            days = 0;
-                        }
-                        if(days > requestedDays)
-                            layout.setError("You can't set more than "+ requestedDays + " days");
-                        else if (days < 0)
-                            layout.setError("You can't set less than 0 days");
-                        else {
-                            layout.setError(null);
-                            layout.setErrorEnabled(false);
-                        }
-                    }
-                });
-                layout.addView(editText);
-                editTextBuilder.setView(layout);
-                editTextBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        unPaidDays = editText.getText().toString();
-                        Toast.makeText(getActivity(), unPaidDays, Toast.LENGTH_SHORT).show();
-                    }
-                });
-                editTextBuilder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                });
-                editTextBuilder.show();
-                layout.setLayoutParams(layoutParams);
-                //TODO validate if the entered days are less than days requested in the request
-                //TODO unComment the following lines to update the employee vacation days
-//                if (employee.getTotalNumberOfVacationDays() - Integer.parseInt(getDays(vacationRequest)) < 0) {
-//                    Toast.makeText(getActivity(), "This vacation can't be accepted duo to available days for this Employee", Toast.LENGTH_LONG).show();
-//                    return;
-//                }
-//                db.collection("Vacation")
-//                        .document(vacationRequest.getId())
-//                        .update("vacationStatus", 1);
-//
-//                db.collection("employees")
-//                        .document(employee.getId())
-//                        .update("totalNumberOfVacationDays"
-//                                , employee.getTotalNumberOfVacationDays() - Integer.parseInt(getDays(vacationRequest)));
+                employee = value.toObject(Employee.class);
+                requestedDays = getDays(vacationRequest);
+                showUnpaidDialog(requestedDays, vacationRequest);
 
 
             });

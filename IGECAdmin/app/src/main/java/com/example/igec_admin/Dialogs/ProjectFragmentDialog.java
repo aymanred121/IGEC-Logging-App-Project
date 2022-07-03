@@ -378,13 +378,13 @@ public class ProjectFragmentDialog extends DialogFragment {
             String day = currentDateAndTime.substring(0,2);
             String month = currentDateAndTime.substring(3,5);
             String year = currentDateAndTime.substring(6,10);
-            if(Integer.parseInt(day)<25){
-                if(Integer.parseInt(month)-1 == 0){
-                    month = "12";
-                    year = Integer.parseInt(year)-1+"";
+            if(Integer.parseInt(day)>25){
+                if(Integer.parseInt(month)+1 == 13){
+                    month = "01";
+                    year = Integer.parseInt(year)+1+"";
                 }
                 else{
-                    month = Integer.parseInt(month)-1+"";
+                    month = Integer.parseInt(month)+1+"";
                     if(month.length()==1){
                         month = "0"+month;
                     }
@@ -425,8 +425,12 @@ public class ProjectFragmentDialog extends DialogFragment {
                                         return;
                                     }
                                     EmployeesGrossSalary employeesGrossSalary1 = documentSnapshot.toObject(EmployeesGrossSalary.class);
-                                    employeesGrossSalary1.getBaseAllowances().removeIf(allowance -> allowance.getType() ==  allowancesEnum.PROJECT.ordinal());
-                                    employeesGrossSalary1.getBaseAllowances().addAll(allowances);
+                                    if(employeesGrossSalary1.getBaseAllowances()==null)
+                                        employeesGrossSalary1.setBaseAllowances(allowances);
+                                    else{
+                                        employeesGrossSalary1.getBaseAllowances().removeIf(allowance -> allowance.getType() ==  allowancesEnum.PROJECT.ordinal());
+                                        employeesGrossSalary1.getBaseAllowances().addAll(allowances);
+                                    }
                             batch.update(db.document(documentSnapshot.getReference().getPath()), "baseAllowances", employeesGrossSalary1.getBaseAllowances());
                             if (counter[0] == newProject.getEmployees().size() - 1) {
                                 batch.commit().addOnSuccessListener(unused1 -> {

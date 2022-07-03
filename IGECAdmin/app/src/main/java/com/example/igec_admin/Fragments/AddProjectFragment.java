@@ -276,12 +276,12 @@ public class AddProjectFragment extends Fragment {
         String day = vTime.getText().toString().substring(0, 2);
         String year = vTime.getText().toString().substring(6, 10);
         String month = vTime.getText().toString().substring(3, 5);
-        if(Integer.parseInt(day)<25){
-            if(Integer.parseInt(month)-1 == 0){
-                month = "12";
-                year = Integer.parseInt(year)-1+"";
+        if(Integer.parseInt(day)>25){
+            if(Integer.parseInt(month)+1 == 13){
+                month = "01";
+                year = Integer.parseInt(year)+1+"";
             }else{
-                month = Integer.parseInt(month)-1+"";
+                month = Integer.parseInt(month)+1+"";
                 if(month.length()==1){
                     month = "0"+month;
                 }
@@ -329,7 +329,7 @@ public class AddProjectFragment extends Fragment {
                     return;
                     }
                     EmployeesGrossSalary employeesGrossSalary1 = documentSnapshot.toObject(EmployeesGrossSalary.class);
-                    employeesGrossSalary1.getAllTypes().removeIf(allowance -> allowance.getType() == allowancesEnum.PROJECT.ordinal());
+                    employeesGrossSalary1.getBaseAllowances().removeIf(allowance -> allowance.getType() == allowancesEnum.PROJECT.ordinal());
                     employeesGrossSalary1.getBaseAllowances().addAll(allowances);
                     batch.set(db.document(documentSnapshot.getReference().getPath()),employeesGrossSalary1,SetOptions.mergeFields("baseAllowances"));
                     if (counter[0] == Team.size() - 1) {

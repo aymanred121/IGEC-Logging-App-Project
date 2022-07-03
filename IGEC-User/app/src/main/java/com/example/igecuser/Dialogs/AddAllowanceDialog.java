@@ -165,12 +165,12 @@ public class AddAllowanceDialog extends DialogFragment {
             String month = currentDateAndTime.substring(3,5);
             String year = currentDateAndTime.substring(6,10);
             int dayInt = Integer.parseInt(day);
-            if(dayInt<25){
-                if(Integer.parseInt(month)-1 == 0){
-                    month = "12";
-                    year = Integer.parseInt(year)-1+"";
+            if(dayInt>25){
+                if(Integer.parseInt(month)+1 == 13){
+                    month = "01";
+                    year = Integer.parseInt(year)+1+"";
                 }else{
-                    month = Integer.parseInt(month)-1+"";
+                    month = Integer.parseInt(month)+1+"";
                     if(month.length()==1){
                         month = "0"+month;
                     }

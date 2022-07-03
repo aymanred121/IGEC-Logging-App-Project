@@ -288,12 +288,12 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         String month = currentDateAndTime.substring(3,5);
         String year = currentDateAndTime.substring(6,10);
         int dayInt = Integer.parseInt(day);
-        if(dayInt<25){
-            if(Integer.parseInt(month)-1 == 0){
-                month = "12";
-                year = String.valueOf(Integer.parseInt(year)-1);
+        if(dayInt>25){
+            if(Integer.parseInt(month)+1 == 13){
+                month = "1";
+                year = String.valueOf(Integer.parseInt(year)+1);
             }else{
-                month = String.valueOf(Integer.parseInt(month)-1);
+                month = String.valueOf(Integer.parseInt(month)+1);
                 if(month.length()==1){
                     month = "0"+month;
                 }
@@ -350,13 +350,13 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         String month = currentDateAndTime.substring(3,5);
         String year = currentDateAndTime.substring(6,10);
         //each month starts in 25th and end 24th of the next month
-        if(Integer.parseInt(day)<25){
-            if(Integer.parseInt(month)-1 == 0){
-                month = "12";
-                year = Integer.parseInt(year)-1+"";
+        if(Integer.parseInt(day)>25){
+            if(Integer.parseInt(month)+1 == 13){
+                month = "1";
+                year = Integer.parseInt(year)+1 +"";
                 }
             else{
-                month = Integer.parseInt(month)-1+"";
+                month = Integer.parseInt(month)+1+"";
                 if(month.length()==1){
                     month = "0"+month;
                 }

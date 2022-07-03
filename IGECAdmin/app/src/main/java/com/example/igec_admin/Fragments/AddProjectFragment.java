@@ -423,6 +423,7 @@ public class AddProjectFragment extends Fragment {
         vTimeDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
         vTimeDatePicker = vTimeDatePickerBuilder.build();
         vTimeDatePicker.addOnPositiveButtonClickListener(pclTimeDatePicker);
+        allowances.clear();
     }
 
     void fakeData() {

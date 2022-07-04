@@ -1,9 +1,8 @@
 package com.example.igec_admin.fireBase;
 
-import com.google.firebase.database.Exclude;
 
 public class EmployeeOverview {
-    @Exclude public boolean isSelected = false;
+    public boolean isSelected = false;
     private String firstName, lastName, title, id, managerID, projectId;
 
     public EmployeeOverview() {
@@ -16,12 +15,13 @@ public class EmployeeOverview {
         this.id = id;
     }
 
-    public EmployeeOverview(String firstName, String lastName, String title, String id, String projectId) {
+    public EmployeeOverview(String firstName, String lastName, String title, String id, String projectId, boolean isSelected) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.title = title;
         this.id = id;
         this.projectId = projectId;
+        this.isSelected = isSelected;
     }
 
     public String getFirstName() {
@@ -71,4 +71,5 @@ public class EmployeeOverview {
     public void setProjectId(String projectId) {
         this.projectId = projectId;
     }
+
 }

@@ -148,6 +148,7 @@ public class AddUserFragment extends Fragment {
             empInfo.add((vTitle.getText()).toString());
             empInfo.add(null); // ManagerID
             empInfo.add(null); // ProjectID
+            empInfo.add("0"); // isSelected
             Map<String, Object> empInfoMap = new HashMap<>();
             empInfoMap.put(id, empInfo);
             employeeOverviewRef.update(empInfoMap).addOnFailureListener(e -> employeeOverviewRef.set(empInfoMap));

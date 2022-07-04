@@ -93,6 +93,7 @@ public class TransferRequestsFragment extends Fragment {
         empInfo.add(request.getEmployee().getTitle());
         empInfo.add(manager.getId());
         empInfo.add(manager.getProjectID());
+        empInfo.add("1"); // by default because already in project
         Map<String, Object> empInfoMap = new HashMap<>();
         empInfoMap.put(request.getEmployee().getId(), empInfo);
         batch.update( db.collection("EmployeeOverview").document("emp"),empInfoMap);

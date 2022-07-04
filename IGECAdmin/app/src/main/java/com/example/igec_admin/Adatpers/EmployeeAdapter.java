@@ -52,7 +52,7 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
             });
 
             vSelected = itemView.findViewById(R.id.ImageView_EmployeeSelected);
-            vSelected.setVisibility(isAdd? View.VISIBLE : View.GONE);
+            vSelected.setVisibility(isAdd ? View.VISIBLE : View.GONE);
             vSelected.setOnClickListener(v -> {
                 if (listener != null) {
                     int position = getAdapterPosition();
@@ -83,8 +83,8 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
         EmployeeOverview employee = employeeOverviewsList.get(position);
         holder.vName.setText("Name: " + employee.getFirstName() + " " + employee.getLastName());
         holder.vID.setText("ID: " + employee.getId());
-        holder.vSelected.setChecked(employee.getProjectId() != null);
-        employee.isSelected = employee.getProjectId() != null;
+        holder.vSelected.setChecked(employee.isSelected);
+        holder.vSelected.setEnabled((employee.getManagerID() == null || !employee.getManagerID().equals("adminID")));
     }
 
     public ArrayList<EmployeeOverview> getEmployeeOverviewsList() {

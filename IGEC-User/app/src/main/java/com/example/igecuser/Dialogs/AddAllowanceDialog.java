@@ -182,23 +182,26 @@ public class AddAllowanceDialog extends DialogFragment {
             ArrayList<Allowance> permanentAllowances = new ArrayList<>();
             if (!isProject) {
                 db.collection("EmployeesGrossSalary").document(employee.getId()).get().addOnSuccessListener((value) -> {
+                    Allowance bonus = new Allowance();
                     if (!value.exists())
                         return;
-                    allowances.forEach(allowance -> {
+                    for (Allowance allowance : allowances) {
                         if (allowance.getType() == allowancesEnum.GIFT.ordinal()) {
                             oneTimeAllowances.add(allowance);
                         } else if (allowance.getType() == allowancesEnum.BONUS.ordinal()) {
+                            bonus = allowance;
                             oneTimeAllowances.add(allowance);
                         } else if (allowance.getType() == allowancesEnum.PENALTY.ordinal()) {
                             oneTimeAllowances.add(allowance);
-                        }else {
+                        } else {
                             permanentAllowances.add(allowance);
                         }
-                    });
+                    }
                     employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
                     employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() == allowancesEnum.PENALTY.ordinal() || allowance.getType() == allowancesEnum.BONUS.ordinal());
                     employeesGrossSalary.getAllTypes().addAll(permanentAllowances);
                     db.collection("EmployeesGrossSalary").document(employee.getId()).update("allTypes", employeesGrossSalary.getAllTypes());
+                    Allowance finalBonus = bonus;
                     db.collection("EmployeesGrossSalary").document(employee.getId()).collection(finalYear).document(finalMonth).get().addOnSuccessListener(doc->{
                         if(!doc.exists()){
                             //new month
@@ -210,6 +213,7 @@ public class AddAllowanceDialog extends DialogFragment {
                         }
                         EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
                         employeesGrossSalary.getBaseAllowances().addAll(permanentAllowances);
+                        employeesGrossSalary.getBaseAllowances().add(finalBonus);
                         employeesGrossSalary.getAllTypes().addAll(oneTimeAllowances);
                         db.document(doc.getReference().getPath()).update("allTypes", employeesGrossSalary.getAllTypes(), "baseAllowances", employeesGrossSalary.getBaseAllowances()).addOnSuccessListener(unused -> {
                             oneTimeAllowances.clear();

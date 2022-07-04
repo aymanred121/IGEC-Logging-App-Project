@@ -121,7 +121,7 @@ public class AllowanceInfoDialog extends DialogFragment {
             vPenalty.setChecked(allowance.getAmount() < 0);
             vMode.setText(vPenalty.isChecked() ? "Days(s)" : "Gift");
             vAllowanceName.setText(allowance.getName());
-            vAllowanceMount.setText(String.valueOf(allowance.getAmount()));
+            vAllowanceMount.setText(String.format("%.2f",Math.abs(allowance.getAmount())));
             vAllowanceNote.setText(allowance.getNote());
         }
     }

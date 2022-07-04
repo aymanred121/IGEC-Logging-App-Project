@@ -19,6 +19,7 @@ public class Summary {
     private Object workedTime;
     private Employee employee;
     private Timestamp lastCheckInTime;
+    private String lastDayPath;
 
     public Employee getEmployee() {
         return employee;
@@ -110,5 +111,13 @@ public class Summary {
 
     public void setLastCheckInTime(Timestamp lastCheckInTime) {
         this.lastCheckInTime = lastCheckInTime;
+    }
+
+    public String getLastDayPath() {
+        return lastDayPath;
+    }
+
+    public void setLastDayPath(String lastDayPath) {
+        this.lastDayPath = lastDayPath;
     }
 }

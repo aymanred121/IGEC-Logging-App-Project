@@ -151,7 +151,7 @@ public class AddAllowanceDialog extends DialogFragment {
             db.collection("EmployeesGrossSalary").document(employee.getId()).collection(year).document(month).addSnapshotListener((value, error) -> {
                 if (!value.exists())
                     return;
-                allowances.clear();
+                //allowances.clear();
                 employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
                 //Adds only Bonuses and penalties
                 // get (penalty || gift )
@@ -221,8 +221,11 @@ public class AddAllowanceDialog extends DialogFragment {
                         }
                         EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
                         employeesGrossSalary.getBaseAllowances().addAll(permanentAllowances);
-                        if (finalBonus != null)
+                        if (finalBonus != null) {
+                            employeesGrossSalary.getBaseAllowances().removeIf(x -> x.getName().equals(finalBonus.getName()) && x.getType() == finalBonus.getType() && x.getNote().equals(finalBonus.getNote()));
                             employeesGrossSalary.getBaseAllowances().add(finalBonus);
+                        }
+                        employeesGrossSalary.getAllTypes().removeIf(x -> x.getType() == allowancesEnum.PENALTY.ordinal() || x.getType() == allowancesEnum.GIFT.ordinal());
                         employeesGrossSalary.getAllTypes().addAll(oneTimeAllowances);
                         db.document(doc.getReference().getPath()).update("allTypes", employeesGrossSalary.getAllTypes(), "baseAllowances", employeesGrossSalary.getBaseAllowances()).addOnSuccessListener(unused -> {
                             oneTimeAllowances.clear();
@@ -239,10 +242,8 @@ public class AddAllowanceDialog extends DialogFragment {
                     if (!documentSnapshot.exists())
                         return;
                     project = documentSnapshot.toObject(Project.class);
-                    for (Allowance i : project.getAllowancesList()) {
-                        allowances.removeIf(x -> x.getProjectId().equals(i.getProjectId()) && x.getName().equals(i.getName()));
-                    }
-                    project.getAllowancesList().addAll(allowances);
+                    ArrayList<Allowance> projectAllowances = allowances;
+                    project.setAllowancesList(projectAllowances);
                     db.collection("projects").document(manager.getProjectID()).update("allowancesList", project.getAllowancesList());
                     for (EmployeeOverview employee : project.getEmployees()) {
                         db.collection("EmployeesGrossSalary").document(employee.getId()).get().addOnSuccessListener((value) -> {
@@ -250,19 +251,20 @@ public class AddAllowanceDialog extends DialogFragment {
                                 return;
                             employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
                             employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() == allowancesEnum.PROJECT.ordinal() && allowance.getProjectId().equals(project.getId()));
-                            employeesGrossSalary.getAllTypes().addAll(allowances);
+                            employeesGrossSalary.getAllTypes().addAll(projectAllowances);
                             db.collection("EmployeesGrossSalary").document(employee.getId()).update("allTypes", employeesGrossSalary.getAllTypes());
                             db.collection("EmployeesGrossSalary").document(employee.getId()).collection(finalYear).document(finalMonth).get().addOnSuccessListener(doc -> {
                                 if (!doc.exists()) {
                                     //new month
                                     employeesGrossSalary.setBaseAllowances(employeesGrossSalary.getAllTypes().stream().filter(x -> x.getType() == allowancesEnum.PROJECT.ordinal()).collect(Collectors.toCollection(ArrayList::new)));
-                                    employeesGrossSalary.getBaseAllowances().addAll(allowances);
+                                    employeesGrossSalary.getBaseAllowances().addAll(projectAllowances);
                                     employeesGrossSalary.getAllTypes().removeIf(x -> x.getType() == allowancesEnum.PROJECT.ordinal());
                                     db.collection("EmployeesGrossSalary").document(employee.getId()).collection(finalYear).document(finalMonth).set(employeesGrossSalary, SetOptions.mergeFields("allTypes", "baseAllowances"));
                                     return;
                                 }
                                 EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
-                                employeesGrossSalary.getBaseAllowances().addAll(allowances);
+                                employeesGrossSalary.getBaseAllowances().removeIf(x -> x.getType() == allowancesEnum.PROJECT.ordinal() && x.getProjectId().equals(project.getId()));
+                                employeesGrossSalary.getBaseAllowances().addAll(projectAllowances);
                                 db.document(doc.getReference().getPath()).update("baseAllowances", employeesGrossSalary.getBaseAllowances());
                             });
                         });

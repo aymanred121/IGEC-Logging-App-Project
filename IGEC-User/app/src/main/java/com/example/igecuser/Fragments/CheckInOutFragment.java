@@ -49,6 +49,7 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.firestore.WriteBatch;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -150,8 +151,8 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         String day = currentDateAndTime.substring(0,2);
         String month = currentDateAndTime.substring(3,5);
         String year = currentDateAndTime.substring(6,10);
-        db.collection("summary").document(id).collection(year+"-"+month).document(day).get().addOnSuccessListener((value) -> {
-            if (!value.exists())
+        db.collection("summary").document(id).get().addOnSuccessListener((value) -> {
+            if (!value.exists() || value.getData().size() ==0)
                 isHere = false;
             else {
                 isHere = value.getData().get("checkOut") == null;
@@ -243,8 +244,10 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                 Summary summary = new Summary(latitude, longitude);
                                 HashMap<String, Object> checkOutDetails = new HashMap<>(summary.getGeoMap());
                                 checkOutDetails.put("Time", Timestamp.now());
-                                db.collection("summary").document(id).collection(year+"-"+month).document(day).get().addOnSuccessListener(documentSnapshot -> {
-                                    if (!documentSnapshot.exists()) {
+                                db.collection("summary").document(id)
+                                        //.collection(year+"-"+month).document(day)
+                                        .get().addOnSuccessListener(documentSnapshot -> {
+                                    if (!documentSnapshot.exists() || documentSnapshot.getData().size() ==0 || documentSnapshot.getData().get("checkOut") != null) {
                                         employeeCheckIn(summary);
                                     } else {
                                         Summary summary1 = documentSnapshot.toObject(Summary.class);
@@ -252,7 +255,8 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                             employeeCheckOut(summary1, checkOutDetails);
                                         } else {
                                             summary1.setLastCheckInTime(Timestamp.now());
-                                            db.collection("summary").document(id).collection(year+"-"+month).document(day).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null);
+                                            db.document(summary1.getLastDayPath()).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null);
+                                            db.collection("summary").document(id).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null);
                                         }
                                     }
                                 });
@@ -281,7 +285,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
 
     };
 
-    private void employeeCheckOut(Summary summary1, HashMap<String, Object> checkOut) {
+    private void employeeCheckOut(Summary summary, HashMap<String, Object> checkOut) {
         //get current year and month from date
         String currentDateAndTime = sdf.format(new Date());
         String day = currentDateAndTime.substring(0,2);
@@ -301,15 +305,17 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         }
         String finalMonth = month;
         String finalYear = year;
-        long checkInTime = (summary1.getLastCheckInTime()).getSeconds();
+        String currentPath =  db.collection("summary").document(id).collection(year+"-"+month).document(day).getPath();
+        long checkInTime = (summary.getLastCheckInTime()).getSeconds();
         long checkOutTime = Timestamp.now().getSeconds();
         long workingTime = (checkOutTime - checkInTime);
         //check if working time is greater than 8 hrs
-        summary1.setCheckOut(checkOut);
-        summary1.setWorkedTime(FieldValue.increment(workingTime));
-        db.collection("summary").document(id).collection(year+"-"+month).document(day).update("checkOut", checkOut, "workingTime", FieldValue.increment(workingTime))
+        summary.setCheckOut(checkOut);
+        summary.setWorkedTime(FieldValue.increment(workingTime));
+        db.collection("summary").document(id).update("checkOut", checkOut, "workingTime", FieldValue.increment(workingTime));
+        db.document(summary.getLastDayPath()).update("checkOut", checkOut, "workingTime", FieldValue.increment(workingTime))
                 .addOnSuccessListener(unused -> {
-                    db.collection("summary").document(id).collection(finalYear+"-"+ finalMonth).document(day).get().addOnSuccessListener(doc->{
+                    db.document(summary.getLastDayPath()).get().addOnSuccessListener(doc->{
                        long workingTime1 =  (long)doc.getData().get("workingTime");
                         long overTime = (workingTime1-28800);
                         if (overTime < 0) {
@@ -317,9 +323,17 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                         }
                         overTime=overTime/3600;
                         long finalOverTime = overTime;
-                        db.document(doc.getReference().getPath()).set(new HashMap<String,Object>(){{
+                        WriteBatch batch = db.batch();
+                        batch.set(  db.document(doc.getReference().getPath()),new HashMap<String,Object>(){{
                             put("overTime", finalOverTime);
                         }},SetOptions.merge());
+                        batch.set( db.collection("summary").document(id),new HashMap<String,Object>(){{
+                            put("overTime", finalOverTime);
+                        }},SetOptions.merge());
+                        if(!summary.getLastDayPath().equals(currentPath)){
+                            batch.delete(db.collection("summary").document(id));
+                        }
+                        batch.commit();
                         Allowance overTimeAllowance=new Allowance();
                         overTimeAllowance.setAmount(finalOverTime*currEmployee.getOverTime());
                         overTimeAllowance.setName("overTime");
@@ -341,6 +355,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                             .update("employeeWorkedTime." + currEmployee.getId(), FieldValue.increment(workingTime));
 
                 });
+
     }
 
     private void employeeCheckIn(Summary summary) {
@@ -362,6 +377,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                 }
             }
         }
+        String path =  db.collection("summary").document(id).collection(year+"-"+month).document(day).getPath();
         String finalMonth = month;
         String finalYear = year;
         summary.setLastCheckInTime(Timestamp.now());
@@ -371,7 +387,9 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         checkIn.put("checkIn", checkInDetails);
         checkIn.put("projectId", currEmployee.getProjectID());
         checkIn.put("lastCheckInTime", summary.getLastCheckInTime());
-        db.collection("summary").document(id).collection(year+"-"+month).document(day).set(checkIn);
+        db.document(path).set(checkIn);
+        checkIn.put("lastDayPath",path);
+        db.collection("summary").document(id).set(checkIn);
         db.collection("EmployeesGrossSalary").document(currEmployee.getId()).collection(year).document(month).get().addOnSuccessListener(doc -> {
            if(!doc.exists()){
                //new month
@@ -381,6 +399,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                    employeesGrossSalary.setBaseAllowances(employeesGrossSalary.getAllTypes().stream().filter(x->x.getType()==allowancesEnum.PROJECT.ordinal()).collect(Collectors.toCollection(ArrayList::new)));
                    employeesGrossSalary.getAllTypes().removeIf(x->x.getType()==allowancesEnum.PROJECT.ordinal());
                    for(Allowance i :employeesGrossSalary.getBaseAllowances()){
+                       if(i.getType()!=allowancesEnum.BONUS.ordinal())
                        i.setNote(day);
                        employeesGrossSalary.getAllTypes().add(i);
                    }

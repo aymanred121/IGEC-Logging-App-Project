@@ -63,7 +63,7 @@ public class UserFragmentDialog extends DialogFragment {
     private final int BONUS = 3;
     private final int PENALTY = 4;
     // Views
-    private MaterialCheckBox vAdmin,vTemporary;
+    private MaterialCheckBox vAdmin, vTemporary;
     private MaterialButton vUpdate;
     private MaterialButton vDelete;
     private TextInputEditText vFirstName;
@@ -79,7 +79,7 @@ public class UserFragmentDialog extends DialogFragment {
     private TextInputEditText vStreet;
     private TextInputEditText vHireDate;
     private TextInputEditText vPhone;
-    private TextInputEditText vInsuranceNumber,vInsuranceAmount;
+    private TextInputEditText vInsuranceNumber, vInsuranceAmount;
     private TextInputLayout vHireDateLayout;
     private final MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vDatePicker;
@@ -248,7 +248,7 @@ public class UserFragmentDialog extends DialogFragment {
     }
 
     private void updateProjects(HashMap<String, Object> updatedEmployeeMap) {
-        EmployeeOverview tempEmp = new EmployeeOverview(vFirstName.getText().toString(), vSecondName.getText().toString(), vTitle.getText().toString(), employee.getId(), employee.getProjectID());
+        EmployeeOverview tempEmp = new EmployeeOverview(vFirstName.getText().toString(), vSecondName.getText().toString(), vTitle.getText().toString(), employee.getId(), employee.getProjectID(), employee.getProjectID() != null);
         tempEmp.setManagerID(employee.getManagerID());
         employeeOverviewArrayList.set(currEmpOverviewPos, tempEmp);
         if (employee.getProjectID() == null) {
@@ -279,7 +279,7 @@ public class UserFragmentDialog extends DialogFragment {
 
     private HashMap<String, Object> fillEmployeeData() {
         HashMap<String, Object> empMap = new HashMap<>();
-        empMap.put("overTime" , (Double.parseDouble(vSalary.getText().toString())/30.0/10.0)*1.5);
+        empMap.put("overTime", (Double.parseDouble(vSalary.getText().toString()) / 30.0 / 10.0) * 1.5);
         empMap.put("area", vArea.getText().toString());
         empMap.put("street", vStreet.getText().toString());
         empMap.put("city", vCity.getText().toString());
@@ -350,6 +350,7 @@ public class UserFragmentDialog extends DialogFragment {
         empInfo.add((vTitle.getText()).toString());
         empInfo.add((employee.getManagerID()));
         empInfo.add((employee.getProjectID()));
+        empInfo.add((employee.getManagerID() == null) ? "0" : "1");
         updatedEmpOverviewMap.put(id, empInfo);
         HashMap<String, Object> updatedEmployeeMap = fillEmployeeData();
         db.collection("employees").document(id).update(updatedEmployeeMap).addOnSuccessListener(unused -> {
@@ -362,7 +363,7 @@ public class UserFragmentDialog extends DialogFragment {
                     employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
                     allTypes.addAll(employeesGrossSalary.getAllTypes());
                     allTypes.removeIf(allowance -> allowance.getType() == NETSALARY);
-                    allTypes.add(new Allowance("Net salary" ,Double.parseDouble(vSalary.getText().toString()) , NETSALARY ));
+                    allTypes.add(new Allowance("Net salary", Double.parseDouble(vSalary.getText().toString()), NETSALARY));
                     db.collection("EmployeesGrossSalary").document(employee.getId()).update("allTypes", allTypes);
                 });
             }

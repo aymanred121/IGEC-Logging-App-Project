@@ -28,6 +28,7 @@ import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkRequest;
 
 import com.example.igec_admin.Adatpers.ViewPagerAdapter;
+import com.example.igec_admin.Dialogs.ProjectFragmentDialog;
 import com.example.igec_admin.Fragments.AddMachineFragment;
 import com.example.igec_admin.Fragments.AddProjectFragment;
 import com.example.igec_admin.Fragments.AddUserFragment;
@@ -44,7 +45,7 @@ import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     private DrawerLayout vDrawerLayout;
     private NavigationView vNavigationView;
@@ -54,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // Vars
     private ActionBarDrawerToggle actionBarDrawerToggle;
     private int selectedTab = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -64,19 +66,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         initialize();
 
-
-
         // Listeners
         vDrawerLayout.addDrawerListener(actionBarDrawerToggle);
         vDrawerLayout.addDrawerListener(drawerListener);
         viewPager.addOnPageChangeListener(viewPagerListener);
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        AddProjectFragment.clearTeam();
+        ProjectFragmentDialog.clearTeam();
+    }
+
     //Functions
 
     private void getExternalStoragePerm() {
-        if (Build.VERSION.SDK_INT >= 30){
-            if (!Environment.isExternalStorageManager()){
+        if (Build.VERSION.SDK_INT >= 30) {
+            if (!Environment.isExternalStorageManager()) {
                 Intent intent = new Intent();
                 intent.setAction(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
                 Uri uri = Uri.fromParts("package", this.getPackageName(), null);
@@ -85,6 +92,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         }
     }
+
     private void initialize() {
         // Views
         vToolbar = findViewById(R.id.toolbar);
@@ -136,8 +144,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         selectedTab = item.getItemId();
         return true;
     }
-    private void changeTab(int itemId)
-    {
+
+    private void changeTab(int itemId) {
         if (itemId == R.id.item_addUser)
             viewPager.setCurrentItem(0, true);
         if (itemId == R.id.item_addProject)

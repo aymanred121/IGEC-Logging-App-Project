@@ -75,14 +75,35 @@ public class AddProjectFragment extends Fragment {
     private MaterialDatePicker.Builder<Long> vTimeDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vTimeDatePicker;
     private ArrayList<EmployeeOverview> employees;
-    private ArrayList<String> TeamID;
-    private ArrayList<EmployeeOverview> Team;
+    private static ArrayList<String> TeamID = new ArrayList<>();
+    private static ArrayList<EmployeeOverview> Team = new ArrayList<>();
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private final DocumentReference employeeOverviewRef = db.collection("EmployeeOverview")
             .document("emp");
     private final CollectionReference employeeCol = db.collection("employees");
     private WriteBatch batch = FirebaseFirestore.getInstance().batch();
     private View view;
+
+    public static void clearTeam() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        WriteBatch batch = FirebaseFirestore.getInstance().batch();
+        for (EmployeeOverview emp : Team) {
+            ArrayList<String> empInfo = new ArrayList<>();
+            empInfo.add(emp.getFirstName());
+            empInfo.add(emp.getLastName());
+            empInfo.add(emp.getTitle());
+            empInfo.add(null);
+            empInfo.add(null);
+            empInfo.add("0");
+            Map<String, Object> empInfoMap = new HashMap<>();
+            empInfoMap.put(emp.getId(), empInfo);
+            batch.update(db.collection("EmployeeOverview")
+                    .document("emp"), empInfoMap);
+        }
+        Team.clear();
+        TeamID.clear();
+        batch.commit();
+    }
 
     @Override
     public void onResume() {
@@ -157,9 +178,6 @@ public class AddProjectFragment extends Fragment {
 
     private void initialize() {
         employees = new ArrayList<>();
-        TeamID = new ArrayList<>();
-        Team = new ArrayList<>();
-
         vName = view.findViewById(R.id.TextInput_ProjectName);
         vProjectReference = view.findViewById(R.id.TextInput_ProjectReference);
         vArea = view.findViewById(R.id.TextInput_Area);
@@ -225,21 +243,42 @@ public class AddProjectFragment extends Fragment {
     private void ChangeSelectedTeam(int position) {
 
         employees.get(position).isSelected = !employees.get(position).isSelected;
+        ArrayList<String> empInfo = new ArrayList<>();
+        empInfo.add(employees.get(position).getFirstName());
+        empInfo.add(employees.get(position).getLastName());
+        empInfo.add(employees.get(position).getTitle());
+        empInfo.add(null);
+        empInfo.add(null);
+        batch = FirebaseFirestore.getInstance().batch();
         if (employees.get(position).isSelected) {
             employees.get(position).setProjectId(projectID);
             Team.add(employees.get(position));
             TeamID.add(String.valueOf(employees.get(position).getId()));
+            //TODO: change selected to true
+            empInfo.add("1");
+            Map<String, Object> empInfoMap = new HashMap<>();
+            empInfoMap.put(employees.get(position).getId(), empInfo);
+            batch.update(db.collection("EmployeeOverview")
+                    .document("emp"), empInfoMap);
+
         } else {
 
             if (!vManagerID.getText().toString().isEmpty() && vManagerID.getText().toString().equals(employees.get(position).getId()))
                 vManagerID.setText("");
-            Team.remove(employees.get(position));
+//            Team.remove(employees.get(position));
+            Team.removeIf(employeeOverview -> employeeOverview.getId().equals(employees.get(position).getId()));
             TeamID.remove(String.valueOf(employees.get(position).getId()));
             employees.get(position).setProjectId(null);
+            //TODO: change selected to false
+            empInfo.add("0");
+            Map<String, Object> empInfoMap = new HashMap<>();
+            empInfoMap.put(employees.get(position).getId(), empInfo);
+            batch.update(db.collection("EmployeeOverview")
+                    .document("emp"), empInfoMap);
         }
         vManagerIDLayout.setEnabled(Team.size() >= 1);
         vManagerID.setEnabled(false);
-
+        batch.commit();
         if (!vManagerIDLayout.isEnabled())
             vManagerID.setText("");
         if (TeamID.size() > 0) {
@@ -251,10 +290,10 @@ public class AddProjectFragment extends Fragment {
     }
 
     void getEmployees() {
+//        TeamID.clear();
+//        Team.clear();
         employeeOverviewRef
                 .addSnapshotListener((documentSnapshot, e) -> {
-                    TeamID.clear();
-                    Team.clear();
                     vManagerID.setText(null);
                     vManagerName.setText(null);
                     vManagerID.setEnabled(false);
@@ -276,14 +315,14 @@ public class AddProjectFragment extends Fragment {
         String day = vTime.getText().toString().substring(0, 2);
         String year = vTime.getText().toString().substring(6, 10);
         String month = vTime.getText().toString().substring(3, 5);
-        if(Integer.parseInt(day)>25){
-            if(Integer.parseInt(month)+1 == 13){
+        if (Integer.parseInt(day) > 25) {
+            if (Integer.parseInt(month) + 1 == 13) {
                 month = "01";
-                year = Integer.parseInt(year)+1+"";
-            }else{
-                month = Integer.parseInt(month)+1+"";
-                if(month.length()==1){
-                    month = "0"+month;
+                year = Integer.parseInt(year) + 1 + "";
+            } else {
+                month = Integer.parseInt(month) + 1 + "";
+                if (month.length() == 1) {
+                    month = "0" + month;
                 }
             }
         }
@@ -297,6 +336,7 @@ public class AddProjectFragment extends Fragment {
             empInfo.add(emp.getTitle());
             empInfo.add(emp.getManagerID());
             empInfo.add(projectID);
+            empInfo.add(emp.isSelected ? "1" : "0");
             Map<String, Object> empInfoMap = new HashMap<>();
             empInfoMap.put(emp.getId(), empInfo);
             batch.update(employeeOverviewRef, empInfoMap);
@@ -311,7 +351,7 @@ public class AddProjectFragment extends Fragment {
                 batch.update(db.collection("EmployeesGrossSalary").document(emp.getId()), "allTypes", employeesGrossSalary.getAllTypes());
 
                 db.collection("EmployeesGrossSalary").document(emp.getId()).collection(finalYear).document(finalMonth).get().addOnSuccessListener(documentSnapshot -> {
-                    if(!documentSnapshot.exists()){
+                    if (!documentSnapshot.exists()) {
 //                        employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() == allowancesEnum.PROJECT.ordinal());
 //                        employeesGrossSalary.setBaseAllowances(allowances);
 //                        batch.set(db.document(documentSnapshot.getReference().getPath()),employeesGrossSalary);
@@ -321,24 +361,24 @@ public class AddProjectFragment extends Fragment {
                                 fakeData();
                                 Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
                                 batch = FirebaseFirestore.getInstance().batch();
-                            }).addOnFailureListener(unused->{
+                            }).addOnFailureListener(unused -> {
                                 batch = FirebaseFirestore.getInstance().batch();
                             });
                         }
                         counter[0]++;
-                    return;
+                        return;
                     }
                     EmployeesGrossSalary employeesGrossSalary1 = documentSnapshot.toObject(EmployeesGrossSalary.class);
                     employeesGrossSalary1.getBaseAllowances().removeIf(allowance -> allowance.getType() == allowancesEnum.PROJECT.ordinal());
                     employeesGrossSalary1.getBaseAllowances().addAll(allowances);
-                    batch.set(db.document(documentSnapshot.getReference().getPath()),employeesGrossSalary1,SetOptions.mergeFields("baseAllowances"));
+                    batch.set(db.document(documentSnapshot.getReference().getPath()), employeesGrossSalary1, SetOptions.mergeFields("baseAllowances"));
                     if (counter[0] == Team.size() - 1) {
                         batch.commit().addOnSuccessListener(unused -> {
                             clearInputs();
                             fakeData();
                             Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
                             batch = FirebaseFirestore.getInstance().batch();
-                        }).addOnFailureListener(unused->{
+                        }).addOnFailureListener(unused -> {
                             batch = FirebaseFirestore.getInstance().batch();
                         });
                     }
@@ -364,6 +404,7 @@ public class AddProjectFragment extends Fragment {
         newProject.setClient(client);
         newProject.getAllowancesList().addAll(allowances);
         allowances = newProject.getAllowancesList();
+        batch = FirebaseFirestore.getInstance().batch();
         batch.set(db.collection("projects").document(projectID), newProject);
         allowances.forEach(allowance -> {
             allowance.setType(allowancesEnum.PROJECT.ordinal());
@@ -395,9 +436,19 @@ public class AddProjectFragment extends Fragment {
             String title = empMap.get(key).get(2);
             String managerID = empMap.get(key).get(3);
             String projectID = empMap.get(key).get(4);
+            boolean isSelected = empMap.get(key).get(5).equals("1");
             String id = (key);
-            if ((managerID == null))
-                employees.add(new EmployeeOverview(firstName, lastName, title, id, projectID));
+            /*
+            *
+                d l
+                00 => show
+                10 => hide
+                01 => doesn't exist
+                11 => show
+            * */
+            if (TeamID.contains(id) == isSelected && managerID == null)
+                employees.add(new EmployeeOverview(firstName, lastName, title, id, projectID, isSelected));
+
         }
         adapter.setEmployeeOverviewsList(employees);
         adapter.notifyDataSetChanged();
@@ -478,7 +529,6 @@ public class AddProjectFragment extends Fragment {
     private final EmployeeAdapter.OnItemClickListener itclEmployeeAdapter = new EmployeeAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position) {
-            ChangeSelectedTeam(position);
         }
 
         @Override

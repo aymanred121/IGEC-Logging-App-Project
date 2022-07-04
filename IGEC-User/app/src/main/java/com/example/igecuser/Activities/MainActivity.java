@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         setContentView(R.layout.activity_main);
-        validateDate(this);
+//        validateDate(this);
         initialize();
         // Listeners
         vEmail.addTextChangedListener(twEmail);
@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        validateDate(this);
+//        validateDate(this);
 
     }
 

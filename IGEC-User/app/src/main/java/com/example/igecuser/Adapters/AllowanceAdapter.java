@@ -43,7 +43,7 @@ public class AllowanceAdapter extends RecyclerView.Adapter<AllowanceAdapter.Allo
         Allowance allowance = allowances.get(position);
         holder.vName.setText(allowance.getName());
         holder.vNote.setText(allowance.getNote() == null ? "" : String.format("Note: %s", allowance.getNote()));
-        holder.vAmount.setText(String.format("%s EGP", allowance.getAmount()));
+        holder.vAmount.setText(String.format("%.2f EGP", allowance.getAmount()));
         if (allowance.getName().equals("Net salary")) return;
         if (allowance.getAmount() > 0) {
             holder.vAmount.setTextColor(Color.rgb(0, 153, 0));

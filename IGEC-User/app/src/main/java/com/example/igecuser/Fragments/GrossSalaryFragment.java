@@ -102,7 +102,7 @@ public class GrossSalaryFragment extends Fragment {
                 salarySummaries.add(allowance);
                 salarySummary += allowance.getAmount();
             }
-            vGrossSalary.setText(String.format("%s EGP", salarySummary));
+            vGrossSalary.setText(String.format("%.2f EGP", salarySummary));
             vGrossSalary.setTextColor(Color.rgb(salarySummary > 0 ? 0 : 153, salarySummary > 0 ? 153 : 0, 0));
             adapter.setAllowances(salarySummaries);
             adapter.notifyDataSetChanged();

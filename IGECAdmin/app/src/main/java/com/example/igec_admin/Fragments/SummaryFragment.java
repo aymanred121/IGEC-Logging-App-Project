@@ -174,9 +174,10 @@ public class SummaryFragment extends Fragment {
                                             continue;
                                         if (allowance.getName().trim().equalsIgnoreCase("Transportation"))
                                             transportation +=allowance.getAmount();
-                                        if (allowance.getType() == allowancesEnum.PENALTY.ordinal()) {
+                                        else if (allowance.getType() == allowancesEnum.PENALTY.ordinal()) {
                                             cuts += allowance.getAmount();
-                                        } else if (allowance.getType() == allowancesEnum.GIFT.ordinal() || allowance.getType() == allowancesEnum.BONUS.ordinal()) {
+                                        } else if (allowance.getType() == allowancesEnum.GIFT.ordinal() ||
+                                                allowance.getType() == allowancesEnum.BONUS.ordinal()) {
                                             personal += allowance.getAmount();
                                         } else if (allowance.getType() == allowancesEnum.OVERTIME.ordinal()) {
                                             overTime += allowance.getAmount();

@@ -148,6 +148,7 @@ public class AddAllowanceDialog extends DialogFragment {
         } else {
             allowances = new ArrayList<>();
             db.collection("EmployeesGrossSalary").document(employee.getId()).collection(year).document(month).addSnapshotListener((value, error) -> {
+                adapter.setAllowances(allowances);
                 if (!value.exists())
                     return;
                 //allowances.clear();
@@ -157,7 +158,6 @@ public class AddAllowanceDialog extends DialogFragment {
                 employeesGrossSalary.getAllTypes().stream().filter(allowance -> allowance.getType() == allowancesEnum.PENALTY.ordinal() || allowance.getType() == allowancesEnum.GIFT.ordinal()).forEach(allowance -> allowances.add(allowance));
                 // get (bonus)
                 employeesGrossSalary.getBaseAllowances().stream().filter(allowance -> allowance.getType() == allowancesEnum.BONUS.ordinal()).forEach(allowance -> allowances.add(allowance));
-                adapter.setAllowances(allowances);
                 adapter.notifyDataSetChanged();
             });
         }
@@ -190,7 +190,7 @@ public class AddAllowanceDialog extends DialogFragment {
             ArrayList<Allowance> permanentAllowances = new ArrayList<>();
             if (!isProject) {
                 db.collection("EmployeesGrossSalary").document(employee.getId()).get().addOnSuccessListener((value) -> {
-                   ArrayList<Allowance> bonus = new ArrayList<>();
+                    ArrayList<Allowance> bonus = new ArrayList<>();
                     if (!value.exists())
                         return;
                     for (Allowance allowance : allowances) {
@@ -204,7 +204,7 @@ public class AddAllowanceDialog extends DialogFragment {
                             permanentAllowances.add(allowance);
                         }
                     }
-                   EmployeesGrossSalary employeesGrossSalary1 = value.toObject(EmployeesGrossSalary.class);
+                    EmployeesGrossSalary employeesGrossSalary1 = value.toObject(EmployeesGrossSalary.class);
                     employeesGrossSalary1.getAllTypes().removeIf(allowance -> allowance.getType() == allowancesEnum.PENALTY.ordinal() || allowance.getType() == allowancesEnum.BONUS.ordinal());
                     employeesGrossSalary1.getAllTypes().addAll(permanentAllowances);
                     db.collection("EmployeesGrossSalary").document(employee.getId()).update("allTypes", employeesGrossSalary1.getAllTypes());
@@ -224,11 +224,11 @@ public class AddAllowanceDialog extends DialogFragment {
                          if bonus(es) exists then remove the old ones and add the new modified ones
                          else remove it from the baseAllowances
                         */
-                        if (bonus.size()!=0) {
-                            employeesGrossSalary.getBaseAllowances().removeIf(x->x.getType()==allowancesEnum.BONUS.ordinal());
+                        if (bonus.size() != 0) {
+                            employeesGrossSalary.getBaseAllowances().removeIf(x -> x.getType() == allowancesEnum.BONUS.ordinal());
                             employeesGrossSalary.getBaseAllowances().addAll(bonus);
-                        }else{
-                            employeesGrossSalary.getBaseAllowances().removeIf(x->x.getType() == allowancesEnum.BONUS.ordinal());
+                        } else {
+                            employeesGrossSalary.getBaseAllowances().removeIf(x -> x.getType() == allowancesEnum.BONUS.ordinal());
                         }
                         employeesGrossSalary.getAllTypes().removeIf(x -> x.getType() == allowancesEnum.PENALTY.ordinal() || x.getType() == allowancesEnum.GIFT.ordinal());
                         employeesGrossSalary.getAllTypes().addAll(oneTimeAllowances);
@@ -259,7 +259,7 @@ public class AddAllowanceDialog extends DialogFragment {
                             employeesGrossSalary.getAllTypes().addAll(projectAllowances);
                             db.collection("EmployeesGrossSalary").document(employee.getId()).update("allTypes", employeesGrossSalary.getAllTypes());
                             db.collection("EmployeesGrossSalary").document(employee.getId()).collection(finalYear).document(finalMonth).get().addOnSuccessListener(doc -> {
-                                if (!doc.exists() || doc.getData().size()==0) {
+                                if (!doc.exists() || doc.getData().size() == 0) {
                                     //new month
 //                                    ArrayList<Allowance> allowanceArrayList = new ArrayList<>();
 //                                    for (Allowance allowance : employeesGrossSalary.getAllTypes()) {

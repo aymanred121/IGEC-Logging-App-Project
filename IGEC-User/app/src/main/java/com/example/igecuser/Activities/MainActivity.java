@@ -4,6 +4,7 @@ package com.example.igecuser.Activities;
 import static com.example.igecuser.cryptography.RSAUtil.decrypt;
 import static com.example.igecuser.cryptography.RSAUtil.privateKey;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -28,6 +29,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.regex.Pattern;
 
+import pub.devrel.easypermissions.AfterPermissionGranted;
+import pub.devrel.easypermissions.EasyPermissions;
+
 public class MainActivity extends AppCompatActivity {
 
     private final int PROJECT = 0;
@@ -42,7 +46,8 @@ public class MainActivity extends AppCompatActivity {
     private TextInputEditText vPassword;
     private MaterialButton vSignIn;
     // Vars
-
+    private final int CAMERA_REQUEST_CODE = 123;
+    private final int LOCATION_REQUEST_CODE = 155;
 
     // Overrides
     @RequiresApi(api = Build.VERSION_CODES.Q)
@@ -80,33 +85,41 @@ public class MainActivity extends AppCompatActivity {
         vPassword = findViewById(R.id.TextInput_password);
         vEmailLayout = findViewById(R.id.textInputLayout_Email);
         vSignIn = findViewById(R.id.Button_SignIn);
-
-        vEmail.setText("admin@gmail.com");
+        vEmail.setText("@gmail.com");
         vPassword.setText("1");
 
+        getLocationPermissions();
+        getCameraPermission();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.Q)
-//    private void askPermission() {
-//        String[] PERMISSIONS = {Manifest.permission.ACCESS_BACKGROUND_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.CAMERA};
-//        ActivityCompat.requestPermissions(this, PERMISSIONS, 112);
-//
-//        TedPermission.create()
-//                .setPermissionListener(new PermissionListener() {
-//                    @Override
-//                    public void onPermissionGranted() {
-//                        Toast.makeText(MainActivity.this, "Granted", Toast.LENGTH_SHORT).show();
-//                    }
-//
-//                    @Override
-//                    public void onPermissionDenied(List<String> deniedPermissions) {
-//
-//                    }
-//                })
-//                .setDeniedMessage("If you reject permission,you can not use this service\n\nPlease turn on permissions at [Setting] > [Permission]")
-//                .setPermissions(PERMISSIONS)
-//                .check();
-//    }
+    @AfterPermissionGranted(LOCATION_REQUEST_CODE)
+    private boolean getLocationPermissions() {
+        String[] perms = {Manifest.permission.ACCESS_FINE_LOCATION};
+
+        if (EasyPermissions.hasPermissions(this, perms)) {
+            return true;
+        } else {
+            EasyPermissions.requestPermissions(
+                    this,
+                    "We need location permissions in order to the app to functional correctly",
+                    LOCATION_REQUEST_CODE,
+                    Manifest.permission.ACCESS_FINE_LOCATION);
+            return false;
+        }
+    }
+
+    @AfterPermissionGranted(CAMERA_REQUEST_CODE)
+    private boolean getCameraPermission() {
+        String[] perms = {Manifest.permission.CAMERA};
+        if (EasyPermissions.hasPermissions(this, perms)) {
+            return true;
+        } else {
+            EasyPermissions.requestPermissions(this, "We need camera permission in order to be able to scan the qr code",
+                    CAMERA_REQUEST_CODE, perms);
+            return false;
+        }
+    }
+
 
     private boolean isPasswordRight(String password) {
         try {

@@ -40,6 +40,7 @@ public class MonthSummaryDialog extends DialogFragment {
     private RecyclerView.LayoutManager layoutManager;
     private ArrayList<WorkingDay> workingDays;
     private FloatingActionButton createCSV;
+    private final int MONTH31DAYS = 0xA55;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     public MonthSummaryDialog(ArrayList<WorkingDay> workingDays) {
@@ -98,29 +99,57 @@ public class MonthSummaryDialog extends DialogFragment {
         String month = workingDays.get(0).getMonth();
         String year = workingDays.get(0).getYear();
         String empName = workingDays.get(0).getEmpName();
-        ArrayList<Integer> monthsWith31Days = new ArrayList<>();
-        monthsWith31Days.add(1);
-        monthsWith31Days.add(3);
-        monthsWith31Days.add(5);
-        monthsWith31Days.add(7);
-        monthsWith31Days.add(8);
-        monthsWith31Days.add(10);
-        monthsWith31Days.add(12);
+        int yearNumber = Integer.parseInt(year);
+        int monthNumber = Integer.parseInt(month);
+//        ArrayList<Integer> monthsWith31Days = new ArrayList<>();
+//        monthsWith31Days.add(1);
+//        monthsWith31Days.add(3);
+//        monthsWith31Days.add(5);
+//        monthsWith31Days.add(7);
+//        monthsWith31Days.add(8);
+//        monthsWith31Days.add(10);
+//        monthsWith31Days.add(12);
         StringJoiner header = new StringJoiner(",");
         String[] dataRow;
         header.add("Name");
-        if (monthsWith31Days.contains(Integer.parseInt(month))) {
+        /*
+        we know that months with 31 days are 1 3 5 7 8 10 12
+        and when we use those numbers to shift left 1 we get
+        2,8,32,128,256,1024,4096
+        each of them represent a single 1 at different locations when transform into binary
+        0b0000000000010
+        0b0000000001000
+        0b0000000100000
+        0b0000010000000
+        0b0000100000000
+        0b0010000000000
+        0b1000000000000
+        so we could bitwise and with
+        0b0101001010101
+        we will always get 0 and otherwise with other numbers
+         */
+        if ((1<<(monthNumber)&MONTH31DAYS)==0) {
             //create header with 31 days
             for (int i = 1; i <= 31; i++) {
                 header.add(String.valueOf(i));
             }
             dataRow = new String[32];
-        } else if (Integer.parseInt(month) == 2) {
-            //create header with 28 days
-            for (int i = 1; i <= 28; i++) {
-                header.add(String.valueOf(i));
+        } else if (monthNumber == 2) {
+            if(yearNumber%400 ==0 ||(yearNumber%100 !=0) && (yearNumber%4 ==0 )) {
+                //create header with 29 days
+                for (int i = 1; i <= 29; i++) {
+                    header.add(String.valueOf(i));
+                }
+                dataRow = new String[30];
             }
-            dataRow = new String[29];
+            else{
+                //create header with 28 days
+                for (int i = 1; i <= 28; i++) {
+                    header.add(String.valueOf(i));
+                }
+                dataRow = new String[29];
+            }
+
         } else {
             //create header with 30 days
             for (int i = 1; i <= 30; i++) {

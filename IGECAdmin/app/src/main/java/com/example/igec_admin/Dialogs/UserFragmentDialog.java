@@ -27,6 +27,7 @@ import com.example.igec_admin.fireBase.Employee;
 import com.example.igec_admin.fireBase.EmployeeOverview;
 import com.example.igec_admin.fireBase.EmployeesGrossSalary;
 import com.example.igec_admin.fireBase.Project;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.datepicker.MaterialDatePicker;
@@ -368,6 +369,10 @@ public class UserFragmentDialog extends DialogFragment {
                 });
             }
             updateEmployeeOverview(updatedEmpOverviewMap, updatedEmployeeMap);
+
+        }).addOnFailureListener(e -> {
+            Toast.makeText(getActivity(), "Failed to update due to corrupted data ", Toast.LENGTH_SHORT).show();
+                dismiss();
 
         });
     }

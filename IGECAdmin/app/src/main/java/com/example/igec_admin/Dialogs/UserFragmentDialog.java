@@ -186,7 +186,7 @@ public class UserFragmentDialog extends DialogFragment {
         vPasswordLayout.setEndIconMode(END_ICON_CUSTOM);
         vPasswordLayout.setEndIconDrawable(R.drawable.ic_baseline_autorenew_24);
         vPassword.setEnabled(false);
-
+        vDelete.setEnabled(employee.getManagerID() == null || !employee.getManagerID().equals("adminID"));
     }
 
     boolean validateInputs() {

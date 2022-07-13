@@ -41,17 +41,18 @@
         android:layout_marginTop="@dimen/mid"
         android:layout_marginEnd="@dimen/high"
         app:helperTextEnabled="true"
-        app:prefixText="IGEC"
         app:layout_constraintEnd_toStartOf="@id/checkbox_officeWork"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textInputLayout_ProjectName">
+        app:layout_constraintTop_toBottomOf="@id/textInputLayout_ProjectName"
+        app:prefixText="IGEC">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/TextInput_ProjectReference"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:digits="0123456789-"
             android:hint="@string/reference"
-            android:inputType="text"
+            android:inputType="number"
             android:maxLength="6"
             android:padding="14dp"
             android:singleLine="true" />
@@ -151,10 +152,10 @@
         android:layout_marginStart="@dimen/vhigh"
         android:layout_marginTop="@dimen/mid"
         android:layout_marginEnd="@dimen/vhigh"
+        android:enabled="true"
         app:boxBackgroundMode="outline"
         app:endIconMode="dropdown_menu"
         app:helperTextEnabled="true"
-        android:enabled="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/textInputLayout_Time">
@@ -163,9 +164,9 @@
             android:id="@+id/TextInput_ContractType"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:enabled="false"
             android:hint="@string/contractType"
             android:inputType="text"
-            android:enabled="false"
             android:padding="14dp"
             android:singleLine="true" />
 

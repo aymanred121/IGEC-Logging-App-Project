@@ -343,9 +343,11 @@ public class UserFragmentDialog extends DialogFragment {
     }
 
     private void updateEmployee() {
-        db.collection("employees").whereEqualTo("email", vEmail.getText().toString().trim()).get().addOnSuccessListener(documents -> {
+        db.collection("employees").whereEqualTo("email", vEmail.getText().toString().trim())
+                .whereNotEqualTo("id",employee.getId())
+                .get().addOnSuccessListener(documents -> {
             if (documents.getDocuments().size() != 0) {
-                Toast.makeText(getActivity(), "this Email already exist", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "this Email already exists", Toast.LENGTH_SHORT).show();
                 vUpdate.setEnabled(true);
                 return;
             }

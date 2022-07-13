@@ -122,7 +122,7 @@ public class AllowanceInfoDialog extends DialogFragment {
             vDone.setEnabled(false);
             Bundle result = new Bundle();
             Allowance allowance = new Allowance();
-            allowance.setName(vAllowanceName.getText().toString());
+            allowance.setName(vAllowanceName.getText().toString().trim());
             allowance.setAmount(Double.parseDouble(vAllowanceMount.getText().toString()));
             result.putSerializable("allowance", allowance);
             result.putInt("position", position);

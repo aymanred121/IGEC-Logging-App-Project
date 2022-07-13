@@ -2,6 +2,7 @@ package com.example.igec_admin.Dialogs;
 
 import static com.example.igec_admin.cryptography.RSAUtil.encrypt;
 import static com.google.android.material.textfield.TextInputLayout.END_ICON_CUSTOM;
+import static com.google.android.material.textfield.TextInputLayout.END_ICON_PASSWORD_TOGGLE;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
@@ -113,7 +114,7 @@ public class UserFragmentDialog extends DialogFragment {
         Window window = dialog.getWindow();
 
         if (window != null) {
-            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
+            dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_MODE_CHANGED);
         }
 
         return dialog;
@@ -184,8 +185,7 @@ public class UserFragmentDialog extends DialogFragment {
         vDatePicker = vDatePickerBuilder.setSelection(hireDate).build();
         vPasswordLayout.setEndIconMode(END_ICON_CUSTOM);
         vPasswordLayout.setEndIconDrawable(R.drawable.ic_baseline_autorenew_24);
-        vPassword.setInputType(InputType.TYPE_CLASS_TEXT);
-
+        vPassword.setEnabled(false);
 
     }
 
@@ -343,37 +343,45 @@ public class UserFragmentDialog extends DialogFragment {
     }
 
     private void updateEmployee() {
-        String id = employee.getId();
-        Map<String, Object> updatedEmpOverviewMap = new HashMap<>();
-        ArrayList<String> empInfo = new ArrayList<>();
-        empInfo.add((vFirstName.getText()).toString());
-        empInfo.add((vSecondName.getText()).toString());
-        empInfo.add((vTitle.getText()).toString());
-        empInfo.add((employee.getManagerID()));
-        empInfo.add((employee.getProjectID()));
-        empInfo.add((employee.getManagerID() == null) ? "0" : "1");
-        updatedEmpOverviewMap.put(id, empInfo);
-        HashMap<String, Object> updatedEmployeeMap = fillEmployeeData();
-        db.collection("employees").document(id).update(updatedEmployeeMap).addOnSuccessListener(unused -> {
-            if (employee.getSalary() != Double.parseDouble(vSalary.getText().toString())) {
-                ArrayList<Allowance> allTypes = new ArrayList<>();
-                db.collection("EmployeesGrossSalary").document(employee.getId()).get().addOnSuccessListener((value) -> {
-                    if (!value.exists())
-                        return;
-                    EmployeesGrossSalary employeesGrossSalary;
-                    employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
-                    allTypes.addAll(employeesGrossSalary.getAllTypes());
-                    allTypes.removeIf(allowance -> allowance.getType() == NETSALARY);
-                    allTypes.add(new Allowance("Net salary", Double.parseDouble(vSalary.getText().toString()), NETSALARY));
-                    db.collection("EmployeesGrossSalary").document(employee.getId()).update("allTypes", allTypes);
-                });
+        db.collection("employees").whereEqualTo("email", vEmail.getText().toString().trim()).get().addOnSuccessListener(documents -> {
+            if (documents.getDocuments().size() != 0) {
+                Toast.makeText(getActivity(), "this Email already exist", Toast.LENGTH_SHORT).show();
+                vUpdate.setEnabled(true);
+                return;
             }
-            updateEmployeeOverview(updatedEmpOverviewMap, updatedEmployeeMap);
+            String id = employee.getId();
+            Map<String, Object> updatedEmpOverviewMap = new HashMap<>();
+            ArrayList<String> empInfo = new ArrayList<>();
+            empInfo.add((vFirstName.getText()).toString());
+            empInfo.add((vSecondName.getText()).toString());
+            empInfo.add((vTitle.getText()).toString());
+            empInfo.add((employee.getManagerID()));
+            empInfo.add((employee.getProjectID()));
+            empInfo.add((employee.getManagerID() == null) ? "0" : "1");
+            updatedEmpOverviewMap.put(id, empInfo);
+            HashMap<String, Object> updatedEmployeeMap = fillEmployeeData();
+            db.collection("employees").document(id).update(updatedEmployeeMap).addOnSuccessListener(unused -> {
 
-        }).addOnFailureListener(e -> {
-            Toast.makeText(getActivity(), "Failed to update due to corrupted data ", Toast.LENGTH_SHORT).show();
+                if (employee.getSalary() != Double.parseDouble(vSalary.getText().toString())) {
+                    ArrayList<Allowance> allTypes = new ArrayList<>();
+                    db.collection("EmployeesGrossSalary").document(employee.getId()).get().addOnSuccessListener((value) -> {
+                        if (!value.exists())
+                            return;
+                        EmployeesGrossSalary employeesGrossSalary;
+                        employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
+                        allTypes.addAll(employeesGrossSalary.getAllTypes());
+                        allTypes.removeIf(allowance -> allowance.getType() == NETSALARY);
+                        allTypes.add(new Allowance("Net salary", Double.parseDouble(vSalary.getText().toString()), NETSALARY));
+                        db.collection("EmployeesGrossSalary").document(employee.getId()).update("allTypes", allTypes);
+                    });
+                }
+                updateEmployeeOverview(updatedEmpOverviewMap, updatedEmployeeMap);
+
+            }).addOnFailureListener(e -> {
+                Toast.makeText(getActivity(), "Failed to update due to corrupted data ", Toast.LENGTH_SHORT).show();
                 dismiss();
 
+            });
         });
     }
 
@@ -449,6 +457,7 @@ public class UserFragmentDialog extends DialogFragment {
         @Override
         public void onClick(View view) {
             vPassword.setText("1234");
+            vPassword.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
         }
     };
 

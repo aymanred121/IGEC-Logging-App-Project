@@ -132,7 +132,7 @@ public class AddUserFragment extends Fragment {
     void addEmployee() {
         db.collection("employees").whereEqualTo("email", vEmail.getText().toString().trim()).get().addOnSuccessListener(documents -> {
             if (documents.getDocuments().size() != 0) {
-                Toast.makeText(getActivity(), "this Email is already exist", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "this Email already exist", Toast.LENGTH_SHORT).show();
                 vRegister.setEnabled(true);
                 return;
             }

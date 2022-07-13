@@ -6,7 +6,10 @@ import static com.example.igec_admin.cryptography.RSAUtil.privateKey;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
@@ -31,15 +34,24 @@ public class LoginActivity extends AppCompatActivity {
     private TextInputLayout vEmailLayout;
     private TextInputEditText vPassword;
     private MaterialButton vSignIn;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        isNetworkAvailable();
         initialize();
         // Listeners
         vEmail.addTextChangedListener(twEmail);
         vSignIn.setOnClickListener(clSignIn);
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        isNetworkAvailable();
+    }
+
     // Functions
     private void initialize() {
         vEmail = findViewById(R.id.TextInput_email);
@@ -50,6 +62,19 @@ public class LoginActivity extends AppCompatActivity {
         vPassword.setText("1");
 
     }
+
+    private void isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        boolean connected = activeNetworkInfo != null && activeNetworkInfo.isConnected();
+        if (!connected) {
+            Intent intent = new Intent(LoginActivity.this, SplashScreen_InternetConnection.class);
+            startActivity(intent);
+            finish();
+        }
+    }
+
     private boolean isPasswordRight(String password) {
         try {
             String decryptedPassword = decrypt(password, privateKey);
@@ -63,6 +88,7 @@ public class LoginActivity extends AppCompatActivity {
         }
         return true;
     }
+
     private void hideError(TextInputLayout textInputLayout) {
         textInputLayout.setErrorEnabled(textInputLayout.getError() != null);
 
@@ -105,23 +131,23 @@ public class LoginActivity extends AppCompatActivity {
                     .whereEqualTo("email", (vEmail.getText() != null) ? vEmail.getText().toString() : "")
                     .limit(1)
                     .get().addOnSuccessListener(queryDocumentSnapshots -> {
-                if (queryDocumentSnapshots.size() == 0) {
-                    Toast.makeText(LoginActivity.this, "please enter a valid email or password", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                DocumentSnapshot d = queryDocumentSnapshots.getDocuments().get(0);
-                if (d.exists()) {
-                    Employee currEmployee = d.toObject(Employee.class);
-                    if (currEmployee != null && !isPasswordRight(currEmployee.getPassword())) {
-                        return;
-                    }
-                    Intent intent;
-                    if (currEmployee != null && currEmployee.isAdmin()) {
-                        intent = new Intent(LoginActivity.this, MainActivity.class);
-                        startActivity(intent);
-                    }
-                }
-            });
+                        if (queryDocumentSnapshots.size() == 0) {
+                            Toast.makeText(LoginActivity.this, "please enter a valid email or password", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        DocumentSnapshot d = queryDocumentSnapshots.getDocuments().get(0);
+                        if (d.exists()) {
+                            Employee currEmployee = d.toObject(Employee.class);
+                            if (currEmployee != null && !isPasswordRight(currEmployee.getPassword())) {
+                                return;
+                            }
+                            Intent intent;
+                            if (currEmployee != null && currEmployee.isAdmin()) {
+                                intent = new Intent(LoginActivity.this, MainActivity.class);
+                                startActivity(intent);
+                            }
+                        }
+                    });
         }
 
 

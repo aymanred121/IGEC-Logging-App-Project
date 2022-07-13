@@ -5,6 +5,8 @@ import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -63,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onCreate(savedInstanceState);
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         setContentView(R.layout.activity_main);
-
+        isNetworkAvailable();
         initialize();
 
         // Listeners
@@ -79,6 +81,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         ProjectFragmentDialog.clearTeam();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        isNetworkAvailable();
+    }
+
     //Functions
 
     private void getExternalStoragePerm() {
@@ -90,6 +98,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 intent.setData(uri);
                 startActivity(intent);
             }
+        }
+    }
+
+    private void isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        boolean connected = activeNetworkInfo != null && activeNetworkInfo.isConnected();
+        if (!connected) {
+            Intent intent = new Intent(MainActivity.this, SplashScreen_InternetConnection.class);
+            startActivity(intent);
+            finish();
         }
     }
 

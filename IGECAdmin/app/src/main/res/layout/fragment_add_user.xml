@@ -123,8 +123,6 @@
             android:layout_marginTop="@dimen/mid"
             android:layout_marginEnd="@dimen/vhigh"
             app:boxBackgroundMode="outline"
-            app:counterEnabled="true"
-            app:counterMaxLength="11"
             app:helperTextEnabled="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

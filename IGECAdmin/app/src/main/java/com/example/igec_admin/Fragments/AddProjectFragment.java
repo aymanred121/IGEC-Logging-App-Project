@@ -67,7 +67,7 @@ public class AddProjectFragment extends Fragment {
     // Vars
     private ArrayList<String> contract = new ArrayList<>();
     private ArrayList<Pair<TextInputLayout, EditText>> views;
-    private ArrayList<Allowance> allowances;
+    private ArrayList<Allowance> allowances = new ArrayList<>();
     private Client client;
     private EmployeeOverview selectedManager;
     private String projectID;
@@ -227,7 +227,6 @@ public class AddProjectFragment extends Fragment {
         vAddClient.setEnabled(!vOfficeWork.isChecked());
         getEmployees();
         setUpContractType();
-        allowances = new ArrayList<>();
         fakeData();
 
     }
@@ -401,7 +400,7 @@ public class AddProjectFragment extends Fragment {
                 , vStreet.getText().toString()
                 , vContractType.getText().toString());
         newProject.setId(projectID);
-        newProject.setClient(client);
+        newProject.setClient(vOfficeWork.isChecked() ? null : client);
         newProject.getAllowancesList().addAll(allowances);
         allowances = newProject.getAllowancesList();
         batch = FirebaseFirestore.getInstance().batch();
@@ -540,11 +539,7 @@ public class AddProjectFragment extends Fragment {
         @Override
         public void onClick(View v) {
             AddClientDialog addClientDialog;
-            if (client != null && client.getName().equals(""))
-                addClientDialog = new AddClientDialog(null);
-            else
-                addClientDialog = new AddClientDialog(client);
-
+            addClientDialog = new AddClientDialog(client);
             addClientDialog.show(getParentFragmentManager(), "");
         }
     };

@@ -101,6 +101,12 @@ public class ProjectFragmentDialog extends DialogFragment {
 
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        dismiss();
+    }
+
     public static void clearTeam() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         WriteBatch batch = FirebaseFirestore.getInstance().batch();
@@ -617,7 +623,7 @@ public class ProjectFragmentDialog extends DialogFragment {
     };
     View.OnClickListener clUpdate = v -> {
         if (validateInputs()) {
-            vUpdate.setEnabled(true);
+            vUpdate.setEnabled(false);
             updateProject();
         } else {
             Toast.makeText(getActivity(), "please, fill the project data", Toast.LENGTH_SHORT).show();
@@ -642,10 +648,7 @@ public class ProjectFragmentDialog extends DialogFragment {
         @Override
         public void onClick(View v) {
             AddClientDialog addClientDialog;
-            if (client != null && client.getName().equals(""))
-                addClientDialog = new AddClientDialog(null);
-            else
-                addClientDialog = new AddClientDialog(client);
+            addClientDialog = new AddClientDialog(client);
 
             addClientDialog.show(getParentFragmentManager(), "");
         }

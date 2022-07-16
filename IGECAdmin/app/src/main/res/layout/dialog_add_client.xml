@@ -65,8 +65,6 @@
             android:layout_marginTop="@dimen/low"
             android:layout_marginEnd="@dimen/vhigh"
             app:boxBackgroundMode="outline"
-            app:counterEnabled="true"
-            app:counterMaxLength="11"
             app:helperTextEnabled="true">
 
             <com.google.android.material.textfield.TextInputEditText

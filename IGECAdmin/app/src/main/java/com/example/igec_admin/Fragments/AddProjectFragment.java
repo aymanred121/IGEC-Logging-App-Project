@@ -368,8 +368,10 @@ public class AddProjectFragment extends Fragment {
                         return;
                     }
                     EmployeesGrossSalary employeesGrossSalary1 = documentSnapshot.toObject(EmployeesGrossSalary.class);
-                    employeesGrossSalary1.getBaseAllowances().removeIf(allowance -> allowance.getType() == allowancesEnum.PROJECT.ordinal());
-                    employeesGrossSalary1.getBaseAllowances().addAll(allowances);
+                    if (employeesGrossSalary1.getBaseAllowances() != null) {
+                        employeesGrossSalary1.getBaseAllowances().removeIf(allowance -> allowance.getType() == allowancesEnum.PROJECT.ordinal());
+                        employeesGrossSalary1.getBaseAllowances().addAll(allowances);
+                    }
                     batch.set(db.document(documentSnapshot.getReference().getPath()), employeesGrossSalary1, SetOptions.mergeFields("baseAllowances"));
                     if (counter[0] == Team.size() - 1) {
                         batch.commit().addOnSuccessListener(unused -> {
@@ -498,7 +500,10 @@ public class AddProjectFragment extends Fragment {
                 return true;
             }
         }
-        return false;
+        boolean isThereAClient = (!vOfficeWork.isChecked() && client == null);
+        if(isThereAClient)
+            Toast.makeText(getActivity(), "Missing client info", Toast.LENGTH_SHORT).show();
+        return isThereAClient;
     }
 
     boolean validateInputs() {

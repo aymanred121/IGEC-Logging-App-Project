@@ -425,7 +425,8 @@ public class ProjectFragmentDialog extends DialogFragment {
                         vStreet.getText().toString().isEmpty() ||
                         vManagerID.getText().toString().isEmpty() ||
                         vManagerName.getText().toString().isEmpty() ||
-                        vTime.getText().toString().isEmpty());
+                        vTime.getText().toString().isEmpty() ||
+                        (!vOfficeWork.isChecked() && client == null));
     }
 
     void updateProject() {
@@ -441,7 +442,7 @@ public class ProjectFragmentDialog extends DialogFragment {
                 , vStreet.getText().toString()
                 , vContractType.getText().toString());
         newProject.setId(project.getId());
-        newProject.setClient(client);
+        newProject.setClient(vOfficeWork.isChecked() ? null : client);
         //Added projectId to each allowance that is coming from project
         allowances.stream().flatMap(allowance -> {
             allowance.setProjectId(project.getId());

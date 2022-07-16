@@ -22,6 +22,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentResultListener;
 
+
+import com.birjuvachhani.locus.Locus;
 import com.example.igecuser.Dialogs.ClientInfoDialog;
 import com.example.igecuser.Dialogs.MachineCheckInOutDialog;
 import com.example.igecuser.Dialogs.SupplementsDialog;
@@ -61,6 +63,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -225,59 +229,54 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                     .setNegativeButton(getString(R.string.No), (dialogInterface, i) -> {
                     })
                     .setPositiveButton(getString(R.string.Yes), (dialogInterface, i) -> {
+                        Locus.INSTANCE.getCurrentLocation(getActivity(), result ->{
+                            Location location = result.getLocation();
+                            String currentDateAndTime = sdf.format(new Date());
+                            String day = currentDateAndTime.substring(0,2);
+                            String month = currentDateAndTime.substring(3,5);
+                            String year = currentDateAndTime.substring(6,10);
 
-                        fusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
-                            @Override
-                            public void onSuccess(Location location) {
-                                if(location == null){
-                                    Toast.makeText(getActivity(), "please enable GPS!", Toast.LENGTH_SHORT).show();
-                                    return;
-                                }
-                                String currentDateAndTime = sdf.format(new Date());
-                                String day = currentDateAndTime.substring(0,2);
-                                String month = currentDateAndTime.substring(3,5);
-                                String year = currentDateAndTime.substring(6,10);
+                            longitude = location.getLongitude();
+                            latitude = location.getLatitude();
 
-                                longitude = location.getLongitude();
-                                latitude = location.getLatitude();
-
-                                Summary summary = new Summary(latitude, longitude);
-                                HashMap<String, Object> checkOutDetails = new HashMap<>(summary.getGeoMap());
-                                checkOutDetails.put("Time", Timestamp.now());
-                                db.collection("summary").document(id)
-                                        //.collection(year+"-"+month).document(day)
-                                        .get().addOnSuccessListener(documentSnapshot -> {
-                                    if (!documentSnapshot.exists() || documentSnapshot.getData().size() ==0 || documentSnapshot.getData().get("checkOut") != null) {
-                                        employeeCheckIn(summary);
-                                    } else {
-                                        Summary summary1 = documentSnapshot.toObject(Summary.class);
-                                        if (summary1.getCheckOut() == null) {
-                                            employeeCheckOut(summary1, checkOutDetails);
+                            Summary summary = new Summary(latitude, longitude);
+                            HashMap<String, Object> checkOutDetails = new HashMap<>(summary.getGeoMap());
+                            checkOutDetails.put("Time", Timestamp.now());
+                            db.collection("summary").document(id)
+                                    //.collection(year+"-"+month).document(day)
+                                    .get().addOnSuccessListener(documentSnapshot -> {
+                                        if (!documentSnapshot.exists() || documentSnapshot.getData().size() ==0 || documentSnapshot.getData().get("checkOut") != null) {
+                                            employeeCheckIn(summary);
                                         } else {
-                                            summary1.setLastCheckInTime(Timestamp.now());
-                                            db.document(summary1.getLastDayPath()).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null);
-                                            db.collection("summary").document(id).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null);
+                                            Summary summary1 = documentSnapshot.toObject(Summary.class);
+                                            if (summary1.getCheckOut() == null) {
+                                                employeeCheckOut(summary1, checkOutDetails);
+                                            } else {
+                                                summary1.setLastCheckInTime(Timestamp.now());
+                                                db.document(summary1.getLastDayPath()).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null);
+                                                db.collection("summary").document(id).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null);
+                                            }
                                         }
-                                    }
-                                });
-                                isHere = !isHere;
-                                vCheckInOut.setBackgroundColor((isHere) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
-                                vCheckInOut.setText(isHere ? "Out" : "In");
-                                vAddMachine.setClickable(isHere);
-                                if (isOpen) {
-                                    vAddMachine.startAnimation(rotateBackwardHide);
-                                    vAddMachineInside.startAnimation(fabClose);
-                                    vAddMachineOutside.startAnimation(fabClose);
-                                    vInsideText.startAnimation(hide);
-                                    vOutsideText.startAnimation(hide);
-                                    vAddMachineInside.setClickable(false);
-                                    vAddMachineOutside.setClickable(false);
-                                    isOpen = false;
-                                } else {
-                                    vAddMachine.startAnimation(isHere ? show : hide);
-                                }
+                                    });
+                            isHere = !isHere;
+                            vCheckInOut.setBackgroundColor((isHere) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
+                            vCheckInOut.setText(isHere ? "Out" : "In");
+                            vAddMachine.setClickable(isHere);
+                            if (isOpen) {
+                                vAddMachine.startAnimation(rotateBackwardHide);
+                                vAddMachineInside.startAnimation(fabClose);
+                                vAddMachineOutside.startAnimation(fabClose);
+                                vInsideText.startAnimation(hide);
+                                vOutsideText.startAnimation(hide);
+                                vAddMachineInside.setClickable(false);
+                                vAddMachineOutside.setClickable(false);
+                                isOpen = false;
+                            } else {
+                                vAddMachine.startAnimation(isHere ? show : hide);
                             }
-                        }).addOnFailureListener(e -> Toast.makeText(getContext(), "Please enable GPS!", Toast.LENGTH_SHORT).show());
+
+                            return null;
+                        });
                     })
                     .show();
         }

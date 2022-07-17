@@ -1,16 +1,30 @@
 package com.example.igecuser.fireBase;
 
-public class Machine_Employee extends Summary {
+import java.util.HashMap;
+import java.util.Map;
+
+public class Machine_Employee {
     private Machine machine;
+    private Employee employee;
+    private long workedTime;
+    private Map<String,Object>checkIn;
+    private Map<String, Object> CheckOut=new HashMap<>();
     private double cost;
+
     public Machine_Employee() {
     }
 
-
-
-    public Machine_Employee(double lat, double lng, Machine machine) {
-        super(lat, lng);
+    public Machine_Employee(Machine machine, Employee employee) {
         this.machine = machine;
+        this.employee = employee;
+    }
+
+    public long getWorkedTime() {
+        return workedTime;
+    }
+
+    public void setWorkedTime(long workedTime) {
+        this.workedTime = workedTime;
     }
 
     public Machine getMachine() {
@@ -19,6 +33,30 @@ public class Machine_Employee extends Summary {
 
     public void setMachine(Machine machine) {
         this.machine = machine;
+    }
+
+    public Employee getEmployee() {
+        return employee;
+    }
+
+    public void setEmployee(Employee employee) {
+        this.employee = employee;
+    }
+
+    public Map<String, Object> getCheckIn() {
+        return checkIn;
+    }
+
+    public Map<String, Object> getCheckOut() {
+        return CheckOut;
+    }
+
+    public void setCheckOut(Map<String, Object> checkOut) {
+        CheckOut = checkOut;
+    }
+
+    public void setCheckIn(Map<String, Object> checkIn) {
+        this.checkIn = checkIn;
     }
 
     public double getCost() {

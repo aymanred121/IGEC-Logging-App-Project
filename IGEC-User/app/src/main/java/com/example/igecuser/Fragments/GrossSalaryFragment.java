@@ -99,6 +99,8 @@ public class GrossSalaryFragment extends Fragment {
             salarySummary = 0;
             employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
             for (Allowance allowance : employeesGrossSalary.getAllTypes()) {
+                if(allowance.getAmount()==0)
+                    continue;
                 salarySummaries.add(allowance);
                 salarySummary += allowance.getAmount();
             }

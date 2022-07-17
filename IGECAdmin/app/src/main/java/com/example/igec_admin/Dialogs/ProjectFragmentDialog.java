@@ -443,6 +443,7 @@ public class ProjectFragmentDialog extends DialogFragment {
                 , vContractType.getText().toString());
         newProject.setId(project.getId());
         newProject.setClient(vOfficeWork.isChecked() ? null : client);
+        newProject.setMachineWorkedTime(project.getMachineWorkedTime());
         //Added projectId to each allowance that is coming from project
         allowances.stream().flatMap(allowance -> {
             allowance.setProjectId(project.getId());

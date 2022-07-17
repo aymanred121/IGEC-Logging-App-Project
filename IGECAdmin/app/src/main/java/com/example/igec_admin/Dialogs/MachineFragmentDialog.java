@@ -38,6 +38,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.google.zxing.WriterException;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -193,10 +194,11 @@ public class MachineFragmentDialog extends DialogFragment {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.R)
-    private void updateMachine() {
+    private void updateMachine() throws ParseException {
 
         if (!validateInput()) {
             Toast.makeText(getActivity(), "please, fill the machine data", Toast.LENGTH_SHORT).show();
+            vUpdate.setEnabled(true);
             return;
         }
 
@@ -239,6 +241,11 @@ public class MachineFragmentDialog extends DialogFragment {
                 });
             }
         }
+        machine.setReference(vSerialNumber.getText().toString());
+        machine.setPurchaseDate(new SimpleDateFormat("dd/MM/yyyy").parse(vPurchaseDate.getText().toString()));
+        machine.setDailyRentPrice(Double.parseDouble(vMachineByDay.getText().toString()));
+        machine.setWeeklyRentPrice(Double.parseDouble(vMachineByWeek.getText().toString()));
+        machine.setMonthlyRentPrice(Double.parseDouble(vMachineByMonth.getText().toString()));
         machineCol.document(machine.getId()).set(machine).addOnSuccessListener(unused -> {
             db.collection("Machine_Employee").whereEqualTo("Machine", machine).get().addOnSuccessListener(queryDocumentSnapshots -> {
                 for (DocumentSnapshot d : queryDocumentSnapshots) {
@@ -280,7 +287,11 @@ public class MachineFragmentDialog extends DialogFragment {
     };
     private final View.OnClickListener oclUpdate = v -> {
         vUpdate.setEnabled(false);
-        updateMachine();
+        try {
+            updateMachine();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
     };
     private final View.OnClickListener oclAddSupplement = new View.OnClickListener() {
         @Override

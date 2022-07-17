@@ -10,6 +10,7 @@ public class Machine_Employee {
     private Map<String,Object>checkIn;
     private Map<String, Object> CheckOut=new HashMap<>();
     private double cost;
+    private Client client;
 
     public Machine_Employee() {
     }
@@ -65,5 +66,13 @@ public class Machine_Employee {
 
     public void setCost(double cost) {
         this.cost = cost;
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
+    }
+
+    public Client getClient() {
+        return client;
     }
 }

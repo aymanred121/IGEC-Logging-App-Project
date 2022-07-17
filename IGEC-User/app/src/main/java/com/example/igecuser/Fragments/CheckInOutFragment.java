@@ -89,7 +89,8 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     private FusedLocationProviderClient fusedLocationClient;
     private final CollectionReference machineEmployee = db.collection("Machine_Employee");
     private final CollectionReference machineCol = db.collection("machine");
-    @SuppressLint("SimpleDateFormat") private final  SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+    @SuppressLint("SimpleDateFormat")
+    private final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
 
     public CheckInOutFragment(Employee currEmployee) {
@@ -152,11 +153,11 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
 
     private void setCheckInOutBtn() {
         String currentDateAndTime = sdf.format(new Date());
-        String day = currentDateAndTime.substring(0,2);
-        String month = currentDateAndTime.substring(3,5);
-        String year = currentDateAndTime.substring(6,10);
+        String day = currentDateAndTime.substring(0, 2);
+        String month = currentDateAndTime.substring(3, 5);
+        String year = currentDateAndTime.substring(6, 10);
         db.collection("summary").document(id).get().addOnSuccessListener((value) -> {
-            if (!value.exists() || value.getData().size() ==0)
+            if (!value.exists() || value.getData().size() == 0)
                 isHere = false;
             else {
                 isHere = value.getData().get("checkOut") == null;
@@ -229,52 +230,58 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                     .setNegativeButton(getString(R.string.No), (dialogInterface, i) -> {
                     })
                     .setPositiveButton(getString(R.string.Yes), (dialogInterface, i) -> {
-                        Locus.INSTANCE.getCurrentLocation(getActivity(), result ->{
-                            Location location = result.getLocation();
-                            String currentDateAndTime = sdf.format(new Date());
-                            String day = currentDateAndTime.substring(0,2);
-                            String month = currentDateAndTime.substring(3,5);
-                            String year = currentDateAndTime.substring(6,10);
+                        Locus.INSTANCE.getCurrentLocation(getActivity(), result -> {
+                            try {
+                                Location location = result.getLocation();
+                                String currentDateAndTime = sdf.format(new Date());
+                                String day = currentDateAndTime.substring(0, 2);
+                                String month = currentDateAndTime.substring(3, 5);
+                                String year = currentDateAndTime.substring(6, 10);
 
-                            longitude = location.getLongitude();
-                            latitude = location.getLatitude();
+                                longitude = location.getLongitude();
+                                latitude = location.getLatitude();
 
-                            Summary summary = new Summary(latitude, longitude);
-                            HashMap<String, Object> checkOutDetails = new HashMap<>(summary.getGeoMap());
-                            checkOutDetails.put("Time", Timestamp.now());
-                            db.collection("summary").document(id)
-                                    //.collection(year+"-"+month).document(day)
-                                    .get().addOnSuccessListener(documentSnapshot -> {
-                                        if (!documentSnapshot.exists() || documentSnapshot.getData().size() ==0 || documentSnapshot.getData().get("checkOut") != null) {
-                                            employeeCheckIn(summary);
-                                        } else {
-                                            Summary summary1 = documentSnapshot.toObject(Summary.class);
-                                            if (summary1.getCheckOut() == null) {
-                                                employeeCheckOut(summary1, checkOutDetails);
+                                Summary summary = new Summary(latitude, longitude);
+                                HashMap<String, Object> checkOutDetails = new HashMap<>(summary.getGeoMap());
+                                checkOutDetails.put("Time", Timestamp.now());
+                                db.collection("summary").document(id)
+                                        //.collection(year+"-"+month).document(day)
+                                        .get().addOnSuccessListener(documentSnapshot -> {
+                                            if (!documentSnapshot.exists() || documentSnapshot.getData().size() == 0 || documentSnapshot.getData().get("checkOut") != null) {
+                                                employeeCheckIn(summary);
                                             } else {
-                                                summary1.setLastCheckInTime(Timestamp.now());
-                                                db.document(summary1.getLastDayPath()).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null);
-                                                db.collection("summary").document(id).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null);
+                                                Summary summary1 = documentSnapshot.toObject(Summary.class);
+                                                if (summary1.getCheckOut() == null) {
+                                                    employeeCheckOut(summary1, checkOutDetails);
+                                                } else {
+                                                    summary1.setLastCheckInTime(Timestamp.now());
+                                                    db.document(summary1.getLastDayPath()).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null);
+                                                    db.collection("summary").document(id).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null);
+                                                }
                                             }
-                                        }
-                                    });
-                            isHere = !isHere;
-                            vCheckInOut.setBackgroundColor((isHere) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
-                            vCheckInOut.setText(isHere ? "Out" : "In");
-                            vAddMachine.setClickable(isHere);
-                            if (isOpen) {
-                                vAddMachine.startAnimation(rotateBackwardHide);
-                                vAddMachineInside.startAnimation(fabClose);
-                                vAddMachineOutside.startAnimation(fabClose);
-                                vInsideText.startAnimation(hide);
-                                vOutsideText.startAnimation(hide);
-                                vAddMachineInside.setClickable(false);
-                                vAddMachineOutside.setClickable(false);
-                                isOpen = false;
-                            } else {
-                                vAddMachine.startAnimation(isHere ? show : hide);
-                            }
+                                        });
+                                isHere = !isHere;
+                                vCheckInOut.setBackgroundColor((isHere) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
+                                vCheckInOut.setText(isHere ? "Out" : "In");
+                                vAddMachine.setClickable(isHere);
+                                if (isOpen) {
+                                    vAddMachine.startAnimation(rotateBackwardHide);
+                                    vAddMachineInside.startAnimation(fabClose);
+                                    vAddMachineOutside.startAnimation(fabClose);
+                                    vInsideText.startAnimation(hide);
+                                    vOutsideText.startAnimation(hide);
+                                    vAddMachineInside.setClickable(false);
+                                    vAddMachineOutside.setClickable(false);
+                                    isOpen = false;
+                                } else {
+                                    vAddMachine.startAnimation(isHere ? show : hide);
+                                }
 
+                                return null;
+
+                            } catch (Exception e) {
+                                Toast.makeText(getActivity(), "Please, enable GPS!", Toast.LENGTH_SHORT).show();
+                            }
                             return null;
                         });
                     })
@@ -287,24 +294,24 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     private void employeeCheckOut(Summary summary, HashMap<String, Object> checkOut) {
         //get current year and month from date
         String currentDateAndTime = sdf.format(new Date());
-        String day = currentDateAndTime.substring(0,2);
-        String month = currentDateAndTime.substring(3,5);
-        String year = currentDateAndTime.substring(6,10);
+        String day = currentDateAndTime.substring(0, 2);
+        String month = currentDateAndTime.substring(3, 5);
+        String year = currentDateAndTime.substring(6, 10);
         int dayInt = Integer.parseInt(day);
-        if(dayInt>25){
-            if(Integer.parseInt(month)+1 == 13){
+        if (dayInt > 25) {
+            if (Integer.parseInt(month) + 1 == 13) {
                 month = "1";
-                year = String.valueOf(Integer.parseInt(year)+1);
-            }else{
-                month = String.valueOf(Integer.parseInt(month)+1);
-                if(month.length()==1){
-                    month = "0"+month;
+                year = String.valueOf(Integer.parseInt(year) + 1);
+            } else {
+                month = String.valueOf(Integer.parseInt(month) + 1);
+                if (month.length() == 1) {
+                    month = "0" + month;
                 }
             }
         }
         String finalMonth = month;
         String finalYear = year;
-        String currentPath =  db.collection("summary").document(id).collection(year+"-"+month).document(day).getPath();
+        String currentPath = db.collection("summary").document(id).collection(year + "-" + month).document(day).getPath();
         long checkInTime = (summary.getLastCheckInTime()).getSeconds();
         long checkOutTime = Timestamp.now().getSeconds();
         long workingTime = (checkOutTime - checkInTime);
@@ -314,39 +321,39 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         db.collection("summary").document(id).update("checkOut", checkOut, "workingTime", FieldValue.increment(workingTime));
         db.document(summary.getLastDayPath()).update("checkOut", checkOut, "workingTime", FieldValue.increment(workingTime))
                 .addOnSuccessListener(unused -> {
-                    db.document(summary.getLastDayPath()).get().addOnSuccessListener(doc->{
-                       long workingTime1 =  (long)doc.getData().get("workingTime");
-                        long overTime = (workingTime1-28800);
+                    db.document(summary.getLastDayPath()).get().addOnSuccessListener(doc -> {
+                        long workingTime1 = (long) doc.getData().get("workingTime");
+                        long overTime = (workingTime1 - 28800);
                         if (overTime < 0) {
                             overTime = 0;
                         }
-                        overTime=overTime/3600;
+                        overTime = overTime / 3600;
                         long finalOverTime = overTime;
                         WriteBatch batch = db.batch();
-                        batch.set(  db.document(doc.getReference().getPath()),new HashMap<String,Object>(){{
+                        batch.set(db.document(doc.getReference().getPath()), new HashMap<String, Object>() {{
                             put("overTime", finalOverTime);
-                        }},SetOptions.merge());
-                        batch.set( db.collection("summary").document(id),new HashMap<String,Object>(){{
+                        }}, SetOptions.merge());
+                        batch.set(db.collection("summary").document(id), new HashMap<String, Object>() {{
                             put("overTime", finalOverTime);
-                        }},SetOptions.merge());
-                        if(!summary.getLastDayPath().equals(currentPath)){
+                        }}, SetOptions.merge());
+                        if (!summary.getLastDayPath().equals(currentPath)) {
                             batch.delete(db.collection("summary").document(id));
                         }
                         batch.commit();
-                        Allowance overTimeAllowance=new Allowance();
-                        overTimeAllowance.setAmount(finalOverTime*currEmployee.getOverTime());
+                        Allowance overTimeAllowance = new Allowance();
+                        overTimeAllowance.setAmount(finalOverTime * currEmployee.getOverTime());
                         overTimeAllowance.setName("overTime");
                         overTimeAllowance.setNote(day);
                         overTimeAllowance.setType(allowancesEnum.OVERTIME.ordinal());
                         overTimeAllowance.setProjectId(currEmployee.getProjectID());
-                        db.collection("EmployeesGrossSalary").document(id).collection(finalYear).document(finalMonth).get().addOnSuccessListener(doc1 ->{
-                           EmployeesGrossSalary emp = doc1.toObject(EmployeesGrossSalary.class);
+                        db.collection("EmployeesGrossSalary").document(id).collection(finalYear).document(finalMonth).get().addOnSuccessListener(doc1 -> {
+                            EmployeesGrossSalary emp = doc1.toObject(EmployeesGrossSalary.class);
                             ArrayList<Allowance> allowanceArrayList = emp.getAllTypes();
                             if (allowanceArrayList != null) {
-                                allowanceArrayList.removeIf(x->x.getName().equals("overTime") && x.getNote().trim().equals(day));
+                                allowanceArrayList.removeIf(x -> x.getName().equals("overTime") && x.getNote().trim().equals(day));
                             }
                             allowanceArrayList.add(overTimeAllowance);
-                            db.collection("EmployeesGrossSalary").document(id).collection(finalYear).document(finalMonth).update("allTypes",allowanceArrayList);
+                            db.collection("EmployeesGrossSalary").document(id).collection(finalYear).document(finalMonth).update("allTypes", allowanceArrayList);
                         });
                     });
                     Toast.makeText(getContext(), "Checked Out successfully!", Toast.LENGTH_SHORT).show();
@@ -360,23 +367,22 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     private void employeeCheckIn(Summary summary) {
         //get current year and month from date
         String currentDateAndTime = sdf.format(new Date());
-        String day = currentDateAndTime.substring(0,2);
-        String month = currentDateAndTime.substring(3,5);
-        String year = currentDateAndTime.substring(6,10);
+        String day = currentDateAndTime.substring(0, 2);
+        String month = currentDateAndTime.substring(3, 5);
+        String year = currentDateAndTime.substring(6, 10);
         //each month starts in 25th and end 24th of the next month
-        if(Integer.parseInt(day)>25){
-            if(Integer.parseInt(month)+1 == 13){
+        if (Integer.parseInt(day) > 25) {
+            if (Integer.parseInt(month) + 1 == 13) {
                 month = "1";
-                year = Integer.parseInt(year)+1 +"";
-                }
-            else{
-                month = Integer.parseInt(month)+1+"";
-                if(month.length()==1){
-                    month = "0"+month;
+                year = Integer.parseInt(year) + 1 + "";
+            } else {
+                month = Integer.parseInt(month) + 1 + "";
+                if (month.length() == 1) {
+                    month = "0" + month;
                 }
             }
         }
-        String path =  db.collection("summary").document(id).collection(year+"-"+month).document(day).getPath();
+        String path = db.collection("summary").document(id).collection(year + "-" + month).document(day).getPath();
         String finalMonth = month;
         String finalYear = year;
         summary.setLastCheckInTime(Timestamp.now());
@@ -387,27 +393,27 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         checkIn.put("projectId", currEmployee.getProjectID());
         checkIn.put("lastCheckInTime", summary.getLastCheckInTime());
         db.document(path).set(checkIn);
-        checkIn.put("lastDayPath",path);
+        checkIn.put("lastDayPath", path);
         db.collection("summary").document(id).set(checkIn);
         db.collection("EmployeesGrossSalary").document(currEmployee.getId()).collection(year).document(month).get().addOnSuccessListener(doc -> {
-           if(!doc.exists()){
-               //new month
-               db.collection("EmployeesGrossSalary").document(currEmployee.getId()).get().addOnSuccessListener(documentSnapshot -> {
-                   if (!documentSnapshot.exists()) return;
-                   EmployeesGrossSalary employeesGrossSalary = documentSnapshot.toObject(EmployeesGrossSalary.class);
-                   employeesGrossSalary.setBaseAllowances(employeesGrossSalary.getAllTypes().stream().filter(x->x.getType()==allowancesEnum.PROJECT.ordinal()).collect(Collectors.toCollection(ArrayList::new)));
-                   employeesGrossSalary.getAllTypes().removeIf(x->x.getType()==allowancesEnum.PROJECT.ordinal());
-                   for(Allowance i :employeesGrossSalary.getBaseAllowances()){
-                       if(i.getType()!=allowancesEnum.BONUS.ordinal())
-                       i.setNote(day);
-                       employeesGrossSalary.getAllTypes().add(i);
-                   }
-                   db.document(doc.getReference().getPath()).set(employeesGrossSalary, SetOptions.merge());
-               });
-               return;
-           }
-           EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
-            for(Allowance i :employeesGrossSalary.getBaseAllowances()){
+            if (!doc.exists()) {
+                //new month
+                db.collection("EmployeesGrossSalary").document(currEmployee.getId()).get().addOnSuccessListener(documentSnapshot -> {
+                    if (!documentSnapshot.exists()) return;
+                    EmployeesGrossSalary employeesGrossSalary = documentSnapshot.toObject(EmployeesGrossSalary.class);
+                    employeesGrossSalary.setBaseAllowances(employeesGrossSalary.getAllTypes().stream().filter(x -> x.getType() == allowancesEnum.PROJECT.ordinal()).collect(Collectors.toCollection(ArrayList::new)));
+                    employeesGrossSalary.getAllTypes().removeIf(x -> x.getType() == allowancesEnum.PROJECT.ordinal());
+                    for (Allowance i : employeesGrossSalary.getBaseAllowances()) {
+                        if (i.getType() != allowancesEnum.BONUS.ordinal())
+                            i.setNote(day);
+                        employeesGrossSalary.getAllTypes().add(i);
+                    }
+                    db.document(doc.getReference().getPath()).set(employeesGrossSalary, SetOptions.merge());
+                });
+                return;
+            }
+            EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
+            for (Allowance i : employeesGrossSalary.getBaseAllowances()) {
                 i.setNote(day);
                 employeesGrossSalary.getAllTypes().add(i);
             }
@@ -428,13 +434,19 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         machineCheckInOutDialog.show(getParentFragmentManager(), "");
     };
 
-    private void checkMachineInOut(Client client) {
+    private void checkMachineInOut(Client client, String note) {
         machineEmployee.document(machineEmpId).get().addOnSuccessListener(documentSnapshot -> {
             if (!documentSnapshot.exists()) {
                 machineCheckIn(client);
             } else {
                 Machine_Employee currMachineEmployee = documentSnapshot.toObject(Machine_Employee.class);
                 machineCheckOut(currMachineEmployee);
+            }
+            if (!note.trim().isEmpty()) {
+                MachineDefectsLog machineDefectsLog = new MachineDefectsLog(note.trim(), currMachine.getReference(), currMachine.getId(), currEmployee.getId(), currEmployee.getFirstName(), new Date());
+                db.collection("MachineDefectsLog").add(machineDefectsLog).addOnSuccessListener(unused -> {
+                    Toast.makeText(getActivity(), "comment has been uploaded", Toast.LENGTH_SHORT).show();
+                });
             }
 
         });
@@ -478,13 +490,11 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     private void machineCheckIn(Client client) {
         HashMap<String, Object> checkInDetails = new HashMap<>((new Summary(latitude, longitude)).getGeoMap());
         checkInDetails.put("Time", Timestamp.now());
-        Map<String, Object> machineEmployee1 = new HashMap();
-        machineEmployee1.put("machine", currMachine);
-        machineEmployee1.put("employee", currEmployee);
-        if (client != null)
-            machineEmployee1.put("client", client);
-
-        machineEmployee1.put("checkIn", checkInDetails);
+        Machine_Employee machine_employee = new Machine_Employee();
+        machine_employee.setMachine(currMachine);
+        machine_employee.setEmployee(currEmployee);
+        machine_employee.setClient(client);
+        machine_employee.setCheckIn(checkInDetails);
         currMachine.setIsUsed(true);
         currMachine.setEmployeeFirstName(currEmployee.getFirstName());
         currMachine.setMachineEmployeeID(machineEmpId);
@@ -492,7 +502,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         //NOTE don't use set()
         machineCol.document(currMachine.getId()).update("isUsed", true, "employeeFirstName", currEmployee.getFirstName(), "employeeId", currEmployee.getId(), "machineEmployeeID", machineEmpId)
                 .addOnSuccessListener(unused1 -> {
-                    machineEmployee.document(machineEmpId).set(machineEmployee1).addOnSuccessListener(unused -> Toast.makeText(getContext(), "Machine: " + currMachine.getReference() + " checked In successfully", Toast.LENGTH_SHORT).show());
+                    machineEmployee.document(machineEmpId).set(machine_employee).addOnSuccessListener(unused -> Toast.makeText(getContext(), "Machine: " + currMachine.getReference() + " checked In successfully", Toast.LENGTH_SHORT).show());
                 });
 //        ArrayList<Allowance> allTypes = new ArrayList<>();
 //        db.collection("EmployeesGrossSalary").document(currEmployee.getId()).get().addOnSuccessListener((value) -> {
@@ -515,39 +525,54 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
             @SuppressLint("MissingPermission")
             @Override
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
-                // We use a String here, but any type that can be put in a Bundle is supported
                 String machineID = bundle.getString("machineID");
                 boolean isItAUser = bundle.getBoolean("isItAUser");
-                // Do something with the result
-                fusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        try {
-                            longitude = location.getLongitude();
-                            latitude = location.getLatitude();
 
-                            machineCol.document(machineID).get().addOnSuccessListener((value) -> {
-                                if (!value.exists()) {
-                                    Toast.makeText(getActivity(), "Invalid Machine ID", Toast.LENGTH_SHORT).show();
-                                    return;
-                                }
-                                currMachine = value.toObject(Machine.class);
-                                if (currMachine.getIsUsed() && !currMachine.getEmployeeId().equals(currEmployee.getId())) {
-                                    Toast.makeText(getContext(), "this Machine already being used by" + currMachine.getEmployeeFirstName(), Toast.LENGTH_SHORT).show();
-                                    return;
-                                }
-                                SupplementsDialog supplementsDialog = new SupplementsDialog(isItAUser, currMachine, currEmployee);
-                                supplementsDialog.show(getParentFragmentManager(), "");
-                                machineEmpId = !currMachine.getEmployeeId().equals(currEmployee.getId()) ? machineEmployee.document().getId() : currMachine.getMachineEmployeeID();
-
-                            });
-                        } catch (Exception e) {
-                            Toast.makeText(getContext(), "invalid Machine ID", Toast.LENGTH_SHORT).show();
+                // validate machine ID
+                try {
+                    machineCol.document(machineID).get().addOnSuccessListener((value) -> {
+                        if (!value.exists()) {
+                            Toast.makeText(getActivity(), "Invalid Machine ID", Toast.LENGTH_SHORT).show();
+                            return;
                         }
-                    }
-                }).addOnFailureListener(unused -> {
-                    Toast.makeText(getContext(), "Please enable GPS!", Toast.LENGTH_SHORT).show();
-                });
+                        currMachine = value.toObject(Machine.class);
+                        // Generate machineEmpID if not found
+                        machineEmpId = !currMachine.getEmployeeId().equals(currEmployee.getId()) ? machineEmployee.document().getId() : currMachine.getMachineEmployeeID();
+                        // if machineEmpID found check if the check-in agent and checkout agent are the same (user or company)
+                        machineEmployee.document(machineEmpId).get().addOnSuccessListener(documentSnapshot -> {
+                            if (documentSnapshot.exists()) {
+                                // check-out
+                                if (isItAUser != ((documentSnapshot.toObject(Machine_Employee.class)).getClient() == null)) {
+                                    Toast.makeText(getActivity(), "Checkout agent doesn't match", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+                            }
+                            Locus.INSTANCE.getCurrentLocation(getActivity(), locusResult -> {
+                                Location location = locusResult.getLocation();
+                                try {
+                                    longitude = location.getLongitude();
+                                    latitude = location.getLatitude();
+                                    // abort if machine is used already by another user
+                                    if (currMachine.getIsUsed() && !currMachine.getEmployeeId().equals(currEmployee.getId())) {
+                                        Toast.makeText(getContext(), "this Machine already being used by" + currMachine.getEmployeeFirstName(), Toast.LENGTH_SHORT).show();
+                                        return null;
+                                    }
+                                    // open supplements dialog if not
+                                    SupplementsDialog supplementsDialog = new SupplementsDialog(isItAUser, currMachine, currEmployee);
+                                    supplementsDialog.show(getParentFragmentManager(), "");
+
+
+                                } catch (Exception e) {
+                                    Toast.makeText(getContext(), "Please, enable GPS!", Toast.LENGTH_SHORT).show();
+                                }
+                                return null;
+                            });
+
+                        });
+                    });
+                } catch (Exception e) {
+                    Toast.makeText(getActivity(), "invalid Machine ID", Toast.LENGTH_SHORT).show();
+                }
             }
         });
         getParentFragmentManager().setFragmentResultListener("supplements", this, new FragmentResultListener() {
@@ -556,17 +581,24 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                 String note = bundle.getString("supplementState");
                 boolean isItAUser = bundle.getBoolean("isItAUser");
 
+                // if isItAUser check-in
                 if (isItAUser) {
-                    checkMachineInOut(null);
-                    if (!note.trim().isEmpty()) {
-                        MachineDefectsLog machineDefectsLog = new MachineDefectsLog(note.trim(), currMachine.getReference(), currMachine.getId(), currEmployee.getId(), currEmployee.getFirstName(), new Date());
-                        db.collection("MachineDefectsLog").add(machineDefectsLog).addOnSuccessListener(unused -> {
-                            Toast.makeText(getActivity(), "comment has been uploaded", Toast.LENGTH_SHORT).show();
-                        });
-                    }
-                } else {
-                    ClientInfoDialog clientInfoDialog = new ClientInfoDialog(note);
-                    clientInfoDialog.show(getParentFragmentManager(), "");
+                    checkMachineInOut(null, note);
+
+                }
+                // if not
+                else {
+                    // only open when client is null in Machine_Employee ie when checking in only
+                    machineEmployee.document(machineEmpId).get().addOnSuccessListener(documentSnapshot -> {
+                        if (documentSnapshot.exists()) {
+                            Machine_Employee machine_employee = documentSnapshot.toObject(Machine_Employee.class);
+                            checkMachineInOut(machine_employee.getClient(), note);
+                        } else {
+                            ClientInfoDialog clientInfoDialog = new ClientInfoDialog(note);
+                            clientInfoDialog.show(getParentFragmentManager(), "");
+                        }
+                    });
+
                 }
             }
         });
@@ -575,13 +607,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
                 Client client = (Client) result.getSerializable("client");
                 String note = result.getString("note");
-                checkMachineInOut(client);
-                if (!note.trim().isEmpty()) {
-                    MachineDefectsLog machineDefectsLog = new MachineDefectsLog(note.trim(), currMachine.getReference(), currMachine.getId(), currEmployee.getId(), currEmployee.getFirstName(), new Date());
-                    db.collection("MachineDefectsLog").add(machineDefectsLog).addOnSuccessListener(unused -> {
-                        Toast.makeText(getActivity(), "comment has been uploaded", Toast.LENGTH_SHORT).show();
-                    });
-                }
+                checkMachineInOut(client, note);
             }
         });
 

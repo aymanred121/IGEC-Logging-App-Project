@@ -138,6 +138,7 @@ public class SupplementsDialog extends DialogFragment {
                         if (progress[0] == machine.getSupplementsNames().size()) {
                             vCircularProgressIndicator.startAnimation(hide);
                             recyclerView.startAnimation(show);
+                            vDone.setEnabled(true);
                             adapter.notifyDataSetChanged();
                         }
                     }

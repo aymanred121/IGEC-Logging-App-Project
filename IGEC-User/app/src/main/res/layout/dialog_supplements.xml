@@ -70,6 +70,7 @@
         android:layout_marginBottom="16dp"
         android:padding="8dp"
         android:text="@string/Done"
+        android:enabled="false"
         android:textAllCaps="false"
         android:textSize="16sp"
         app:cornerRadius="8dp"

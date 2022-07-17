@@ -67,4 +67,6 @@
     <string name="per_friday">Per Friday</string>
     <string name="no_internet_connection">No internet Connection</string>
     <string name="retry">Retry</string>
+    <string name="machine_log">Machine Log</string>
+    <string name="no_log_to_display">No Log to Display</string>
 </resources>

@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -32,6 +33,7 @@ public class MachineLogDialog extends DialogFragment {
     private MachineLogAdapter adapter;
     private RecyclerView recyclerView;
     private RecyclerView.LayoutManager layoutManager;
+    private TextView vLogState;
 
     public MachineLogDialog(Machine machine) {
         this.machine = machine;
@@ -42,7 +44,12 @@ public class MachineLogDialog extends DialogFragment {
                     if (queryDocumentSnapshots.size() != 0) {
                         machineSummaryData.addAll(queryDocumentSnapshots.toObjects(Machine_Employee.class));
                         adapter.setMachineEmployees(machineSummaryData);
+                        vLogState.setVisibility(View.GONE);
                         adapter.notifyDataSetChanged();
+                    }
+                    else
+                    {
+                        vLogState.setVisibility(View.VISIBLE);
                     }
                 }
         );
@@ -73,7 +80,7 @@ public class MachineLogDialog extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.dialog_maching_log, container, false);
+        return inflater.inflate(R.layout.dialog_machine_log, container, false);
     }
 
     @Override
@@ -86,6 +93,7 @@ public class MachineLogDialog extends DialogFragment {
     void initialize(View view) {
         machineSummaryData = new ArrayList<>();
         recyclerView = view.findViewById(R.id.recyclerview);
+        vLogState = view.findViewById(R.id.TextView_state);
         recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
         adapter = new MachineLogAdapter(machineSummaryData);

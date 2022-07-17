@@ -50,6 +50,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
 import androidmads.library.qrgenearator.QRGContents;
@@ -80,7 +81,7 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
     private MaterialDatePicker vDatePicker;
     private final FirebaseStorage storage = FirebaseStorage.getInstance();
     private final StorageReference storageRef = storage.getReference();
-    private ArrayList<Supplement> supplements;
+    private ArrayList<Supplement> supplements = new ArrayList<>();
     private ArrayList<Pair<TextInputLayout, TextInputEditText>> views;
 
 
@@ -143,7 +144,12 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
         getParentFragmentManager().setFragmentResultListener("machine", this, new FragmentResultListener() {
             @Override
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
-                vSerialNumber.setText(result.getString("SerialNumber"));
+                String serialNumber = result.getString("SerialNumber");
+                Pattern mPattern = Pattern.compile("[0-9]+");
+                if(mPattern.matcher(serialNumber).matches())
+                    vSerialNumber.setText(serialNumber);
+                else
+                    Toast.makeText(getActivity(), "Invalid Serial Number", Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -176,7 +182,7 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
     // Functions
 
     private void Initialize(View view) {
-        supplements = new ArrayList<>();
+
         vId = view.findViewById(R.id.TextInput_MachineID);
         vQRImg = view.findViewById(R.id.ImageView_MachineIDIMG);
         vRegister = view.findViewById(R.id.button_register);
@@ -223,13 +229,12 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
     private boolean generateError() {
         for (Pair<TextInputLayout, TextInputEditText> view : views) {
             if (view.second.getText().toString().trim().isEmpty()) {
-                if(view.first == vIdLayout)
+                if (view.first == vIdLayout)
                     view.first.setErrorIconDrawable(R.drawable.ic_baseline_autorenew_24);
-                else if(view.first == vSerialNumberLayout)
+                else if (view.first == vSerialNumberLayout)
                     view.first.setErrorIconDrawable(R.drawable.ic_barcode);
                 else if (view.first == vPurchaseDateLayout)
                     view.first.setErrorIconDrawable(R.drawable.ic_baseline_calendar_month_24);
-
 
 
                 view.first.setError("Missing");

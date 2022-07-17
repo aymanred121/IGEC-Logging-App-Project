@@ -64,12 +64,12 @@ public class Machine {
         return weeklyRentPrice;
     }
 
-    public Boolean getUsed() {
+    public Boolean getIsUsed() {
         return isUsed;
     }
 
-    public void setUsed(Boolean used) {
-        isUsed = used;
+    public void setIsUsed(Boolean isUsed) {
+        this.isUsed = isUsed;
     }
 
     public void setWeeklyRentPrice(double weeklyRentPrice) {

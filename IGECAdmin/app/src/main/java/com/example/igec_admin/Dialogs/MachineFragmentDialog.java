@@ -247,11 +247,11 @@ public class MachineFragmentDialog extends DialogFragment {
         machine.setWeeklyRentPrice(Double.parseDouble(vMachineByWeek.getText().toString()));
         machine.setMonthlyRentPrice(Double.parseDouble(vMachineByMonth.getText().toString()));
         machineCol.document(machine.getId()).set(machine).addOnSuccessListener(unused -> {
-            db.collection("Machine_Employee").whereEqualTo("Machine", machine).get().addOnSuccessListener(queryDocumentSnapshots -> {
+            db.collection("Machine_Employee").whereEqualTo("machine.id", machine.getId()).get().addOnSuccessListener(queryDocumentSnapshots -> {
                 for (DocumentSnapshot d : queryDocumentSnapshots) {
                     db.collection("Machine_Employee")
-                            .document(d.getId())
-                            .update("Machine", modifiedMachine);
+                                .document(d.getId())
+                            .update("machine", machine);
                 }
             });
             Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();

@@ -485,9 +485,10 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
             machineEmployee1.put("client", client);
 
         machineEmployee1.put("checkIn", checkInDetails);
-        currMachine.setUsed(true);
+        currMachine.setIsUsed(true);
         currMachine.setEmployeeFirstName(currEmployee.getFirstName());
         currMachine.setMachineEmployeeID(machineEmpId);
+        currMachine.setEmployeeId(currEmployee.getId());
         //NOTE don't use set()
         machineCol.document(currMachine.getId()).update("isUsed", true, "employeeFirstName", currEmployee.getFirstName(), "employeeId", currEmployee.getId(), "machineEmployeeID", machineEmpId)
                 .addOnSuccessListener(unused1 -> {
@@ -517,7 +518,6 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                 // We use a String here, but any type that can be put in a Bundle is supported
                 String machineID = bundle.getString("machineID");
                 boolean isItAUser = bundle.getBoolean("isItAUser");
-                Toast.makeText(getActivity(), machineID, Toast.LENGTH_SHORT).show();
                 // Do something with the result
                 fusedLocationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
                     @Override
@@ -532,12 +532,12 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                     return;
                                 }
                                 currMachine = value.toObject(Machine.class);
-                                SupplementsDialog supplementsDialog = new SupplementsDialog(isItAUser, currMachine, currEmployee);
-                                supplementsDialog.show(getParentFragmentManager(), "");
-                                if (currMachine.getUsed() && !currMachine.getEmployeeId().equals(currEmployee.getId())) {
+                                if (currMachine.getIsUsed() && !currMachine.getEmployeeId().equals(currEmployee.getId())) {
                                     Toast.makeText(getContext(), "this Machine already being used by" + currMachine.getEmployeeFirstName(), Toast.LENGTH_SHORT).show();
                                     return;
                                 }
+                                SupplementsDialog supplementsDialog = new SupplementsDialog(isItAUser, currMachine, currEmployee);
+                                supplementsDialog.show(getParentFragmentManager(), "");
                                 machineEmpId = !currMachine.getEmployeeId().equals(currEmployee.getId()) ? machineEmployee.document().getId() : currMachine.getMachineEmployeeID();
 
                             });

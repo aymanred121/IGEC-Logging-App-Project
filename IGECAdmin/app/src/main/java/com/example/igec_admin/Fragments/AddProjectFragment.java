@@ -108,10 +108,9 @@ public class AddProjectFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        vOfficeWork.setChecked(false);
-        vAddClient.setEnabled(true);
         vManagerID.setText(null);
-        vProjectReference.setText(null);
+        ArrayAdapter<String> idAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, TeamID);
+        vManagerID.setAdapter(idAdapter);
         setUpContractType();
     }
 

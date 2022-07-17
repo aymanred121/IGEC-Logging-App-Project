@@ -1,7 +1,4 @@
 package com.example.igecuser.fireBase;
-
-import com.example.igecuser.fireBase.Allowance;
-
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -11,17 +8,6 @@ public class Machine {
     private Date purchaseDate;
     private Boolean isUsed;
     private ArrayList<String> supplementsNames;
-
-
-    public Allowance getAllowance() {
-        return allowance;
-    }
-
-    public void setAllowance(Allowance allowance) {
-        this.allowance = allowance;
-    }
-
-    private Allowance allowance;
 
     public Machine() {
     }
@@ -42,11 +28,10 @@ public class Machine {
         this.reference = reference;
     }
 
-    public Machine(String id, String reference, Date buyingDate, Allowance allowance) {
+    public Machine(String id, String reference, Date buyingDate) {
         this.id = id;
         this.reference = reference;
         this.purchaseDate = buyingDate;
-        this.allowance = allowance;
         removeEmployeeDependency();
     }
 
@@ -78,12 +63,12 @@ public class Machine {
         return weeklyRentPrice;
     }
 
-    public Boolean getUsed() {
+    public Boolean getIsUsed() {
         return isUsed;
     }
 
-    public void setUsed(Boolean used) {
-        isUsed = used;
+    public void setIsUsed(Boolean isUsed) {
+        this.isUsed = isUsed;
     }
 
     public void setWeeklyRentPrice(double weeklyRentPrice) {
@@ -128,3 +113,4 @@ public class Machine {
         machineEmployeeID="";
     }
 }
+

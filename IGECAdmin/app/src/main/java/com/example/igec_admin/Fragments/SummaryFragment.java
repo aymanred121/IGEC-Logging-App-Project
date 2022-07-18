@@ -241,6 +241,16 @@ public class SummaryFragment extends Fragment {
                             if (month.length() == 1) {
                                 month = "0" + month;
                             }
+                            if((Integer.parseInt(month) -1)<1){
+                                prevMonth = "12";
+                                prevYear = Integer.parseInt(year)-1 +"";
+                            }else{
+                                prevMonth =  (Integer.parseInt(month) -1)+"";
+                                prevYear = year;
+                            }
+                            if (prevMonth.length() == 1) {
+                                prevMonth = "0" + prevMonth;
+                            }
                             EmployeeFragmentDialog employeeFragmentDialog = new EmployeeFragmentDialog(projects.get(position), year, month);
                             employeeFragmentDialog.show(getParentFragmentManager(), "");
 

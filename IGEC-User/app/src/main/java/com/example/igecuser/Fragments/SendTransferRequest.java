@@ -266,7 +266,7 @@ public class SendTransferRequest extends Fragment {
                 sendRequest(selectedEmployee).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void unused) {
-                        Toast.makeText(getActivity(), "Sent", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(), "Request Sent", Toast.LENGTH_SHORT).show();
                         clearInput();
                     }
                 });

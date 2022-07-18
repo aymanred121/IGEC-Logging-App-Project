@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.HashMap;
 
 public class Project {
-    //maintaining phase//TODO: create projectOverview to be loaded when send a transfer request instead of loading all the projects
     private String managerID,managerName,name,id , reference ,  locationCity ,locationArea ,locationStreet, contractType;
     private ArrayList<Allowance> allowancesList = new ArrayList<>();
     private Client client ;

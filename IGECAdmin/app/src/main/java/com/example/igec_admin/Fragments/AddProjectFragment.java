@@ -226,7 +226,8 @@ public class AddProjectFragment extends Fragment {
         vAddClient.setEnabled(!vOfficeWork.isChecked());
         getEmployees();
         setUpContractType();
-        fakeData();
+        //TODO: remove fakeData() when all testing is finished
+        //fakeData();
 
     }
 
@@ -252,7 +253,6 @@ public class AddProjectFragment extends Fragment {
             employees.get(position).setProjectId(projectID);
             Team.add(employees.get(position));
             TeamID.add(String.valueOf(employees.get(position).getId()));
-            //TODO: change selected to true
             empInfo.add("1");
             Map<String, Object> empInfoMap = new HashMap<>();
             empInfoMap.put(employees.get(position).getId(), empInfo);
@@ -267,7 +267,6 @@ public class AddProjectFragment extends Fragment {
             Team.removeIf(employeeOverview -> employeeOverview.getId().equals(employees.get(position).getId()));
             TeamID.remove(String.valueOf(employees.get(position).getId()));
             employees.get(position).setProjectId(null);
-            //TODO: change selected to false
             empInfo.add("0");
             Map<String, Object> empInfoMap = new HashMap<>();
             empInfoMap.put(employees.get(position).getId(), empInfo);

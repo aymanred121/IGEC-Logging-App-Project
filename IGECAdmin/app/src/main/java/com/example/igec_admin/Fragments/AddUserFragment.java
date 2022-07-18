@@ -102,24 +102,7 @@ public class AddUserFragment extends Fragment {
         vDatePicker = vDatePickerBuilder.build();
         vRegister = view.findViewById(R.id.button_register);
         //TODO: remove fakeData() when all testing is finished
-        fakeData();
-
-//        {
-//            vFirstName.setText("test");
-//            vSecondName.setText("1");
-//            vEmail.setText("t@gmail.com");
-//            vPassword.setText("1");
-//            vTitle.setText("a");
-//            vSalary.setText("1");
-//            vNationalID.setText("11111111111111");
-//            vPhone.setText("11111111111");
-//            vArea.setText("a");
-//            vCity.setText("a");
-//            vStreet.setText("a");
-//            vHireDate.setText(convertDateToString(1000000000));
-//        }
-//
-
+        //fakeData();
     }
 
     private String convertDateToString(long selection) {

@@ -56,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         setContentView(R.layout.activity_main);
-//        validateDate(this);
+        validateDate(this);
         initialize();
         // Listeners
         vEmail.addTextChangedListener(twEmail);
@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-//        validateDate(this);
+        validateDate(this);
 
     }
 
@@ -85,8 +85,6 @@ public class MainActivity extends AppCompatActivity {
         vPassword = findViewById(R.id.TextInput_password);
         vEmailLayout = findViewById(R.id.textInputLayout_Email);
         vSignIn = findViewById(R.id.Button_SignIn);
-        vEmail.setText("@gmail.com");
-        vPassword.setText("1");
 
         getLocationPermissions();
         getCameraPermission();

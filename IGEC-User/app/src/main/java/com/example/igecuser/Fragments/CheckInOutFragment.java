@@ -454,8 +454,8 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
             }
             if (!note.trim().isEmpty()) {
                 MachineDefectsLog machineDefectsLog = new MachineDefectsLog(note.trim(), currMachine.getReference(), currMachine.getId(), currEmployee.getId(), currEmployee.getFirstName(), new Date());
-                db.collection("MachineDefectsLog").add(machineDefectsLog).addOnSuccessListener(unused -> {
-                    Toast.makeText(getActivity(), "comment has been uploaded", Toast.LENGTH_SHORT).show();
+                db.collection("MachineDefectsLog").add(machineDefectsLog).addOnFailureListener(unused -> {
+                    Toast.makeText(getActivity(), "error uploading comment", Toast.LENGTH_SHORT).show();
                 });
             }
 

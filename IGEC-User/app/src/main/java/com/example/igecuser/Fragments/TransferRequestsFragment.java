@@ -156,7 +156,6 @@ public class TransferRequestsFragment extends Fragment {
     private void updateRequestStatus(TransferRequests request, int status) {
         batch = FirebaseFirestore.getInstance().batch();
         db.collection("TransferRequests").document(request.getTransferId()).update("transferStatus", status).addOnSuccessListener(unused -> {
-            Toast.makeText(getActivity(), "complete", Toast.LENGTH_SHORT).show();
             if (status == 1) {
                 updateEmployeeData(request);
                 updateOldProjectData(request);

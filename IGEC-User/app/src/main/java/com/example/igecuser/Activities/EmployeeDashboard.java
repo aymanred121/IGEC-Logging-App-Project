@@ -45,7 +45,7 @@ public class EmployeeDashboard extends AppCompatActivity implements NavigationVi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_employee_dashboard);
-//        validateDate(this);
+        validateDate(this);
         initialize();
         // Listeners
         vDrawerLayout.addDrawerListener(actionBarDrawerToggle);
@@ -56,7 +56,7 @@ public class EmployeeDashboard extends AppCompatActivity implements NavigationVi
     @Override
     protected void onResume() {
         super.onResume();
-//        validateDate(this);
+        validateDate(this);
     }
 
     @Override

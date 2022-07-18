@@ -227,7 +227,7 @@ public class AddProjectFragment extends Fragment {
         getEmployees();
         setUpContractType();
         //TODO: remove fakeData() when all testing is finished
-        //fakeData();
+        fakeData();
 
     }
 
@@ -712,7 +712,6 @@ public class AddProjectFragment extends Fragment {
                 vManagerName.setText(null);
                 selectedManager = null;
             }
-
             for (EmployeeOverview emp : Team) {
                 if (!emp.getId().equals(vManagerID.getText().toString())) {
                     emp.setManagerID(!vManagerID.getText().toString().equals("") ? vManagerID.getText().toString() : null);
@@ -720,7 +719,6 @@ public class AddProjectFragment extends Fragment {
                     emp.setManagerID("adminID");
                 }
             }
-
             hideError(vManagerIDLayout);
         }
     };

@@ -42,7 +42,7 @@ public class MachineLogAdapter extends RecyclerView.Adapter<MachineLogAdapter.Ma
         holder.vStartDate.setText(convertDateToString((long) ((Timestamp) employeeMachine.getCheckIn().get("Time")).getSeconds() * 1000));
         if (employeeMachine.getCheckOut().get("Time") != null)
             holder.vEndDate.setText(convertDateToString((long) ((Timestamp) employeeMachine.getCheckOut().get("Time")).getSeconds() * 1000));
-        holder.vCost.setText(String.valueOf(employeeMachine.getCost()));
+        holder.vCost.setText(String.format("%.2f EGP", employeeMachine.getCost()));
     }
 
     private String convertDateToString(long selection) {

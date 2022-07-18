@@ -20,29 +20,20 @@
         app:layout_constraintVertical_bias=".3" />
 
 
-    <com.google.android.material.button.MaterialButton
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/Button_CheckInOut"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton.Icon"
         android:layout_width="150dp"
         android:layout_height="150dp"
+        android:layout_marginBottom="32dp"
         android:layout_marginTop="@dimen/high"
-        android:backgroundTint="@color/green"
-        android:insetLeft="0dp"
-        android:insetTop="0dp"
-        android:insetRight="0dp"
-        android:insetBottom="0dp"
-        android:padding="0dp"
+        android:rotation="0"
         android:text="IN"
-        android:textColor="@color/white"
-        android:textSize="32sp"
-        app:iconGravity="textStart"
-        app:iconPadding="0dp"
-        app:iconSize="24dp"
+        android:textAlignment="center"
+        android:textSize="42sp"
+        android:backgroundTint="@color/green"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/TextView_Greeting"
-        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.MyApp.Button.Circle" />
-
+        app:layout_constraintTop_toBottomOf="@+id/TextView_Greeting"/>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/container"

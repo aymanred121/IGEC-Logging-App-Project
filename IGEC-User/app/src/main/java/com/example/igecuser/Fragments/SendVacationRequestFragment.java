@@ -176,7 +176,7 @@ public class SendVacationRequestFragment extends Fragment implements DatePickerD
                 return true;
             }
             if (view.first.getError() != null) {
-                return false;
+                return true;
             }
         }
         return false;
@@ -216,7 +216,7 @@ public class SendVacationRequestFragment extends Fragment implements DatePickerD
         public void afterTextChanged(Editable editable) {
             daysAfterVacationIsTaken = vVacationDays.getText().toString().trim().equals("") ? remainingDays : remainingDays - Integer.parseInt(vVacationDays.getText().toString());
             if (daysAfterVacationIsTaken < 0) {
-                vVacationDaysLayout.setError("Exceeds remaining");
+                vVacationDaysLayout.setHelperText(String.format("Exceeds remaining by %d", -daysAfterVacationIsTaken));
             } else if (daysAfterVacationIsTaken == remainingDays && !vVacationDays.getText().toString().trim().isEmpty()) {
                 vVacationDaysLayout.setError("Invalid Value");
             } else {
@@ -267,23 +267,21 @@ public class SendVacationRequestFragment extends Fragment implements DatePickerD
     };
     private View.OnClickListener oclSendRequest = v -> {
         if (validateInputs()) {
-            if(daysAfterVacationIsTaken < 0)
-            {
+            if (daysAfterVacationIsTaken < 0) {
                 MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
-                builder.setTitle("days exceeded by "+daysAfterVacationIsTaken*-1+" ...")
-                        .setMessage("there will be "+daysAfterVacationIsTaken*-1+ " will be considered as Unpaid")
+                builder.setTitle("Days exceeded by " + daysAfterVacationIsTaken * -1 + " ...")
+                        .setMessage(daysAfterVacationIsTaken * -1 + " Days at least will be considered as Unpaid")
                         .setCancelable(true)
-                        .setPositiveButton("ok, send" , (dialogInterface, i) -> {
+                        .setPositiveButton("ok, send", (dialogInterface, i) -> {
                             uploadVacationRequest();
                             dialogInterface.dismiss();
                         })
-                        .setNegativeButton("No" ,  (dialogInterface, i) -> {
+                        .setNegativeButton("No", (dialogInterface, i) -> {
                             dialogInterface.dismiss();
                         });
                 AlertDialog alertDialog = builder.create();
                 alertDialog.show();
-            }
-            else{
+            } else {
                 uploadVacationRequest();
             }
 
@@ -293,10 +291,11 @@ public class SendVacationRequestFragment extends Fragment implements DatePickerD
     private View.OnClickListener oclVacationDate = v -> {
         dpd.show(getParentFragmentManager(), "DATE_PICKER");
     };
+
     @Override
     public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
         Calendar vacation = Calendar.getInstance();
-        vacation.set(year,monthOfYear,dayOfMonth);
+        vacation.set(year, monthOfYear, dayOfMonth);
         vVacationDate.setText(convertDateToString(vacation.getTime().getTime()));
         startDate = vacation.getTime().getTime();
     }

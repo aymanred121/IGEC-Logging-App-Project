@@ -43,6 +43,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
@@ -71,7 +72,7 @@ import pub.devrel.easypermissions.EasyPermissions;
 
 public class CheckInOutFragment extends Fragment implements EasyPermissions.PermissionCallbacks {
 
-    private MaterialButton vCheckInOut;
+    private ExtendedFloatingActionButton vCheckInOut;
     private FloatingActionButton vAddMachine, vAddMachineInside, vAddMachineOutside;
     private TextView vInsideText, vOutsideText;
     // Vars
@@ -232,6 +233,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                     .setPositiveButton(getString(R.string.Yes), (dialogInterface, i) -> {
                         Locus.INSTANCE.getCurrentLocation(getActivity(), result -> {
                             try {
+                                vCheckInOut.setEnabled(false);
                                 Location location = result.getLocation();
                                 String currentDateAndTime = sdf.format(new Date());
                                 String day = currentDateAndTime.substring(0, 2);
@@ -281,6 +283,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
 
                             } catch (Exception e) {
                                 Toast.makeText(getActivity(), "Please, enable GPS!", Toast.LENGTH_SHORT).show();
+                                vCheckInOut.setEnabled(true);
                             }
                             return null;
                         });
@@ -357,6 +360,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                         });
                     });
                     Toast.makeText(getContext(), "Checked Out successfully!", Toast.LENGTH_SHORT).show();
+                    vCheckInOut.setEnabled(true);
                     db.collection("projects").document(currEmployee.getProjectID())
                             .update("employeeWorkedTime." + currEmployee.getId(), FieldValue.increment(workingTime));
 
@@ -422,6 +426,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         });
 
         Toast.makeText(getContext(), "Checked In successfully!", Toast.LENGTH_SHORT).show();
+        vCheckInOut.setEnabled(true);
     }
 
 

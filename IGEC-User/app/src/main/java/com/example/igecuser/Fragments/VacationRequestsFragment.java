@@ -105,7 +105,8 @@ public class VacationRequestsFragment extends Fragment {
         layout.setBoxBackgroundColor(ContextCompat.getColor(getActivity(), android.R.color.white));
         layout.setBoxBackgroundMode(TextInputLayout.BOX_BACKGROUND_OUTLINE);
         final TextInputEditText editText = new TextInputEditText(layout.getContext());
-        editText.setText("0");
+        int allowed = requestedDays - employee.getTotalNumberOfVacationDays();
+        editText.setText(String.format("%d", allowed));
         editText.setInputType(InputType.TYPE_CLASS_NUMBER);
         editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(2)});
         editText.addTextChangedListener(new TextWatcher() {

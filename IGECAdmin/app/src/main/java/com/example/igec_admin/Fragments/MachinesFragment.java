@@ -70,7 +70,7 @@ public class MachinesFragment extends Fragment {
     }
 
     private String convertDateToString(long selection) {
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("F EEE MMM yyyy hh:mm:ss a");
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm a");
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(selection);
         return simpleDateFormat.format(calendar.getTime());

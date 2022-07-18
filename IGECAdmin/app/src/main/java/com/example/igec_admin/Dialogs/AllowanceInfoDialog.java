@@ -10,7 +10,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Toast;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -26,13 +28,14 @@ import java.util.ArrayList;
 
 public class AllowanceInfoDialog extends DialogFragment {
 
-    private TextInputEditText vAllowanceName, vAllowanceMount;
+    private TextInputEditText vAllowanceMount;
+    private AutoCompleteTextView vAllowanceName;
     private TextInputLayout vAllowanceNameLayout, vAllowanceMountLayout;
-    private ArrayList<Pair<TextInputLayout, TextInputEditText>> views;
+    private ArrayList<Pair<TextInputLayout, EditText>> views;
     private MaterialButton vDone;
     private int position;
     private Allowance allowance = null;
-
+    private ArrayList<String> allowancesList = new ArrayList<>();
     public AllowanceInfoDialog(int position) {
         this.position = position;
     }
@@ -76,14 +79,14 @@ public class AllowanceInfoDialog extends DialogFragment {
         super.onViewCreated(view, savedInstanceState);
         initialize(view);
         vDone.setOnClickListener(oclDone);
-        vAllowanceName.addTextChangedListener(twName);
+        //vAllowanceName.addTextChangedListener(twName);
         vAllowanceMount.addTextChangedListener(twMount);
 
     }
 
     private void initialize(View view) {
         vAllowanceMount = view.findViewById(R.id.TextInput_AllowanceMount);
-        vAllowanceName = view.findViewById(R.id.TextInput_AllowanceName);
+        vAllowanceName = view.findViewById(R.id.TextInput_allowanceName);
         vAllowanceMountLayout = view.findViewById(R.id.textInputLayout_AllowanceMount);
         vAllowanceNameLayout = view.findViewById(R.id.textInputLayout_AllowanceName);
         vDone = view.findViewById(R.id.button_Done);
@@ -95,10 +98,20 @@ public class AllowanceInfoDialog extends DialogFragment {
             vAllowanceName.setText(allowance.getName());
             vAllowanceMount.setText(String.valueOf(allowance.getAmount()));
         }
+        vAllowanceName.addTextChangedListener(twName);
+        allowancesList.clear();
+        allowancesList.add("Transportation");
+        allowancesList.add("accommodation");
+        allowancesList.add("site");
+        allowancesList.add("remote");
+        allowancesList.add("food");
+        allowancesList.add("Other");
+        ArrayAdapter<String> allowancesAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, allowancesList);
+        vAllowanceName.setAdapter(allowancesAdapter);
     }
 
     private boolean generateError() {
-        for (Pair<TextInputLayout, TextInputEditText> view : views) {
+        for (Pair<TextInputLayout, EditText> view : views) {
             if (view.second.getText().toString().trim().isEmpty()) {
                 view.first.setError("Missing");
                 return true;

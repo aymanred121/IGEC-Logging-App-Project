@@ -187,6 +187,18 @@ public class UserFragmentDialog extends DialogFragment {
         vPasswordLayout.setEndIconDrawable(R.drawable.ic_baseline_autorenew_24);
         vPassword.setEnabled(false);
         vDelete.setEnabled(employee.getManagerID() == null || !employee.getManagerID().equals("adminID"));
+        db.collection("Machine_Employee").whereEqualTo("employee.id", employee.getId()).addSnapshotListener((docs, e) -> {
+            // no machines found = enabled X
+            // a machine without a check-out = disabled
+            // all machines have been checked-out = enabled
+            for (QueryDocumentSnapshot doc : docs) {
+                if (doc.get("checkOut") == null || ((HashMap) doc.get("checkOut")).size() == 0) {
+                    vDelete.setEnabled(false);
+                    return;
+                }
+                vDelete.setEnabled(true);
+            }
+        });
     }
 
     boolean validateInputs() {
@@ -344,47 +356,47 @@ public class UserFragmentDialog extends DialogFragment {
 
     private void updateEmployee() {
         db.collection("employees").whereEqualTo("email", vEmail.getText().toString().trim())
-                .whereNotEqualTo("id",employee.getId())
+                .whereNotEqualTo("id", employee.getId())
                 .get().addOnSuccessListener(documents -> {
-            if (documents.getDocuments().size() != 0) {
-                Toast.makeText(getActivity(), "this Email already exists", Toast.LENGTH_SHORT).show();
-                vUpdate.setEnabled(true);
-                return;
-            }
-            String id = employee.getId();
-            Map<String, Object> updatedEmpOverviewMap = new HashMap<>();
-            ArrayList<String> empInfo = new ArrayList<>();
-            empInfo.add((vFirstName.getText()).toString());
-            empInfo.add((vSecondName.getText()).toString());
-            empInfo.add((vTitle.getText()).toString());
-            empInfo.add((employee.getManagerID()));
-            empInfo.add((employee.getProjectID()));
-            empInfo.add((employee.getManagerID() == null) ? "0" : "1");
-            updatedEmpOverviewMap.put(id, empInfo);
-            HashMap<String, Object> updatedEmployeeMap = fillEmployeeData();
-            db.collection("employees").document(id).update(updatedEmployeeMap).addOnSuccessListener(unused -> {
+                    if (documents.getDocuments().size() != 0) {
+                        Toast.makeText(getActivity(), "this Email already exists", Toast.LENGTH_SHORT).show();
+                        vUpdate.setEnabled(true);
+                        return;
+                    }
+                    String id = employee.getId();
+                    Map<String, Object> updatedEmpOverviewMap = new HashMap<>();
+                    ArrayList<String> empInfo = new ArrayList<>();
+                    empInfo.add((vFirstName.getText()).toString());
+                    empInfo.add((vSecondName.getText()).toString());
+                    empInfo.add((vTitle.getText()).toString());
+                    empInfo.add((employee.getManagerID()));
+                    empInfo.add((employee.getProjectID()));
+                    empInfo.add((employee.getManagerID() == null) ? "0" : "1");
+                    updatedEmpOverviewMap.put(id, empInfo);
+                    HashMap<String, Object> updatedEmployeeMap = fillEmployeeData();
+                    db.collection("employees").document(id).update(updatedEmployeeMap).addOnSuccessListener(unused -> {
 
-                if (employee.getSalary() != Double.parseDouble(vSalary.getText().toString())) {
-                    ArrayList<Allowance> allTypes = new ArrayList<>();
-                    db.collection("EmployeesGrossSalary").document(employee.getId()).get().addOnSuccessListener((value) -> {
-                        if (!value.exists())
-                            return;
-                        EmployeesGrossSalary employeesGrossSalary;
-                        employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
-                        allTypes.addAll(employeesGrossSalary.getAllTypes());
-                        allTypes.removeIf(allowance -> allowance.getType() == NETSALARY);
-                        allTypes.add(new Allowance("Net salary", Double.parseDouble(vSalary.getText().toString()), NETSALARY));
-                        db.collection("EmployeesGrossSalary").document(employee.getId()).update("allTypes", allTypes);
+                        if (employee.getSalary() != Double.parseDouble(vSalary.getText().toString())) {
+                            ArrayList<Allowance> allTypes = new ArrayList<>();
+                            db.collection("EmployeesGrossSalary").document(employee.getId()).get().addOnSuccessListener((value) -> {
+                                if (!value.exists())
+                                    return;
+                                EmployeesGrossSalary employeesGrossSalary;
+                                employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
+                                allTypes.addAll(employeesGrossSalary.getAllTypes());
+                                allTypes.removeIf(allowance -> allowance.getType() == NETSALARY);
+                                allTypes.add(new Allowance("Net salary", Double.parseDouble(vSalary.getText().toString()), NETSALARY));
+                                db.collection("EmployeesGrossSalary").document(employee.getId()).update("allTypes", allTypes);
+                            });
+                        }
+                        updateEmployeeOverview(updatedEmpOverviewMap, updatedEmployeeMap);
+
+                    }).addOnFailureListener(e -> {
+                        Toast.makeText(getActivity(), "Failed to update due to corrupted data ", Toast.LENGTH_SHORT).show();
+                        dismiss();
+
                     });
-                }
-                updateEmployeeOverview(updatedEmpOverviewMap, updatedEmployeeMap);
-
-            }).addOnFailureListener(e -> {
-                Toast.makeText(getActivity(), "Failed to update due to corrupted data ", Toast.LENGTH_SHORT).show();
-                dismiss();
-
-            });
-        });
+                });
     }
 
     // Listeners

@@ -46,6 +46,8 @@ public class SendTransferRequest extends Fragment {
     private TextInputLayout vTransferNoteLayout, vProjectReferenceLayout, vEmployeesIdLayout;
     private ArrayList<Pair<TextInputLayout, EditText>> views;
     private MaterialButton vSend;
+    private ArrayList<String> EmployeesId = new ArrayList<>();
+    private ArrayAdapter<String> IdAdapter;
     private EmployeeOverview selectedEmployee;
     ArrayList<String> projectsRef;
     private ArrayAdapter<String> RefAdapter;
@@ -86,9 +88,8 @@ public class SendTransferRequest extends Fragment {
         views.add(new Pair<>(vProjectReferenceLayout, vProjectsReference));
         views.add(new Pair<>(vEmployeesIdLayout, vEmployeesId));
         views.add(new Pair<>(vTransferNoteLayout, vTransferNote));
+        IdAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, EmployeesId);
         getProject();
-
-
     }
 
     private Task<Void> sendRequest(EmployeeOverview employee) {
@@ -109,21 +110,21 @@ public class SendTransferRequest extends Fragment {
     private void getAllEmployees() {
         vEmployeesId.setText(null);
         selectedEmployee = null;
-        ArrayList<String> EmployeesId = new ArrayList<>();
+        EmployeesId.clear();
         for (EmployeeOverview emp : oldProject.getEmployees())
             if (!emp.getId().equals(manager.getId())) {
                 if (selectedEmployee == null)
                     selectedEmployee = emp;
                 EmployeesId.add(emp.getId() + " | " + emp.getFirstName() + " " + emp.getLastName());
             }
-        ArrayAdapter<String> IdAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, EmployeesId);
+
         if (selectedEmployee != null) // no employees to make a transfer request
             vEmployeesId.setText(String.format("%s | %s %s", selectedEmployee.getId(), selectedEmployee.getFirstName(), selectedEmployee.getLastName()));
-        else
-        {
+        else {
             freezeViews(true);
         }
         vEmployeesId.setAdapter(IdAdapter);
+        IdAdapter.notifyDataSetChanged();
         vProjectsReference.setEnabled(false);
         vEmployeesId.setEnabled(false);
     }
@@ -234,6 +235,7 @@ public class SendTransferRequest extends Fragment {
                     break;
                 }
             }
+            vEmployeesIdLayout.setErrorEnabled(vEmployeesId.getText().toString().isEmpty());
         }
     };
     private final TextWatcher twProjectRef = new TextWatcher() {

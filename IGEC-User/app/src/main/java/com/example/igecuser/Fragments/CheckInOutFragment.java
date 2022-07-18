@@ -249,7 +249,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                 db.collection("summary").document(id)
                                         //.collection(year+"-"+month).document(day)
                                         .get().addOnSuccessListener(documentSnapshot -> {
-                                            if (!documentSnapshot.exists() || documentSnapshot.getData().size() == 0 || documentSnapshot.getData().get("checkOut") != null) {
+                                            if (!documentSnapshot.exists() || documentSnapshot.getData().size() == 0) {
                                                 employeeCheckIn(summary);
                                             } else {
                                                 Summary summary1 = documentSnapshot.toObject(Summary.class);
@@ -259,6 +259,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                                     summary1.setLastCheckInTime(Timestamp.now());
                                                     db.document(summary1.getLastDayPath()).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null);
                                                     db.collection("summary").document(id).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null);
+                                                    vCheckInOut.setEnabled(true);
                                                 }
                                             }
                                         });

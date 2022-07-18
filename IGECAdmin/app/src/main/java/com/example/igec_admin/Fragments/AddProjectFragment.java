@@ -390,6 +390,11 @@ public class AddProjectFragment extends Fragment {
     }
 
     private void addProject() {
+
+        allowances.forEach(allowance -> {
+            allowance.setType(allowancesEnum.PROJECT.ordinal());
+            allowance.setProjectId(projectID);
+        });
         Project newProject = new Project(vManagerName.getText().toString()
                 , vManagerID.getText().toString()
                 , vName.getText().toString()
@@ -406,10 +411,6 @@ public class AddProjectFragment extends Fragment {
         allowances = newProject.getAllowancesList();
         batch = FirebaseFirestore.getInstance().batch();
         batch.set(db.collection("projects").document(projectID), newProject);
-        allowances.forEach(allowance -> {
-            allowance.setType(allowancesEnum.PROJECT.ordinal());
-            allowance.setProjectId(projectID);
-        });
         updateEmployeesDetails(projectID);
         projectID = db.collection("projects").document().getId().substring(0, 5);
 

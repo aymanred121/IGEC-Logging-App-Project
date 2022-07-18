@@ -347,7 +347,11 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                         Allowance overTimeAllowance = new Allowance();
                         overTimeAllowance.setAmount(finalOverTime * currEmployee.getOverTime());
                         overTimeAllowance.setName("overTime");
-                        overTimeAllowance.setNote(day);
+                        Date checkInDate = (Date) summary.getCheckIn().get("Time");
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTime(checkInDate);
+                        String prevDay = String.format("%02d",cal.get(Calendar.DAY_OF_MONTH));
+                        overTimeAllowance.setNote(prevDay);
                         overTimeAllowance.setType(allowancesEnum.OVERTIME.ordinal());
                         overTimeAllowance.setProjectId(currEmployee.getProjectID());
                         db.collection("EmployeesGrossSalary").document(id).collection(finalYear).document(finalMonth).get().addOnSuccessListener(doc1 -> {

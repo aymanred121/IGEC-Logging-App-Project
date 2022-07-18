@@ -52,7 +52,7 @@
     <string name="cancel">No</string>
     <string name="accept">Yes</string>
     <string name="Note">Note</string>
-    <string name="penalty">Penalty</string>
+    <string name="penalty">Retention</string>
     <string name="send_a_transfer_request">Send a Transfer Request</string>
     <string name="transfer_requests">Transfer Requests</string>
     <string name="transfer_note">Transfer Note</string>
@@ -60,7 +60,7 @@
     <string name="employee_id_name">Employee Id | Name</string>
     <string name="ChangePassword">Change Password</string>
     <string name="perDay">Per Day</string>
-    <string name="gift">Gift</string>
+    <string name="gift">Bonus</string>
     <string name="date_is_inaccurate">Date is inaccurate</string>
     <string name="adjust_date">Adjust Date</string>
     <string name="month">Month</string>

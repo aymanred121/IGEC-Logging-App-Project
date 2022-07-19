@@ -10,6 +10,9 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.util.Pair;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -30,13 +33,15 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class AllowanceInfoDialog extends DialogFragment {
-    private TextInputEditText vAllowanceName, vAllowanceMount, vAllowanceNote;
+    private TextInputEditText vAllowanceMount, vAllowanceNote;
     private TextInputLayout vAllowanceNameLayout, vAllowanceMountLayout, vAllowanceNoteLayout;
-    private ArrayList<Pair<TextInputLayout, TextInputEditText>> views;
+    private ArrayList<Pair<TextInputLayout, EditText>> views;
     private MaterialCheckBox vPenalty, vMode;
     private MaterialButton vDone;
+    private AutoCompleteTextView vAllowanceName;
     private int position;
     private Allowance allowance = null;
+    private ArrayList<String> allowancesList = new ArrayList<>();
     private boolean canGivePenalty, isProject;
     private String EmployeeID;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -101,7 +106,7 @@ public class AllowanceInfoDialog extends DialogFragment {
 
     private void initialize(View view) {
         vAllowanceMount = view.findViewById(R.id.TextInput_AllowanceMount);
-        vAllowanceName = view.findViewById(R.id.TextInput_AllowanceName);
+        vAllowanceName = view.findViewById(R.id.TextInput_allowanceName);
         vAllowanceNote = view.findViewById(R.id.TextInput_AllowanceNote);
         vAllowanceMountLayout = view.findViewById(R.id.textInputLayout_AllowanceMount);
         vAllowanceNameLayout = view.findViewById(R.id.textInputLayout_AllowanceName);
@@ -119,16 +124,25 @@ public class AllowanceInfoDialog extends DialogFragment {
         vMode.setVisibility(canGivePenalty ? View.VISIBLE : View.GONE);
         if (allowance != null) {
             vPenalty.setChecked(allowance.getAmount() < 0);
-            vMode.setText(vPenalty.isChecked() ? "Days(s)" : "Gift");
+            vMode.setText(vPenalty.isChecked() ? "Days(s)" : "Bonus");
             vAllowanceName.setText(allowance.getName());
             vAllowanceMount.setText(String.format("%.2f",Math.abs(allowance.getAmount())));
             vAllowanceNote.setText(allowance.getNote());
         }
+        allowancesList.clear();
+        allowancesList.add("Transportation");
+        allowancesList.add("accommodation");
+        allowancesList.add("site");
+        allowancesList.add("remote");
+        allowancesList.add("food");
+        allowancesList.add("Other");
+        ArrayAdapter<String> allowancesAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, allowancesList);
+        vAllowanceName.setAdapter(allowancesAdapter);
     }
 
     private boolean generateError() {
 
-        for (Pair<TextInputLayout, TextInputEditText> view : views) {
+        for (Pair<TextInputLayout, EditText> view : views) {
             if (view.second.getText().toString().trim().isEmpty()) {
                 view.first.setError("Missing");
                 return true;
@@ -167,7 +181,7 @@ public class AllowanceInfoDialog extends DialogFragment {
                 vMode.setText("Days");
             } else {
                 vMode.setChecked(false);
-                vMode.setText("Gift");
+                vMode.setText("Bonus");
             }
 
         }

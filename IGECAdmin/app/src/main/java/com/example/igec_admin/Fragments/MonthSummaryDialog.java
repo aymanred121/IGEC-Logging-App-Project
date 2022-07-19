@@ -128,21 +128,20 @@ public class MonthSummaryDialog extends DialogFragment {
         0b0101001010101
         we will always get 0 and otherwise with other numbers
          */
-        if ((1<<(monthNumber)&MONTH31DAYS)==0) {
+        if ((1 << (monthNumber) & MONTH31DAYS) == 0) {
             //create header with 31 days
             for (int i = 1; i <= 31; i++) {
                 header.add(String.valueOf(i));
             }
             dataRow = new String[32];
         } else if (monthNumber == 2) {
-            if(yearNumber%400 ==0 ||(yearNumber%100 !=0) && (yearNumber%4 ==0 )) {
+            if (yearNumber % 400 == 0 || (yearNumber % 100 != 0) && (yearNumber % 4 == 0)) {
                 //create header with 29 days
                 for (int i = 1; i <= 29; i++) {
                     header.add(String.valueOf(i));
                 }
                 dataRow = new String[30];
-            }
-            else{
+            } else {
                 //create header with 28 days
                 for (int i = 1; i <= 28; i++) {
                     header.add(String.valueOf(i));
@@ -164,6 +163,13 @@ public class MonthSummaryDialog extends DialogFragment {
         }
         IntStream.range(1, dataRow.length).filter(i -> dataRow[i] == null).forEach(i -> dataRow[i] = "0");
         csvWriter.addDataRow(dataRow);
+        dataRow[0] = workingDays.get(0).getProjectName();
+        for (WorkingDay w : workingDays) {
+            dataRow[Integer.parseInt(w.getDay())] = String.valueOf(w.getProjectName());
+        }
+        IntStream.range(1, dataRow.length).filter(i -> dataRow[i] == null).forEach(i -> dataRow[i] = "0");
+        csvWriter.addDataRow(dataRow);
+
         try {
             csvWriter.build(empName + "-" + year + "-" + month);
             Toast.makeText(getActivity(), "csv Saved!", Toast.LENGTH_SHORT).show();

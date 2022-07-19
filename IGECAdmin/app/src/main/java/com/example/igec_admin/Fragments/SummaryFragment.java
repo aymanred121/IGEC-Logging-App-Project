@@ -1,6 +1,5 @@
 package com.example.igec_admin.Fragments;
 
-import android.content.DialogInterface;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -9,7 +8,6 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -48,7 +46,7 @@ public class SummaryFragment extends Fragment {
     // Vars
     private ProjectAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
-    private String year, month,prevMonth,prevYear;
+    private String year, month, prevMonth, prevYear;
     ArrayList<Project> projects = new ArrayList();
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     CollectionReference projectRef = db.collection("projects");
@@ -66,7 +64,7 @@ public class SummaryFragment extends Fragment {
         selectedMonthLayout.setEndIconOnClickListener(oclMonthPicker);
         selectedMonthLayout.setErrorIconOnClickListener(oclMonthPicker);
         selectedMonthLayout.setErrorIconDrawable(R.drawable.ic_baseline_calendar_month_24);
-        adapter.setOnItemClickListener(oclEmployees);
+        adapter.setOnItemClickListener(oclProject);
         createCSV.setOnClickListener(oclCSV);
     }
 
@@ -111,11 +109,11 @@ public class SummaryFragment extends Fragment {
                         if (month.length() == 1) {
                             month = "0" + month;
                         }
-                        if((Integer.parseInt(month) -1)<1){
+                        if ((Integer.parseInt(month) - 1) < 1) {
                             prevMonth = "12";
-                            prevYear = Integer.parseInt(year)-1 +"";
-                        }else{
-                            prevMonth =  (Integer.parseInt(month) -1)+"";
+                            prevYear = Integer.parseInt(year) - 1 + "";
+                        } else {
+                            prevMonth = (Integer.parseInt(month) - 1) + "";
                             prevYear = year;
                         }
                         if (prevMonth.length() == 1) {
@@ -140,18 +138,18 @@ public class SummaryFragment extends Fragment {
             db.collection("employees")
                     .get()
                     .addOnSuccessListener(queryDocumentSnapshots -> {
-                        String[] header = {"Name", "Basic","over time", "Cuts", "Transportation", "other", "personal" , "Next month" , "current month" , "previous month"};
+                        String[] header = {"Name", "Basic", "over time", "Cuts", "Transportation", "accommodation" , "site" , "remote" , "food",  "other", "personal", "Next month", "current month", "previous month"};
                         CsvWriter csvWriter = new CsvWriter(header);
                         final int[] counter = new int[1];
                         for (QueryDocumentSnapshot queryDocumentSnapshot : queryDocumentSnapshots) {
                             if (month.length() == 1)
                                 month = "0" + month;
-                            db.collection("EmployeesGrossSalary").document(queryDocumentSnapshot.getId()).collection(prevYear).document(prevMonth).get().addOnSuccessListener(doc->{
+                            db.collection("EmployeesGrossSalary").document(queryDocumentSnapshot.getId()).collection(prevYear).document(prevMonth).get().addOnSuccessListener(doc -> {
                                 db.collection("EmployeesGrossSalary").document(queryDocumentSnapshot.getId()).collection(year).document(month).get().addOnSuccessListener(documentSnapshot1 -> {
                                     if (!documentSnapshot1.exists()) {
-                                        if (counter[0] == queryDocumentSnapshots.size()-1) {
+                                        if (counter[0] == queryDocumentSnapshots.size() - 1) {
                                             try {
-                                                csvWriter.build(year+"-"+month);
+                                                csvWriter.build(year + "-" + month);
                                                 Toast.makeText(getActivity(), "CSV file created", Toast.LENGTH_SHORT).show();
                                             } catch (IOException e) {
                                                 e.printStackTrace();
@@ -161,20 +159,32 @@ public class SummaryFragment extends Fragment {
                                         return;
                                     }
                                     Employee emp = queryDocumentSnapshot.toObject(Employee.class);
-                                    double cuts  = 0 ;
-                                    double transportation = 0 ;
-                                    double other = 0 ;
+                                    double cuts = 0;
+                                    double transportation = 0;
+                                    double accommodation = 0;
+                                    double site = 0;
+                                    double remote = 0;
+                                    double food = 0;
+                                    double other = 0;
                                     double overTime = 0;
                                     double personal = 0;
                                     double nextMonth = 0;
                                     double currentMonth = 0;
                                     double previousMonth = 0;
                                     for (Allowance allowance : documentSnapshot1.toObject(EmployeesGrossSalary.class).getAllTypes()) {
-                                        if(allowance.getType() == allowancesEnum.NETSALARY.ordinal())
+                                        if (allowance.getType() == allowancesEnum.NETSALARY.ordinal())
                                             continue;
-                                        if (allowance.getName().trim().equalsIgnoreCase("Transportation"))
-                                            transportation +=allowance.getAmount();
-                                        else if (allowance.getType() == allowancesEnum.PENALTY.ordinal()) {
+                                        if (allowance.getName().trim().equalsIgnoreCase("Transportation")) {
+                                            transportation += allowance.getAmount();
+                                        } else if (allowance.getName().trim().equalsIgnoreCase("accommodation")) {
+                                            accommodation += allowance.getAmount();
+                                        } else if (allowance.getName().trim().equalsIgnoreCase("site")) {
+                                            site += allowance.getAmount();
+                                        } else if (allowance.getName().trim().equalsIgnoreCase("remote")) {
+                                            remote += allowance.getAmount();
+                                        } else if (allowance.getName().trim().equalsIgnoreCase("food")) {
+                                            food += allowance.getAmount();
+                                        } else if (allowance.getType() == allowancesEnum.PENALTY.ordinal()) {
                                             cuts += allowance.getAmount();
                                         } else if (allowance.getType() == allowancesEnum.GIFT.ordinal() ||
                                                 allowance.getType() == allowancesEnum.BONUS.ordinal()) {
@@ -185,20 +195,18 @@ public class SummaryFragment extends Fragment {
                                             other += allowance.getAmount();
                                         }
                                     }
-                                    nextMonth = other + personal;
-                                    currentMonth = transportation+emp.getSalary()+cuts+overTime;
-                                    if(!doc.exists())
-                                    previousMonth = 0;
-                                    else{
+                                    nextMonth = other + personal + accommodation + site + remote + food;
+                                    currentMonth = transportation + emp.getSalary() + cuts + overTime;
+                                    if (!doc.exists())
+                                        previousMonth = 0;
+                                    else {
                                         for (Allowance allowance : doc.toObject(EmployeesGrossSalary.class).getAllTypes()) {
-                                            if(allowance.getType() == allowancesEnum.NETSALARY.ordinal())
+                                            if (allowance.getType() == allowancesEnum.NETSALARY.ordinal())
                                                 continue;
                                             if (allowance.getName().trim().equalsIgnoreCase("Transportation"))
                                                 continue;
                                             if (allowance.getType() == allowancesEnum.PENALTY.ordinal()) {
                                                 continue;
-                                            } else if (allowance.getType() == allowancesEnum.GIFT.ordinal() || allowance.getType() == allowancesEnum.BONUS.ordinal()) {
-                                                previousMonth += allowance.getAmount();
                                             } else if (allowance.getType() == allowancesEnum.OVERTIME.ordinal()) {
                                                 continue;
                                             } else {
@@ -206,10 +214,10 @@ public class SummaryFragment extends Fragment {
                                             }
                                         }
                                     }
-                                    csvWriter.addDataRow(emp.getFirstName() + " " + emp.getLastName(), String.valueOf(emp.getSalary()), String.valueOf(overTime), String.valueOf(cuts), String.valueOf(transportation) , String.valueOf(other), String.valueOf(personal), String.valueOf(nextMonth) , String.valueOf(currentMonth) , String.valueOf(previousMonth));
-                                    if (counter[0] == queryDocumentSnapshots.size()-1) {
+                                    csvWriter.addDataRow(emp.getFirstName() + " " + emp.getLastName(), String.valueOf(emp.getSalary()), String.valueOf(overTime), String.valueOf(cuts), String.valueOf(transportation),String.valueOf(accommodation) ,String.valueOf(site) ,String.valueOf(remote) ,String.valueOf(food) , String.valueOf(other), String.valueOf(personal), String.valueOf(nextMonth), String.valueOf(currentMonth), String.valueOf(previousMonth));
+                                    if (counter[0] == queryDocumentSnapshots.size() - 1) {
                                         try {
-                                            csvWriter.build(year+"-"+month);
+                                            csvWriter.build(year + "-" + month);
                                             Toast.makeText(getActivity(), "CSV file created", Toast.LENGTH_SHORT).show();
                                         } catch (IOException e) {
                                             e.printStackTrace();
@@ -224,37 +232,34 @@ public class SummaryFragment extends Fragment {
                     });
         }
     };
-    private ProjectAdapter.OnItemClickListener oclEmployees = new ProjectAdapter.OnItemClickListener() {
+    private ProjectAdapter.OnItemClickListener oclProject = new ProjectAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position) {
             final Calendar today = Calendar.getInstance();
             MonthPickerDialog.Builder builder = new MonthPickerDialog.Builder(getActivity(),
-                    new MonthPickerDialog.OnDateSetListener() {
-                        @Override
-                        public void onDateSet(int selectedMonth, int selectedYear) {
-                            selectedMonthLayout.setError(null);
-                            selectedMonthLayout.setErrorEnabled(false);
-                            selectedMonthEdit.setText(String.format("%d/%d", selectedMonth + 1, selectedYear));
-                            String[] selectedDate = selectedMonthEdit.getText().toString().split("/");
-                            year = selectedDate[1];
-                            month = selectedDate[0];
-                            if (month.length() == 1) {
-                                month = "0" + month;
-                            }
-                            if((Integer.parseInt(month) -1)<1){
-                                prevMonth = "12";
-                                prevYear = Integer.parseInt(year)-1 +"";
-                            }else{
-                                prevMonth =  (Integer.parseInt(month) -1)+"";
-                                prevYear = year;
-                            }
-                            if (prevMonth.length() == 1) {
-                                prevMonth = "0" + prevMonth;
-                            }
-                            EmployeeFragmentDialog employeeFragmentDialog = new EmployeeFragmentDialog(projects.get(position), year, month);
-                            employeeFragmentDialog.show(getParentFragmentManager(), "");
-
+                    (selectedMonth, selectedYear) -> {
+                        selectedMonthLayout.setError(null);
+                        selectedMonthLayout.setErrorEnabled(false);
+                        selectedMonthEdit.setText(String.format("%d/%d", selectedMonth + 1, selectedYear));
+                        String[] selectedDate = selectedMonthEdit.getText().toString().split("/");
+                        year = selectedDate[1];
+                        month = selectedDate[0];
+                        if (month.length() == 1) {
+                            month = "0" + month;
                         }
+                        if ((Integer.parseInt(month) - 1) < 1) {
+                            prevMonth = "12";
+                            prevYear = Integer.parseInt(year) - 1 + "";
+                        } else {
+                            prevMonth = (Integer.parseInt(month) - 1) + "";
+                            prevYear = year;
+                        }
+                        if (prevMonth.length() == 1) {
+                            prevMonth = "0" + prevMonth;
+                        }
+                        EmployeeFragmentDialog employeeFragmentDialog = new EmployeeFragmentDialog(projects.get(position), year, month);
+                        employeeFragmentDialog.show(getParentFragmentManager(), "");
+
                     }, today.get(Calendar.YEAR), today.get(Calendar.MONTH));
             MonthPickerDialog monthPickerDialog = builder.setActivatedMonth(today.get(Calendar.MONTH))
                     .setMinYear(today.get(Calendar.YEAR) - 1)
@@ -264,8 +269,7 @@ public class SummaryFragment extends Fragment {
                     .build();
             if (selectedMonthEdit.getText().toString().isEmpty())
                 monthPickerDialog.show();
-            else
-            {
+            else {
                 String[] selectedDate = selectedMonthEdit.getText().toString().split("/");
                 year = selectedDate[1];
                 month = selectedDate[0];

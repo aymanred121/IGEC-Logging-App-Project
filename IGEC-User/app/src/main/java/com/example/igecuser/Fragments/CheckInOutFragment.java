@@ -2,11 +2,9 @@ package com.example.igecuser.Fragments;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,33 +37,24 @@ import com.example.igecuser.fireBase.Summary;
 import com.example.igecuser.utilites.allowancesEnum;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.WriteBatch;
 
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
-import kotlin.Unit;
-import kotlin.jvm.functions.Function1;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -226,7 +215,6 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     @SuppressLint("MissingPermission")
     private final View.OnClickListener oclCheckInOut = v -> {
         vCheckInOut.setEnabled(false);
-        if (getLocationPermissions() && getCameraPermission()) {
             MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
             builder.setTitle(getString(R.string.do_you_want_to_confirm_this_action))
                     .setNegativeButton(getString(R.string.No), (dialogInterface, i) -> {
@@ -236,7 +224,11 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                     })
                     .setPositiveButton(getString(R.string.Yes), (dialogInterface, i) -> {
                         Locus.INSTANCE.getCurrentLocation(getActivity(), result -> {
-                            try {
+                            if(result.getError()!=null){
+                                Toast.makeText(getActivity(), "can't complete the operation.", Toast.LENGTH_SHORT).show();
+                                vCheckInOut.setEnabled(true);
+                                return null;
+                            }
                                 Location location = result.getLocation();
                                 String currentDateAndTime = sdf.format(new Date());
                                 String day = currentDateAndTime.substring(0, 2);
@@ -286,17 +278,9 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
 
                                 return null;
 
-                            } catch (Exception e) {
-                                Toast.makeText(getActivity(), "Please, enable GPS!", Toast.LENGTH_SHORT).show();
-                                vCheckInOut.setEnabled(true);
-                            }
-                            return null;
-                        });
+                            });
                     })
                     .show();
-        }
-
-
     };
 
     private void employeeCheckOut(Summary summary, HashMap<String, Object> checkOut) {
@@ -438,15 +422,23 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
 
 
     private final View.OnClickListener oclInside = view -> {
+        if(!getCameraPermission()){
+            Toast.makeText(getActivity(), "Please, Enable camera permission !", Toast.LENGTH_SHORT).show();
+            return;
+        }
         MachineCheckInOutDialog machineCheckInOutDialog = new MachineCheckInOutDialog(true);
         machineCheckInOutDialog.show(getParentFragmentManager(), "");
     };
     private final View.OnClickListener oclOutside = view -> {
+        if(!getCameraPermission()){
+            Toast.makeText(getActivity(), "Please, Enable camera permission !", Toast.LENGTH_SHORT).show();
+            return;
+        }
         MachineCheckInOutDialog machineCheckInOutDialog = new MachineCheckInOutDialog(false);
         machineCheckInOutDialog.show(getParentFragmentManager(), "");
     };
 
-    private void checkMachineInOut(Client client, String note) {
+    private void machineCheckInOut(Client client, String note) {
         machineEmployee.document(machineEmpId).get().addOnSuccessListener(documentSnapshot -> {
             if (!documentSnapshot.exists()) {
                 machineCheckIn(client);
@@ -561,7 +553,11 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                             }
                             Locus.INSTANCE.getCurrentLocation(getActivity(), locusResult -> {
                                 Location location = locusResult.getLocation();
-                                try {
+                                if(locusResult.getError()!=null){
+                                    Toast.makeText(getActivity(), "can't complete the operation.", Toast.LENGTH_SHORT).show();
+                                    vCheckInOut.setEnabled(true);
+                                    return null;
+                                }
                                     longitude = location.getLongitude();
                                     latitude = location.getLatitude();
                                     // abort if machine is used already by another user
@@ -572,11 +568,6 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                     // open supplements dialog if not
                                     SupplementsDialog supplementsDialog = new SupplementsDialog(isItAUser, currMachine, currEmployee);
                                     supplementsDialog.show(getParentFragmentManager(), "");
-
-
-                                } catch (Exception e) {
-                                    Toast.makeText(getContext(), "Please, enable GPS!", Toast.LENGTH_SHORT).show();
-                                }
                                 return null;
                             });
 
@@ -595,7 +586,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
 
                 // if isItAUser check-in
                 if (isItAUser) {
-                    checkMachineInOut(null, note);
+                    machineCheckInOut(null, note);
 
                 }
                 // if not
@@ -604,7 +595,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                     machineEmployee.document(machineEmpId).get().addOnSuccessListener(documentSnapshot -> {
                         if (documentSnapshot.exists()) {
                             Machine_Employee machine_employee = documentSnapshot.toObject(Machine_Employee.class);
-                            checkMachineInOut(machine_employee.getClient(), note);
+                            machineCheckInOut(machine_employee.getClient(), note);
                         } else {
                             ClientInfoDialog clientInfoDialog = new ClientInfoDialog(note);
                             clientInfoDialog.show(getParentFragmentManager(), "");
@@ -619,7 +610,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
                 Client client = (Client) result.getSerializable("client");
                 String note = result.getString("note");
-                checkMachineInOut(client, note);
+                machineCheckInOut(client, note);
             }
         });
 

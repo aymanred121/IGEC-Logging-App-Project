@@ -41,8 +41,10 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.stream.Collectors;
 
 
@@ -210,6 +212,21 @@ public class VacationRequestsFragment extends Fragment {
         dialog.show();
         layout.setLayoutParams(layoutParams);
 
+    }
+    //TODO use when accepting the vacation but with lesser amount of days
+    private void updateVacationEndDate(VacationRequest vacationRequest,int vacationDays){
+        Calendar c =Calendar.getInstance();
+        Date requestStartDate = vacationRequest.getStartDate();
+        Date requestEndDate = vacationRequest.getEndDate();
+        c.setTime(requestStartDate);
+        c.add(Calendar.DATE,vacationDays);
+        Date newEndDate = c.getTime();
+        vacationRequest.setEndDate(newEndDate);
+        vacationRequest.setVacationStatus(1);
+        db.collection("Vacation").document(vacationRequest.getId())
+                .set(vacationRequest,SetOptions.merge());
+        db.collection("employees").document(vacationRequest.getEmployee().getId())
+                .update("totalNumberOfVacationDays",FieldValue.increment(-vacationDays));
     }
 
     private void loadVacations() {

@@ -84,7 +84,7 @@ public class VacationsLogFragment extends Fragment {
         if (isEmployee) {
             db.collection("Vacation")
                     .whereEqualTo("employee.id", user.getId())
-                    //.orderBy("requestDate", Query.Direction.DESCENDING)
+                    .orderBy("requestDate", Query.Direction.DESCENDING)
                     .addSnapshotListener((queryDocumentSnapshots, e) -> {
                         if (e != null) {
                             Log.w(TAG, "Listen failed.", e);

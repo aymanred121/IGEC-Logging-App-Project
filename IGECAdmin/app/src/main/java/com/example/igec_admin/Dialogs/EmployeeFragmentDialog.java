@@ -104,6 +104,8 @@ public class EmployeeFragmentDialog extends DialogFragment {
                             return;
 
                         for (QueryDocumentSnapshot q : queryDocumentSnapshots) {
+                            if(q.getData().get("checkOut") == null)
+                                continue;
                             String day = q.getId();
                             double hours = ((q.getData().get("workingTime") == null) ? 0 : ((long) (q.getData().get("workingTime"))) / 3600.0);
                             String checkInGeoHash = (String) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkIn"))).get("geohash");

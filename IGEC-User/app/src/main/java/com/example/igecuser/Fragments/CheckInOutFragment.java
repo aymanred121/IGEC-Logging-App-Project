@@ -225,15 +225,18 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     // Listeners
     @SuppressLint("MissingPermission")
     private final View.OnClickListener oclCheckInOut = v -> {
+        vCheckInOut.setEnabled(false);
         if (getLocationPermissions() && getCameraPermission()) {
             MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
             builder.setTitle(getString(R.string.do_you_want_to_confirm_this_action))
                     .setNegativeButton(getString(R.string.No), (dialogInterface, i) -> {
+                        vCheckInOut.setEnabled(true);
+                    }).setOnDismissListener(unused->{
+                        vCheckInOut.setEnabled(true);
                     })
                     .setPositiveButton(getString(R.string.Yes), (dialogInterface, i) -> {
                         Locus.INSTANCE.getCurrentLocation(getActivity(), result -> {
                             try {
-                                vCheckInOut.setEnabled(false);
                                 Location location = result.getLocation();
                                 String currentDateAndTime = sdf.format(new Date());
                                 String day = currentDateAndTime.substring(0, 2);
@@ -259,6 +262,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                                     summary1.setLastCheckInTime(Timestamp.now());
                                                     db.document(summary1.getLastDayPath()).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null);
                                                     db.collection("summary").document(id).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null);
+                                                    Toast.makeText(getContext(), "Checked In successfully!", Toast.LENGTH_SHORT).show();
                                                     vCheckInOut.setEnabled(true);
                                                 }
                                             }
@@ -364,13 +368,13 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                             db.collection("EmployeesGrossSalary").document(id).collection(finalYear).document(finalMonth).update("allTypes", allowanceArrayList);
                         });
                     });
-                    Toast.makeText(getContext(), "Checked Out successfully!", Toast.LENGTH_SHORT).show();
+
                     vCheckInOut.setEnabled(true);
                     db.collection("projects").document(currEmployee.getProjectID())
                             .update("employeeWorkedTime." + currEmployee.getId(), FieldValue.increment(workingTime));
 
                 });
-
+        Toast.makeText(getContext(), "Checked Out successfully!", Toast.LENGTH_SHORT).show();
     }
 
     private void employeeCheckIn(Summary summary) {
@@ -403,6 +407,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         checkIn.put("lastCheckInTime", summary.getLastCheckInTime());
         db.document(path).set(checkIn);
         checkIn.put("lastDayPath", path);
+
         db.collection("summary").document(id).set(checkIn);
         db.collection("EmployeesGrossSalary").document(currEmployee.getId()).collection(year).document(month).get().addOnSuccessListener(doc -> {
             if (!doc.exists()) {
@@ -429,9 +434,6 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
             db.collection("EmployeesGrossSalary").document(currEmployee.getId()).collection(finalYear).document(finalMonth).set(employeesGrossSalary, SetOptions.merge());
 
         });
-
-        Toast.makeText(getContext(), "Checked In successfully!", Toast.LENGTH_SHORT).show();
-        vCheckInOut.setEnabled(true);
     }
 
 

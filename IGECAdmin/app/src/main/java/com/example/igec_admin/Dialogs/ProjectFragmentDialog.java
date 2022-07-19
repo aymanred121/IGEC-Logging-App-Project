@@ -240,8 +240,6 @@ public class ProjectFragmentDialog extends DialogFragment {
         vArea.setText(project.getLocationArea());
         vCity.setText(project.getLocationCity());
         vStreet.setText(project.getLocationStreet());
-        vManagerIDLayout.setEnabled(true);
-        vManagerID.setEnabled(false);
         startDate = project.getStartDate().getTime();
         vTimeDatePickerBuilder.setTitleText("Time");
         vTimeDatePicker = vTimeDatePickerBuilder.setSelection(startDate).build();
@@ -301,8 +299,6 @@ public class ProjectFragmentDialog extends DialogFragment {
                         .document("emp"), empInfoMap);
             }
         }
-        vManagerIDLayout.setEnabled(Team.size() >= 1);
-        vManagerID.setEnabled(false);
         batch.commit();
         if (!vManagerIDLayout.isEnabled())
             vManagerID.setText("");

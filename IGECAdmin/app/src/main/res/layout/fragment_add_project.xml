@@ -164,9 +164,8 @@
             android:id="@+id/TextInput_ContractType"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:enabled="false"
             android:hint="@string/contractType"
-            android:inputType="text"
+            android:inputType="none"
             android:padding="14dp"
             android:singleLine="true" />
 
@@ -206,7 +205,6 @@
         android:layout_marginStart="@dimen/vhigh"
         android:layout_marginTop="@dimen/mid"
         android:layout_marginEnd="@dimen/mid"
-        android:enabled="false"
         app:boxBackgroundMode="outline"
         app:endIconMode="dropdown_menu"
         app:helperTextEnabled="true"
@@ -218,9 +216,8 @@
             android:id="@+id/TextInput_ManagerID"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:enabled="false"
             android:hint="@string/manager_id"
-            android:inputType="text"
+            android:inputType="none"
             android:padding="14dp"
             android:singleLine="true" />
 
@@ -246,7 +243,7 @@
             android:layout_height="wrap_content"
             android:enabled="false"
             android:hint="@string/manager_name"
-            android:inputType="textPersonName"
+            android:inputType="none"
             android:padding="14dp"
             android:singleLine="true" />
 

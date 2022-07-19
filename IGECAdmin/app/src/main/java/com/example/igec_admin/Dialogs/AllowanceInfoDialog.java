@@ -66,6 +66,19 @@ public class AllowanceInfoDialog extends DialogFragment {
         setStyle(DialogFragment.STYLE_NORMAL, R.style.FullscreenDialogTheme);
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        allowancesList.clear();
+        allowancesList.add("Transportation");
+        allowancesList.add("accommodation");
+        allowancesList.add("site");
+        allowancesList.add("remote");
+        allowancesList.add("food");
+        allowancesList.add("Other");
+        ArrayAdapter<String> allowancesAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, allowancesList);
+        vAllowanceName.setAdapter(allowancesAdapter);
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -100,14 +113,7 @@ public class AllowanceInfoDialog extends DialogFragment {
         }
         vAllowanceName.addTextChangedListener(twName);
         allowancesList.clear();
-        allowancesList.add("Transportation");
-        allowancesList.add("accommodation");
-        allowancesList.add("site");
-        allowancesList.add("remote");
-        allowancesList.add("food");
-        allowancesList.add("Other");
-        ArrayAdapter<String> allowancesAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, allowancesList);
-        vAllowanceName.setAdapter(allowancesAdapter);
+
     }
 
     private boolean generateError() {

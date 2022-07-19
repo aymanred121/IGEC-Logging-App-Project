@@ -35,9 +35,8 @@
                 android:id="@+id/TextInput_allowanceName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:enabled="false"
                 android:hint="@string/allowance_name"
-                android:inputType="text"
+                android:inputType="none"
                 android:padding="14dp"
                 android:singleLine="true" />
         </com.google.android.material.textfield.TextInputLayout>

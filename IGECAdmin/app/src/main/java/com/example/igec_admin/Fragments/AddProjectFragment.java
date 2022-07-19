@@ -273,8 +273,6 @@ public class AddProjectFragment extends Fragment {
             batch.update(db.collection("EmployeeOverview")
                     .document("emp"), empInfoMap);
         }
-        vManagerIDLayout.setEnabled(Team.size() >= 1);
-        vManagerID.setEnabled(false);
         batch.commit();
         if (!vManagerIDLayout.isEnabled())
             vManagerID.setText("");
@@ -293,8 +291,6 @@ public class AddProjectFragment extends Fragment {
                 .addSnapshotListener((documentSnapshot, e) -> {
                     vManagerID.setText(null);
                     vManagerName.setText(null);
-                    vManagerID.setEnabled(false);
-                    vManagerName.setEnabled(false);
                     if (e != null) {
                         Log.w(TAG, "Listen failed.", e);
                         return;
@@ -468,7 +464,6 @@ public class AddProjectFragment extends Fragment {
         TeamID.clear();
         Team.clear();
         vManagerID.setAdapter(null);
-        vManagerID.setEnabled(false);
         client = null;
         vTimeDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
         vTimeDatePicker = vTimeDatePickerBuilder.build();

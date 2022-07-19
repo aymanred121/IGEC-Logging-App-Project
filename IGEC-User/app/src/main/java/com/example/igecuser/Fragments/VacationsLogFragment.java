@@ -22,6 +22,7 @@ import com.example.igecuser.fireBase.Employee;
 import com.example.igecuser.fireBase.VacationRequest;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
@@ -83,7 +84,7 @@ public class VacationsLogFragment extends Fragment {
         if (isEmployee) {
             db.collection("Vacation")
                     .whereEqualTo("employee.id", user.getId())
-                    .orderBy("requestDate", Query.Direction.DESCENDING)
+                    //.orderBy("requestDate", Query.Direction.DESCENDING)
                     .addSnapshotListener((queryDocumentSnapshots, e) -> {
                         if (e != null) {
                             Log.w(TAG, "Listen failed.", e);

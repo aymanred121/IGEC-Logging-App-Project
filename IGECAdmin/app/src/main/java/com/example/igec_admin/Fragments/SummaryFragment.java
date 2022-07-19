@@ -185,8 +185,7 @@ public class SummaryFragment extends Fragment {
                         CsvWriter csvWriter = new CsvWriter(header);
                         final int[] counter = new int[1];
                         for (QueryDocumentSnapshot queryDocumentSnapshot : queryDocumentSnapshots) {
-                            if (month.length() == 1)
-                                month = "0" + month;
+                            month = String.format("%02d",month);
                             db.collection("EmployeesGrossSalary").document(queryDocumentSnapshot.getId()).collection(prevYear).document(prevMonth).get().addOnSuccessListener(doc -> {
                                 db.collection("EmployeesGrossSalary").document(queryDocumentSnapshot.getId()).collection(year).document(month).get().addOnSuccessListener(documentSnapshot1 -> {
                                     if (!documentSnapshot1.exists()) {
@@ -279,6 +278,7 @@ public class SummaryFragment extends Fragment {
         @Override
         public void onItemClick(int position) {
             final Calendar today = Calendar.getInstance();
+            @SuppressLint("DefaultLocale")
             MonthPickerDialog.Builder builder = new MonthPickerDialog.Builder(getActivity(),
                     (selectedMonth, selectedYear) -> {
                         selectedMonthLayout.setError(null);
@@ -287,9 +287,7 @@ public class SummaryFragment extends Fragment {
                         String[] selectedDate = selectedMonthEdit.getText().toString().split("/");
                         year = selectedDate[1];
                         month = selectedDate[0];
-                        if (month.length() == 1) {
-                            month = "0" + month;
-                        }
+                        month = String.format("%02d",month);
                         if ((Integer.parseInt(month) - 1) < 1) {
                             prevMonth = "12";
                             prevYear = Integer.parseInt(year) - 1 + "";
@@ -297,29 +295,40 @@ public class SummaryFragment extends Fragment {
                             prevMonth = (Integer.parseInt(month) - 1) + "";
                             prevYear = year;
                         }
-                        if (prevMonth.length() == 1) {
-                            prevMonth = "0" + prevMonth;
-                        }
-
-                        //TODO get the project of the employee to use it here then uncomment this part
-                        /*for (QueryDocumentSnapshot q : queryDocumentSnapshots) {
-                            if(q.getData().get("checkOut") == null)
-                                continue;
-                            String day = q.getId();
-                            double hours = ((q.getData().get("workingTime") == null) ? 0 : ((long) (q.getData().get("workingTime"))) / 3600.0);
-                            String checkInGeoHash = (String) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkIn"))).get("geohash");
-                            double checkInLat = (double) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkIn"))).get("lat");
-                            double checkInLng = (double) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkIn"))).get("lng");
-                            String checkOutGeoHash = (String) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkOut"))).get("geohash");
-                            double checkOutLat = (double) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkOut"))).get("lat");
-                            double checkOutLng = (double) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkOut"))).get("lng");
-                            LocationDetails checkInLocation = new LocationDetails(checkInGeoHash, checkInLat, checkInLng);
-                            LocationDetails checkOutLocation = new LocationDetails(checkOutGeoHash, checkOutLat, checkOutLng);
-                            String projectLocation = String.format("%s, %s, %s", project.getLocationCity(), project.getLocationArea(), project.getLocationStreet());
-                            workingDays.add(new WorkingDay(day, month, year, hours, empName, checkInLocation, checkOutLocation, project.getName(), projectLocation));
-                        }
-                        MonthSummaryDialog monthSummaryDialog = new MonthSummaryDialog(workingDays);
-                        monthSummaryDialog.show(getParentFragmentManager(), "");*/
+                        prevMonth = String.format("%02d",prevMonth);
+                        ArrayList<WorkingDay> workingDays = new ArrayList<>();
+                        EmployeeOverview employee = employees.get(position);
+                        String empName = employee.getFirstName() + " " + employee.getLastName();
+                        db.collection("summary").document(employee.getId()).collection(year + "-" + month)
+                                //.whereEqualTo("projectId", employee.getProjectId())
+                                .get().addOnSuccessListener(queryDocumentSnapshots -> {
+                                    if (queryDocumentSnapshots.size() == 0)
+                                        return;
+                                    //TODO: add project Lat and Lng when implemented
+                                    for (QueryDocumentSnapshot q : queryDocumentSnapshots) {
+                                        if(q.getData().get("checkOut") == null)
+                                            continue;
+                                        db.collection("projects").document((String) q.get("projectId")).get().addOnSuccessListener(doc->{
+                                            if(!doc.exists())
+                                                return;
+                                            Project project = doc.toObject(Project.class);
+                                            String day = q.getId();
+                                            double hours = ((q.getData().get("workingTime") == null) ? 0 : ((long) (q.getData().get("workingTime"))) / 3600.0);
+                                            String checkInGeoHash = (String) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkIn"))).get("geohash");
+                                            double checkInLat = (double) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkIn"))).get("lat");
+                                            double checkInLng = (double) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkIn"))).get("lng");
+                                            String checkOutGeoHash = (String) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkOut"))).get("geohash");
+                                            double checkOutLat = (double) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkOut"))).get("lat");
+                                            double checkOutLng = (double) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkOut"))).get("lng");
+                                            LocationDetails checkInLocation = new LocationDetails(checkInGeoHash, checkInLat, checkInLng);
+                                            LocationDetails checkOutLocation = new LocationDetails(checkOutGeoHash, checkOutLat, checkOutLng);
+                                            String projectLocation = String.format("%s, %s, %s", project.getLocationCity(), project.getLocationArea(), project.getLocationStreet());
+                                            workingDays.add(new WorkingDay(day, month, year, hours, empName, checkInLocation, checkOutLocation, project.getName(), projectLocation));
+                                        });
+                                    }
+                                    MonthSummaryDialog monthSummaryDialog = new MonthSummaryDialog(workingDays);
+                                    monthSummaryDialog.show(getParentFragmentManager(), "");
+                                });
 
                     }, today.get(Calendar.YEAR), today.get(Calendar.MONTH));
             MonthPickerDialog monthPickerDialog = builder.setActivatedMonth(today.get(Calendar.MONTH))
@@ -334,37 +343,39 @@ public class SummaryFragment extends Fragment {
                 String[] selectedDate = selectedMonthEdit.getText().toString().split("/");
                 year = selectedDate[1];
                 month = selectedDate[0];
-                if (month.length() == 1) {
-                    month = "0" + month;
-                }
-
+                month = String.format("%02d",month);
                 ArrayList<WorkingDay> workingDays = new ArrayList<>();
                 EmployeeOverview employee = employees.get(position);
                 String empName = employee.getFirstName() + " " + employee.getLastName();
                 db.collection("summary").document(employee.getId()).collection(year + "-" + month)
-                        .whereEqualTo("projectId", employee.getProjectId())
+                        //.whereEqualTo("projectId", employee.getProjectId())
                         .get().addOnSuccessListener(queryDocumentSnapshots -> {
                             if (queryDocumentSnapshots.size() == 0)
                                 return;
-                            //TODO get the project of the employee to use it here then uncomment this part
-                            /*for (QueryDocumentSnapshot q : queryDocumentSnapshots) {
+                            //TODO: add project Lat and Lng when implemented
+                            for (QueryDocumentSnapshot q : queryDocumentSnapshots) {
                                 if(q.getData().get("checkOut") == null)
                                     continue;
-                                String day = q.getId();
-                                double hours = ((q.getData().get("workingTime") == null) ? 0 : ((long) (q.getData().get("workingTime"))) / 3600.0);
-                                String checkInGeoHash = (String) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkIn"))).get("geohash");
-                                double checkInLat = (double) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkIn"))).get("lat");
-                                double checkInLng = (double) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkIn"))).get("lng");
-                                String checkOutGeoHash = (String) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkOut"))).get("geohash");
-                                double checkOutLat = (double) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkOut"))).get("lat");
-                                double checkOutLng = (double) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkOut"))).get("lng");
-                                LocationDetails checkInLocation = new LocationDetails(checkInGeoHash, checkInLat, checkInLng);
-                                LocationDetails checkOutLocation = new LocationDetails(checkOutGeoHash, checkOutLat, checkOutLng);
-                                String projectLocation = String.format("%s, %s, %s", project.getLocationCity(), project.getLocationArea(), project.getLocationStreet());
-                                workingDays.add(new WorkingDay(day, month, year, hours, empName, checkInLocation, checkOutLocation, project.getName(), projectLocation));
-                            }
+                                db.collection("projects").document((String) q.get("projectId")).get().addOnSuccessListener(doc->{
+                                   if(!doc.exists())
+                                   return;
+                                   Project project = doc.toObject(Project.class);
+                                    String day = q.getId();
+                                    double hours = ((q.getData().get("workingTime") == null) ? 0 : ((long) (q.getData().get("workingTime"))) / 3600.0);
+                                    String checkInGeoHash = (String) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkIn"))).get("geohash");
+                                    double checkInLat = (double) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkIn"))).get("lat");
+                                    double checkInLng = (double) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkIn"))).get("lng");
+                                    String checkOutGeoHash = (String) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkOut"))).get("geohash");
+                                    double checkOutLat = (double) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkOut"))).get("lat");
+                                    double checkOutLng = (double) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkOut"))).get("lng");
+                                    LocationDetails checkInLocation = new LocationDetails(checkInGeoHash, checkInLat, checkInLng);
+                                    LocationDetails checkOutLocation = new LocationDetails(checkOutGeoHash, checkOutLat, checkOutLng);
+                                    String projectLocation = String.format("%s, %s, %s", project.getLocationCity(), project.getLocationArea(), project.getLocationStreet());
+                                    workingDays.add(new WorkingDay(day, month, year, hours, empName, checkInLocation, checkOutLocation, project.getName(), projectLocation));
+                                });
+                                }
                             MonthSummaryDialog monthSummaryDialog = new MonthSummaryDialog(workingDays);
-                            monthSummaryDialog.show(getParentFragmentManager(), "");*/
+                            monthSummaryDialog.show(getParentFragmentManager(), "");
                         });
             }
 

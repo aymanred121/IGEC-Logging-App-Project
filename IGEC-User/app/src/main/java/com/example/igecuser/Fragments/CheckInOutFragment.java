@@ -146,7 +146,10 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         String day = currentDateAndTime.substring(0, 2);
         String month = currentDateAndTime.substring(3, 5);
         String year = currentDateAndTime.substring(6, 10);
-        db.collection("summary").document(id).get().addOnSuccessListener((value) -> {
+        db.collection("summary").document(id)
+                .collection(year+"-"+month)
+                .document(day)
+                .get().addOnSuccessListener((value) -> {
             if (!value.exists() || value.getData().size() == 0)
                 isHere = false;
             else {

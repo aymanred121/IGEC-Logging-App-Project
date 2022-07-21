@@ -73,7 +73,7 @@ public class TransferRequestsFragment extends Fragment {
     }
 
     private void getRequests() {
-        db.collection("TransferRequests").whereEqualTo("newProjectId", manager.getProjectID()).whereEqualTo("transferStatus",-1).addSnapshotListener((values, error) -> {
+        db.collection("TransferRequests").whereEqualTo("oldProjectId", manager.getProjectID()).whereEqualTo("transferStatus",-1).addSnapshotListener((values, error) -> {
             if (values.size() == 0)
                 return;
             requests.clear();

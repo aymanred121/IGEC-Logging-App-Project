@@ -23,7 +23,6 @@ import com.example.igecuser.fireBase.Employee;
 import com.example.igecuser.fireBase.EmployeeOverview;
 import com.example.igecuser.fireBase.Project;
 import com.example.igecuser.fireBase.TransferRequests;
-import com.google.android.gms.common.util.ArrayUtils;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.button.MaterialButton;
@@ -40,17 +39,17 @@ public class SendTransferRequest extends Fragment {
     private final Employee manager;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private final ArrayList<Project> projects = new ArrayList<>();
-    private Project oldProject, newProject;
+    private Project thisProject, chosenProject;
     private AutoCompleteTextView vProjectsReference, vEmployeesId;
     private TextInputEditText vTransferNote;
     private TextInputLayout vTransferNoteLayout, vProjectReferenceLayout, vEmployeesIdLayout;
     private ArrayList<Pair<TextInputLayout, EditText>> views;
     private MaterialButton vSend;
-    private ArrayList<String> EmployeesId = new ArrayList<>();
-    private ArrayAdapter<String> IdAdapter;
+    private ArrayList<String> employeesId = new ArrayList<>();
+    private ArrayAdapter<String> idAdapter;
     private EmployeeOverview selectedEmployee;
-    ArrayList<String> projectsRef;
-    private ArrayAdapter<String> RefAdapter;
+    private ArrayList<String> projectsRef = new ArrayList<>();
+    private ArrayAdapter<String> refAdapter;
 
 
     public SendTransferRequest(Employee manager) {
@@ -83,12 +82,12 @@ public class SendTransferRequest extends Fragment {
         vEmployeesIdLayout = view.findViewById(R.id.textInputLayout_EmployeeId);
         vProjectReferenceLayout = view.findViewById(R.id.textInputLayout_ProjectReferences);
         projectsRef = new ArrayList<>();
-        RefAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, projectsRef);
+        refAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, projectsRef);
         views = new ArrayList<>();
         views.add(new Pair<>(vProjectReferenceLayout, vProjectsReference));
         views.add(new Pair<>(vEmployeesIdLayout, vEmployeesId));
         views.add(new Pair<>(vTransferNoteLayout, vTransferNote));
-        IdAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, EmployeesId);
+        idAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, employeesId);
         getProject();
     }
 
@@ -97,44 +96,22 @@ public class SendTransferRequest extends Fragment {
         TransferRequests request = new TransferRequests();
         request.setTransferId(transferId);
         request.setEmployee(employee);
-        request.setNewProjectId(newProject.getId());
-        request.setNewProjectName(newProject.getName());
-        request.setNewProjectReference(newProject.getReference());
-        request.setOldProjectId(oldProject.getId());
-        request.setOldProjectName(oldProject.getName());
-        request.setOldProjectReference(oldProject.getReference());
+        request.setNewProjectId(thisProject.getId());
+        request.setNewProjectName(thisProject.getName());
+        request.setNewProjectReference(thisProject.getReference());
+        request.setOldProjectId(chosenProject.getId());
+        request.setOldProjectName(chosenProject.getName());
+        request.setOldProjectReference(chosenProject.getReference());
         request.setNote(vTransferNote.getText().toString());
         return db.collection("TransferRequests").document(transferId).set(request);
-    }
-
-    private void getAllEmployees() {
-        vEmployeesId.setText(null);
-        selectedEmployee = null;
-        EmployeesId.clear();
-        for (EmployeeOverview emp : oldProject.getEmployees())
-            if (!emp.getId().equals(manager.getId())) {
-                if (selectedEmployee == null)
-                    selectedEmployee = emp;
-                EmployeesId.add(emp.getId() + " | " + emp.getFirstName() + " " + emp.getLastName());
-            }
-
-        if (selectedEmployee != null) // no employees to make a transfer request
-            vEmployeesId.setText(String.format("%s | %s %s", selectedEmployee.getId(), selectedEmployee.getFirstName(), selectedEmployee.getLastName()));
-        else {
-            freezeViews(true);
-        }
-        vEmployeesId.setAdapter(IdAdapter);
-        IdAdapter.notifyDataSetChanged();
-        vProjectsReference.setEnabled(false);
-        vEmployeesId.setEnabled(false);
     }
 
     private void getProject() {
         db.collection("projects").document(manager.getProjectID()).get().addOnSuccessListener(documentSnapshot -> {
             if (!documentSnapshot.exists())
                 return;
-            oldProject = documentSnapshot.toObject(Project.class);
-            getAllProjects(oldProject.getId());
+            thisProject = documentSnapshot.toObject(Project.class);
+            getAllProjects(thisProject.getId());
         });
     }
 
@@ -155,18 +132,19 @@ public class SendTransferRequest extends Fragment {
                 freezeViews(true);
                 return;
             }
-            freezeViews(false);
             projectsRef.clear();
             projects.clear();
             projects.addAll((queryDocumentSnapshots.toObjects(Project.class)));
             for (Project project : projects)
-                if (!project.getId().equals(oldProject.getId()))
+                if (!project.getId().equals(thisProject.getId()))
                     projectsRef.add("IGEC" + project.getReference() + " | " + project.getName());
 
-            newProject = projects.get(0);
-            vProjectsReference.setText(String.format("IGEC%s | %s", newProject.getReference(), newProject.getName()));
-            vProjectsReference.setAdapter(RefAdapter);
-            getAllEmployees();
+            chosenProject = projects.get(0);
+            vProjectsReference.setText(String.format("IGEC%s | %s", chosenProject.getReference(), chosenProject.getName()));
+            vProjectsReference.setAdapter(refAdapter);
+
+
+//            getAllEmployees();
         });
     }
 
@@ -229,7 +207,7 @@ public class SendTransferRequest extends Fragment {
 
         @Override
         public void afterTextChanged(Editable s) {
-            for (EmployeeOverview emp : oldProject.getEmployees()) {
+            for (EmployeeOverview emp : chosenProject.getEmployees()) {
                 if (vEmployeesId.getText().toString().contains(emp.getId())) {
                     selectedEmployee = emp;
                     break;
@@ -252,8 +230,24 @@ public class SendTransferRequest extends Fragment {
         @Override
         public void afterTextChanged(Editable s) {
             for (Project project : projects) {
-                if (vProjectsReference.getText().toString().contains(project.getReference())) {
-                    newProject = project;
+                if (vProjectsReference.getText().toString().contains(project.getReference()) &&
+                        vProjectsReference.getText().toString().contains(project.getName())) {
+                    chosenProject = project;
+
+                    employeesId.clear();
+                    for (EmployeeOverview employee : project.getEmployees()) {
+                        // add project employees except for the manager
+                        if (!employee.getId().equals(project.getManagerID())) {
+                            employeesId.add(String.format("%s | %s %s", employee.getId(), employee.getFirstName(), employee.getLastName()));
+                        }
+                    }
+                    // no employees can be requested
+                    boolean isThereEmployees = employeesId.size() != 0;
+                    vEmployeesId.setText(isThereEmployees ? null : "No Available Employee");
+                    vEmployeesId.setEnabled(isThereEmployees);
+                    vSend.setEnabled(isThereEmployees);
+                    idAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, employeesId);
+                    vEmployeesId.setAdapter(idAdapter);
                     break;
                 }
             }

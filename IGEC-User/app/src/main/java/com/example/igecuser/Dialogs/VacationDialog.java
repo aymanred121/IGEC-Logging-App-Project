@@ -17,7 +17,9 @@ import androidx.fragment.app.DialogFragment;
 import com.example.igecuser.R;
 import com.example.igecuser.databinding.DialogVacationBinding;
 import com.example.igecuser.fireBase.VacationRequest;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -106,8 +108,37 @@ public class VacationDialog extends DialogFragment {
             return false;
         }
 
-        return binding.textInputLayoutAcceptedAmount.getError() != null && binding.textInputLayoutAcceptedAmount.getError() != null;
+        return binding.textInputLayoutAcceptedAmount.getError() == null && binding.textInputLayoutUnpaid.getError() == null;
     }
+    private void updateVacationEndDate(VacationRequest vacationRequest, int vacationDays, int unPaidDays){
+        String day,month,year;
+        Calendar calendar =Calendar.getInstance();
+        Date requestStartDate = vacationRequest.getStartDate();
+        calendar.setTime(requestStartDate);
+        if(calendar.get(Calendar.DAY_OF_MONTH)>25){
+            if(calendar.get(Calendar.MONTH) ==13){
+                month ="1";
+                year = String.format("%02d",calendar.get(Calendar.YEAR)+1);
+            }else{
+                month = String.format("%02d",calendar.get(Calendar.MONTH)-1);
+            }
+        }else{
+            day = String.format("%02d",calendar.get(Calendar.DAY_OF_MONTH));
+            month = String.format("%02d",calendar.get(Calendar.MONTH)-1);
+            year = String.valueOf(calendar.get(Calendar.YEAR));
+        }
+
+        calendar.add(Calendar.DATE,vacationDays);
+        Date newEndDate = calendar.getTime();
+        vacationRequest.setEndDate(newEndDate);
+        vacationRequest.setVacationStatus(1);
+        db.collection("Vacation").document(vacationRequest.getId())
+                .set(vacationRequest, SetOptions.merge());
+        db.collection("employees").document(vacationRequest.getEmployee().getId())
+                .update("totalNumberOfVacationDays", FieldValue.increment(-vacationDays));
+        //todo add the unpaid days to the employeeGrossSalary when the allowances implementation is done
+    }
+
 
     private TextWatcher twAcceptedAmount = new TextWatcher() {
         @Override
@@ -189,18 +220,17 @@ public class VacationDialog extends DialogFragment {
         @Override
         public void onClick(View view) {
 
-            //TODO accept the vacation with
-            // binding.TextInputAcceptedAmount days accepted (partial acceptance) initial value: requested days
-            // binding.TextInputUnpaid days made to be unpaid (partial acceptance) initial value: empty same as 0
             if (isInputValid()) {
-
+                int acceptedDays =binding.TextInputAcceptedAmount.getText().toString().trim().isEmpty()?0:Integer.parseInt(binding.TextInputAcceptedAmount.getText().toString());
+               int unPaidDays = binding.TextInputUnpaid.getText().toString().trim().isEmpty()?0:Integer.parseInt(binding.TextInputUnpaid.getText().toString().trim());
+               updateVacationEndDate(vacationRequest,acceptedDays,unPaidDays);
+               dismiss();
             }
         }
     };
     private View.OnClickListener oclReject = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            //TODO reject the vacation
             db.collection("Vacation")
                     .document(vacationRequest.getId())
                     .update("vacationStatus", -1).addOnSuccessListener(v -> dismiss());

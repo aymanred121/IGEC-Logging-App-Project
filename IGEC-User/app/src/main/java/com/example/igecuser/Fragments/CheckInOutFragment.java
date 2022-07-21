@@ -374,10 +374,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                 month = "1";
                 year = Integer.parseInt(year) + 1 + "";
             } else {
-                month = Integer.parseInt(month) + 1 + "";
-                if (month.length() == 1) {
-                    month = "0" + month;
-                }
+                month = String.format("%02d", Integer.parseInt(month) + 1);
             }
         }
         String finalMonth = month;

@@ -94,22 +94,6 @@ public class VacationRequestsFragment extends Fragment {
 
 
     }
-    //TODO use when accepting the vacation but with lesser amount of days
-    // TODO move it to VacationDialog
-    private void updateVacationEndDate(VacationRequest vacationRequest,int vacationDays){
-        Calendar c =Calendar.getInstance();
-        Date requestStartDate = vacationRequest.getStartDate();
-        Date requestEndDate = vacationRequest.getEndDate();
-        c.setTime(requestStartDate);
-        c.add(Calendar.DATE,vacationDays);
-        Date newEndDate = c.getTime();
-        vacationRequest.setEndDate(newEndDate);
-        vacationRequest.setVacationStatus(1);
-        db.collection("Vacation").document(vacationRequest.getId())
-                .set(vacationRequest,SetOptions.merge());
-        db.collection("employees").document(vacationRequest.getEmployee().getId())
-                .update("totalNumberOfVacationDays",FieldValue.increment(-vacationDays));
-    }
 
     private void loadVacations() {
         db.collection("Vacation")

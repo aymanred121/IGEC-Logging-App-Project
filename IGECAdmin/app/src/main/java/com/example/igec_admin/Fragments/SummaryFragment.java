@@ -323,10 +323,12 @@ public class SummaryFragment extends Fragment {
                                             LocationDetails checkOutLocation = new LocationDetails(checkOutGeoHash, checkOutLat, checkOutLng);
                                             String projectLocation = String.format("%s, %s, %s", project.getLocationCity(), project.getLocationArea(), project.getLocationStreet());
                                             workingDays.add(new WorkingDay(day, month, year, hours, empName, checkInLocation, checkOutLocation, project.getName(), projectLocation));
+                                            if(queryDocumentSnapshots.getDocuments().lastIndexOf(q)==queryDocumentSnapshots.getDocuments().size()-1){
+                                                MonthSummaryDialog monthSummaryDialog = new MonthSummaryDialog(workingDays);
+                                                monthSummaryDialog.show(getParentFragmentManager(), "");
+                                            }
                                         });
                                     }
-                                    MonthSummaryDialog monthSummaryDialog = new MonthSummaryDialog(workingDays);
-                                    monthSummaryDialog.show(getParentFragmentManager(), "");
                                 });
 
                     }, today.get(Calendar.YEAR), today.get(Calendar.MONTH));
@@ -371,10 +373,12 @@ public class SummaryFragment extends Fragment {
                                     LocationDetails checkOutLocation = new LocationDetails(checkOutGeoHash, checkOutLat, checkOutLng);
                                     String projectLocation = String.format("%s, %s, %s", project.getLocationCity(), project.getLocationArea(), project.getLocationStreet());
                                     workingDays.add(new WorkingDay(day, month, year, hours, empName, checkInLocation, checkOutLocation, project.getName(), projectLocation));
+                                    if(queryDocumentSnapshots.getDocuments().lastIndexOf(q)==queryDocumentSnapshots.getDocuments().size()-1){
+                                        MonthSummaryDialog monthSummaryDialog = new MonthSummaryDialog(workingDays);
+                                        monthSummaryDialog.show(getParentFragmentManager(), "");
+                                    }
                                 });
                                 }
-                            MonthSummaryDialog monthSummaryDialog = new MonthSummaryDialog(workingDays);
-                            monthSummaryDialog.show(getParentFragmentManager(), "");
                         });
             }
 

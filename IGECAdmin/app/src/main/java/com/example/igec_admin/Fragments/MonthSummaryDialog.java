@@ -101,14 +101,6 @@ public class MonthSummaryDialog extends DialogFragment {
         String empName = workingDays.get(0).getEmpName();
         int yearNumber = Integer.parseInt(year);
         int monthNumber = Integer.parseInt(month);
-//        ArrayList<Integer> monthsWith31Days = new ArrayList<>();
-//        monthsWith31Days.add(1);
-//        monthsWith31Days.add(3);
-//        monthsWith31Days.add(5);
-//        monthsWith31Days.add(7);
-//        monthsWith31Days.add(8);
-//        monthsWith31Days.add(10);
-//        monthsWith31Days.add(12);
         StringJoiner header = new StringJoiner(",");
         String[] dataRow;
         header.add("Name");

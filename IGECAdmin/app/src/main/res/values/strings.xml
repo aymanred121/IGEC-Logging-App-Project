@@ -25,6 +25,8 @@
     <string name="add_project">Add Project</string>
     <string name="add_machine">Add Machine</string>
     <string name="summary">Summary</string>
+    <string name="vacations_log">Vacations Log</string>
+    <string name="vacation_requests">Vacation Requests</string>
     <string name="openNavBar">Open navigation drawer</string>
     <string name="closeNavBar">Close navigation drawer</string>
     <string name="users">Users</string>
@@ -54,6 +56,8 @@
     <string name="Mount">Mount</string>
     <string name="AreUSure">Are You sure?</string>
     <string name="Delete">Delete</string>
+    <string name="accept_request">Accept</string>
+    <string name="Decline_request">Decline</string>
     <string name="cancel">No</string>
     <string name="accept">Yes</string>
     <string name="admin">Admin</string>
@@ -70,4 +74,5 @@
     <string name="machine_log">Machine Log</string>
     <string name="no_log_to_display">No Log to Display</string>
     <string name="allowance_name">Allowance Name</string>
+    <string name="unpaid_days">Unpaid Days</string>
 </resources>

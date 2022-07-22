@@ -35,8 +35,14 @@
             android:id="@+id/item_Machines"
             android:icon="@drawable/ic_baseline_construction_24"
             android:title="@string/machines"></item>
-
-
+        <item
+            android:id="@+id/item_Vacation_Requests"
+            android:icon="@drawable/ic_baseline_mail_24"
+            android:title="@string/vacation_requests"></item>
+        <item
+            android:id="@+id/item_VacationsLog"
+            android:icon="@drawable/ic_baseline_history_24"
+            android:title="@string/vacations_log"></item>
         <item
             android:checkable="true"
             android:id="@+id/item_summary"

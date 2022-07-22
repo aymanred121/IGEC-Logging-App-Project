@@ -37,6 +37,8 @@ import com.example.igec_admin.Fragments.AddUserFragment;
 import com.example.igec_admin.Fragments.MachinesFragment;
 import com.example.igec_admin.Fragments.ProjectsFragment;
 import com.example.igec_admin.Fragments.UsersFragment;
+import com.example.igec_admin.Fragments.VacationRequestsFragment;
+import com.example.igec_admin.Fragments.VacationsLogFragment;
 import com.example.igec_admin.R;
 import com.example.igec_admin.Fragments.SummaryFragment;
 import com.google.android.material.navigation.NavigationView;
@@ -133,7 +135,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         ProjectsFragment projectsFragment = new ProjectsFragment();
         MachinesFragment machinesFragment = new MachinesFragment();
         SummaryFragment summaryFragment = new SummaryFragment();
-
+        VacationRequestsFragment vacationRequestsFragment = new VacationRequestsFragment();
+        VacationsLogFragment vacationsLogFragment = new VacationsLogFragment();
 
         ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), 0);
         viewPagerAdapter.addFragment(addUserFragment, getString(R.string.add_user));
@@ -142,6 +145,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         viewPagerAdapter.addFragment(usersFragment, getString(R.string.users));
         viewPagerAdapter.addFragment(projectsFragment, getString(R.string.projects));
         viewPagerAdapter.addFragment(machinesFragment, getString(R.string.machines));
+        viewPagerAdapter.addFragment(vacationRequestsFragment, getString(R.string.vacation_requests));
+        viewPagerAdapter.addFragment(vacationsLogFragment, getString(R.string.vacations_log));
         viewPagerAdapter.addFragment(summaryFragment, getString(R.string.summary));
 
         viewPager.setAdapter(viewPagerAdapter);
@@ -178,8 +183,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             viewPager.setCurrentItem(4, true);
         if (itemId == R.id.item_Machines)
             viewPager.setCurrentItem(5, true);
-        if (itemId == R.id.item_summary)
+        if (itemId == R.id.item_Vacation_Requests)
             viewPager.setCurrentItem(6, true);
+        if (itemId == R.id.item_VacationsLog)
+            viewPager.setCurrentItem(7, true);
+        if (itemId == R.id.item_summary)
+            viewPager.setCurrentItem(8, true);
     }
 
     private ViewPager.OnPageChangeListener viewPagerListener = new ViewPager.OnPageChangeListener() {

@@ -1,53 +1,87 @@
 package com.example.igec_admin.fireBase;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class VacationRequest {
-    private Date startDate,duration,requestDate;
-    private boolean isAccepted;
-    private String requestID,employeeID,managerID;
-
+public class VacationRequest implements Serializable {
+    private Date startDate, endDate,requestDate;
+    private Employee manager,employee;
+    private String vacationNote,id;
+    private int vacationStatus;
     public VacationRequest() {
     }
 
-    public VacationRequest(Date startDate, Date duration, Date requestDate, String requestID, String employeeID, String managerID) {
+    public VacationRequest(Date startDate, Date endDate, Date requestDate, Employee manager, Employee employee, String vacationNote) {
         this.startDate = startDate;
-        this.duration = duration;
+        this.endDate = endDate;
         this.requestDate = requestDate;
-        this.requestID = requestID;
-        this.employeeID = employeeID;
-        this.managerID = managerID;
+        this.manager = manager;
+        this.employee = employee;
+        this.vacationNote = vacationNote;
+        vacationStatus=0;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public Date getStartDate() {
         return startDate;
     }
 
-    public Date getDuration() {
-        return duration;
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
     }
 
-    public boolean isAccepted() {
-        return isAccepted;
+    public Date getEndDate() {
+        return endDate;
     }
 
-    public String getRequestID() {
-        return requestID;
-    }
-
-    public String getEmployeeID() {
-        return employeeID;
-    }
-
-    public String getManagerID() {
-        return managerID;
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
     }
 
     public Date getRequestDate() {
         return requestDate;
     }
 
-    public void setAccepted(boolean accepted) {
-        isAccepted = accepted;
+    public void setRequestDate(Date requestDate) {
+        this.requestDate = requestDate;
+    }
+
+    public Employee getManager() {
+        return manager;
+    }
+
+    public void setManager(Employee manager) {
+        this.manager = manager;
+    }
+
+    public Employee getEmployee() {
+        return employee;
+    }
+
+    public void setEmployee(Employee employee) {
+        this.employee = employee;
+    }
+
+    public String getVacationNote() {
+        return vacationNote;
+    }
+
+    public void setVacationNote(String vacationNote) {
+        this.vacationNote = vacationNote;
+    }
+
+    public int getVacationStatus() {
+        return vacationStatus;
+    }
+
+    public void setVacationStatus(int vacationStatus) {
+        this.vacationStatus = vacationStatus;
     }
 }

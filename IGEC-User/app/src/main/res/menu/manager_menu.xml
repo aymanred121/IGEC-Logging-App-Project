@@ -18,6 +18,11 @@
             android:icon="@drawable/ic_baseline_wallet_24"
             android:title="@string/gross_salary"></item>
         <item
+            android:id="@+id/item_Send_Vacation_Request"
+            android:checkable="true"
+            android:icon="@drawable/ic_baseline_send_24"
+            android:title="@string/send_vacation_request"></item>
+        <item
             android:id="@+id/item_Vacation_Requests"
             android:icon="@drawable/ic_baseline_mail_24"
             android:title="@string/vacation_requests"></item>

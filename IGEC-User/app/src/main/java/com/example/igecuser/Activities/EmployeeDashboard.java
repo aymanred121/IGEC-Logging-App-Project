@@ -94,7 +94,7 @@ public class EmployeeDashboard extends AppCompatActivity implements NavigationVi
         viewPagerAdapter.addFragment(checkInOutFragment, getString(R.string.check_in_out));
         viewPagerAdapter.addFragment(changePasswordFragment, getString(R.string.change_password));
         viewPagerAdapter.addFragment(grossSalaryFragment, getString(R.string.gross_salary));
-        viewPagerAdapter.addFragment(sendVacationRequestFragment, getString(R.string.send_request));
+        viewPagerAdapter.addFragment(sendVacationRequestFragment, getString(R.string.send_vacation_request));
         viewPagerAdapter.addFragment(vacationsLogFragment, getString(R.string.vacations_log));
 
         viewPager.setAdapter(viewPagerAdapter);
@@ -121,7 +121,7 @@ public class EmployeeDashboard extends AppCompatActivity implements NavigationVi
             viewPager.setCurrentItem(1, true);
         if (itemId == R.id.item_GrossSalary)
             viewPager.setCurrentItem(2, true);
-        if (itemId == R.id.item_Send_Request)
+        if (itemId == R.id.item_Send_Vacation_Request)
             viewPager.setCurrentItem(3, true);
         if (itemId == R.id.item_VacationsLog)
             viewPager.setCurrentItem(4, true);

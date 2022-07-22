@@ -23,6 +23,7 @@ import com.example.igecuser.Fragments.CheckInOutFragment;
 import com.example.igecuser.Fragments.GrossSalaryFragment;
 import com.example.igecuser.Fragments.ProjectSummaryFragment;
 import com.example.igecuser.Fragments.SendTransferRequest;
+import com.example.igecuser.Fragments.SendVacationRequestFragment;
 import com.example.igecuser.Fragments.TransferRequestsFragment;
 import com.example.igecuser.Fragments.VacationRequestsFragment;
 import com.example.igecuser.Fragments.VacationsLogFragment;
@@ -131,6 +132,7 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
         CheckInOutFragment checkInOutFragment = new CheckInOutFragment(currManager);
         ChangePasswordFragment changePasswordFragment = new ChangePasswordFragment(currManager);
         GrossSalaryFragment grossSalaryFragment = new GrossSalaryFragment(currManager.getId());
+        SendVacationRequestFragment sendVacationRequestFragment = new SendVacationRequestFragment(currManager);
         VacationRequestsFragment vacationRequestsFragment = new VacationRequestsFragment(currManager);
         VacationsLogFragment vacationsLogFragment = new VacationsLogFragment(false, currManager);
         ProjectSummaryFragment projectSummaryFragment = new ProjectSummaryFragment(currManager);
@@ -141,6 +143,7 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
         viewPagerAdapter.addFragment(checkInOutFragment, getString(R.string.check_in_out));
         viewPagerAdapter.addFragment(changePasswordFragment, getString(R.string.change_password));
         viewPagerAdapter.addFragment(grossSalaryFragment, getString(R.string.gross_salary));
+        viewPagerAdapter.addFragment(sendVacationRequestFragment, getString(R.string.send_vacation_request));
         viewPagerAdapter.addFragment(vacationRequestsFragment, getString(R.string.vacation_requests));
         viewPagerAdapter.addFragment(vacationsLogFragment, getString(R.string.vacations_log));
         viewPagerAdapter.addFragment(sendTransferRequest, getString(R.string.send_a_transfer_request));
@@ -172,16 +175,18 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
             viewPager.setCurrentItem(1, true);
         if (itemId == R.id.item_GrossSalary)
             viewPager.setCurrentItem(2, true);
-        if (itemId == R.id.item_Vacation_Requests)
+        if (itemId == R.id.item_Send_Vacation_Request)
             viewPager.setCurrentItem(3, true);
-        if (itemId == R.id.item_VacationsLog)
+        if (itemId == R.id.item_Vacation_Requests)
             viewPager.setCurrentItem(4, true);
-        if (itemId == R.id.item_Send_Transfer_Request)
+        if (itemId == R.id.item_VacationsLog)
             viewPager.setCurrentItem(5, true);
-        if (itemId == R.id.item_Transfer_Requests)
+        if (itemId == R.id.item_Send_Transfer_Request)
             viewPager.setCurrentItem(6, true);
-        if (itemId == R.id.item_ProjectSummary)
+        if (itemId == R.id.item_Transfer_Requests)
             viewPager.setCurrentItem(7, true);
+        if (itemId == R.id.item_ProjectSummary)
+            viewPager.setCurrentItem(8, true);
 
     }
 

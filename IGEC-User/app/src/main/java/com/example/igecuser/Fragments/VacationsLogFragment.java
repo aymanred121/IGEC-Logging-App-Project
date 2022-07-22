@@ -98,6 +98,7 @@ public class VacationsLogFragment extends Fragment {
                         adapter.notifyDataSetChanged();
                     });
         } else {
+            //TODO: need to load both vacations send by the manager and to him, but first need to solve the problem with send vacation request fragment
             db.collection("Vacation")
                     .whereEqualTo("manager.id", user.getId())
                     .orderBy("requestDate", Query.Direction.DESCENDING)

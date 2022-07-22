@@ -141,19 +141,29 @@ public class SendVacationRequestFragment extends Fragment implements DatePickerD
                 .addSnapshotListener((value, error) -> {
                     days = ((long) Integer.parseInt(vVacationDays.getText().toString()) * 24 * 3600 * 1000) + startDate;
 
-                    //TODO determine what to pass instead of manager when the sender is a site manager
-                    // 1) select anyone from the admins and pass him as the manager
-                    // 2) create a pseudo manager by the id adminId (just in the vacation request)
-                    // Employee pseudoManager = new Employee();
-                    // pseudoManager.setId("adminID");
-                    vacationRequest = new VacationRequest(
-                            new Date(startDate),
-                            new Date(days),
-                            (new Date()),
-                            value.toObject(Employee.class),
-                            currEmployee,
-                            vVacationNote.getText().toString()
-                    );
+
+                    if(currEmployee.getManagerID().trim().equals("adminID")){
+                        Employee pseudoManager = new Employee();
+                        pseudoManager.setId("adminID");
+                        vacationRequest = new VacationRequest(
+                                new Date(startDate),
+                                new Date(days),
+                                (new Date()),
+                               pseudoManager,
+                                currEmployee,
+                                vVacationNote.getText().toString()
+                        );
+                    }else{
+
+                        vacationRequest = new VacationRequest(
+                                new Date(startDate),
+                                new Date(days),
+                                (new Date()),
+                                value.toObject(Employee.class),
+                                currEmployee,
+                                vVacationNote.getText().toString()
+                        );
+                    }
                     vacationRequest.setId(vacationID);
                     db.collection("Vacation").document(vacationID).set(vacationRequest).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override

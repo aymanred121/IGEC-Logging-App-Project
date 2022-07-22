@@ -26,6 +26,7 @@ import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 
@@ -82,29 +83,16 @@ public class VacationsLogFragment extends Fragment {
     private void loadVacations() {
 
         if (isEmployee) {
-            db.collection("Vacation")
-                    .whereEqualTo("employee.id", user.getId())
-                    .orderBy("requestDate", Query.Direction.DESCENDING)
-                    .addSnapshotListener((queryDocumentSnapshots, e) -> {
-                        if (e != null) {
-                            Log.w(TAG, "Listen failed.", e);
-                            return;
-                        }
-                        ArrayList<VacationRequest> vacationRequests = new ArrayList<>();
-                        for (DocumentSnapshot vacations : queryDocumentSnapshots) {
-                            vacationRequests.add(vacations.toObject(VacationRequest.class));
-                        }
-                        adapter.setVacationsList(vacationRequests);
-                        adapter.notifyDataSetChanged();
-                    });
-        } else {
-            //TODO: need to load both vacations send by the manager and to him, but first need to solve the problem with send vacation request fragment
+           loadOwnVacations(new ArrayList<>());
+        }
+        else {
             db.collection("Vacation")
                     .whereEqualTo("manager.id", user.getId())
                     .orderBy("requestDate", Query.Direction.DESCENDING)
                     .addSnapshotListener((queryDocumentSnapshots, e) -> {
                         if (e != null) {
                             Log.w(TAG, "Listen failed.", e);
+                            loadOwnVacations(new ArrayList<>());
                             return;
                         }
                         ArrayList<VacationRequest> vacationRequests = new ArrayList<>();
@@ -113,24 +101,31 @@ public class VacationsLogFragment extends Fragment {
                             if (vacations.toObject(VacationRequest.class).getVacationStatus() != 0)
                                 vacationRequests.add(vacations.toObject(VacationRequest.class));
                         }
-                        //TODO: think of better way
-                        // load his own vacations
-                        db.collection("Vacation")
-                                .whereEqualTo("employee.id", user.getId())
-                                .orderBy("requestDate", Query.Direction.DESCENDING)
-                                .addSnapshotListener((q, er) -> {
-                                    if (er != null) {
-                                        Log.w(TAG, "Listen failed.", er);
-                                        return;
-                                    }
-                                    for (DocumentSnapshot vacations : q) {
-                                        vacationRequests.add(vacations.toObject(VacationRequest.class));
-                                    }
-                                    adapter.setVacationsList(vacationRequests);
-                                    adapter.notifyDataSetChanged();
-                                });
+                        loadOwnVacations(vacationRequests);
                     });
         }
+    }
+
+    private void loadOwnVacations(ArrayList<VacationRequest> vacationRequests) {
+        db.collection("Vacation")
+            .whereEqualTo("employee.id", user.getId())
+            .orderBy("requestDate", Query.Direction.DESCENDING)
+            .addSnapshotListener((queryDocumentSnapshots, er) -> {
+                if (er != null) {
+                    Log.w(TAG, "Listen failed.", er);
+                    adapter.setVacationsList(vacationRequests);
+                    adapter.notifyDataSetChanged();
+                    return;
+                }
+                ArrayList<VacationRequest> ownVacationRequests = new ArrayList<>();
+                for (DocumentSnapshot vacations : queryDocumentSnapshots) {
+                    ownVacationRequests.add(vacations.toObject(VacationRequest.class));
+                }
+                adapter.getVacationsList().clear();
+                adapter.getVacationsList().addAll(vacationRequests);
+                adapter.getVacationsList().addAll(ownVacationRequests);
+                adapter.notifyDataSetChanged();
+            });
     }
 
 }

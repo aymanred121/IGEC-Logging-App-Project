@@ -133,6 +133,8 @@ public class VacationDialog extends DialogFragment {
         Date newEndDate = calendar.getTime();
         vacationRequest.setEndDate(newEndDate);
         vacationRequest.setVacationStatus(1);
+        //TODO set vacation manager to the admin who accepts this vacation
+        // vacationRequest.setManager(admin);
         db.collection("Vacation").document(vacationRequest.getId())
                 .set(vacationRequest, SetOptions.merge());
         db.collection("employees").document(vacationRequest.getEmployee().getId())

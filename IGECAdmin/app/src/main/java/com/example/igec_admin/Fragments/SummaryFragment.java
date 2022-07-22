@@ -185,7 +185,7 @@ public class SummaryFragment extends Fragment {
                         CsvWriter csvWriter = new CsvWriter(header);
                         final int[] counter = new int[1];
                         for (QueryDocumentSnapshot queryDocumentSnapshot : queryDocumentSnapshots) {
-                            month = String.format("%02d",month);
+                            month = String.format("%02d",Integer.parseInt(month));
                             db.collection("EmployeesGrossSalary").document(queryDocumentSnapshot.getId()).collection(prevYear).document(prevMonth).get().addOnSuccessListener(doc -> {
                                 db.collection("EmployeesGrossSalary").document(queryDocumentSnapshot.getId()).collection(year).document(month).get().addOnSuccessListener(documentSnapshot1 -> {
                                     if (!documentSnapshot1.exists()) {
@@ -287,7 +287,7 @@ public class SummaryFragment extends Fragment {
                         String[] selectedDate = selectedMonthEdit.getText().toString().split("/");
                         year = selectedDate[1];
                         month = selectedDate[0];
-                        month = String.format("%02d",month);
+                        month = String.format("%02d",Integer.parseInt(month));
                         if ((Integer.parseInt(month) - 1) < 1) {
                             prevMonth = "12";
                             prevYear = Integer.parseInt(year) - 1 + "";
@@ -295,12 +295,11 @@ public class SummaryFragment extends Fragment {
                             prevMonth = (Integer.parseInt(month) - 1) + "";
                             prevYear = year;
                         }
-                        prevMonth = String.format("%02d",prevMonth);
+                        prevMonth = String.format("%02d",Integer.parseInt(prevMonth));
                         ArrayList<WorkingDay> workingDays = new ArrayList<>();
                         EmployeeOverview employee = employees.get(position);
                         String empName = employee.getFirstName() + " " + employee.getLastName();
                         db.collection("summary").document(employee.getId()).collection(year + "-" + month)
-                                //.whereEqualTo("projectId", employee.getProjectId())
                                 .get().addOnSuccessListener(queryDocumentSnapshots -> {
                                     if (queryDocumentSnapshots.size() == 0)
                                         return;
@@ -343,7 +342,7 @@ public class SummaryFragment extends Fragment {
                 String[] selectedDate = selectedMonthEdit.getText().toString().split("/");
                 year = selectedDate[1];
                 month = selectedDate[0];
-                month = String.format("%02d",month);
+                month = String.format("%02d",Integer.parseInt(month));
                 ArrayList<WorkingDay> workingDays = new ArrayList<>();
                 EmployeeOverview employee = employees.get(position);
                 String empName = employee.getFirstName() + " " + employee.getLastName();

@@ -163,7 +163,7 @@ public class MonthSummaryDialog extends DialogFragment {
         }
         IntStream.range(1, dataRow.length).filter(i -> dataRow[i] == null).forEach(i -> dataRow[i] = "0");
         csvWriter.addDataRow(dataRow);
-        dataRow[0] = workingDays.get(0).getProjectName();
+        dataRow[0] = "project name";
         for (WorkingDay w : workingDays) {
             dataRow[Integer.parseInt(w.getDay())] = String.valueOf(w.getProjectName());
         }

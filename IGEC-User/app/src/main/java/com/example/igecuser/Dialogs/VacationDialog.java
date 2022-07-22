@@ -68,14 +68,15 @@ public class VacationDialog extends DialogFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        // TODO missing the conditions of exceeding the allowed vacations
+        int accepted = Integer.parseInt(getDays(vacationRequest));
+        int remaining = vacationRequest.getEmployee().getTotalNumberOfVacationDays();
         String days = getDays(vacationRequest);
         binding.TextInputAcceptedAmount.setText(days);
         binding.textInputLayoutAcceptedAmount.setSuffixText("of " + days);
         binding.textInputLayoutUnpaid.setSuffixText("of " + days);
         binding.TextViewVacationStatus.setText(String.format("%s\nNote: %s", vacationNote, vacationRequest.getVacationNote()));
-
+        if (remaining < accepted)
+            binding.TextInputUnpaid.setText(String.format("%d", accepted - remaining));
         binding.TextInputAcceptedAmount.addTextChangedListener(twAcceptedAmount);
         binding.TextInputUnpaid.addTextChangedListener(twUnpaid);
         binding.ButtonAccept.setOnClickListener(oclAccept);
@@ -110,25 +111,26 @@ public class VacationDialog extends DialogFragment {
 
         return binding.textInputLayoutAcceptedAmount.getError() == null && binding.textInputLayoutUnpaid.getError() == null;
     }
-    private void updateVacationEndDate(VacationRequest vacationRequest, int vacationDays, int unPaidDays){
-        String day,month,year;
-        Calendar calendar =Calendar.getInstance();
+
+    private void updateVacationEndDate(VacationRequest vacationRequest, int vacationDays, int unPaidDays) {
+        String day, month, year;
+        Calendar calendar = Calendar.getInstance();
         Date requestStartDate = vacationRequest.getStartDate();
         calendar.setTime(requestStartDate);
-        if(calendar.get(Calendar.DAY_OF_MONTH)>25){
-            if(calendar.get(Calendar.MONTH) ==13){
-                month ="1";
-                year = String.format("%02d",calendar.get(Calendar.YEAR)+1);
-            }else{
-                month = String.format("%02d",calendar.get(Calendar.MONTH)-1);
+        if (calendar.get(Calendar.DAY_OF_MONTH) > 25) {
+            if (calendar.get(Calendar.MONTH) == 13) {
+                month = "1";
+                year = String.format("%02d", calendar.get(Calendar.YEAR) + 1);
+            } else {
+                month = String.format("%02d", calendar.get(Calendar.MONTH) - 1);
             }
-        }else{
-            day = String.format("%02d",calendar.get(Calendar.DAY_OF_MONTH));
-            month = String.format("%02d",calendar.get(Calendar.MONTH)-1);
+        } else {
+            day = String.format("%02d", calendar.get(Calendar.DAY_OF_MONTH));
+            month = String.format("%02d", calendar.get(Calendar.MONTH) - 1);
             year = String.valueOf(calendar.get(Calendar.YEAR));
         }
 
-        calendar.add(Calendar.DATE,vacationDays);
+        calendar.add(Calendar.DATE, vacationDays);
         Date newEndDate = calendar.getTime();
         vacationRequest.setEndDate(newEndDate);
         vacationRequest.setVacationStatus(1);
@@ -158,15 +160,19 @@ public class VacationDialog extends DialogFragment {
             if (!isEmpty) {
                 int requested = Integer.parseInt(getDays(vacationRequest));
                 int accepted = Integer.parseInt(binding.TextInputAcceptedAmount.getText().toString());
+                int remaining = vacationRequest.getEmployee().getTotalNumberOfVacationDays();
+
                 Date newEndDate = new Date((long) (accepted * 24 * 3600 * 1000) + vacationRequest.getStartDate().getTime());
 
                 if (accepted > requested) {
                     binding.textInputLayoutAcceptedAmount.setErrorEnabled(false);
                     binding.textInputLayoutAcceptedAmount.setError(String.format("Can't accept more than %d", requested));
+                    binding.TextInputUnpaid.setText("");
                     binding.TextViewVacationStatus.setText(String.format("%s\nNote: %s", vacationNote, vacationRequest.getVacationNote()));
                 } else if (accepted == 0) {
                     binding.textInputLayoutAcceptedAmount.setErrorEnabled(false);
                     binding.textInputLayoutAcceptedAmount.setError("Invalid value");
+                    binding.TextInputUnpaid.setText("");
                     binding.TextViewVacationStatus.setText(String.format("%s\nNote: %s", vacationNote, vacationRequest.getVacationNote()));
                 } else {
                     binding.textInputLayoutUnpaid.setSuffixText(String.format("of %d", accepted));
@@ -174,6 +180,11 @@ public class VacationDialog extends DialogFragment {
                     binding.textInputLayoutUnpaid.setEnabled(true);
                     binding.textInputLayoutAcceptedAmount.setError(null);
                     binding.textInputLayoutAcceptedAmount.setErrorEnabled(false);
+                    if (remaining < accepted)
+                        binding.TextInputUnpaid.setText(String.format("%d", accepted - remaining));
+                    else
+                        binding.TextInputUnpaid.setText("");
+
                 }
 
             } else {
@@ -203,9 +214,11 @@ public class VacationDialog extends DialogFragment {
             if (!isEmpty) {
                 int unpaid = Integer.parseInt(binding.TextInputUnpaid.getText().toString());
                 int accepted = Integer.parseInt(binding.TextInputAcceptedAmount.getText().toString());
-
+                int remaining = vacationRequest.getEmployee().getTotalNumberOfVacationDays();
                 if (unpaid > accepted) {
                     binding.textInputLayoutUnpaid.setError(String.format("Can't be more than %d", accepted));
+                } else if (remaining < accepted && unpaid < accepted - remaining) {
+                    binding.textInputLayoutUnpaid.setError("Has to be at least " + (accepted - remaining) + " Days");
                 } else {
                     binding.textInputLayoutUnpaid.setError(null);
                     binding.textInputLayoutUnpaid.setErrorEnabled(false);
@@ -221,10 +234,10 @@ public class VacationDialog extends DialogFragment {
         public void onClick(View view) {
 
             if (isInputValid()) {
-                int acceptedDays =binding.TextInputAcceptedAmount.getText().toString().trim().isEmpty()?0:Integer.parseInt(binding.TextInputAcceptedAmount.getText().toString());
-               int unPaidDays = binding.TextInputUnpaid.getText().toString().trim().isEmpty()?0:Integer.parseInt(binding.TextInputUnpaid.getText().toString().trim());
-               updateVacationEndDate(vacationRequest,acceptedDays,unPaidDays);
-               dismiss();
+                int acceptedDays = binding.TextInputAcceptedAmount.getText().toString().trim().isEmpty() ? 0 : Integer.parseInt(binding.TextInputAcceptedAmount.getText().toString());
+                int unPaidDays = binding.TextInputUnpaid.getText().toString().trim().isEmpty() ? 0 : Integer.parseInt(binding.TextInputUnpaid.getText().toString().trim());
+                updateVacationEndDate(vacationRequest, acceptedDays, unPaidDays);
+                dismiss();
             }
         }
     };

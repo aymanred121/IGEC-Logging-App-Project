@@ -108,12 +108,27 @@ public class VacationsLogFragment extends Fragment {
                             return;
                         }
                         ArrayList<VacationRequest> vacationRequests = new ArrayList<>();
+                        // loads his employees vacations
                         for (DocumentSnapshot vacations : queryDocumentSnapshots) {
                             if (vacations.toObject(VacationRequest.class).getVacationStatus() != 0)
                                 vacationRequests.add(vacations.toObject(VacationRequest.class));
                         }
-                        adapter.setVacationsList(vacationRequests);
-                        adapter.notifyDataSetChanged();
+                        //TODO: think of better way
+                        // load his own vacations
+                        db.collection("Vacation")
+                                .whereEqualTo("employee.id", user.getId())
+                                .orderBy("requestDate", Query.Direction.DESCENDING)
+                                .addSnapshotListener((q, er) -> {
+                                    if (er != null) {
+                                        Log.w(TAG, "Listen failed.", er);
+                                        return;
+                                    }
+                                    for (DocumentSnapshot vacations : q) {
+                                        vacationRequests.add(vacations.toObject(VacationRequest.class));
+                                    }
+                                    adapter.setVacationsList(vacationRequests);
+                                    adapter.notifyDataSetChanged();
+                                });
                     });
         }
     }

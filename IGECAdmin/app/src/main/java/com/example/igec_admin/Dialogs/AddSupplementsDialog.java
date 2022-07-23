@@ -208,24 +208,18 @@ public class AddSupplementsDialog extends DialogFragment {
             ref = FirebaseStorage.getInstance().getReference().child("/imgs/" + machine.getId() + String.format("/%s.jpg", name));
             try {
                 final File localFile = File.createTempFile(name, "jpg");
-                ref.getFile(localFile).addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                        Bitmap bitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
-                        updatedSupplements.add(new Supplement(name, bitmap));
-                        supplements.add(new Supplement(name,bitmap));
-                        progress[0]++;
-                        if (progress[0] == machine.getSupplementsNames().size()) {
-                            vCircularProgressIndicator.startAnimation(hide);
-                            recyclerView.startAnimation(show);
-                            adapter.notifyDataSetChanged();
-                        }
+                ref.getFile(localFile).addOnSuccessListener(taskSnapshot -> {
+                    Bitmap bitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
+                    updatedSupplements.add(new Supplement(name, bitmap));
+                    supplements.add(new Supplement(name,bitmap));
+                    progress[0]++;
+                    if (progress[0] == machine.getSupplementsNames().size()) {
+                        vCircularProgressIndicator.startAnimation(hide);
+                        recyclerView.startAnimation(show);
+                        adapter.notifyDataSetChanged();
                     }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
+                }).addOnFailureListener(e -> {
 
-                    }
                 });
             } catch (IOException e) {
                 e.printStackTrace();

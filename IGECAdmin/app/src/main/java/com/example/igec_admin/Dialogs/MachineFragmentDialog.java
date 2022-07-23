@@ -91,11 +91,13 @@ public class MachineFragmentDialog extends DialogFragment {
     private ArrayList<Supplement> supplements;
     private final FirebaseStorage storage = FirebaseStorage.getInstance();
     private final StorageReference storageRef = storage.getReference();
+    private Bitmap machineCover;
     private ArrayList<String> oldNames;
     private ArrayList<Pair<TextInputLayout, TextInputEditText>> views;
 
-    public MachineFragmentDialog(Machine machine) {
+    public MachineFragmentDialog(Machine machine,Bitmap machineCover) {
         this.machine = machine;
+        this.machineCover = machineCover;
     }
 
 
@@ -192,6 +194,7 @@ public class MachineFragmentDialog extends DialogFragment {
         vMachineByDay.setText(String.valueOf(machine.getDailyRentPrice()));
         vMachineByWeek.setText(String.valueOf(machine.getWeeklyRentPrice()));
         vMachineByMonth.setText(String.valueOf(machine.getMonthlyRentPrice()));
+        vMachineImg.setImageBitmap(machineCover);
         //TODO load the image of machine from database
         vDatePickerBuilder.setTitleText("Purchase Date");
         vDatePicker = vDatePickerBuilder.setSelection(purchaseDate).build();

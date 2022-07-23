@@ -89,15 +89,14 @@ public class MachineFragmentDialog extends DialogFragment {
     private MaterialDatePicker vDatePicker;
     private final Machine machine;
     private ArrayList<Supplement> supplements;
+    private Supplement machineCover = new Supplement();
     private final FirebaseStorage storage = FirebaseStorage.getInstance();
     private final StorageReference storageRef = storage.getReference();
-    private Bitmap machineCover;
     private ArrayList<String> oldNames;
     private ArrayList<Pair<TextInputLayout, TextInputEditText>> views;
 
-    public MachineFragmentDialog(Machine machine,Bitmap machineCover) {
+    public MachineFragmentDialog(Machine machine) {
         this.machine = machine;
-        this.machineCover = machineCover;
     }
 
 
@@ -194,7 +193,7 @@ public class MachineFragmentDialog extends DialogFragment {
         vMachineByDay.setText(String.valueOf(machine.getDailyRentPrice()));
         vMachineByWeek.setText(String.valueOf(machine.getWeeklyRentPrice()));
         vMachineByMonth.setText(String.valueOf(machine.getMonthlyRentPrice()));
-        vMachineImg.setImageBitmap(machineCover);
+        getMachineCover();
         //TODO load the image of machine from database
         vDatePickerBuilder.setTitleText("Purchase Date");
         vDatePicker = vDatePickerBuilder.setSelection(purchaseDate).build();
@@ -219,9 +218,28 @@ public class MachineFragmentDialog extends DialogFragment {
                     Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath);
                     vMachineImg.setImageBitmap(bitmap);
                     vMachineImg.setBorderWidth(2);
+                    machineCover.setPhoto(bitmap);
+                    machineCover.setName("cover");
                 }
             }
         });
+    }
+
+    private void getMachineCover() {
+        String cover ="cover";
+        StorageReference ref = FirebaseStorage.getInstance().getReference().child("/imgs/" + machine.getId() + String.format("/%s.jpg", cover));
+        try {
+            final File localFile = File.createTempFile(cover, "jpg");
+            ref.getFile(localFile).addOnSuccessListener(taskSnapshot -> {
+                Bitmap bitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
+                vMachineImg.setImageBitmap(bitmap);
+                machineCover.setPhoto(bitmap);
+                machineCover.setName("cover");
+            }).addOnFailureListener(e -> {
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -243,6 +261,7 @@ public class MachineFragmentDialog extends DialogFragment {
                 }
             });
         }
+        storageRef.child("imgs/" + vID.getText().toString() + "/" + "cover" + ".jpg").delete();
         machineCol.document(machine.getId()).delete().addOnSuccessListener(unused -> {
             Toast.makeText(getActivity(), "Deleted", Toast.LENGTH_SHORT).show();
             vDelete.setEnabled(true);
@@ -253,7 +272,6 @@ public class MachineFragmentDialog extends DialogFragment {
     @RequiresApi(api = Build.VERSION_CODES.R)
     private void updateMachine() throws ParseException {
 
-        HashMap<String, Object> modifiedMachine = new HashMap<>();
         if (supplements != null) {
             int size = supplements.size();
             MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
@@ -297,18 +315,21 @@ public class MachineFragmentDialog extends DialogFragment {
         machine.setDailyRentPrice(Double.parseDouble(vMachineByDay.getText().toString()));
         machine.setWeeklyRentPrice(Double.parseDouble(vMachineByWeek.getText().toString()));
         machine.setMonthlyRentPrice(Double.parseDouble(vMachineByMonth.getText().toString()));
-        machineCol.document(machine.getId()).set(machine).addOnSuccessListener(unused -> {
-            db.collection("Machine_Employee").whereEqualTo("machine.id", machine.getId()).get().addOnSuccessListener(queryDocumentSnapshots -> {
-                for (DocumentSnapshot d : queryDocumentSnapshots) {
-                    db.collection("Machine_Employee")
-                            .document(d.getId())
-                            .update("machine", machine);
-                }
+        machineCover.saveToCloudStorage(storageRef,machine.getId()).addOnSuccessListener(uv->{
+            machineCol.document(machine.getId()).set(machine).addOnSuccessListener(unused -> {
+                db.collection("Machine_Employee").whereEqualTo("machine.id", machine.getId()).get().addOnSuccessListener(queryDocumentSnapshots -> {
+                    for (DocumentSnapshot d : queryDocumentSnapshots) {
+                        db.collection("Machine_Employee")
+                                .document(d.getId())
+                                .update("machine", machine);
+                    }
+                });
+                Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
+                vUpdate.setEnabled(true);
+                dismiss();
             });
-            Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
-            vUpdate.setEnabled(true);
-            dismiss();
         });
+
 
     }
 
@@ -384,7 +405,7 @@ public class MachineFragmentDialog extends DialogFragment {
     private View.OnClickListener oclMachineImg = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            String fileName = "photo";
+            String fileName = "cover";
             File storageDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
 
             try {

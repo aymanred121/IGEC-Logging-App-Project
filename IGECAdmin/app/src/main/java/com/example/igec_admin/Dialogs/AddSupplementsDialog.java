@@ -205,6 +205,8 @@ public class AddSupplementsDialog extends DialogFragment {
         StorageReference ref;
         final int[] progress = new int[1];
         for (String name : machine.getSupplementsNames()) {
+            if(name.equals("cover"))
+                continue;
             ref = FirebaseStorage.getInstance().getReference().child("/imgs/" + machine.getId() + String.format("/%s.jpg", name));
             try {
                 final File localFile = File.createTempFile(name, "jpg");

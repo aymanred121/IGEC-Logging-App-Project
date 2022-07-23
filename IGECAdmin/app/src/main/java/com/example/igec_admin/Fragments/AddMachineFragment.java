@@ -98,6 +98,7 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
     private final FirebaseStorage storage = FirebaseStorage.getInstance();
     private final StorageReference storageRef = storage.getReference();
     private ArrayList<Supplement> supplements = new ArrayList<>();
+    private Supplement machineCover;
     private ArrayList<Pair<TextInputLayout, TextInputEditText>> views;
 
 
@@ -235,6 +236,9 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
                     Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath);
                     vMachineImg.setImageBitmap(bitmap);
                     vMachineImg.setBorderWidth(2);
+                    machineCover = new Supplement();
+                    machineCover.setName("cover");
+                    machineCover.setPhoto(bitmap);
                 }
             }
         });
@@ -274,7 +278,7 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
                 return true;
             }
         }
-        return false;
+        return machineCover ==null;
     }
 
     private boolean validateInput() {
@@ -337,19 +341,17 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
                     });
                 }
                 saveToInternalStorage();
-                //saveToCloudStorage();
                 Machine newMachine = new Machine(vId.getText().toString(), vSerialNumber.getText().toString(), new Date(purchaseDate));
                 newMachine.setDailyRentPrice(Double.parseDouble(vByDay.getText().toString()));
                 newMachine.setWeeklyRentPrice(Double.parseDouble(vByWeek.getText().toString()));
                 newMachine.setMonthlyRentPrice(Double.parseDouble(vByMonth.getText().toString()));
                 newMachine.setSupplementsNames(new ArrayList<>());
                 IntStream.range(0, supplements.size()).forEach(i -> newMachine.getSupplementsNames().add(supplements.get(i).getName()));
-                machineCol.document(vId.getText().toString()).set(newMachine).addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void unused) {
+                machineCover.saveToCloudStorage( FirebaseStorage.getInstance().getReference(),vId.getText().toString()).addOnSuccessListener(unused->{
+                    machineCol.document(vId.getText().toString()).set(newMachine).addOnSuccessListener(unused1 -> {
                         Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
                         clearInput();
-                    }
+                    });
                 });
             }
         }

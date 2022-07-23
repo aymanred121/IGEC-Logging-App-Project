@@ -3,8 +3,6 @@ package com.example.igec_admin.Fragments;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,15 +22,10 @@ import com.example.igec_admin.Dialogs.MachineLogDialog;
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Machine;
 import com.example.igec_admin.fireBase.MachineDefectsLog;
-import com.example.igec_admin.fireBase.Supplement;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 
-import java.io.File;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -86,27 +79,8 @@ public class MachinesFragment extends Fragment {
     private final MachineAdapter.OnItemClickListener itclMachineAdapter = new MachineAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position) {
-            getMachineCover(adapter.getMachinesList().get(position));
-        }
-
-        private void getMachineCover(Machine machine) {
-            StorageReference ref = FirebaseStorage.getInstance().getReference().child("/imgs/" + machine.getId() + String.format("/%s.jpg", "cover"));
-            try {
-                final File localFile = File.createTempFile("cover", "jpg");
-                ref.getFile(localFile).addOnSuccessListener(taskSnapshot -> {
-                    Bitmap bitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
-                    MachineFragmentDialog machineFragmentDialog = new MachineFragmentDialog(machine,bitmap);
-                    machineFragmentDialog.show(getParentFragmentManager(), "");
-                }).addOnFailureListener(e -> {
-                    MachineFragmentDialog machineFragmentDialog = new MachineFragmentDialog(machine,Bitmap.createBitmap(2,2,Bitmap.Config.ARGB_8888));
-                    machineFragmentDialog.show(getParentFragmentManager(), "");
-                });
-            } catch (IOException e) {
-                e.printStackTrace();
-                MachineFragmentDialog machineFragmentDialog = new MachineFragmentDialog(machine,Bitmap.createBitmap(2,2,Bitmap.Config.ARGB_8888));
-                machineFragmentDialog.show(getParentFragmentManager(), "");
-            }
-
+            MachineFragmentDialog machineFragmentDialog = new MachineFragmentDialog(adapter.getMachinesList().get(position));
+            machineFragmentDialog.show(getParentFragmentManager(), "");
         }
 
         @Override

@@ -1,11 +1,17 @@
 package com.example.igec_admin.Fragments;
 
+import static android.app.Activity.RESULT_OK;
+
 import android.Manifest;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Pair;
@@ -15,15 +21,21 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentResultListener;
 
 import com.example.igec_admin.Dialogs.AddSupplementsDialog;
 import com.example.igec_admin.Dialogs.MachineSerialNumberDialog;
+import com.example.igec_admin.Dialogs.SupplementInfoDialog;
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Allowance;
 import com.example.igec_admin.fireBase.Machine;
@@ -55,6 +67,7 @@ import java.util.stream.IntStream;
 
 import androidmads.library.qrgenearator.QRGContents;
 import androidmads.library.qrgenearator.QRGEncoder;
+import de.hdodenhof.circleimageview.CircleImageView;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -70,8 +83,11 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
     private TextInputLayout vIdLayout, vPurchaseDateLayout, vSerialNumberLayout, vByDayLayout, vByWeekLayout, vByMonthLayout;
     private TextInputEditText vId, vPurchaseDate, vSerialNumber, vByDay, vByWeek, vByMonth;
     private ImageView vQRImg;
+    private CircleImageView vMachineImg;
     private MaterialButton vRegister, vAddSupplement;
     // Vars
+    private String currentPhotoPath;
+    private ActivityResultLauncher<Intent> activityResultLauncher;
     private static final int CAMERA_REQUEST_CODE = 100;
     private long purchaseDate;
     private QRGEncoder qrgEncoder;
@@ -171,6 +187,7 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
         vAddSupplement.setOnClickListener(oclAddSupplement);
 
         vId.addTextChangedListener(twId);
+        vMachineImg.setOnClickListener(oclMachineImg);
         vSerialNumber.addTextChangedListener(twSerialNumber);
         vPurchaseDate.addTextChangedListener(twPurchaseDate);
         vByDay.addTextChangedListener(twByDay);
@@ -185,6 +202,7 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
 
         vId = view.findViewById(R.id.TextInput_MachineID);
         vQRImg = view.findViewById(R.id.ImageView_MachineIDIMG);
+        vMachineImg = view.findViewById(R.id.ImageView_MachineIMG);
         vRegister = view.findViewById(R.id.button_register);
         vAddSupplement = view.findViewById(R.id.button_addSupplements);
         vSerialNumber = view.findViewById(R.id.TextInput_MachineSerialNumber);
@@ -209,6 +227,17 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
         views.add(new Pair<>(vByDayLayout, vByDay));
         views.add(new Pair<>(vByWeekLayout, vByWeek));
         views.add(new Pair<>(vByMonthLayout, vByMonth));
+        activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+            @Override
+            public void onActivityResult(ActivityResult result) {
+                if (result.getResultCode() == RESULT_OK) {
+                    //Bundle bundle = result.getData().getExtras();
+                    Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath);
+                    vMachineImg.setImageBitmap(bitmap);
+                    vMachineImg.setBorderWidth(2);
+                }
+            }
+        });
     }
 
     private void clearInput() {
@@ -227,6 +256,7 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
     }
 
     private boolean generateError() {
+        //TODO add a validation for Machine Image
         for (Pair<TextInputLayout, TextInputEditText> view : views) {
             if (view.second.getText().toString().trim().isEmpty()) {
                 if (view.first == vIdLayout)
@@ -251,6 +281,8 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
         if (generateError())
             return false;
         boolean noSupplements = supplements.size() == 0;
+        if(noSupplements)
+            Toast.makeText(getActivity(), "No accessories were added", Toast.LENGTH_SHORT).show();
         return !noSupplements;
     }
 
@@ -319,8 +351,6 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
                         clearInput();
                     }
                 });
-            } else {
-                Toast.makeText(getActivity(), "please, fill the machine data", Toast.LENGTH_SHORT).show();
             }
         }
     };
@@ -335,6 +365,26 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
         public void onClick(View v) {
             AddSupplementsDialog addSupplementsDialog = new AddSupplementsDialog(supplements);
             addSupplementsDialog.show(getParentFragmentManager(), "");
+        }
+    };
+    private View.OnClickListener oclMachineImg = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            String fileName = "photo";
+            File storageDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+
+            try {
+                File imageFile = File.createTempFile(fileName,".jpg", storageDirectory);
+                currentPhotoPath = imageFile.getAbsolutePath();
+
+                Uri imageUri =  FileProvider.getUriForFile(getActivity(),"com.example.igec_admin.fileprovider",imageFile);
+
+                Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                takePicture. putExtra(MediaStore.EXTRA_OUTPUT,imageUri);
+                activityResultLauncher.launch(takePicture);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     };
     private final MaterialPickerOnPositiveButtonClickListener pclDatePicker = new MaterialPickerOnPositiveButtonClickListener() {

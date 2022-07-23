@@ -6,6 +6,23 @@
     android:layout_height="match_parent"
     tools:context=".Fragments.AddMachineFragment">
 
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/ImageView_MachineIMG"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_marginStart="@dimen/vhigh"
+        android:layout_marginTop="@dimen/mid"
+        android:layout_marginEnd="@dimen/vhigh"
+        android:layout_marginBottom="@dimen/mid"
+        android:scaleType="centerCrop"
+        app:civ_border_width="0dp"
+        app:civ_border_color="@color/black"
+        android:src="@drawable/ic_baseline_image_200"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textInputLayout_MachineID"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -16,11 +33,11 @@
         android:layout_marginEnd="@dimen/vhigh"
         app:boxBackgroundMode="outline"
         app:endIconDrawable="@drawable/ic_baseline_autorenew_24"
-        app:endIconTint="@color/primaryColor"
         app:endIconMode="custom"
+        app:endIconTint="@color/primaryColor"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/ImageView_MachineIMG">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/TextInput_MachineID"
@@ -42,8 +59,8 @@
         android:layout_marginTop="@dimen/mid"
         android:layout_marginEnd="@dimen/vhigh"
         app:boxBackgroundMode="outline"
-        app:endIconMode="custom"
         app:endIconDrawable="@drawable/ic_barcode"
+        app:endIconMode="custom"
         app:endIconTint="@color/primaryColor"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -59,7 +76,6 @@
             android:singleLine="true" />
 
     </com.google.android.material.textfield.TextInputLayout>
-
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textInputLayout_MachinePurchaseDate"
@@ -166,19 +182,18 @@
         android:id="@+id/button_addSupplements"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/vhigh"
         android:layout_marginTop="@dimen/high"
+        android:layout_marginBottom="@dimen/vhigh"
         android:text="@string/add_supplements"
         android:textAllCaps="false"
-        app:layout_constraintTop_toBottomOf="@id/textInputLayout_MachineByWeek"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textInputLayout_MachineByWeek" />
 
     <ImageView
         android:id="@+id/ImageView_MachineIDIMG"
-        android:layout_width="250dp"
-        android:layout_height="250dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
         android:layout_marginStart="@dimen/vhigh"
         android:layout_marginTop="@dimen/mid"
         android:layout_marginEnd="@dimen/vhigh"

@@ -73,6 +73,6 @@
     <string name="retry">Retry</string>
     <string name="machine_log">Machine Log</string>
     <string name="no_log_to_display">No Log to Display</string>
-    <string name="allowance_name">Allowance Name</string>
+    <string name="allowance_type">Type</string>
     <string name="unpaid_days">Unpaid Days</string>
 </resources>

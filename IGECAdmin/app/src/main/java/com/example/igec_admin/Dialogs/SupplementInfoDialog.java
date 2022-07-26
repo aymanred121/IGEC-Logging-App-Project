@@ -135,6 +135,7 @@ public class SupplementInfoDialog extends DialogFragment {
                 for (int i = 0; i < supplementNames.size(); i++) {
                     if (position != i && supplementNames.get(i).getName().equals(vSupplementName.getText().toString())) {
                         Toast.makeText(getContext(), "name is taken , please try another name", Toast.LENGTH_SHORT).show();
+                        vDone.setEnabled(true);
                         return;
                     }
                 }

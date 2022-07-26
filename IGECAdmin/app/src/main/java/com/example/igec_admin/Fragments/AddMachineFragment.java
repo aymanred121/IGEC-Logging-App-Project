@@ -253,6 +253,9 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
         vByDay.setText(null);
         vByMonth.setText(null);
         vByWeek.setText(null);
+        machineCover = null;
+        vMachineImg.setImageResource(R.drawable.ic_baseline_image_200);
+        vMachineImg.setBorderWidth(0);
         supplements.clear();
         vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
         vDatePicker = vDatePickerBuilder.build();
@@ -260,7 +263,6 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
     }
 
     private boolean generateError() {
-        //TODO add a validation for Machine Image
         for (Pair<TextInputLayout, TextInputEditText> view : views) {
             if (view.second.getText().toString().trim().isEmpty()) {
                 if (view.first == vIdLayout)
@@ -278,7 +280,12 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
                 return true;
             }
         }
-        return machineCover ==null;
+        if(machineCover == null)
+        {
+            Toast.makeText(getActivity(), "Machine Image Missing", Toast.LENGTH_SHORT).show();
+            return true;
+        }
+        return false;
     }
 
     private boolean validateInput() {
@@ -286,7 +293,7 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
             return false;
         boolean noSupplements = supplements.size() == 0;
         if(noSupplements)
-            Toast.makeText(getActivity(), "No accessories were added", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "Accessories Missing", Toast.LENGTH_SHORT).show();
         return !noSupplements;
     }
 

@@ -16,6 +16,8 @@ import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.DialogFragment;
 
 import com.example.igec_admin.R;
@@ -28,14 +30,17 @@ import java.util.ArrayList;
 
 public class AllowanceInfoDialog extends DialogFragment {
 
-    private TextInputEditText vAllowanceMount;
-    private AutoCompleteTextView vAllowanceName;
-    private TextInputLayout vAllowanceNameLayout, vAllowanceMountLayout;
+    private TextInputEditText vAllowanceMount, vAllowanceName;
+    private AutoCompleteTextView vAllowanceType;
+    private TextInputLayout vAllowanceNameLayout, vAllowanceMountLayout, vAllowanceTypeLayout;
     private ArrayList<Pair<TextInputLayout, EditText>> views;
     private MaterialButton vDone;
     private int position;
     private Allowance allowance = null;
     private ArrayList<String> allowancesList = new ArrayList<>();
+    private ArrayList<String> types = new ArrayList<>();
+    ConstraintLayout constraintLayout;
+
     public AllowanceInfoDialog(int position) {
         this.position = position;
     }
@@ -70,14 +75,9 @@ public class AllowanceInfoDialog extends DialogFragment {
     public void onResume() {
         super.onResume();
         allowancesList.clear();
-        allowancesList.add("Transportation");
-        allowancesList.add("accommodation");
-        allowancesList.add("site");
-        allowancesList.add("remote");
-        allowancesList.add("food");
-        allowancesList.add("Other");
+        allowancesList.addAll(types);
         ArrayAdapter<String> allowancesAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, allowancesList);
-        vAllowanceName.setAdapter(allowancesAdapter);
+        vAllowanceType.setAdapter(allowancesAdapter);
     }
 
     @Override
@@ -92,28 +92,46 @@ public class AllowanceInfoDialog extends DialogFragment {
         super.onViewCreated(view, savedInstanceState);
         initialize(view);
         vDone.setOnClickListener(oclDone);
-        //vAllowanceName.addTextChangedListener(twName);
+        vAllowanceType.addTextChangedListener(twType);
+        vAllowanceName.addTextChangedListener(twName);
         vAllowanceMount.addTextChangedListener(twMount);
 
     }
 
     private void initialize(View view) {
+        constraintLayout = view.findViewById(R.id.parent_layout);
         vAllowanceMount = view.findViewById(R.id.TextInput_AllowanceMount);
-        vAllowanceName = view.findViewById(R.id.TextInput_allowanceName);
+        vAllowanceType = view.findViewById(R.id.TextInput_AllowanceType);
+        vAllowanceName = view.findViewById(R.id.TextInput_AllowanceName);
         vAllowanceMountLayout = view.findViewById(R.id.textInputLayout_AllowanceMount);
+        vAllowanceTypeLayout = view.findViewById(R.id.textInputLayout_AllowanceType);
         vAllowanceNameLayout = view.findViewById(R.id.textInputLayout_AllowanceName);
         vDone = view.findViewById(R.id.button_Done);
-
+        types.clear();
+        types.add("Transportation");
+        types.add("accommodation");
+        types.add("site");
+        types.add("remote");
+        types.add("food");
+        types.add("Other");
+        //TODO should we add a detention?
         views = new ArrayList<>();
-        views.add(new Pair<>(vAllowanceNameLayout, vAllowanceName));
+        views.add(new Pair<>(vAllowanceNameLayout, vAllowanceType));
         views.add(new Pair<>(vAllowanceMountLayout, vAllowanceMount));
         if (allowance != null) {
-            vAllowanceName.setText(allowance.getName());
+            int index = types.indexOf(allowance.getName());
+            // if -1 meaning its other else its a valid type
+            if (index != -1) {
+                vAllowanceType.setText(types.get(index));
+            } else {
+                vAllowanceNameLayout.setVisibility(View.VISIBLE);
+                vAllowanceType.setText(types.get(types.size() - 1));
+                vAllowanceName.setText(allowance.getName());
+            }
+
             vAllowanceMount.setText(String.valueOf(allowance.getAmount()));
         }
-        vAllowanceName.addTextChangedListener(twName);
-        allowancesList.clear();
-
+        vAllowanceType.addTextChangedListener(twName);
     }
 
     private boolean generateError() {
@@ -126,12 +144,13 @@ public class AllowanceInfoDialog extends DialogFragment {
                 return true;
             }
         }
-        return false;
+        boolean otherNoName = vAllowanceName.getText().toString().trim().isEmpty() && vAllowanceType.getText().toString().equals("Other");
+        vAllowanceNameLayout.setError(otherNoName ? "Missing" : null);
+        return otherNoName;
     }
 
     private boolean validateInput() {
         return !generateError();
-
     }
 
     private View.OnClickListener oclDone = new View.OnClickListener() {
@@ -141,7 +160,8 @@ public class AllowanceInfoDialog extends DialogFragment {
             vDone.setEnabled(false);
             Bundle result = new Bundle();
             Allowance allowance = new Allowance();
-            allowance.setName(vAllowanceName.getText().toString().trim());
+            boolean isOther = vAllowanceType.getText().toString().equals("Other");
+            allowance.setName(isOther ? vAllowanceName.getText().toString() : vAllowanceType.getText().toString().trim());
             allowance.setAmount(Double.parseDouble(vAllowanceMount.getText().toString()));
             result.putSerializable("allowance", allowance);
             result.putInt("position", position);
@@ -151,6 +171,31 @@ public class AllowanceInfoDialog extends DialogFragment {
                 getParentFragmentManager().setFragmentResult("editAllowance", result);
             vDone.setEnabled(true);
             dismiss();
+        }
+    };
+    private TextWatcher twType = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            boolean isOther = vAllowanceType.getText().toString().equals("Other");
+            vAllowanceNameLayout.setVisibility(isOther ? View.VISIBLE : View.GONE);
+            vAllowanceName.setText("");
+//            ConstraintSet constraintSet = new ConstraintSet();
+//            constraintSet.clone(constraintLayout);
+//            constraintSet.connect(
+//                    R.id.textInputLayout_AllowanceMount,
+//                    ConstraintSet.TOP,
+//                    isOther ? R.id.textInputLayout_AllowanceName : R.id.textInputLayout_AllowanceType,
+//                    ConstraintSet.BOTTOM, 32);
         }
     };
     private TextWatcher twName = new TextWatcher() {

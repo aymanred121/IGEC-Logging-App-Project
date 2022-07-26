@@ -226,7 +226,7 @@ public class MachineFragmentDialog extends DialogFragment {
     }
 
     private void getMachineCover() {
-        String cover ="cover";
+        String cover = "cover";
         StorageReference ref = FirebaseStorage.getInstance().getReference().child("/imgs/" + machine.getId() + String.format("/%s.jpg", cover));
         try {
             final File localFile = File.createTempFile(cover, "jpg");
@@ -315,7 +315,7 @@ public class MachineFragmentDialog extends DialogFragment {
         machine.setDailyRentPrice(Double.parseDouble(vMachineByDay.getText().toString()));
         machine.setWeeklyRentPrice(Double.parseDouble(vMachineByWeek.getText().toString()));
         machine.setMonthlyRentPrice(Double.parseDouble(vMachineByMonth.getText().toString()));
-        machineCover.saveToCloudStorage(storageRef,machine.getId()).addOnSuccessListener(uv->{
+        machineCover.saveToCloudStorage(storageRef, machine.getId()).addOnSuccessListener(uv -> {
             machineCol.document(machine.getId()).set(machine).addOnSuccessListener(unused -> {
                 db.collection("Machine_Employee").whereEqualTo("machine.id", machine.getId()).get().addOnSuccessListener(queryDocumentSnapshots -> {
                     for (DocumentSnapshot d : queryDocumentSnapshots) {
@@ -335,7 +335,6 @@ public class MachineFragmentDialog extends DialogFragment {
 
 
     private boolean generateError() {
-        //TODO add a validation for Machine Image
         for (Pair<TextInputLayout, TextInputEditText> view : views) {
             if (view.second.getText().toString().trim().isEmpty()) {
                 if (view.first == vSerialNumberLayout)
@@ -350,6 +349,10 @@ public class MachineFragmentDialog extends DialogFragment {
             if (view.first.getError() != null) {
                 return true;
             }
+        }
+        if (machineCover == null) {
+            Toast.makeText(getActivity(), "Machine Image Missing", Toast.LENGTH_SHORT).show();
+            return true;
         }
         return false;
     }

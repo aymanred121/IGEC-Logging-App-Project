@@ -14,26 +14,29 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Pair;
 import android.view.View;
 import android.widget.Toast;
 
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Employee;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 public class LoginActivity extends AppCompatActivity {
 
     private TextInputEditText vEmail;
-    private TextInputLayout vEmailLayout;
+    private TextInputLayout vEmailLayout, vPasswordLayout;
     private TextInputEditText vPassword;
     private MaterialButton vSignIn;
+    private ArrayList<Pair<TextInputLayout, TextInputEditText>> views;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +46,7 @@ public class LoginActivity extends AppCompatActivity {
         initialize();
         // Listeners
         vEmail.addTextChangedListener(twEmail);
+        vPassword.addTextChangedListener(twPassword);
         vSignIn.setOnClickListener(clSignIn);
     }
 
@@ -57,10 +61,32 @@ public class LoginActivity extends AppCompatActivity {
         vEmail = findViewById(R.id.TextInput_email);
         vPassword = findViewById(R.id.TextInput_password);
         vEmailLayout = findViewById(R.id.textInputLayout_Email);
+        vPasswordLayout = findViewById(R.id.textInputLayout_Password);
         vSignIn = findViewById(R.id.Button_SignIn);
         vEmail.setText("admin@gmail.com");
         vPassword.setText("1");
 
+        views = new ArrayList<>();
+        views.add(new Pair<>(vEmailLayout, vEmail));
+        views.add(new Pair<>(vPasswordLayout, vPassword));
+
+    }
+
+    private boolean generateError() {
+        for (Pair<TextInputLayout, TextInputEditText> view : views) {
+            // check if its missing error
+            if (view.second.getText().toString().trim().isEmpty())
+                view.first.setError("Missing");
+            // check for other errors generated via text watchers
+            if (view.first.getError() != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean validateInput() {
+        return !generateError();
     }
 
     private void isNetworkAvailable() {
@@ -79,11 +105,13 @@ public class LoginActivity extends AppCompatActivity {
         try {
             String decryptedPassword = decrypt(password, privateKey);
             if (vPassword.getText() != null && !vPassword.getText().toString().equals(decryptedPassword)) {
-                Toast.makeText(LoginActivity.this, "please enter a valid email or password", Toast.LENGTH_SHORT).show();
+                vEmailLayout.setError(" ");
+                vPasswordLayout.setError("Wrong E-mail or password");
                 return false;
             }
         } catch (Exception e) {
-            Toast.makeText(LoginActivity.this, "please enter a valid email or password", Toast.LENGTH_SHORT).show();
+            vEmailLayout.setError(" ");
+            vPasswordLayout.setError("Wrong E-mail or password");
             return false;
         }
         return true;
@@ -122,29 +150,53 @@ public class LoginActivity extends AppCompatActivity {
             hideError(vEmailLayout);
         }
     };
+    private final TextWatcher twPassword = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            // remove any error when changed
+            vPasswordLayout.setError(null);
+            vPasswordLayout.setErrorEnabled(false);
+        }
+    };
     private final View.OnClickListener clSignIn = new View.OnClickListener() {
         @RequiresApi(api = Build.VERSION_CODES.Q)
         @Override
         public void onClick(View v) {
+            if (!validateInput()) return;
+            vSignIn.setEnabled(false);
             FirebaseFirestore db = FirebaseFirestore.getInstance();
             db.collection("employees")
                     .whereEqualTo("email", (vEmail.getText() != null) ? vEmail.getText().toString() : "")
                     .limit(1)
                     .get().addOnSuccessListener(queryDocumentSnapshots -> {
                         if (queryDocumentSnapshots.size() == 0) {
-                            Toast.makeText(LoginActivity.this, "please enter a valid email or password", Toast.LENGTH_SHORT).show();
+                            vEmailLayout.setError(" ");
+                            vPasswordLayout.setError("Wrong E-mail or password");
+                            vSignIn.setEnabled(true);
                             return;
                         }
                         DocumentSnapshot d = queryDocumentSnapshots.getDocuments().get(0);
                         if (d.exists()) {
                             Employee currEmployee = d.toObject(Employee.class);
                             if (currEmployee != null && !isPasswordRight(currEmployee.getPassword())) {
+                                vSignIn.setEnabled(true);
                                 return;
                             }
                             Intent intent;
                             if (currEmployee != null && currEmployee.isAdmin()) {
                                 intent = new Intent(LoginActivity.this, MainActivity.class);
                                 startActivity(intent);
+                                finish();
                             }
                         }
                     });

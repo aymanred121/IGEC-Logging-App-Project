@@ -15,9 +15,9 @@
         android:layout_marginEnd="32dp"
         app:boxBackgroundMode="outline"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/textInputLayout_password"
+        app:layout_constraintEnd_toEndOf="@+id/textInputLayout_Password"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="@+id/textInputLayout_password"
+        app:layout_constraintStart_toStartOf="@+id/textInputLayout_Password"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.4000000">
 
@@ -32,7 +32,7 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/textInputLayout_password"
+        android:id="@+id/textInputLayout_Password"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -68,6 +68,6 @@
         app:cornerRadius="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textInputLayout_password" />
+        app:layout_constraintTop_toBottomOf="@+id/textInputLayout_Password" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

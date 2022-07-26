@@ -6,10 +6,12 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -50,9 +52,10 @@ public class AddUserFragment extends Fragment {
     private MaterialCheckBox vAdmin, vTemporary;
     private MaterialButton vRegister;
     private TextInputEditText vFirstName, vSecondName, vEmail, vPassword, vPhone, vTitle, vSalary, vNationalID, vArea, vCity, vStreet, vHireDate, vInsuranceNumber, vInsuranceAmount;
-    private TextInputLayout vHireDateLayout, vEmailLayout;
+    private TextInputLayout vFirstNameLayout, vSecondNameLayout, vEmailLayout, vPasswordLayout, vPhoneLayout, vTitleLayout, vSalaryLayout, vNationalIDLayout, vAreaLayout, vCityLayout, vStreetLayout, vHireDateLayout, vInsuranceNumberLayout, vInsuranceAmountLayout;
     private MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vDatePicker;
+    private ArrayList<Pair<TextInputLayout, EditText>> views;
 
     // Vars
     long hireDate;
@@ -73,34 +76,86 @@ public class AddUserFragment extends Fragment {
         // Listeners
         vEmail.addTextChangedListener(twEmail);
         vHireDateLayout.setEndIconOnClickListener(oclHireDate);
+        vHireDateLayout.setErrorIconOnClickListener(oclHireDate);
         vRegister.setOnClickListener(clRegister);
         vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);
         vAdmin.setOnClickListener(oclAdmin);
+        vHireDateLayout.setErrorIconDrawable(R.drawable.ic_baseline_calendar_month_24);
+        for (Pair<TextInputLayout, EditText> v : views) {
+            if(v.first != vEmailLayout)
+                v.second.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable editable) {
+                        v.first.setError(null);
+                        v.first.setErrorEnabled(false);
+                    }
+                });
+        }
     }
 
     // Functions
     private void initialize(View view) {
         vFirstName = view.findViewById(R.id.TextInput_FirstName);
+        vFirstNameLayout = view.findViewById(R.id.textInputLayout_FirstName);
         vSecondName = view.findViewById(R.id.TextInput_SecondName);
+        vSecondNameLayout = view.findViewById(R.id.textInputLayout_SecondName);
         vEmail = view.findViewById(R.id.TextInput_Email);
         vEmailLayout = view.findViewById(R.id.textInputLayout_Email);
         vPassword = view.findViewById(R.id.TextInput_Password);
+        vPasswordLayout = view.findViewById(R.id.textInputLayout_Password);
         vPhone = view.findViewById(R.id.TextInput_Phone);
+        vPhoneLayout = view.findViewById(R.id.textInputLayout_Phone);
         vTitle = view.findViewById(R.id.TextInput_Title);
+        vTitleLayout = view.findViewById(R.id.textInputLayout_Title);
         vAdmin = view.findViewById(R.id.CheckBox_Admin);
         vTemporary = view.findViewById(R.id.CheckBox_Temporary);
         vSalary = view.findViewById(R.id.TextInput_Salary);
+        vSalaryLayout = view.findViewById(R.id.textInputLayout_Salary);
         vInsuranceNumber = view.findViewById(R.id.TextInput_InsuranceNumber);
+        vInsuranceNumberLayout = view.findViewById(R.id.textInputLayout_InsuranceNumber);
         vInsuranceAmount = view.findViewById(R.id.TextInput_InsuranceAmount);
+        vInsuranceAmountLayout = view.findViewById(R.id.textInputLayout_InsuranceAmount);
         vNationalID = view.findViewById(R.id.TextInput_NationalID);
+        vNationalIDLayout = view.findViewById(R.id.textInputLayout_NationalID);
         vArea = view.findViewById(R.id.TextInput_Area);
+        vAreaLayout = view.findViewById(R.id.textInputLayout_Area);
         vCity = view.findViewById(R.id.TextInput_City);
+        vCityLayout = view.findViewById(R.id.textInputLayout_City);
         vStreet = view.findViewById(R.id.TextInput_Street);
+        vStreetLayout = view.findViewById(R.id.textInputLayout_Street);
         vHireDate = view.findViewById(R.id.TextInput_HireDate);
         vHireDateLayout = view.findViewById(R.id.textInputLayout_HireDate);
         vDatePickerBuilder.setTitleText("Hire Date");
         vDatePicker = vDatePickerBuilder.build();
         vRegister = view.findViewById(R.id.button_register);
+
+        views = new ArrayList<>();
+        views.add(new Pair<>(vFirstNameLayout, vFirstName));
+        views.add(new Pair<>(vSecondNameLayout, vSecondName));
+        views.add(new Pair<>(vEmailLayout, vEmail));
+        views.add(new Pair<>(vPasswordLayout, vPassword));
+        views.add(new Pair<>(vPhoneLayout, vPhone));
+        views.add(new Pair<>(vTitleLayout, vTitle));
+        views.add(new Pair<>(vSalaryLayout, vSalary));
+        views.add(new Pair<>(vInsuranceNumberLayout, vInsuranceNumber));
+        views.add(new Pair<>(vInsuranceAmountLayout, vInsuranceAmount));
+        views.add(new Pair<>(vAreaLayout, vArea));
+        views.add(new Pair<>(vCityLayout, vCity));
+        views.add(new Pair<>(vStreetLayout, vStreet));
+        views.add(new Pair<>(vHireDateLayout, vHireDate));
+        views.add(new Pair<>(vNationalIDLayout, vNationalID));
+
+
         //TODO: remove fakeData() when all testing is finished
         fakeData();
     }
@@ -154,7 +209,7 @@ public class AddUserFragment extends Fragment {
     }
 
     private Employee fillEmployeeData() {
-        double overTime =  (Double.parseDouble(vSalary.getText().toString())/30.0/10.0)*1.5;
+        double overTime = (Double.parseDouble(vSalary.getText().toString()) / 30.0 / 10.0) * 1.5;
         return new Employee(
                 (vFirstName.getText()).toString(),
                 (vSecondName.getText()).toString(),
@@ -229,24 +284,27 @@ public class AddUserFragment extends Fragment {
 
     }
 
+    private boolean generateError() {
+        for (Pair<TextInputLayout, EditText> view : views) {
+            if (view.second.getText().toString().trim().isEmpty()) {
+                view.first.setError("Missing");
+                return true;
+            }
+            if (view.first.getError() != null) {
+                return true;
+            }
+        }
+        boolean isNationalIdValid = vNationalID.getText().toString().length() == 14;
+        if (!isNationalIdValid) {
+            vNationalIDLayout.setError("Must be 14 digits");
+            return true;
+        }
+        return false;
+    }
+
+
     boolean validateInputs() {
-        return
-                !(vFirstName.getText().toString().isEmpty() ||
-                        vSecondName.getText().toString().isEmpty() ||
-                        vEmail.getText().toString().isEmpty() ||
-                        vEmailLayout.getError() != null ||
-                        vPassword.getText().toString().isEmpty() ||
-                        vPhone.getText().toString().isEmpty() ||
-                        vTitle.getText().toString().isEmpty() ||
-                        vSalary.getText().toString().isEmpty() ||
-                        vArea.getText().toString().isEmpty() ||
-                        vCity.getText().toString().isEmpty() ||
-                        vStreet.getText().toString().isEmpty() ||
-                        vHireDate.getText().toString().isEmpty() ||
-                        vNationalID.getText().toString().isEmpty() ||
-                        vInsuranceAmount.getText().toString().isEmpty() ||
-                        vInsuranceNumber.getText().toString().isEmpty() ||
-                        vNationalID.getText().toString().length() != 14);
+        return !generateError();
     }
 
     // Listeners
@@ -266,8 +324,6 @@ public class AddUserFragment extends Fragment {
                         })
                         .show();
             }
-        } else {
-            Toast.makeText(getActivity(), "please, fill the user data", Toast.LENGTH_SHORT).show();
         }
     };
     MaterialPickerOnPositiveButtonClickListener pclDatePicker = selection -> {

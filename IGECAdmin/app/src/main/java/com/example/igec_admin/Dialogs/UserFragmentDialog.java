@@ -11,11 +11,13 @@ import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -68,23 +70,11 @@ public class UserFragmentDialog extends DialogFragment {
     private MaterialCheckBox vAdmin, vTemporary;
     private MaterialButton vUpdate;
     private MaterialButton vDelete;
-    private TextInputEditText vFirstName;
-    private TextInputEditText vSecondName;
-    private TextInputEditText vEmail;
-    private TextInputLayout vEmailLayout, vPasswordLayout;
-    private TextInputEditText vPassword;
-    private TextInputEditText vTitle;
-    private TextInputEditText vSalary;
-    private TextInputEditText vSSN;
-    private TextInputEditText vArea;
-    private TextInputEditText vCity;
-    private TextInputEditText vStreet;
-    private TextInputEditText vHireDate;
-    private TextInputEditText vPhone;
-    private TextInputEditText vInsuranceNumber, vInsuranceAmount;
-    private TextInputLayout vHireDateLayout;
+    private TextInputEditText vFirstName, vSecondName, vEmail, vPassword, vPhone, vTitle, vSalary, vNationalID, vArea, vCity, vStreet, vHireDate, vInsuranceNumber, vInsuranceAmount;
+    private TextInputLayout vFirstNameLayout, vSecondNameLayout, vEmailLayout, vPasswordLayout, vPhoneLayout, vTitleLayout, vSalaryLayout, vNationalIDLayout, vAreaLayout, vCityLayout, vStreetLayout, vHireDateLayout, vInsuranceNumberLayout, vInsuranceAmountLayout;
     private final MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vDatePicker;
+    private ArrayList<Pair<TextInputLayout, EditText>> views;
 
 
     //Var
@@ -129,33 +119,69 @@ public class UserFragmentDialog extends DialogFragment {
         vEmail.addTextChangedListener(twEmail);
         vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);
         vHireDateLayout.setEndIconOnClickListener(oclHireDate);
+        vHireDateLayout.setErrorIconOnClickListener(oclHireDate);
         vUpdate.setOnClickListener(clUpdate);
         vDelete.setOnClickListener(clDelete);
         vPasswordLayout.setEndIconOnClickListener(oclPasswordGenerate);
+        for (Pair<TextInputLayout, EditText> v : views) {
+            if(v.first != vEmailLayout)
+                v.second.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable editable) {
+                        v.first.setError(null);
+                        v.first.setErrorEnabled(false);
+                    }
+                });
+        }
+
         return view;
     }
 
     // Functions
     private void initialize(View view) {
         vFirstName = view.findViewById(R.id.TextInput_FirstName);
+        vFirstNameLayout = view.findViewById(R.id.textInputLayout_FirstName);
         vSecondName = view.findViewById(R.id.TextInput_SecondName);
+        vSecondNameLayout = view.findViewById(R.id.textInputLayout_SecondName);
         vEmail = view.findViewById(R.id.TextInput_Email);
         vEmailLayout = view.findViewById(R.id.textInputLayout_Email);
         vPassword = view.findViewById(R.id.TextInput_Password);
         vPasswordLayout = view.findViewById(R.id.textInputLayout_Password);
-        vTitle = view.findViewById(R.id.TextInput_Title);
-        vSalary = view.findViewById(R.id.TextInput_Salary);
-        vSSN = view.findViewById(R.id.TextInput_NationalID);
-        vArea = view.findViewById(R.id.TextInput_Area);
-        vCity = view.findViewById(R.id.TextInput_City);
-        vStreet = view.findViewById(R.id.TextInput_Street);
-        vHireDate = view.findViewById(R.id.TextInput_HireDate);
-        vAdmin = view.findViewById(R.id.CheckBox_Admin);
-        vInsuranceNumber = view.findViewById(R.id.TextInput_InsuranceNumber);
-        vInsuranceAmount = view.findViewById(R.id.TextInput_InsuranceAmount);
-        vTemporary = view.findViewById(R.id.CheckBox_Temporary);
         vPhone = view.findViewById(R.id.TextInput_Phone);
+        vPhoneLayout = view.findViewById(R.id.textInputLayout_Phone);
+        vTitle = view.findViewById(R.id.TextInput_Title);
+        vTitleLayout = view.findViewById(R.id.textInputLayout_Title);
+        vAdmin = view.findViewById(R.id.CheckBox_Admin);
+        vTemporary = view.findViewById(R.id.CheckBox_Temporary);
+        vSalary = view.findViewById(R.id.TextInput_Salary);
+        vSalaryLayout = view.findViewById(R.id.textInputLayout_Salary);
+        vInsuranceNumber = view.findViewById(R.id.TextInput_InsuranceNumber);
+        vInsuranceNumberLayout = view.findViewById(R.id.textInputLayout_InsuranceNumber);
+        vInsuranceAmount = view.findViewById(R.id.TextInput_InsuranceAmount);
+        vInsuranceAmountLayout = view.findViewById(R.id.textInputLayout_InsuranceAmount);
+        vNationalID = view.findViewById(R.id.TextInput_NationalID);
+        vNationalIDLayout = view.findViewById(R.id.textInputLayout_NationalID);
+        vArea = view.findViewById(R.id.TextInput_Area);
+        vAreaLayout = view.findViewById(R.id.textInputLayout_Area);
+        vCity = view.findViewById(R.id.TextInput_City);
+        vCityLayout = view.findViewById(R.id.textInputLayout_City);
+        vStreet = view.findViewById(R.id.TextInput_Street);
+        vStreetLayout = view.findViewById(R.id.textInputLayout_Street);
+        vHireDate = view.findViewById(R.id.TextInput_HireDate);
         vHireDateLayout = view.findViewById(R.id.textInputLayout_HireDate);
+        vDatePickerBuilder.setTitleText("Hire Date");
+        vDatePicker = vDatePickerBuilder.build();
+//        vRegister = view.findViewById(R.id.button_register);
         MaterialButton vRegister = view.findViewById(R.id.button_register);
         vDelete = view.findViewById(R.id.button_delete);
         vUpdate = view.findViewById(R.id.button_update);
@@ -163,6 +189,24 @@ public class UserFragmentDialog extends DialogFragment {
         vRegister.setVisibility(View.GONE);
         vDelete.setVisibility(View.VISIBLE);
         vUpdate.setVisibility(View.VISIBLE);
+
+
+        views = new ArrayList<>();
+        views.add(new Pair<>(vFirstNameLayout, vFirstName));
+        views.add(new Pair<>(vSecondNameLayout, vSecondName));
+        views.add(new Pair<>(vEmailLayout, vEmail));
+        views.add(new Pair<>(vPasswordLayout, vPassword));
+        views.add(new Pair<>(vPhoneLayout, vPhone));
+        views.add(new Pair<>(vTitleLayout, vTitle));
+        views.add(new Pair<>(vSalaryLayout, vSalary));
+        views.add(new Pair<>(vInsuranceNumberLayout, vInsuranceNumber));
+        views.add(new Pair<>(vInsuranceAmountLayout, vInsuranceAmount));
+        views.add(new Pair<>(vAreaLayout, vArea));
+        views.add(new Pair<>(vCityLayout, vCity));
+        views.add(new Pair<>(vStreetLayout, vStreet));
+        views.add(new Pair<>(vHireDateLayout, vHireDate));
+        views.add(new Pair<>(vNationalIDLayout, vNationalID));
+
 
         vFirstName.setText(employee.getFirstName());
         vSecondName.setText(employee.getLastName());
@@ -172,7 +216,7 @@ public class UserFragmentDialog extends DialogFragment {
         vStreet.setText(employee.getStreet());
         vEmail.setText(employee.getEmail());
         vSalary.setText(String.valueOf(employee.getSalary()));
-        vSSN.setText(employee.getSSN());
+        vNationalID.setText(employee.getSSN());
         vPassword.setText(employee.getDecryptedPassword());
         vPhone.setText(employee.getPhoneNumber());
         vAdmin.setChecked(employee.isAdmin());
@@ -200,24 +244,25 @@ public class UserFragmentDialog extends DialogFragment {
             }
         });
     }
-
+    private boolean generateError() {
+        for (Pair<TextInputLayout, EditText> view : views) {
+            if (view.second.getText().toString().trim().isEmpty()) {
+                view.first.setError("Missing");
+                return true;
+            }
+            if (view.first.getError() != null) {
+                return true;
+            }
+        }
+        boolean isNationalIdValid = vNationalID.getText().toString().length() == 14;
+        if (!isNationalIdValid) {
+            vNationalIDLayout.setError("Must be 14 digits");
+            return true;
+        }
+        return false;
+    }
     boolean validateInputs() {
-        return
-                !(vFirstName.getText().toString().isEmpty() ||
-                        vSecondName.getText().toString().isEmpty() ||
-                        vEmail.getText().toString().isEmpty() ||
-                        vEmailLayout.getError() != null ||
-                        vPassword.getText().toString().isEmpty() ||
-                        vTitle.getText().toString().isEmpty() ||
-                        vSalary.getText().toString().isEmpty() ||
-                        vArea.getText().toString().isEmpty() ||
-                        vCity.getText().toString().isEmpty() ||
-                        vStreet.getText().toString().isEmpty() ||
-                        vHireDate.getText().toString().isEmpty() ||
-                        vSSN.getText().toString().isEmpty() ||
-                        vInsuranceAmount.getText().toString().isEmpty() ||
-                        vInsuranceNumber.getText().toString().isEmpty() ||
-                        vSSN.getText().toString().length() != 14);
+        return !generateError();
     }
 
     private void updateEmployeeOverview(Map<String, Object> updatedEmpOverviewMap, HashMap<String, Object> updatedEmployeeMap) {
@@ -302,10 +347,11 @@ public class UserFragmentDialog extends DialogFragment {
         empMap.put("password", encryptedPassword());
         empMap.put("title", vTitle.getText().toString());
         empMap.put("salary", Double.parseDouble(vSalary.getText().toString()));
-        empMap.put("SSN", vSSN.getText().toString());
+        empMap.put("SSN", vNationalID.getText().toString());
         empMap.put("phoneNumber", vPhone.getText().toString());
         empMap.put("hireDate", new Date(hireDate));
         empMap.put("id", employee.getId());
+        //TODO check if there's a missing attributes here like admin
         return empMap;
     }
 
@@ -359,7 +405,7 @@ public class UserFragmentDialog extends DialogFragment {
                 .whereNotEqualTo("id", employee.getId())
                 .get().addOnSuccessListener(documents -> {
                     if (documents.getDocuments().size() != 0) {
-                        Toast.makeText(getActivity(), "this Email already exists", Toast.LENGTH_SHORT).show();
+                        vEmailLayout.setError("This Email already exists");
                         vUpdate.setEnabled(true);
                         return;
                     }
@@ -402,8 +448,6 @@ public class UserFragmentDialog extends DialogFragment {
     // Listeners
     private View.OnClickListener clUpdate = v -> {
         if (!validateInputs()) {
-
-            Toast.makeText(getActivity(), "please, fill the project data", Toast.LENGTH_SHORT).show();
             return;
         }
         vUpdate.setEnabled(false);

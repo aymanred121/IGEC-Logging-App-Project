@@ -496,7 +496,7 @@ public class AddProjectFragment extends Fragment {
         }
         boolean isThereAClient = (!vOfficeWork.isChecked() && client == null);
         if(isThereAClient)
-            Toast.makeText(getActivity(), "Missing client info", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), "client Info Missing", Toast.LENGTH_SHORT).show();
         return isThereAClient;
     }
 

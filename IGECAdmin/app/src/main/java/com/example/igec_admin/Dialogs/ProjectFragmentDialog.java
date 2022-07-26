@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -63,7 +65,7 @@ public class ProjectFragmentDialog extends DialogFragment {
     private TextInputEditText vName, vArea, vStreet, vCity, vTime, vManagerName, vProjectReference;
     private MaterialButton vRegister, vUpdate, vDelete, vAddClient, vAddAllowance;
     private AutoCompleteTextView vManagerID, vContractType;
-    private TextInputLayout vManagerIDLayout, vTimeLayout, vProjectReferenceLayout, vContractTypeLayout;
+    private TextInputLayout vNameLayout, vAreaLayout, vStreetLayout, vCityLayout, vManagerIDLayout, vTimeLayout, vProjectReferenceLayout, vContractTypeLayout;
     private RecyclerView recyclerView;
     private EmployeeAdapter adapter;
     private MaterialCheckBox vOfficeWork;
@@ -88,6 +90,7 @@ public class ProjectFragmentDialog extends DialogFragment {
     private String currProjectID;
     private WriteBatch batch = FirebaseFirestore.getInstance().batch();
     private final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+    private ArrayList<Pair<TextInputLayout, EditText>> views;
 
     public ProjectFragmentDialog(Project project) {
         this.project = project;
@@ -175,12 +178,18 @@ public class ProjectFragmentDialog extends DialogFragment {
         Initialize(view);
 
         // listeners
+        vName.addTextChangedListener(twName);
+        vProjectReference.addTextChangedListener(twProjectReference);
+        vArea.addTextChangedListener(twArea);
+        vCity.addTextChangedListener(twCity);
+        vStreet.addTextChangedListener(twStreet);
+        vTime.addTextChangedListener(twTime);
+        vContractType.addTextChangedListener(twContractType);
+        vManagerID.addTextChangedListener(twManagerID);
         vUpdate.setOnClickListener(clUpdate);
         vDelete.setOnClickListener(clDelete);
-        vManagerID.addTextChangedListener(twManagerID);
         vTimeDatePicker.addOnPositiveButtonClickListener(pclTimeDatePicker);
         vTimeLayout.setEndIconOnClickListener(oclStartDate);
-        vProjectReference.addTextChangedListener(twProjectReference);
         vOfficeWork.setOnClickListener(oclOfficeWork);
         vAddClient.setOnClickListener(oclAddClient);
         vAddAllowance.setOnClickListener(oclAddAllowance);
@@ -194,12 +203,16 @@ public class ProjectFragmentDialog extends DialogFragment {
     private void Initialize(View view) {
         allowances = new ArrayList<>();
         vName = view.findViewById(R.id.TextInput_ProjectName);
+        vNameLayout = view.findViewById(R.id.textInputLayout_ProjectName);
         vProjectReference = view.findViewById(R.id.TextInput_ProjectReference);
         vProjectReferenceLayout = view.findViewById(R.id.textInputLayout_ProjectReference);
         vOfficeWork = view.findViewById(R.id.checkbox_officeWork);
         vCity = view.findViewById(R.id.TextInput_City);
+        vCityLayout = view.findViewById(R.id.textInputLayout_City);
         vStreet = view.findViewById(R.id.TextInput_Street);
+        vStreetLayout = view.findViewById(R.id.textInputLayout_Street);
         vArea = view.findViewById(R.id.TextInput_Area);
+        vAreaLayout = view.findViewById(R.id.textInputLayout_Area);
         vContractType = view.findViewById(R.id.TextInput_ContractType);
         vContractTypeLayout = view.findViewById(R.id.textInputLayout_ContractType);
         vTime = view.findViewById(R.id.TextInput_Time);
@@ -213,6 +226,16 @@ public class ProjectFragmentDialog extends DialogFragment {
         vRegister = view.findViewById(R.id.button_register);
         vUpdate = view.findViewById(R.id.button_update);
         vDelete = view.findViewById(R.id.button_delete);
+
+        views = new ArrayList<>();
+        views.add(new Pair<>(vNameLayout, vName));
+        views.add(new Pair<>(vProjectReferenceLayout, vProjectReference));
+        views.add(new Pair<>(vAreaLayout, vArea));
+        views.add(new Pair<>(vCityLayout, vCity));
+        views.add(new Pair<>(vStreetLayout, vStreet));
+        views.add(new Pair<>(vTimeLayout, vTime));
+        views.add(new Pair<>(vContractTypeLayout, vContractType));
+        views.add(new Pair<>(vManagerIDLayout, vManagerID));
 
         vRegister.setVisibility(View.GONE);
         vDelete.setVisibility(View.VISIBLE);
@@ -413,16 +436,26 @@ public class ProjectFragmentDialog extends DialogFragment {
         }
     }
 
+    private boolean generateError() {
+        for (Pair<TextInputLayout, EditText> view : views) {
+            if (view.second.getText().toString().trim().isEmpty()) {
+                if (view.first == vTimeLayout)
+                    view.first.setErrorIconDrawable(R.drawable.ic_baseline_calendar_month_24);
+                view.first.setError("Missing");
+                return true;
+            }
+            if (view.first.getError() != null) {
+                return true;
+            }
+        }
+        boolean isThereAClient = (!vOfficeWork.isChecked() && client == null);
+        if (isThereAClient)
+            Toast.makeText(getActivity(), "client Info Missing", Toast.LENGTH_SHORT).show();
+        return isThereAClient;
+    }
+
     boolean validateInputs() {
-        return
-                !(vName.getText().toString().isEmpty() ||
-                        vArea.getText().toString().isEmpty() ||
-                        vCity.getText().toString().isEmpty() ||
-                        vStreet.getText().toString().isEmpty() ||
-                        vManagerID.getText().toString().isEmpty() ||
-                        vManagerName.getText().toString().isEmpty() ||
-                        vTime.getText().toString().isEmpty() ||
-                        (!vOfficeWork.isChecked() && client == null));
+        return !generateError();
     }
 
     void updateProject() {
@@ -547,8 +580,130 @@ public class ProjectFragmentDialog extends DialogFragment {
 
     }
 
+    private void hideError(TextInputLayout layout) {
+        layout.setError(null);
+        layout.setErrorEnabled(false);
+    }
+
     // Listeners
-    TextWatcher twManagerID = new TextWatcher() {
+    private final TextWatcher twName = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            hideError(vNameLayout);
+        }
+    };
+    private final TextWatcher twArea = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            hideError(vAreaLayout);
+        }
+    };
+    private final TextWatcher twCity = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            hideError(vCityLayout);
+        }
+    };
+    private final TextWatcher twStreet = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            hideError(vStreetLayout);
+        }
+    };
+    private final TextWatcher twTime = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            hideError(vTimeLayout);
+        }
+    };
+    private final TextWatcher twContractType = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            hideError(vContractTypeLayout);
+        }
+    };
+    private final TextWatcher twProjectReference = new TextWatcher() {
+        boolean removeDash = false;
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            removeDash = s.toString().contains("-");
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+            if (s.toString().length() == 2 && !removeDash) {
+                s.append('-');
+            }
+            hideError(vProjectReferenceLayout);
+        }
+    };
+    private final TextWatcher twManagerID = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -574,36 +729,14 @@ public class ProjectFragmentDialog extends DialogFragment {
                 vManagerName.setText(null);
                 selectedManager = null;
             }
-
             for (EmployeeOverview emp : Team) {
                 if (!emp.getId().equals(vManagerID.getText().toString())) {
                     emp.setManagerID(!vManagerID.getText().toString().equals("") ? vManagerID.getText().toString() : null);
                 } else {
                     emp.setManagerID("adminID");
-                    adapter.notifyDataSetChanged();
                 }
             }
-        }
-    };
-    private final TextWatcher twProjectReference = new TextWatcher() {
-        boolean removeDash = false;
-
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            removeDash = s.toString().contains("-");
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
-            if (s.toString().length() == 2 && !removeDash) {
-                s.append('-');
-            }
+            hideError(vManagerIDLayout);
         }
     };
     MaterialPickerOnPositiveButtonClickListener pclTimeDatePicker = new MaterialPickerOnPositiveButtonClickListener() {

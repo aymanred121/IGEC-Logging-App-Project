@@ -2,7 +2,6 @@ package com.example.igec_admin.Dialogs;
 
 import static com.example.igec_admin.cryptography.RSAUtil.encrypt;
 import static com.google.android.material.textfield.TextInputLayout.END_ICON_CUSTOM;
-import static com.google.android.material.textfield.TextInputLayout.END_ICON_PASSWORD_TOGGLE;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
@@ -30,7 +29,6 @@ import com.example.igec_admin.fireBase.Employee;
 import com.example.igec_admin.fireBase.EmployeeOverview;
 import com.example.igec_admin.fireBase.EmployeesGrossSalary;
 import com.example.igec_admin.fireBase.Project;
-import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.datepicker.MaterialDatePicker;
@@ -337,21 +335,26 @@ public class UserFragmentDialog extends DialogFragment {
 
     private HashMap<String, Object> fillEmployeeData() {
         HashMap<String, Object> empMap = new HashMap<>();
-        empMap.put("overTime", (Double.parseDouble(vSalary.getText().toString()) / 30.0 / 10.0) * 1.5);
+        empMap.put("id", employee.getId());
+        empMap.put("firstName", vFirstName.getText().toString());
+        empMap.put("lastName", vSecondName.getText().toString());
+        empMap.put("title", vTitle.getText().toString());
+        empMap.put("email", vEmail.getText().toString());
+        empMap.put("password", encryptedPassword());
+        empMap.put("salary", Double.parseDouble(vSalary.getText().toString()));
+        empMap.put("ssn", vNationalID.getText().toString());
+        empMap.put("hireDate", new Date(hireDate));
+        empMap.put("phoneNumber", vPhone.getText().toString());
         empMap.put("area", vArea.getText().toString());
         empMap.put("street", vStreet.getText().toString());
         empMap.put("city", vCity.getText().toString());
-        empMap.put("email", vEmail.getText().toString());
-        empMap.put("firstName", vFirstName.getText().toString());
-        empMap.put("lastName", vSecondName.getText().toString());
-        empMap.put("password", encryptedPassword());
-        empMap.put("title", vTitle.getText().toString());
-        empMap.put("salary", Double.parseDouble(vSalary.getText().toString()));
-        empMap.put("SSN", vNationalID.getText().toString());
-        empMap.put("phoneNumber", vPhone.getText().toString());
-        empMap.put("hireDate", new Date(hireDate));
-        empMap.put("id", employee.getId());
-        //TODO check if there's a missing attributes here like admin
+        empMap.put("overTime", (Double.parseDouble(vSalary.getText().toString()) / 30.0 / 10.0) * 1.5);
+        empMap.put("admin",vAdmin.isChecked());
+        //TODO discuss whether should we removed him from the projects he is in or not
+//        if(vAdmin.isChecked()){
+//            empMap.put("managerID", null);
+//            empMap.put("projectID", null);
+//        }
         return empMap;
     }
 
@@ -419,8 +422,8 @@ public class UserFragmentDialog extends DialogFragment {
                     empInfo.add((employee.getProjectID()));
                     empInfo.add((employee.getManagerID() == null) ? "0" : "1");
                     updatedEmpOverviewMap.put(id, empInfo);
-                    HashMap<String, Object> updatedEmployeeMap = fillEmployeeData();
-                    db.collection("employees").document(id).update(updatedEmployeeMap).addOnSuccessListener(unused -> {
+                    HashMap<String, Object> updatedEmployee = fillEmployeeData();
+                    db.collection("employees").document(id).update(updatedEmployee).addOnSuccessListener(unused -> {
 
                         if (employee.getSalary() != Double.parseDouble(vSalary.getText().toString())) {
                             ArrayList<Allowance> allTypes = new ArrayList<>();
@@ -435,7 +438,7 @@ public class UserFragmentDialog extends DialogFragment {
                                 db.collection("EmployeesGrossSalary").document(employee.getId()).update("allTypes", allTypes);
                             });
                         }
-                        updateEmployeeOverview(updatedEmpOverviewMap, updatedEmployeeMap);
+                        updateEmployeeOverview(updatedEmpOverviewMap, updatedEmployee);
 
                     }).addOnFailureListener(e -> {
                         Toast.makeText(getActivity(), "Failed to update due to corrupted data ", Toast.LENGTH_SHORT).show();

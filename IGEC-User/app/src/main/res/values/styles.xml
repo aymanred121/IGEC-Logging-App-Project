@@ -4,4 +4,7 @@
         <item name="android:background">@color/black_overlay</item>
         <item name="android:buttonBarStyle">?android:attr/buttonBarStyle</item>
     </style>
+
+    <style name="Theme.IGECUser.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
 </resources>

@@ -1,4 +1,4 @@
-package com.example.igec_admin.Fragments;
+package com.example.igec_admin.Dialogs;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;

@@ -19,8 +19,9 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:background="@color/white"
-            android:elevation="@dimen/low" />
+            android:background="?attr/colorPrimary"
+            app:titleTextColor="@color/white"
+            app:popupTheme="@style/Theme.IGECAdmin.PopupOverlay" />
 
         <androidx.viewpager.widget.ViewPager
             android:id="@+id/fragment_container"
@@ -34,6 +35,7 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
+        app:headerLayout="@layout/nav_header_main"
         app:menu="@menu/admin_menu" />
 
 

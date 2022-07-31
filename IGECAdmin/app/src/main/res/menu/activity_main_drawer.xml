@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_add_user"
+            android:icon="@drawable/ic_baseline_person_add_24"
+            android:title="@string/add_user" />
+        <item
+            android:id="@+id/nav_add_project"
+            android:icon="@drawable/ic_baseline_group_add_24"
+            android:title="@string/add_project" />
+        <item
+            android:id="@+id/nav_add_machine"
+            android:icon="@drawable/ic_baseline_build_24"
+            android:title="@string/add_machine" />
+        <item
+            android:id="@+id/nav_users"
+            android:icon="@drawable/ic_baseline_person_24"
+            android:title="@string/users" />
+        <item
+            android:id="@+id/nav_projects"
+            android:icon="@drawable/ic_baseline_group_24"
+            android:title="@string/projects" />
+        <item
+            android:id="@+id/nav_machines"
+            android:icon="@drawable/ic_baseline_construction_24"
+            android:title="@string/machines" />
+
+
+        <item
+            android:id="@+id/nav_vacation_requests"
+            android:icon="@drawable/ic_baseline_mail_24"
+            android:title="@string/vacation_requests" />
+        <item
+            android:id="@+id/nav_vacations_log"
+            android:icon="@drawable/ic_round_history_24"
+            android:title="@string/vacations_log" />
+        <item
+            android:id="@+id/nav_summary"
+            android:icon="@drawable/ic_baseline_feed_24"
+            android:title="@string/summary" />
+    </group>
+</menu>

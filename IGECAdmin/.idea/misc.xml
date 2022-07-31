@@ -12,7 +12,10 @@
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/drawable/ic_round_history_24.xml" value="0.127" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/activity_login.xml" value="0.33" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/activity_main.xml" value="0.14764492753623187" />
+        <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/activity_main2.xml" value="0.1" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/allowance_item.xml" value="0.46906474820143884" />
+        <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/app_bar_main.xml" value="0.16" />
+        <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/content_main.xml" value="0.17889492753623187" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/dialog_add_allowance.xml" value="0.14764492753623187" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/dialog_add_client.xml" value="0.25" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/dialog_add_supplements.xml" value="0.14764492753623187" />
@@ -48,8 +51,10 @@
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/machine_item.xml" value="1.1" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/machine_log_item.xml" value="0.17074275362318841" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/month_summary.xml" value="0.33" />
+        <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/nav_header_main.xml" value="0.5" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/supplement_item.xml" value="0.12907608695652173" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/workday_item.xml" value="0.17074275362318841" />
+        <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/menu/activity_main_drawer.xml" value="0.67" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/menu/admin_menu.xml" value="0.5" />
         <entry key="..\:/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/drawable/ic_round_close_24.xml" value="0.2115" />
         <entry key="..\:/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/activity_main.xml" value="0.1621376811594203" />

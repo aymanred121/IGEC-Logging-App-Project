@@ -15,20 +15,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.igec_admin.Adatpers.EmployeeAdapter;
-import com.example.igec_admin.Fragments.MonthSummaryDialog;
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Project;
-import com.example.igec_admin.utilites.LocationDetails;
-import com.example.igec_admin.utilites.WorkingDay;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
 
 public class EmployeeFragmentDialog extends DialogFragment {
 

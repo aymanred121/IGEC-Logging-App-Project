@@ -75,4 +75,9 @@
     <string name="no_log_to_display">No Log to Display</string>
     <string name="allowance_type">Type</string>
     <string name="unpaid_days">Unpaid Days</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">IGEC</string>
+    <string name="nav_header_subtitle">www.igeccorp.com</string>
+    <string name="nav_header_desc">Navigation header</string>
 </resources>

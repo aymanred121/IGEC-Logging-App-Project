@@ -15,6 +15,7 @@ import android.provider.Settings;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -74,6 +75,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         vDrawerLayout.addDrawerListener(actionBarDrawerToggle);
         vDrawerLayout.addDrawerListener(drawerListener);
         viewPager.addOnPageChangeListener(viewPagerListener);
+
+
+        NavigationView navigationView = findViewById(R.id.navView);
+
+
+        TextView contact_info = navigationView.getHeaderView(0).findViewById(R.id.contact_info);
+        contact_info.setOnClickListener(view -> {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://" + getString(R.string.nav_header_subtitle)));
+            this.startActivity(intent);
+        });
+
     }
 
     @Override

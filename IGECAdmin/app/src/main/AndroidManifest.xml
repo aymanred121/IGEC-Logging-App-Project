@@ -21,11 +21,19 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.IGECAdmin">
         <activity
+            android:name=".Activities.MainActivity_navComp"
+            android:exported="true"
+            android:theme="@style/Theme.IGECAdmin.NoActionBar" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".Activities.LoginActivity"
             android:exported="true"
-            android:screenOrientation="portrait">
-
-        </activity>
+            android:screenOrientation="portrait"></activity>
         <activity
             android:name=".Activities.SplashScreen_InternetConnection"
             android:exported="false"
@@ -36,12 +44,9 @@
             android:exported="true"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustPan">
-            <!--TODO: move this tag to login-->
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            <!-- TODO: move this tag to login -->
+
         </activity>
 
         <provider
@@ -53,7 +58,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_path" />
         </provider>
-
     </application>
 
 </manifest>

@@ -4,43 +4,43 @@
     tools:showIn="navigation_view">
     <group android:checkableBehavior="single">
         <item
-            android:id="@+id/item_CheckInOut"
+            android:id="@+id/nav_check_in_out"
             android:icon="@drawable/ic_baseline_access_time_24"
             android:title="@string/check_in_out"></item>
         <item
-            android:id="@+id/item_ChangePassword"
+            android:id="@+id/nav_change_password"
             android:checkable="true"
             android:icon="@drawable/ic_baseline_password_24"
             android:title="@string/change_password"></item>
         <item
-            android:id="@+id/item_GrossSalary"
+            android:id="@+id/nav_gross_salary"
             android:checkable="true"
             android:icon="@drawable/ic_baseline_wallet_24"
             android:title="@string/gross_salary"></item>
         <item
-            android:id="@+id/item_Send_Vacation_Request"
+            android:id="@+id/nav_send_vacation_request"
             android:checkable="true"
             android:icon="@drawable/ic_baseline_send_24"
             android:title="@string/send_vacation_request"></item>
         <item
-            android:id="@+id/item_Vacation_Requests"
+            android:id="@+id/nav_vacation_requests"
             android:icon="@drawable/ic_baseline_mail_24"
             android:title="@string/vacation_requests"></item>
         <item
-            android:id="@+id/item_VacationsLog"
+            android:id="@+id/nav_vacations_log"
             android:icon="@drawable/ic_baseline_history_24"
             android:title="@string/vacations_log"></item>
         <item
-            android:id="@+id/item_Send_Transfer_Request"
+            android:id="@+id/nav_send_transfer_request"
             android:icon="@drawable/ic_user"
-            android:title="@string/send_a_transfer_request"></item>
+            android:title="@string/send_transfer_request"></item>
         <item
-            android:id="@+id/item_Transfer_Requests"
+            android:id="@+id/nav_transfer_requests"
             android:icon="@drawable/ic_baseline_mail_24"
             android:title="@string/transfer_requests"></item>
         <item
-            android:id="@+id/item_ProjectSummary"
+            android:id="@+id/nav_project_summary"
             android:icon="@drawable/ic_baseline_groups_24"
-            android:title="@string/ProjectSummary"></item>
+            android:title="@string/project_summary"></item>
     </group>
 </menu>

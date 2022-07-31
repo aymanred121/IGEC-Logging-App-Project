@@ -6,5 +6,6 @@
     </style>
 
     <style name="Theme.IGECUser.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="Theme.IGECUser.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
 </resources>

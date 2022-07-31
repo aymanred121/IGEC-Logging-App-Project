@@ -42,7 +42,7 @@
     <string name="project_reference">Project Reference</string>
     <string name="project_allowances">Project Allowances</string>
     <string name="update">Update</string>
-    <string name="ProjectSummary">Project Summary</string>
+    <string name="project_summary">Project Summary</string>
     <string name="do_you_want_to_confirm_this_action">Do you want to confirm this action?</string>
     <string name="Comment">Comment</string>
     <string name="Mount">Mount</string>
@@ -53,7 +53,6 @@
     <string name="accept">Yes</string>
     <string name="Note">Note</string>
     <string name="penalty">Retention</string>
-    <string name="send_a_transfer_request">Send a Transfer Request</string>
     <string name="transfer_requests">Transfer Requests</string>
     <string name="transfer_note">Transfer Note</string>
     <string name="project_reference_name">Project Reference | Name</string>

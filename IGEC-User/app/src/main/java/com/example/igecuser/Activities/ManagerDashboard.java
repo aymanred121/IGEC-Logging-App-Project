@@ -146,9 +146,9 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
         viewPagerAdapter.addFragment(sendVacationRequestFragment, getString(R.string.send_vacation_request));
         viewPagerAdapter.addFragment(vacationRequestsFragment, getString(R.string.vacation_requests));
         viewPagerAdapter.addFragment(vacationsLogFragment, getString(R.string.vacations_log));
-        viewPagerAdapter.addFragment(sendTransferRequest, getString(R.string.send_a_transfer_request));
+        viewPagerAdapter.addFragment(sendTransferRequest, getString(R.string.send_transfer_request));
         viewPagerAdapter.addFragment(transferRequestsFragment, getString(R.string.transfer_requests));
-        viewPagerAdapter.addFragment(projectSummaryFragment, getString(R.string.ProjectSummary));
+        viewPagerAdapter.addFragment(projectSummaryFragment, getString(R.string.project_summary));
 
 
         viewPager.setAdapter(viewPagerAdapter);
@@ -169,23 +169,23 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
     }
 
     private void changeTab(int itemId) {
-        if (itemId == R.id.item_CheckInOut)
+        if (itemId == R.id.nav_check_in_out)
             viewPager.setCurrentItem(0, true);
-        if (itemId == R.id.item_ChangePassword)
+        if (itemId == R.id.nav_change_password)
             viewPager.setCurrentItem(1, true);
-        if (itemId == R.id.item_GrossSalary)
+        if (itemId == R.id.nav_gross_salary)
             viewPager.setCurrentItem(2, true);
-        if (itemId == R.id.item_Send_Vacation_Request)
+        if (itemId == R.id.nav_send_vacation_request)
             viewPager.setCurrentItem(3, true);
-        if (itemId == R.id.item_Vacation_Requests)
+        if (itemId == R.id.nav_vacation_requests)
             viewPager.setCurrentItem(4, true);
-        if (itemId == R.id.item_VacationsLog)
+        if (itemId == R.id.nav_vacations_log)
             viewPager.setCurrentItem(5, true);
-        if (itemId == R.id.item_Send_Transfer_Request)
+        if (itemId == R.id.nav_send_transfer_request)
             viewPager.setCurrentItem(6, true);
-        if (itemId == R.id.item_Transfer_Requests)
+        if (itemId == R.id.nav_transfer_requests)
             viewPager.setCurrentItem(7, true);
-        if (itemId == R.id.item_ProjectSummary)
+        if (itemId == R.id.nav_project_summary)
             viewPager.setCurrentItem(8, true);
 
     }

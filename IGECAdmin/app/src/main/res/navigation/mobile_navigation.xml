@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mobile_navigation"
+    app:startDestination="@+id/nav_add_user">
+
+
+    <fragment
+        android:id="@+id/nav_add_user"
+        android:name="com.example.igec_admin.Fragments.AddUserFragment"
+        android:label="@string/add_user"
+        tools:layout="@layout/fragment_add_user" />
+    <fragment
+        android:id="@+id/nav_add_project"
+        android:name="com.example.igec_admin.Fragments.AddProjectFragment"
+        android:label="@string/add_project"
+        tools:layout="@layout/fragment_add_project" />
+    <fragment
+        android:id="@+id/nav_add_machine"
+        android:name="com.example.igec_admin.Fragments.AddMachineFragment"
+        android:label="@string/add_machine"
+        tools:layout="@layout/fragment_add_machine" />
+
+
+    <fragment
+        android:id="@+id/nav_users"
+        android:name="com.example.igec_admin.Fragments.UsersFragment"
+        android:label="@string/users"
+        tools:layout="@layout/fragment_users" />
+    <fragment
+        android:id="@+id/nav_projects"
+        android:name="com.example.igec_admin.Fragments.ProjectsFragment"
+        android:label="@string/projects"
+        tools:layout="@layout/fragment_projects" />
+    <fragment
+        android:id="@+id/nav_machines"
+        android:name="com.example.igec_admin.Fragments.MachinesFragment"
+        android:label="@string/machines"
+        tools:layout="@layout/fragment_machines" />
+
+
+
+    <fragment
+        android:id="@+id/nav_vacation_requests"
+        android:name="com.example.igec_admin.Fragments.VacationRequestsFragment"
+        android:label="@string/vacation_requests"
+        tools:layout="@layout/fragment_vacation_requests" />
+    <fragment
+        android:id="@+id/nav_vacations_log"
+        android:name="com.example.igec_admin.Fragments.VacationsLogFragment"
+        android:label="@string/vacations_log"
+        tools:layout="@layout/fragment_vacations_log" />
+    <fragment
+        android:id="@+id/nav_summary"
+        android:name="com.example.igec_admin.Fragments.SummaryFragment"
+        android:label="@string/summary"
+        tools:layout="@layout/fragment_summary" />
+
+
+</navigation>

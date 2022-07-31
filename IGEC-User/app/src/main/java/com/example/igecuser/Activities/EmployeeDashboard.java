@@ -115,15 +115,15 @@ public class EmployeeDashboard extends AppCompatActivity implements NavigationVi
     }
 
     private void changeTab(int itemId) {
-        if (itemId == R.id.item_CheckInOut)
+        if (itemId == R.id.nav_check_in_out)
             viewPager.setCurrentItem(0, true);
-        if (itemId == R.id.item_ChangePassword)
+        if (itemId == R.id.nav_change_password)
             viewPager.setCurrentItem(1, true);
-        if (itemId == R.id.item_GrossSalary)
+        if (itemId == R.id.nav_gross_salary)
             viewPager.setCurrentItem(2, true);
-        if (itemId == R.id.item_Send_Vacation_Request)
+        if (itemId == R.id.nav_send_vacation_request)
             viewPager.setCurrentItem(3, true);
-        if (itemId == R.id.item_VacationsLog)
+        if (itemId == R.id.nav_vacations_log)
             viewPager.setCurrentItem(4, true);
     }
 

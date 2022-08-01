@@ -89,12 +89,14 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/button_unlock"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/vhigh"
             android:layout_marginBottom="@dimen/high"
             android:textAllCaps= "false"
-            android:visibility="gone"
+            android:visibility="visible"
+            android:minWidth="0dp"
+            app:iconPadding="0dp"
             app:icon="@drawable/ic_round_lock_open_24"
             app:layout_constraintBottom_toBottomOf="@id/textInputLayout_Email"
             app:layout_constraintEnd_toEndOf="parent"

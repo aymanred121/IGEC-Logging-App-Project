@@ -30,6 +30,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class AllowanceInfoDialog extends DialogFragment {
@@ -220,10 +221,11 @@ public class AllowanceInfoDialog extends DialogFragment {
                         allowance.setNote(vAllowanceNote.getText().toString());
                         if (vPenalty.isChecked()) {
                             allowance.setAmount(-1 * amount.get());
-                            allowance.setType(allowancesEnum.PENALTY.ordinal());
+                            allowance.setType(allowancesEnum.RETENTION.ordinal());
                         } else {
                             allowance.setAmount(amount.get());
-                            allowance.setType(vMode.isChecked()? allowancesEnum.GIFT.ordinal(): allowancesEnum.BONUS.ordinal());
+                            allowance.setType(vMode.isChecked()?allowancesEnum.BONUS.ordinal(): allowancesEnum.valueOf(vAllowanceName.getText().toString().toUpperCase(Locale.ROOT)).ordinal());
+
                         }
 
                         result.putSerializable("allowance", allowance);

@@ -190,9 +190,9 @@ public class MainActivity extends AppCompatActivity {
                                 Toast.makeText(MainActivity.this, "you are not assigned to any project", Toast.LENGTH_SHORT).show();
                                 return;
                             } else if (currEmployee != null && currEmployee.getManagerID().equals("adminID")) {
-                                intent = new Intent(MainActivity.this, EDashboard.class);
-                            } else {
                                 intent = new Intent(MainActivity.this, MDashboard.class);
+                            } else {
+                                intent = new Intent(MainActivity.this, EDashboard.class);
                             }
                             intent.putExtra("emp", currEmployee);
                             startActivity(intent);

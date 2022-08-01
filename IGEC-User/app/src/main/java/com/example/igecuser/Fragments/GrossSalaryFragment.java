@@ -41,14 +41,22 @@ public class GrossSalaryFragment extends Fragment {
     private ArrayList<Allowance> salarySummaries;
     private EmployeesGrossSalary employeesGrossSalary;
     private TextView vGrossSalary;
-    private final String employeeId;
+    private String employeeId;
     private String year,month,prevMonth,prevYear;
     private double salarySummary = 0;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-    public GrossSalaryFragment(String employeeId) {
-        this.employeeId = employeeId;
+    public static GrossSalaryFragment newInstance(String employeeId) {
+
+        Bundle args = new Bundle();
+        args.putString("employeeId",employeeId);
+        GrossSalaryFragment fragment = new GrossSalaryFragment();
+        fragment.setArguments(args);
+        return fragment;
     }
+//    public GrossSalaryFragment(String employeeId) {
+//        this.employeeId = employeeId;
+//    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -70,6 +78,7 @@ public class GrossSalaryFragment extends Fragment {
 
     // Functions
     private void initialize(View view) {
+        employeeId = getArguments().getString("employeeId");
         selectedMonthEdit = view.findViewById(R.id.TextInput_SelectedMonth);
         selectedMonthLayout = view.findViewById(R.id.textInputLayout_SelectedMonth);
         salarySummaries = new ArrayList<>();

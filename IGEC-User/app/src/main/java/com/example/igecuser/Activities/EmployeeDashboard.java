@@ -77,41 +77,41 @@ public class EmployeeDashboard extends AppCompatActivity implements NavigationVi
     // Functions
     private void initialize() {
 
-        currEmployee = (Employee) getIntent().getSerializableExtra("emp");
-
-        // Views
-        vToolbar = findViewById(R.id.toolbar);
-        vDrawerLayout = findViewById(R.id.drawer);
-        vNavigationView = findViewById(R.id.navView);
-        viewPager = findViewById(R.id.fragment_container);
-
-        ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), 0);
-        CheckInOutFragment checkInOutFragment = new CheckInOutFragment(currEmployee);
-        ChangePasswordFragment changePasswordFragment = new ChangePasswordFragment(currEmployee);
-        GrossSalaryFragment grossSalaryFragment = new GrossSalaryFragment(currEmployee.getId());
-        SendVacationRequestFragment sendVacationRequestFragment = new SendVacationRequestFragment(currEmployee);
-        VacationsLogFragment vacationsLogFragment = new VacationsLogFragment(true, currEmployee);
-        viewPagerAdapter.addFragment(checkInOutFragment, getString(R.string.check_in_out));
-        viewPagerAdapter.addFragment(changePasswordFragment, getString(R.string.change_password));
-        viewPagerAdapter.addFragment(grossSalaryFragment, getString(R.string.gross_salary));
-        viewPagerAdapter.addFragment(sendVacationRequestFragment, getString(R.string.send_vacation_request));
-        viewPagerAdapter.addFragment(vacationsLogFragment, getString(R.string.vacations_log));
-
-        viewPager.setAdapter(viewPagerAdapter);
-        vNavigationView.getMenu().getItem(0).setChecked(true);
-
-
-        setSupportActionBar(vToolbar);
-        actionBarDrawerToggle = new ActionBarDrawerToggle(this, vDrawerLayout, vToolbar, R.string.openNavBar, R.string.closeNavBar);
-        actionBarDrawerToggle.syncState();
-        vNavigationView.setNavigationItemSelectedListener(this);
-
-
-        TextView EmployeeName = vNavigationView.getHeaderView(0).findViewById(R.id.EmployeeName);
-        TextView EmployeeID = vNavigationView.getHeaderView(0).findViewById(R.id.EmployeeID);
-
-        EmployeeName.setText(String.format("%s %s", currEmployee.getFirstName(), currEmployee.getLastName()));
-        EmployeeID.setText(String.format("Id: %s", currEmployee.getId()));
+//        currEmployee = (Employee) getIntent().getSerializableExtra("emp");
+//
+//        // Views
+//        vToolbar = findViewById(R.id.toolbar);
+//        vDrawerLayout = findViewById(R.id.drawer);
+//        vNavigationView = findViewById(R.id.navView);
+//        viewPager = findViewById(R.id.fragment_container);
+//
+//        ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), 0);
+//        CheckInOutFragment checkInOutFragment = new CheckInOutFragment(currEmployee);
+//        ChangePasswordFragment changePasswordFragment = new ChangePasswordFragment(currEmployee);
+//        GrossSalaryFragment grossSalaryFragment = new GrossSalaryFragment(currEmployee.getId());
+//        SendVacationRequestFragment sendVacationRequestFragment = new SendVacationRequestFragment(currEmployee);
+//        VacationsLogFragment vacationsLogFragment = new VacationsLogFragment(true, currEmployee);
+//        viewPagerAdapter.addFragment(checkInOutFragment, getString(R.string.check_in_out));
+//        viewPagerAdapter.addFragment(changePasswordFragment, getString(R.string.change_password));
+//        viewPagerAdapter.addFragment(grossSalaryFragment, getString(R.string.gross_salary));
+//        viewPagerAdapter.addFragment(sendVacationRequestFragment, getString(R.string.send_vacation_request));
+//        viewPagerAdapter.addFragment(vacationsLogFragment, getString(R.string.vacations_log));
+//
+//        viewPager.setAdapter(viewPagerAdapter);
+//        vNavigationView.getMenu().getItem(0).setChecked(true);
+//
+//
+//        setSupportActionBar(vToolbar);
+//        actionBarDrawerToggle = new ActionBarDrawerToggle(this, vDrawerLayout, vToolbar, R.string.openNavBar, R.string.closeNavBar);
+//        actionBarDrawerToggle.syncState();
+//        vNavigationView.setNavigationItemSelectedListener(this);
+//
+//
+//        TextView EmployeeName = vNavigationView.getHeaderView(0).findViewById(R.id.EmployeeName);
+//        TextView EmployeeID = vNavigationView.getHeaderView(0).findViewById(R.id.EmployeeID);
+//
+//        EmployeeName.setText(String.format("%s %s", currEmployee.getFirstName(), currEmployee.getLastName()));
+//        EmployeeID.setText(String.format("Id: %s", currEmployee.getId()));
     }
 
     private void changeTab(int itemId) {

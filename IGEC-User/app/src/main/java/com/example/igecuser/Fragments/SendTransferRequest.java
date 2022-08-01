@@ -36,7 +36,7 @@ import java.util.ArrayList;
 
 public class SendTransferRequest extends Fragment {
 
-    private final Employee manager;
+    private Employee manager;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private final ArrayList<Project> projects = new ArrayList<>();
     private Project thisProject, chosenProject;
@@ -51,10 +51,17 @@ public class SendTransferRequest extends Fragment {
     private ArrayList<String> projectsRef = new ArrayList<>();
     private ArrayAdapter<String> refAdapter;
 
+    public static SendTransferRequest newInstance(Employee manager) {
 
-    public SendTransferRequest(Employee manager) {
-        this.manager = manager;
+        Bundle args = new Bundle();
+        args.putSerializable("manager",manager);
+        SendTransferRequest fragment = new SendTransferRequest();
+        fragment.setArguments(args);
+        return fragment;
     }
+//    public SendTransferRequest(Employee manager) {
+//        this.manager = manager;
+//    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -74,6 +81,7 @@ public class SendTransferRequest extends Fragment {
     }
 
     private void initialize(View view) {
+        manager = (Employee) getArguments().getSerializable("manager");
         vSend = view.findViewById(R.id.Button_SendRequest);
         vTransferNote = view.findViewById(R.id.TextInput_TransferNote);
         vProjectsReference = view.findViewById(R.id.TextInput_ProjectReferences);

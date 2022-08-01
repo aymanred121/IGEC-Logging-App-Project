@@ -40,9 +40,17 @@ public class ChangePasswordFragment extends Fragment {
     private Employee user;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-    public ChangePasswordFragment(Employee user) {
-        this.user = user;
+    public static ChangePasswordFragment newInstance(Employee user) {
+        Bundle args = new Bundle();
+        args.putSerializable("user",user);
+        ChangePasswordFragment fragment = new ChangePasswordFragment();
+        fragment.setArguments(args);
+        return fragment;
     }
+
+//    public ChangePasswordFragment(Employee user) {
+//        this.user = user;
+//    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -61,6 +69,7 @@ public class ChangePasswordFragment extends Fragment {
     }
 
     private void initialize(View v) {
+        user = (Employee) getArguments().getSerializable("user");
         vNewPassword = v.findViewById(R.id.TextInput_NewPassword);
         vConfirmPassword = v.findViewById(R.id.TextInput_ConfirmPassword);
         vChangePassword = v.findViewById(R.id.Button_ChangePassword);

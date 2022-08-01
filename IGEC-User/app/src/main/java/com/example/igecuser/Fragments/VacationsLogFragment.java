@@ -39,19 +39,28 @@ public class VacationsLogFragment extends Fragment {
 
     private ArrayList<VacationRequest> vacations;
     private Employee user;
-    private final boolean isEmployee;
+    private boolean isEmployee;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-    public VacationsLogFragment(boolean isEmployee, Employee user) {
-        this.isEmployee = isEmployee;
-        this.user = user;
+    public static VacationsLogFragment newInstance(Employee user,boolean isEmployee) {
 
+        Bundle args = new Bundle();
+        args.putBoolean("isEmployee",isEmployee);
+        args.putSerializable("user", user);
+        VacationsLogFragment fragment = new VacationsLogFragment();
+        fragment.setArguments(args);
+        return fragment;
     }
+//    public VacationsLogFragment(boolean isEmployee, Employee user) {
+//        this.isEmployee = isEmployee;
+//        this.user = user;
+//
+//    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-       return inflater.inflate(R.layout.fragment_vacations_log, container, false);
+        return inflater.inflate(R.layout.fragment_vacations_log, container, false);
     }
 
     @Override
@@ -70,6 +79,8 @@ public class VacationsLogFragment extends Fragment {
 
     // Functions
     private void Initialize(View view) {
+        user = (Employee) getArguments().getSerializable("user");
+        isEmployee = getArguments().getBoolean("isEmployee");
         vacations = new ArrayList<>();
         recyclerView = view.findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
@@ -83,9 +94,8 @@ public class VacationsLogFragment extends Fragment {
     private void loadVacations() {
 
         if (isEmployee) {
-           loadOwnVacations(new ArrayList<>());
-        }
-        else {
+            loadOwnVacations(new ArrayList<>());
+        } else {
             db.collection("Vacation")
                     .whereEqualTo("manager.id", user.getId())
                     .orderBy("requestDate", Query.Direction.DESCENDING)
@@ -108,24 +118,24 @@ public class VacationsLogFragment extends Fragment {
 
     private void loadOwnVacations(ArrayList<VacationRequest> vacationRequests) {
         db.collection("Vacation")
-            .whereEqualTo("employee.id", user.getId())
-            .orderBy("requestDate", Query.Direction.DESCENDING)
-            .addSnapshotListener((queryDocumentSnapshots, er) -> {
-                if (er != null) {
-                    Log.w(TAG, "Listen failed.", er);
-                    adapter.setVacationsList(vacationRequests);
+                .whereEqualTo("employee.id", user.getId())
+                .orderBy("requestDate", Query.Direction.DESCENDING)
+                .addSnapshotListener((queryDocumentSnapshots, er) -> {
+                    if (er != null) {
+                        Log.w(TAG, "Listen failed.", er);
+                        adapter.setVacationsList(vacationRequests);
+                        adapter.notifyDataSetChanged();
+                        return;
+                    }
+                    ArrayList<VacationRequest> ownVacationRequests = new ArrayList<>();
+                    for (DocumentSnapshot vacations : queryDocumentSnapshots) {
+                        ownVacationRequests.add(vacations.toObject(VacationRequest.class));
+                    }
+                    adapter.getVacationsList().clear();
+                    adapter.getVacationsList().addAll(vacationRequests);
+                    adapter.getVacationsList().addAll(ownVacationRequests);
                     adapter.notifyDataSetChanged();
-                    return;
-                }
-                ArrayList<VacationRequest> ownVacationRequests = new ArrayList<>();
-                for (DocumentSnapshot vacations : queryDocumentSnapshots) {
-                    ownVacationRequests.add(vacations.toObject(VacationRequest.class));
-                }
-                adapter.getVacationsList().clear();
-                adapter.getVacationsList().addAll(vacationRequests);
-                adapter.getVacationsList().addAll(ownVacationRequests);
-                adapter.notifyDataSetChanged();
-            });
+                });
     }
 
 }

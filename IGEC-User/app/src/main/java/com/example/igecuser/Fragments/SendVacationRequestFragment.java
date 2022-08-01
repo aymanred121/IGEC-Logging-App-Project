@@ -74,13 +74,22 @@ public class SendVacationRequestFragment extends Fragment implements DatePickerD
         vVacationNote.addTextChangedListener(twVacationNote);
     }
 
-    //Functions
-    public SendVacationRequestFragment(Employee currEmployee) {
-        this.currEmployee = currEmployee;
+    public static SendVacationRequestFragment newInstance(Employee currEmployee) {
+
+        Bundle args = new Bundle();
+        args.putSerializable("currEmployee",currEmployee);
+        SendVacationRequestFragment fragment = new SendVacationRequestFragment();
+        fragment.setArguments(args);
+        return fragment;
     }
+    //Functions
+//    public SendVacationRequestFragment(Employee currEmployee) {
+//        this.currEmployee = currEmployee;
+//    }
 
     @SuppressLint("DefaultLocale")
     private void Initialize(View view) {
+        currEmployee = (Employee) getArguments().getSerializable("currEmployee");
         vVacationDate = view.findViewById(R.id.TextInput_VacationDate);
         vVacationNote = view.findViewById(R.id.TextInput_VacationNote);
         vVacationDays = view.findViewById(R.id.TextInput_VacationDays);

@@ -58,13 +58,22 @@ public class VacationRequestsFragment extends Fragment {
     private VacationAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
     private ArrayList<VacationRequest> vacationRequests;
-    private final Employee currManager;
+    private Employee currManager;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private int unPaidDays;
 
-    public VacationRequestsFragment(Employee currManager) {
-        this.currManager = currManager;
+
+    public static VacationRequestsFragment newInstance(Employee currManager) {
+
+        Bundle args = new Bundle();
+        args.putSerializable("currManager", currManager);
+        VacationRequestsFragment fragment = new VacationRequestsFragment();
+        fragment.setArguments(args);
+        return fragment;
     }
+//    public VacationRequestsFragment(Employee currManager) {
+//        this.currManager = currManager;
+//    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -83,6 +92,7 @@ public class VacationRequestsFragment extends Fragment {
 
     // Functions
     private void initialize(View view) {
+        currManager= (Employee) getArguments().getSerializable("currManager");
         vacationRequests = new ArrayList<>();
         recyclerView = view.findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
@@ -115,7 +125,7 @@ public class VacationRequestsFragment extends Fragment {
 
     VacationAdapter.OnItemClickListener itclVacationAdapter = position -> {
         VacationDialog vacationDialog = new VacationDialog(vacationRequests.get(position));
-        vacationDialog.show(getParentFragmentManager(),"");
+        vacationDialog.show(getParentFragmentManager(), "");
     };
 
 }

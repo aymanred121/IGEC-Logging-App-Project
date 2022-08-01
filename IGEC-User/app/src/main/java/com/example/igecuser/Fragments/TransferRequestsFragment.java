@@ -39,13 +39,22 @@ public class TransferRequestsFragment extends Fragment {
     private TransferAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
     private RecyclerView recyclerView;
-    private final Employee manager;
+    private Employee manager;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private ArrayList<TransferRequests> requests;
     private WriteBatch batch = FirebaseFirestore.getInstance().batch();
-    public TransferRequestsFragment(Employee manager) {
-        this.manager = manager;
+
+    public static TransferRequestsFragment newInstance(Employee manager) {
+
+        Bundle args = new Bundle();
+        args.putSerializable("manager", manager);
+        TransferRequestsFragment fragment = new TransferRequestsFragment();
+        fragment.setArguments(args);
+        return fragment;
     }
+//    public TransferRequestsFragment(Employee manager) {
+//        this.manager = manager;
+//    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -62,6 +71,7 @@ public class TransferRequestsFragment extends Fragment {
     }
 
     private void initialize(View view) {
+        manager = (Employee) getArguments().getSerializable("manager");
         requests = new ArrayList<>();
         recyclerView = view.findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
@@ -73,7 +83,7 @@ public class TransferRequestsFragment extends Fragment {
     }
 
     private void getRequests() {
-        db.collection("TransferRequests").whereEqualTo("oldProjectId", manager.getProjectID()).whereEqualTo("transferStatus",-1).addSnapshotListener((values, error) -> {
+        db.collection("TransferRequests").whereEqualTo("oldProjectId", manager.getProjectID()).whereEqualTo("transferStatus", -1).addSnapshotListener((values, error) -> {
             if (values.size() == 0)
                 return;
             requests.clear();
@@ -83,9 +93,10 @@ public class TransferRequestsFragment extends Fragment {
             adapter.notifyDataSetChanged();
         });
     }
-    private void updateEmployeeData (TransferRequests request) {
-        batch.update( db.collection("employees").document(request.getEmployee().getId()),"projectID" , request.getNewProjectId()
-                , "managerID" , manager.getId());
+
+    private void updateEmployeeData(TransferRequests request) {
+        batch.update(db.collection("employees").document(request.getEmployee().getId()), "projectID", request.getNewProjectId()
+                , "managerID", manager.getId());
 
         ArrayList<String> empInfo = new ArrayList<>();
         empInfo.add(request.getEmployee().getFirstName());
@@ -96,23 +107,25 @@ public class TransferRequestsFragment extends Fragment {
         empInfo.add("1"); // by default because already in project
         Map<String, Object> empInfoMap = new HashMap<>();
         empInfoMap.put(request.getEmployee().getId(), empInfo);
-        batch.update( db.collection("EmployeeOverview").document("emp"),empInfoMap);
+        batch.update(db.collection("EmployeeOverview").document("emp"), empInfoMap);
     }
+
     private void updateOldProjectData(TransferRequests request) {
         db.collection("projects").document(request.getOldProjectId()).get().addOnSuccessListener((value) ->
         {
             if (!value.exists()) return;
             Project projectTemp = value.toObject(Project.class);
-            for (EmployeeOverview e: projectTemp.getEmployees()) {
-                if(e.getId().equals(request.getEmployee().getId())) {
+            for (EmployeeOverview e : projectTemp.getEmployees()) {
+                if (e.getId().equals(request.getEmployee().getId())) {
                     projectTemp.getEmployees().remove(e);
                     break;
                 }
 
             }
-            db.collection("projects").document(request.getOldProjectId()).update("employees" ,  projectTemp.getEmployees());
+            db.collection("projects").document(request.getOldProjectId()).update("employees", projectTemp.getEmployees());
         });
     }
+
     private void updateNewProjectData(TransferRequests request) {
         db.collection("projects").document(request.getNewProjectId()).get().addOnSuccessListener((value) ->
         {
@@ -130,21 +143,21 @@ public class TransferRequestsFragment extends Fragment {
     private void updateAllowancesData(TransferRequests request, ArrayList<Allowance> projectAllowances) {
         @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
         String currentDateAndTime = sdf.format(new Date());
-        String day = currentDateAndTime.substring(0,2);
-        String month = currentDateAndTime.substring(3,5);
-        String year = currentDateAndTime.substring(6,10);
+        String day = currentDateAndTime.substring(0, 2);
+        String month = currentDateAndTime.substring(3, 5);
+        String year = currentDateAndTime.substring(6, 10);
         db.collection("EmployeesGrossSalary").document(request.getEmployee().getId()).get().addOnSuccessListener(value -> {
             if (!value.exists())
                 return;
             EmployeesGrossSalary temp = value.toObject(EmployeesGrossSalary.class);
-            temp.getAllTypes().removeIf(x->x.getProjectId().equals(request.getOldProjectId()));
+            temp.getAllTypes().removeIf(x -> x.getProjectId().equals(request.getOldProjectId()));
             temp.getAllTypes().addAll(projectAllowances);
             db.collection("EmployeesGrossSalary").document(request.getEmployee().getId()).update("allTypes", temp.getAllTypes());
-            db.collection("EmployeesGrossSalary").document(request.getEmployee().getId()).collection(year).document(month).get().addOnSuccessListener(doc->{
+            db.collection("EmployeesGrossSalary").document(request.getEmployee().getId()).collection(year).document(month).get().addOnSuccessListener(doc -> {
                 if (!doc.exists())
                     return;
                 EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
-                employeesGrossSalary.getBaseAllowances().removeIf(a->a.getProjectId().trim().equals(request.getOldProjectId()));
+                employeesGrossSalary.getBaseAllowances().removeIf(a -> a.getProjectId().trim().equals(request.getOldProjectId()));
                 employeesGrossSalary.getBaseAllowances().addAll(projectAllowances);
                 db.document(doc.getReference().getPath()).update("baseAllowances", employeesGrossSalary.getBaseAllowances());
             });
@@ -161,8 +174,7 @@ public class TransferRequestsFragment extends Fragment {
                 updateOldProjectData(request);
                 updateNewProjectData(request);
                 batch.commit();
-            }
-            else if(status == 0) {/*do nothing*/}
+            } else if (status == 0) {/*do nothing*/}
         });
     }
 
@@ -185,7 +197,7 @@ public class TransferRequestsFragment extends Fragment {
                     transferRequestStatus = 1;
                     requests.remove(request);
                     adapter.notifyItemRemoved(position);
-                    updateRequestStatus(request,transferRequestStatus);
+                    updateRequestStatus(request, transferRequestStatus);
                 }
             });
             builder.setNegativeButton("Reject", new DialogInterface.OnClickListener() {
@@ -194,7 +206,7 @@ public class TransferRequestsFragment extends Fragment {
                     transferRequestStatus = 0;
                     requests.remove(request);
                     adapter.notifyItemRemoved(position);
-                    updateRequestStatus(request,transferRequestStatus);
+                    updateRequestStatus(request, transferRequestStatus);
                 }
             });
             builder.setNeutralButton("Cancel", new DialogInterface.OnClickListener() {

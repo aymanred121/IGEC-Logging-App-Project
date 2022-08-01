@@ -119,52 +119,52 @@ public class ManagerDashboard extends AppCompatActivity implements NavigationVie
 
     // Functions
     private void initialize() {
-        currManager = (Employee) getIntent().getSerializableExtra("emp");
-
-
-        // Views
-        vToolbar = findViewById(R.id.toolbar);
-        vDrawerLayout = findViewById(R.id.drawer);
-        vNavigationView = findViewById(R.id.navView);
-        viewPager = findViewById(R.id.fragment_container);
-
-        ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), 0);
-        CheckInOutFragment checkInOutFragment = new CheckInOutFragment(currManager);
-        ChangePasswordFragment changePasswordFragment = new ChangePasswordFragment(currManager);
-        GrossSalaryFragment grossSalaryFragment = new GrossSalaryFragment(currManager.getId());
-        SendVacationRequestFragment sendVacationRequestFragment = new SendVacationRequestFragment(currManager);
-        VacationRequestsFragment vacationRequestsFragment = new VacationRequestsFragment(currManager);
-        VacationsLogFragment vacationsLogFragment = new VacationsLogFragment(false, currManager);
-        ProjectSummaryFragment projectSummaryFragment = new ProjectSummaryFragment(currManager);
-        TransferRequestsFragment transferRequestsFragment = new TransferRequestsFragment(currManager);
-        SendTransferRequest sendTransferRequest = new SendTransferRequest(currManager);
-
-
-        viewPagerAdapter.addFragment(checkInOutFragment, getString(R.string.check_in_out));
-        viewPagerAdapter.addFragment(changePasswordFragment, getString(R.string.change_password));
-        viewPagerAdapter.addFragment(grossSalaryFragment, getString(R.string.gross_salary));
-        viewPagerAdapter.addFragment(sendVacationRequestFragment, getString(R.string.send_vacation_request));
-        viewPagerAdapter.addFragment(vacationRequestsFragment, getString(R.string.vacation_requests));
-        viewPagerAdapter.addFragment(vacationsLogFragment, getString(R.string.vacations_log));
-        viewPagerAdapter.addFragment(sendTransferRequest, getString(R.string.send_transfer_request));
-        viewPagerAdapter.addFragment(transferRequestsFragment, getString(R.string.transfer_requests));
-        viewPagerAdapter.addFragment(projectSummaryFragment, getString(R.string.project_summary));
-
-
-        viewPager.setAdapter(viewPagerAdapter);
-        vNavigationView.getMenu().getItem(0).setChecked(true);
-
-
-        setSupportActionBar(vToolbar);
-        actionBarDrawerToggle = new ActionBarDrawerToggle(this, vDrawerLayout, vToolbar, R.string.openNavBar, R.string.closeNavBar);
-        actionBarDrawerToggle.syncState();
-        vNavigationView.setNavigationItemSelectedListener(this);
-
-        TextView EmployeeName = vNavigationView.getHeaderView(0).findViewById(R.id.EmployeeName);
-        TextView EmployeeID = vNavigationView.getHeaderView(0).findViewById(R.id.EmployeeID);
-
-        EmployeeName.setText(String.format("%s %s", currManager.getFirstName(), currManager.getLastName()));
-        EmployeeID.setText(String.format("Id: %s", currManager.getId()));
+//        currManager = (Employee) getIntent().getSerializableExtra("emp");
+//
+//
+//        // Views
+//        vToolbar = findViewById(R.id.toolbar);
+//        vDrawerLayout = findViewById(R.id.drawer);
+//        vNavigationView = findViewById(R.id.navView);
+//        viewPager = findViewById(R.id.fragment_container);
+//
+//        ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), 0);
+//        CheckInOutFragment checkInOutFragment = new CheckInOutFragment(currManager);
+//        ChangePasswordFragment changePasswordFragment = new ChangePasswordFragment(currManager);
+//        GrossSalaryFragment grossSalaryFragment = new GrossSalaryFragment(currManager.getId());
+//        SendVacationRequestFragment sendVacationRequestFragment = new SendVacationRequestFragment(currManager);
+//        VacationRequestsFragment vacationRequestsFragment = new VacationRequestsFragment(currManager);
+//        VacationsLogFragment vacationsLogFragment = new VacationsLogFragment(false, currManager);
+//        ProjectSummaryFragment projectSummaryFragment = new ProjectSummaryFragment(currManager);
+//        TransferRequestsFragment transferRequestsFragment = new TransferRequestsFragment(currManager);
+//        SendTransferRequest sendTransferRequest = new SendTransferRequest(currManager);
+//
+//
+//        viewPagerAdapter.addFragment(checkInOutFragment, getString(R.string.check_in_out));
+//        viewPagerAdapter.addFragment(changePasswordFragment, getString(R.string.change_password));
+//        viewPagerAdapter.addFragment(grossSalaryFragment, getString(R.string.gross_salary));
+//        viewPagerAdapter.addFragment(sendVacationRequestFragment, getString(R.string.send_vacation_request));
+//        viewPagerAdapter.addFragment(vacationRequestsFragment, getString(R.string.vacation_requests));
+//        viewPagerAdapter.addFragment(vacationsLogFragment, getString(R.string.vacations_log));
+//        viewPagerAdapter.addFragment(sendTransferRequest, getString(R.string.send_transfer_request));
+//        viewPagerAdapter.addFragment(transferRequestsFragment, getString(R.string.transfer_requests));
+//        viewPagerAdapter.addFragment(projectSummaryFragment, getString(R.string.project_summary));
+//
+//
+//        viewPager.setAdapter(viewPagerAdapter);
+//        vNavigationView.getMenu().getItem(0).setChecked(true);
+//
+//
+//        setSupportActionBar(vToolbar);
+//        actionBarDrawerToggle = new ActionBarDrawerToggle(this, vDrawerLayout, vToolbar, R.string.openNavBar, R.string.closeNavBar);
+//        actionBarDrawerToggle.syncState();
+//        vNavigationView.setNavigationItemSelectedListener(this);
+//
+//        TextView EmployeeName = vNavigationView.getHeaderView(0).findViewById(R.id.EmployeeName);
+//        TextView EmployeeID = vNavigationView.getHeaderView(0).findViewById(R.id.EmployeeID);
+//
+//        EmployeeName.setText(String.format("%s %s", currManager.getFirstName(), currManager.getLastName()));
+//        EmployeeID.setText(String.format("Id: %s", currManager.getId()));
 
     }
 

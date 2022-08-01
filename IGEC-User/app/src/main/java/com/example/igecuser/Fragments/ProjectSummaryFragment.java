@@ -31,16 +31,23 @@ public class ProjectSummaryFragment extends Fragment {
     private EmployeeAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
     private ArrayList<EmployeeOverview> employeeOverviews;
-    private final Employee manager;
+    private Employee manager;
     private Project project;
     private ArrayList<Allowance> projectAllowance;
     private TextInputEditText vProjectName, vProjectReference;
     private MaterialButton vShowProjectAllowances;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-    public ProjectSummaryFragment(Employee manager) {
-        this.manager = manager;
+    public static ProjectSummaryFragment newInstance(Employee manager) {
+        Bundle args = new Bundle();
+        args.putSerializable("manager", manager);
+        ProjectSummaryFragment fragment = new ProjectSummaryFragment();
+        fragment.setArguments(args);
+        return fragment;
     }
+//    public ProjectSummaryFragment(Employee manager) {
+//        this.manager = manager;
+//    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -64,7 +71,7 @@ public class ProjectSummaryFragment extends Fragment {
 
     // Functions
     private void initialize(View view) {
-
+        manager = (Employee) getArguments().getSerializable("manager");
         db.collection("projects").document(manager.getProjectID()).addSnapshotListener((documentSnapshot, error) -> {
             if (!documentSnapshot.exists())
                 return;

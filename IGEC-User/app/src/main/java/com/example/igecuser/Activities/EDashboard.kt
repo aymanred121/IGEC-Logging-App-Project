@@ -1,12 +1,13 @@
 package com.example.igecuser.Activities
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.NavController
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -18,7 +19,7 @@ import com.example.igecuser.databinding.ActivityEdashboardBinding
 import com.example.igecuser.fireBase.Employee
 import com.google.android.material.navigation.NavigationView
 
-class EDashboard : AppCompatActivity() , NavigationView.OnNavigationItemSelectedListener {
+class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private var currEmployee: Employee? = null
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityEdashboardBinding
@@ -30,12 +31,18 @@ class EDashboard : AppCompatActivity() , NavigationView.OnNavigationItemSelected
         binding = ActivityEdashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
         currEmployee = intent.getSerializableExtra("emp") as Employee?
+        setSupportActionBar(binding.toolbar)
 
         val drawerLayout: DrawerLayout = binding.drawerLayout
         val navView: NavigationView = binding.navView
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment_content_main) as NavHostFragment
         navController = navHostFragment.navController
+        val inflater = navHostFragment.navController.navInflater
+        val graph = inflater.inflate(R.navigation.mobile_navigation_user)
+        val args = Bundle()
+        args.putSerializable("user", currEmployee)
+        navController.setGraph(graph,args)
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         appBarConfiguration = AppBarConfiguration(
@@ -62,26 +69,35 @@ class EDashboard : AppCompatActivity() , NavigationView.OnNavigationItemSelected
             override fun onDrawerClosed(drawerView: View) {
                 // This method will be called after drawer animation finishes
                 // Perform the fragment replacement
-                if(lastTab != item.itemId) {
+                if (lastTab != item.itemId) {
                     when (item.itemId) {
                         R.id.nav_check_in_out -> {
                             binding.toolbar.title = getString(R.string.check_in_out)
                             supportFragmentManager.beginTransaction()
-                                .replace(R.id.nav_host_fragment_content_main, CheckInOutFragment(currEmployee))
+                                .replace(
+                                    R.id.nav_host_fragment_content_main,
+                                    CheckInOutFragment.newInstance(currEmployee)
+                                )
                                 .addToBackStack(null)
                                 .commit()
                         }
                         R.id.nav_change_password -> {
                             binding.toolbar.title = getString(R.string.change_password)
                             supportFragmentManager.beginTransaction()
-                                .replace(R.id.nav_host_fragment_content_main, ChangePasswordFragment(currEmployee))
+                                .replace(
+                                    R.id.nav_host_fragment_content_main,
+                                    ChangePasswordFragment.newInstance(currEmployee)
+                                )
                                 .addToBackStack(null)
                                 .commit()
                         }
                         R.id.nav_gross_salary -> {
                             binding.toolbar.title = getString(R.string.gross_salary)
                             supportFragmentManager.beginTransaction()
-                                .replace(R.id.nav_host_fragment_content_main, GrossSalaryFragment(currEmployee!!.id))
+                                .replace(
+                                    R.id.nav_host_fragment_content_main,
+                                    GrossSalaryFragment.newInstance(currEmployee!!.id)
+                                )
                                 .addToBackStack(null)
                                 .commit()
                         }
@@ -89,14 +105,20 @@ class EDashboard : AppCompatActivity() , NavigationView.OnNavigationItemSelected
                         R.id.nav_send_vacation_request -> {
                             binding.toolbar.title = getString(R.string.send_vacation_request)
                             supportFragmentManager.beginTransaction()
-                                .replace(R.id.nav_host_fragment_content_main, SendVacationRequestFragment(currEmployee))
+                                .replace(
+                                    R.id.nav_host_fragment_content_main,
+                                    SendVacationRequestFragment.newInstance(currEmployee)
+                                )
                                 .addToBackStack(null)
                                 .commit()
                         }
                         R.id.nav_vacations_log -> {
                             binding.toolbar.title = getString(R.string.vacations_log)
                             supportFragmentManager.beginTransaction()
-                                .replace(R.id.nav_host_fragment_content_main, VacationsLogFragment(false,currEmployee))
+                                .replace(
+                                    R.id.nav_host_fragment_content_main,
+                                    VacationsLogFragment.newInstance(currEmployee, true)
+                                )
                                 .addToBackStack(null)
                                 .commit()
                         }
@@ -114,6 +136,10 @@ class EDashboard : AppCompatActivity() , NavigationView.OnNavigationItemSelected
         // Closes the drawer, triggering the listener above
         binding.drawerLayout.closeDrawer(GravityCompat.START)
         return true
+    }
+
+    override fun onBackPressed() {
+        finish()
     }
 
 }

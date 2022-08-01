@@ -3,8 +3,13 @@ package com.example.igecuser.utilites;
 public enum allowancesEnum {
     PROJECT,
     NETSALARY,
-    GIFT ,
+    TRANSPORTATION ,
+    ACCOMMODATION,
+    SITE,
+    REMOTE,
+    FOOD,
+    RETENTION,
     BONUS,
- PENALTY,
-    OVERTIME
+    OVERTIME,
+    OTHER
 }

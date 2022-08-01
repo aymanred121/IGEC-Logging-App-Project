@@ -7,6 +7,7 @@ import static com.example.igecuser.cryptography.RSAUtil.privateKey;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -26,6 +27,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 
 import java.util.regex.Pattern;
 
@@ -48,6 +50,9 @@ public class MainActivity extends AppCompatActivity {
     // Vars
     private final int CAMERA_REQUEST_CODE = 123;
     private final int LOCATION_REQUEST_CODE = 155;
+    public static final String IGEC = "IGEC";
+    public static final String ID = "ID";
+    public static final String LOGGED = "LOGGED";
 
     // Overrides
     @RequiresApi(api = Build.VERSION_CODES.Q)
@@ -118,7 +123,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     private boolean isPasswordRight(String password) {
         try {
             String decryptedPassword = decrypt(password, privateKey);
@@ -185,17 +189,31 @@ public class MainActivity extends AppCompatActivity {
                             if (currEmployee != null && !isPasswordRight(currEmployee.getPassword())) {
                                 return;
                             }
-                            Intent intent;
-                            if (currEmployee != null && currEmployee.getManagerID() == null) {
-                                Toast.makeText(MainActivity.this, "you are not assigned to any project", Toast.LENGTH_SHORT).show();
+                            if (currEmployee.isLocked() == true) {
+                                Toast.makeText(MainActivity.this, "This email is already in use", Toast.LENGTH_SHORT).show();
                                 return;
-                            } else if (currEmployee != null && currEmployee.getManagerID().equals("adminID")) {
-                                intent = new Intent(MainActivity.this, MDashboard.class);
-                            } else {
-                                intent = new Intent(MainActivity.this, EDashboard.class);
                             }
-                            intent.putExtra("emp", currEmployee);
-                            startActivity(intent);
+                            currEmployee.setLocked(true);
+                            db.collection("employees").document(currEmployee.getId()).set(currEmployee, SetOptions.merge()).addOnSuccessListener(unused -> {
+                                Intent intent;
+                                if (currEmployee != null && currEmployee.getManagerID() == null) {
+                                    Toast.makeText(MainActivity.this, "you are not assigned to any project", Toast.LENGTH_SHORT).show();
+                                    return;
+                                } else if (currEmployee != null && currEmployee.getManagerID().equals("adminID")) {
+                                    intent = new Intent(MainActivity.this, MDashboard.class);
+                                } else {
+                                    intent = new Intent(MainActivity.this, EDashboard.class);
+                                }
+                                intent.putExtra("emp", currEmployee);
+                                SharedPreferences sharedPreferences = getSharedPreferences(IGEC, MODE_PRIVATE);
+                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                editor.putBoolean(LOGGED, true);
+                                editor.putString(ID, currEmployee.getId());
+                                editor.apply();
+                                startActivity(intent);
+                                finish();
+                            });
+
                         }
                     });
         }

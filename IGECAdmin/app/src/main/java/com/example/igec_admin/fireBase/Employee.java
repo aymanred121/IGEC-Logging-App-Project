@@ -10,7 +10,7 @@ public class Employee {
     private double salary,insuranceAmount,overTime;
     private Date hireDate;
     private int totalNumberOfVacationDays;
-    private boolean isAdmin, temporary;
+    private boolean isAdmin, temporary,locked;
 
 
     public  Employee(){
@@ -38,6 +38,13 @@ public class Employee {
         this.overTime=overTime;
     }
 
+    public boolean isLocked() {
+        return locked;
+    }
+
+    public void setLocked(boolean locked) {
+        this.locked = locked;
+    }
 
     public Date getHireDate() {
         return hireDate;

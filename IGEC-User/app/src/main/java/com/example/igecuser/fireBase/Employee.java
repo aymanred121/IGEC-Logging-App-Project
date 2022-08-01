@@ -1,35 +1,49 @@
 package com.example.igecuser.fireBase;
+import com.example.igecuser.cryptography.RSAUtil;
+import com.google.firebase.firestore.Exclude;
 
 import java.io.Serializable;
 import java.util.Date;
-@SuppressWarnings("serial")
+
 public class Employee implements Serializable {
-    private String firstName, lastName, title, area, city, street, SSN, projectID, managerID, email, password, id, phoneNumber;
-    private double salary,overTime;
+    private String firstName, lastName, title, area, city, street,SSN,projectID,managerID,email,password,id,phoneNumber,insuranceNumber;
+    private double salary,insuranceAmount,overTime;
     private Date hireDate;
     private int totalNumberOfVacationDays;
+    private boolean isAdmin, temporary,locked;
 
 
-    public Employee() {
+    public  Employee(){
 
     }
 
-    public Employee(String firstName, String lastName, String Title, String area, String City, String Street, String projectID, double salary,double overTime, String SSN, Date hireDate, String email, String password, String phoneNumber) {
+    public Employee(String firstName, String lastName, String Title, String area, String City, String Street, double salary,double overTime, String SSN, Date hireDate, String email, String password,String phoneNumber,String insuranceNumber,boolean labourType,double insuranceAmount,boolean isAdmin) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.title = Title;
         this.area = area;
         this.city = City;
         this.street = Street;
-        this.projectID = projectID;
         this.salary = salary;
         this.SSN = SSN;
         this.hireDate = hireDate;
         this.email=email;
-        this.password = password;
+        this.password=password;
         this.phoneNumber = phoneNumber;
         totalNumberOfVacationDays = 21;
+        this.insuranceNumber=insuranceNumber;
+        this.temporary =labourType;
+        this.insuranceAmount=insuranceAmount;
+        this.isAdmin=isAdmin;
         this.overTime=overTime;
+    }
+
+    public boolean isLocked() {
+        return locked;
+    }
+
+    public void setLocked(boolean locked) {
+        this.locked = locked;
     }
 
     public Date getHireDate() {
@@ -108,14 +122,47 @@ public class Employee implements Serializable {
         return SSN;
     }
 
+    public String getInsuranceNumber() {
+        return insuranceNumber;
+    }
+
+    public void setInsuranceNumber(String insuranceNumber) {
+        this.insuranceNumber = insuranceNumber;
+    }
+
+    public boolean isAdmin() {
+        return isAdmin;
+    }
+
+    public void setAdmin(boolean admin) {
+        isAdmin = admin;
+    }
+
+    public boolean isTemporary() {
+        return temporary;
+    }
+
+    public void setTemporary(boolean temporary) {
+        this.temporary = temporary;
+    }
+
+    public double getInsuranceAmount() {
+        return insuranceAmount;
+    }
+
+    public void setInsuranceAmount(double insuranceAmount) {
+        this.insuranceAmount = insuranceAmount;
+    }
+
     public void setSSN(String SSN) {
         this.SSN = SSN;
     }
     public String getManagerID() {
         return managerID;
     }
-    public void setManagerID(String managerID) {
+    public Employee setManagerID(String managerID) {
         this.managerID = managerID;
+        return this;
     }
 
     public String getEmail() {
@@ -129,7 +176,13 @@ public class Employee implements Serializable {
     public String getPassword() {
         return password;
     }
-
+    @Exclude public String getDecryptedPassword(){
+        try {
+            return RSAUtil.decrypt(password, RSAUtil.privateKey);
+        }catch (Exception e){
+            return null;
+        }
+    }
     public void setPassword(String password) {
         this.password = password;
     }

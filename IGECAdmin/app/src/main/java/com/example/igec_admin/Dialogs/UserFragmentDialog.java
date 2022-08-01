@@ -41,6 +41,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.SetOptions;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -68,6 +69,7 @@ public class UserFragmentDialog extends DialogFragment {
     private MaterialCheckBox vAdmin, vTemporary;
     private MaterialButton vUpdate;
     private MaterialButton vDelete;
+    private MaterialButton vUnlock;
     private TextInputEditText vFirstName, vSecondName, vEmail, vPassword, vPhone, vTitle, vSalary, vNationalID, vArea, vCity, vStreet, vHireDate, vInsuranceNumber, vInsuranceAmount;
     private TextInputLayout vFirstNameLayout, vSecondNameLayout, vEmailLayout, vPasswordLayout, vPhoneLayout, vTitleLayout, vSalaryLayout, vNationalIDLayout, vAreaLayout, vCityLayout, vStreetLayout, vHireDateLayout, vInsuranceNumberLayout, vInsuranceAmountLayout;
     private final MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
@@ -120,6 +122,7 @@ public class UserFragmentDialog extends DialogFragment {
         vHireDateLayout.setErrorIconOnClickListener(oclHireDate);
         vUpdate.setOnClickListener(clUpdate);
         vDelete.setOnClickListener(clDelete);
+        vUnlock.setOnClickListener(clUnlock);
         vPasswordLayout.setEndIconOnClickListener(oclPasswordGenerate);
         for (Pair<TextInputLayout, EditText> v : views) {
             if(v.first != vEmailLayout)
@@ -183,10 +186,11 @@ public class UserFragmentDialog extends DialogFragment {
         MaterialButton vRegister = view.findViewById(R.id.button_register);
         vDelete = view.findViewById(R.id.button_delete);
         vUpdate = view.findViewById(R.id.button_update);
-
+        vUnlock = view.findViewById(R.id.button_unlock);
         vRegister.setVisibility(View.GONE);
         vDelete.setVisibility(View.VISIBLE);
         vUpdate.setVisibility(View.VISIBLE);
+        vUnlock.setVisibility(View.VISIBLE);
 
 
         views = new ArrayList<>();
@@ -472,7 +476,10 @@ public class UserFragmentDialog extends DialogFragment {
                 .show();
 
     };
-
+    private View.OnClickListener clUnlock = v -> {
+        employee.setLocked(false);
+        db.collection("employees").document(employee.getId()).set(employee, SetOptions.mergeFields("locked"));
+    };
 
     private View.OnClickListener oclHireDate = new View.OnClickListener() {
         @Override

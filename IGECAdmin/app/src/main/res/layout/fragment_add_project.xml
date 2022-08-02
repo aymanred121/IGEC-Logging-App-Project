@@ -145,6 +145,49 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/textInputLayout_ProjectLocation"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/vhigh"
+        android:layout_marginTop="@dimen/mid"
+        android:layout_marginEnd="@dimen/high"
+        app:helperTextEnabled="true"
+        app:layout_constraintEnd_toStartOf="@id/button_Locate"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textInputLayout_Area">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/TextInput_ProjectLocation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/plus_code"
+            android:inputType="textPersonName"
+            android:padding="14dp"
+            android:singleLine="true" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/button_Locate"
+        android:text="@string/location"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/vhigh"
+        android:layout_marginStart="@dimen/vhigh"
+        android:layout_marginTop="@dimen/mid"
+        android:textAllCaps= "false"
+        android:visibility="visible"
+        android:minWidth="0dp"
+        app:iconPadding="10dp"
+        app:iconGravity="textStart"
+        app:icon="@drawable/ic_baseline_location_on_24"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/textInputLayout_Area"
+        tools:layout_editor_absoluteY="190dp" />
+    <!--help: do we need to add options for project sizes ie radius   -->
+
+    <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textInputLayout_ContractType"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
         android:layout_width="0dp"
@@ -183,7 +226,7 @@
         app:helperTextEnabled="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textInputLayout_Area">
+        app:layout_constraintTop_toBottomOf="@id/textInputLayout_ProjectLocation">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/TextInput_Time"

@@ -26,6 +26,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.igec_admin.Adatpers.EmployeeAdapter;
 import com.example.igec_admin.Dialogs.AddAllowanceDialog;
 import com.example.igec_admin.Dialogs.AddClientDialog;
+import com.example.igec_admin.Dialogs.LocationDialog;
 import com.example.igec_admin.R;
 import com.example.igec_admin.fireBase.Allowance;
 import com.example.igec_admin.fireBase.Client;
@@ -58,13 +59,14 @@ public class AddProjectFragment extends Fragment {
     // Views
     private TextInputEditText vName, vTime, vManagerName, vArea, vStreet, vCity, vProjectReference;
     private TextInputLayout vNameLayout, vTimeLayout, vManagerNameLayout, vAreaLayout, vStreetLayout, vCityLayout, vProjectReferenceLayout, vManagerIDLayout, vContractTypeLayout;
-    private MaterialButton vRegister, vAddClient, vAddAllowance;
+    private MaterialButton vRegister, vAddClient, vAddAllowance, vLocate;
     private AutoCompleteTextView vManagerID, vContractType;
     private RecyclerView recyclerView;
     private MaterialCheckBox vOfficeWork;
     private EmployeeAdapter adapter;
 
     // Vars
+    private String lat, lng;
     private ArrayList<String> contract = new ArrayList<>();
     private ArrayList<Pair<TextInputLayout, EditText>> views;
     private ArrayList<Allowance> allowances = new ArrayList<>();
@@ -137,6 +139,20 @@ public class AddProjectFragment extends Fragment {
                 // Do something with the result
             }
         });
+
+        getParentFragmentManager().setFragmentResultListener("location", this, new FragmentResultListener() {
+            @Override
+            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
+
+                lat = result.getString("lat");
+                lng = result.getString("lng");
+                Toast.makeText(getActivity(), String.format(
+                                "lat: %s, lang: %s",
+                                result.getString("lat"),
+                                result.getString("lng")),
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override
@@ -165,10 +181,10 @@ public class AddProjectFragment extends Fragment {
         vTime.addTextChangedListener(twTime);
         vContractType.addTextChangedListener(twContractType);
         vManagerID.addTextChangedListener(twManagerID);
-
         vOfficeWork.setOnClickListener(oclOfficeWork);
         vAddClient.setOnClickListener(oclAddClient);
         vRegister.setOnClickListener(clRegister);
+        vLocate.setOnClickListener(clLocate);
         vTimeLayout.setEndIconOnClickListener(oclTimeDate);
         vTimeLayout.setErrorIconOnClickListener(oclTimeDate);
         vTimeDatePicker.addOnPositiveButtonClickListener(pclTimeDatePicker);
@@ -211,6 +227,7 @@ public class AddProjectFragment extends Fragment {
         vRegister = view.findViewById(R.id.button_register);
         vAddAllowance = view.findViewById(R.id.button_AddAllowances);
         vAddClient = view.findViewById(R.id.button_AddClient);
+        vLocate = view.findViewById(R.id.button_Locate);
         vTimeDatePickerBuilder.setTitleText("Time");
         vTimeDatePicker = vTimeDatePickerBuilder.build();
 
@@ -399,7 +416,10 @@ public class AddProjectFragment extends Fragment {
                 , vCity.getText().toString()
                 , vArea.getText().toString()
                 , vStreet.getText().toString()
+                , Double.parseDouble(lat)
+                , Double.parseDouble(lng)
                 , vContractType.getText().toString());
+        // TODO: include location
         newProject.setId(projectID);
         newProject.setClient(vOfficeWork.isChecked() ? null : client);
         newProject.getAllowancesList().addAll(allowances);
@@ -494,10 +514,16 @@ public class AddProjectFragment extends Fragment {
                 return true;
             }
         }
-        boolean isThereAClient = (!vOfficeWork.isChecked() && client == null);
-        if(isThereAClient)
+        boolean isClientMissing = (!vOfficeWork.isChecked() && client == null);
+        boolean isLocationMissing = (lat == null && lng == null);
+        if (isClientMissing) {
             Toast.makeText(getActivity(), "client Info Missing", Toast.LENGTH_SHORT).show();
-        return isThereAClient;
+        }
+        if(isLocationMissing)
+        {
+            Toast.makeText(getActivity(), "Location is Missing", Toast.LENGTH_SHORT).show();
+        }
+        return isClientMissing || isLocationMissing;
     }
 
     boolean validateInputs() {
@@ -561,6 +587,16 @@ public class AddProjectFragment extends Fragment {
         public void onClick(View v) {
             AddAllowanceDialog addAllowanceDialog = new AddAllowanceDialog(allowances);
             addAllowanceDialog.show(getParentFragmentManager(), "");
+        }
+    };
+    private final View.OnClickListener clLocate = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            // first time
+            if (lat == null && lng == null)
+                LocationDialog.newInstance().show(getParentFragmentManager(), "");
+            else
+                LocationDialog.newInstance(lat, lng).show(getParentFragmentManager(), "");
         }
     };
 

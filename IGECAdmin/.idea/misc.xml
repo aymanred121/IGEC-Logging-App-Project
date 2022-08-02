@@ -21,6 +21,7 @@
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/dialog_add_client.xml" value="0.25" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/dialog_add_supplements.xml" value="0.14764492753623187" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/dialog_allowance_info.xml" value="0.33" />
+        <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/dialog_location.xml" value="0.13994565217391305" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/dialog_machine_log.xml" value="0.109375" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/dialog_machine_serial_code.xml" value="0.17074275362318841" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/dialog_maching_log.xml" value="0.25" />
@@ -29,7 +30,7 @@
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/dropdown_item.xml" value="0.1" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/fragment_add_allowance_dialog.xml" value="0.2" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/fragment_add_machine.xml" value="0.25" />
-        <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/fragment_add_project.xml" value="0.22" />
+        <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/fragment_add_project.xml" value="0.25" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/fragment_add_user.xml" value="1.0" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/fragment_machine_serial_code_dialog.xml" value="0.17074275362318841" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/layout/fragment_machines.xml" value="0.67" />

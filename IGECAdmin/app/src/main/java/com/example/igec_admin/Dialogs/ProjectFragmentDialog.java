@@ -35,8 +35,6 @@ import com.example.igec_admin.fireBase.EmployeeOverview;
 import com.example.igec_admin.fireBase.EmployeesGrossSalary;
 import com.example.igec_admin.fireBase.Project;
 import com.example.igec_admin.utilites.allowancesEnum;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.datepicker.MaterialDatePicker;
@@ -50,7 +48,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.WriteBatch;
 
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -63,7 +60,7 @@ public class ProjectFragmentDialog extends DialogFragment {
 
     // Views
     private TextInputEditText vName, vArea, vStreet, vCity, vTime, vManagerName, vProjectReference;
-    private MaterialButton vRegister, vUpdate, vDelete, vAddClient, vAddAllowance;
+    private MaterialButton vRegister, vUpdate, vDelete, vAddClient, vAddAllowance, vLocate;
     private AutoCompleteTextView vManagerID, vContractType;
     private TextInputLayout vNameLayout, vAreaLayout, vStreetLayout, vCityLayout, vManagerIDLayout, vTimeLayout, vProjectReferenceLayout, vContractTypeLayout;
     private RecyclerView recyclerView;
@@ -72,6 +69,7 @@ public class ProjectFragmentDialog extends DialogFragment {
     private RecyclerView.LayoutManager layoutManager;
 
     // Vars
+    private String lat, lng;
     private ArrayList<Allowance> allowances;
     long startDate;
     private Client client;
@@ -169,6 +167,19 @@ public class ProjectFragmentDialog extends DialogFragment {
                 // Do something with the result
             }
         });
+        getParentFragmentManager().setFragmentResultListener("location", this, new FragmentResultListener() {
+            @Override
+            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
+
+                lat = result.getString("lat");
+                lng = result.getString("lng");
+                Toast.makeText(getActivity(), String.format(
+                                "lat: %s, lang: %s",
+                                result.getString("lat"),
+                                result.getString("lng")),
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override
@@ -188,6 +199,7 @@ public class ProjectFragmentDialog extends DialogFragment {
         vManagerID.addTextChangedListener(twManagerID);
         vUpdate.setOnClickListener(clUpdate);
         vDelete.setOnClickListener(clDelete);
+        vLocate.setOnClickListener(clLocate);
         vTimeDatePicker.addOnPositiveButtonClickListener(pclTimeDatePicker);
         vTimeLayout.setEndIconOnClickListener(oclStartDate);
         vOfficeWork.setOnClickListener(oclOfficeWork);
@@ -226,6 +238,7 @@ public class ProjectFragmentDialog extends DialogFragment {
         vRegister = view.findViewById(R.id.button_register);
         vUpdate = view.findViewById(R.id.button_update);
         vDelete = view.findViewById(R.id.button_delete);
+        vLocate = view.findViewById(R.id.button_Locate);
 
         views = new ArrayList<>();
         views.add(new Pair<>(vNameLayout, vName));
@@ -267,6 +280,8 @@ public class ProjectFragmentDialog extends DialogFragment {
         vTimeDatePickerBuilder.setTitleText("Time");
         vTimeDatePicker = vTimeDatePickerBuilder.setSelection(startDate).build();
         vTime.setText(String.format("%s", convertDateToString(startDate)));
+        lat = String.valueOf(project.getLat());
+        lng = String.valueOf(project.getLng());
         getEmployees();
 
         ArrayAdapter<String> idAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, TeamID);
@@ -448,10 +463,15 @@ public class ProjectFragmentDialog extends DialogFragment {
                 return true;
             }
         }
-        boolean isThereAClient = (!vOfficeWork.isChecked() && client == null);
-        if (isThereAClient)
+        boolean isClientMissing = (!vOfficeWork.isChecked() && client == null);
+        boolean isLocationMissing = (lat == null && lng == null);
+        if (isClientMissing) {
             Toast.makeText(getActivity(), "client Info Missing", Toast.LENGTH_SHORT).show();
-        return isThereAClient;
+        }
+        if (isLocationMissing) {
+            Toast.makeText(getActivity(), "Location is Missing", Toast.LENGTH_SHORT).show();
+        }
+        return isClientMissing || isLocationMissing;
     }
 
     boolean validateInputs() {
@@ -469,6 +489,8 @@ public class ProjectFragmentDialog extends DialogFragment {
                 , vCity.getText().toString()
                 , vArea.getText().toString()
                 , vStreet.getText().toString()
+                , Double.parseDouble(lat)
+                , Double.parseDouble(lng)
                 , vContractType.getText().toString());
         newProject.setId(project.getId());
         newProject.setClient(vOfficeWork.isChecked() ? null : client);
@@ -756,8 +778,6 @@ public class ProjectFragmentDialog extends DialogFragment {
         if (validateInputs()) {
             vUpdate.setEnabled(false);
             updateProject();
-        } else {
-            Toast.makeText(getActivity(), "please, fill the project data", Toast.LENGTH_SHORT).show();
         }
     };
     View.OnClickListener clDelete = v -> {
@@ -775,6 +795,17 @@ public class ProjectFragmentDialog extends DialogFragment {
                 .show();
 
     };
+    private final View.OnClickListener clLocate = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            // first time
+            if (lat == null && lng == null)
+                LocationDialog.newInstance().show(getParentFragmentManager(), "");
+            else
+                LocationDialog.newInstance(lat, lng).show(getParentFragmentManager(), "");
+        }
+    };
+
     private final View.OnClickListener oclAddClient = new View.OnClickListener() {
         @Override
         public void onClick(View v) {

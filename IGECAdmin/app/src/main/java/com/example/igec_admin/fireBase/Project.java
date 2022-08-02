@@ -1,11 +1,8 @@
 package com.example.igec_admin.fireBase;
 
-import com.google.firebase.database.Exclude;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 
 public class Project {
     private String managerID;
@@ -18,11 +15,12 @@ public class Project {
     private String locationStreet;
     private String contractType;
     private ArrayList<Allowance> allowancesList = new ArrayList<>();
-    private Client client ;
+    private Client client;
     private Date startDate;
-    private ArrayList<EmployeeOverview>  employees;
-    private HashMap<String,Object> employeeWorkedTime = new HashMap<>();
-    private HashMap<String,Object> machineWorkedTime = new HashMap<>();
+    private double lng, lat;
+    private ArrayList<EmployeeOverview> employees;
+    private HashMap<String, Object> employeeWorkedTime = new HashMap<>();
+    private HashMap<String, Object> machineWorkedTime = new HashMap<>();
 
     public HashMap<String, Object> getEmployeeWorkedTime() {
         return employeeWorkedTime;
@@ -35,17 +33,35 @@ public class Project {
     public Project() {
     }
 
-    public Project(String managerName,String managerID, String name, Date startDate, ArrayList<EmployeeOverview> employees , String reference , String locationCity , String locationArea , String locationStreet, String contractType) {
+    public Project(String managerName, String managerID, String name, Date startDate, ArrayList<EmployeeOverview> employees, String reference, String locationCity, String locationArea, String locationStreet, double lat, double lng, String contractType) {
         this.managerID = managerID;
         this.name = name;
         this.startDate = startDate;
         this.employees = employees;
-        this.managerName=managerName;
+        this.managerName = managerName;
         this.reference = reference;
         this.locationArea = locationArea;
         this.locationCity = locationCity;
         this.locationStreet = locationStreet;
+        this.lng = lng;
+        this.lat = lat;
         this.contractType = contractType;
+    }
+
+    public double getLng() {
+        return lng;
+    }
+
+    public void setLng(double lng) {
+        this.lng = lng;
+    }
+
+    public double getLat() {
+        return lat;
+    }
+
+    public void setLat(double lat) {
+        this.lat = lat;
     }
 
     public String getLocationCity() {
@@ -111,6 +127,7 @@ public class Project {
     public void setContractType(String contractType) {
         this.contractType = contractType;
     }
+
     public String getId() {
         return id;
     }
@@ -143,11 +160,11 @@ public class Project {
         this.reference = reference;
     }
 
-    public ArrayList<EmployeeOverview>  getEmployees() {
+    public ArrayList<EmployeeOverview> getEmployees() {
         return employees;
     }
 
-    public void setEmployees(ArrayList<EmployeeOverview>  employees) {
+    public void setEmployees(ArrayList<EmployeeOverview> employees) {
         this.employees = employees;
     }
 

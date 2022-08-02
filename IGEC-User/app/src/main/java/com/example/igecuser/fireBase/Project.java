@@ -1,6 +1,5 @@
 package com.example.igecuser.fireBase;
 
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -10,7 +9,8 @@ public class Project {
     private ArrayList<Allowance> allowancesList = new ArrayList<>();
     private Client client ;
     private Date startDate;
-    private ArrayList<EmployeeOverview>  employees;
+    private double lng, lat;
+    private ArrayList<EmployeeOverview> employees;
     private HashMap<String, Object> employeeWorkedTime = new HashMap<>();
     private HashMap<String, Object> machineWorkedTime = new HashMap<>();
 
@@ -25,26 +25,35 @@ public class Project {
     public Project() {
     }
 
-
-    public Project(String managerName,String managerID, String name, Date startDate, ArrayList<EmployeeOverview> employees , String reference , String locationCity , String locationArea , String locationStreet) {
+    public Project(String managerName, String managerID, String name, Date startDate, ArrayList<EmployeeOverview> employees, String reference, String locationCity, String locationArea, String locationStreet, double lat, double lng, String contractType) {
         this.managerID = managerID;
         this.name = name;
         this.startDate = startDate;
         this.employees = employees;
-        this.managerName=managerName;
+        this.managerName = managerName;
         this.reference = reference;
         this.locationArea = locationArea;
         this.locationCity = locationCity;
         this.locationStreet = locationStreet;
-    }
-
-
-    public String getContractType() {
-        return contractType;
-    }
-
-    public void setContractType(String contractType) {
+        this.lng = lng;
+        this.lat = lat;
         this.contractType = contractType;
+    }
+
+    public double getLng() {
+        return lng;
+    }
+
+    public void setLng(double lng) {
+        this.lng = lng;
+    }
+
+    public double getLat() {
+        return lat;
+    }
+
+    public void setLat(double lat) {
+        this.lat = lat;
     }
 
     public String getLocationCity() {
@@ -103,6 +112,13 @@ public class Project {
         this.startDate = startDate;
     }
 
+    public String getContractType() {
+        return contractType;
+    }
+
+    public void setContractType(String contractType) {
+        this.contractType = contractType;
+    }
 
     public String getId() {
         return id;

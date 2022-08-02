@@ -43,6 +43,7 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
     implementation 'androidx.navigation:navigation-fragment-ktx:2.5.1'
     implementation 'androidx.navigation:navigation-ui-ktx:2.5.1'
+    implementation 'pub.devrel:easypermissions:3.0.0'
     def fragment_version = "1.4.1"
     debugImplementation "androidx.fragment:fragment-testing:$fragment_version"
     implementation platform('com.google.firebase:firebase-bom:29.3.0')

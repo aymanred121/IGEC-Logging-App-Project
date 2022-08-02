@@ -1,5 +1,6 @@
 package com.example.igec_admin.Dialogs;
 
+import android.Manifest;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -7,6 +8,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.webkit.GeolocationPermissions;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -21,7 +24,11 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 
+import pub.devrel.easypermissions.AfterPermissionGranted;
+import pub.devrel.easypermissions.EasyPermissions;
+
 public class LocationDialog extends DialogFragment {
+    private final int LOCATION_REQUEST_CODE = 155;
     private FloatingActionButton fbSubmit;
     private WebView webView;
     private String currentUrl;
@@ -30,7 +37,7 @@ public class LocationDialog extends DialogFragment {
         public void doUpdateVisitedHistory(WebView view, String url, boolean isReload) {
             super.doUpdateVisitedHistory(view, url, isReload);
             currentUrl = url;
-            if (!fbSubmit.isEnabled())
+            if(currentUrl.contains("!3d"))
                 fbSubmit.setEnabled(true);
         }
     };
@@ -69,6 +76,12 @@ public class LocationDialog extends DialogFragment {
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        dismiss();
+    }
+
+    @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setStyle(DialogFragment.STYLE_NORMAL, R.style.FullscreenDialogTheme);
@@ -80,18 +93,43 @@ public class LocationDialog extends DialogFragment {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.dialog_location, container, false);
     }
+    @AfterPermissionGranted(LOCATION_REQUEST_CODE)
+    private boolean getLocationPermissions() {
+        String[] perms = {Manifest.permission.ACCESS_FINE_LOCATION};
+
+        if (EasyPermissions.hasPermissions(getActivity(), perms)) {
+            return true;
+        } else {
+            EasyPermissions.requestPermissions(
+                    this,
+                    "We need location permissions in order to the app to function correctly",
+                    LOCATION_REQUEST_CODE,
+                    Manifest.permission.ACCESS_FINE_LOCATION);
+            return false;
+        }
+    }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        getLocationPermissions();
         fbSubmit = view.findViewById(R.id.button_submit);
         webView = view.findViewById(R.id.web_view);
+        webView.getSettings().setGeolocationEnabled(true);
         webView.getSettings().setJavaScriptEnabled(true);
         webView.getSettings().setLoadWithOverviewMode(true);
         webView.getSettings().setUseWideViewPort(true);
         webView.getSettings().setBuiltInZoomControls(true);
         webView.getSettings().setPluginState(WebSettings.PluginState.ON);
         webView.setWebViewClient(webViewClient);
+        webView.setWebChromeClient(new WebChromeClient(){
+
+            @Override
+            public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
+                callback.invoke(origin, true, false);
+            }
+
+        });
         // first time
         if (getArguments().size() == 0) {
             webView.loadUrl("https://www.google.com/maps");

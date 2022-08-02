@@ -519,8 +519,7 @@ public class AddProjectFragment extends Fragment {
         if (isClientMissing) {
             Toast.makeText(getActivity(), "client Info Missing", Toast.LENGTH_SHORT).show();
         }
-        if(isLocationMissing)
-        {
+        if (isLocationMissing) {
             Toast.makeText(getActivity(), "Location is Missing", Toast.LENGTH_SHORT).show();
         }
         return isClientMissing || isLocationMissing;
@@ -593,10 +592,13 @@ public class AddProjectFragment extends Fragment {
         @Override
         public void onClick(View v) {
             // first time
+            LocationDialog locationDialog;
+
             if (lat == null && lng == null)
-                LocationDialog.newInstance().show(getParentFragmentManager(), "");
+                locationDialog = LocationDialog.newInstance();
             else
-                LocationDialog.newInstance(lat, lng).show(getParentFragmentManager(), "");
+                locationDialog = LocationDialog.newInstance(lat, lng);
+            locationDialog.show(getParentFragmentManager(), "");
         }
     };
 

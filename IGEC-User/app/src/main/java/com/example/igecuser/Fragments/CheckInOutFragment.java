@@ -33,6 +33,7 @@ import com.example.igecuser.fireBase.EmployeesGrossSalary;
 import com.example.igecuser.fireBase.Machine;
 import com.example.igecuser.fireBase.MachineDefectsLog;
 import com.example.igecuser.fireBase.Machine_Employee;
+import com.example.igecuser.fireBase.Project;
 import com.example.igecuser.fireBase.Summary;
 import com.example.igecuser.utilites.allowancesEnum;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -81,6 +82,9 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     private final CollectionReference machineCol = db.collection("machine");
     @SuppressLint("SimpleDateFormat")
     private final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+    private final double RADIUS = 1.0; //TODO change to lesser value
+    private final double LAT = 30.103168;
+    private final double LNG = 31.373099;
 
     public static CheckInOutFragment newInstance(Employee user) {
         Bundle args = new Bundle();
@@ -233,63 +237,82 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                     vCheckInOut.setEnabled(true);
                 })
                 .setPositiveButton(getString(R.string.Yes), (dialogInterface, i) -> {
-                    Locus.INSTANCE.getCurrentLocation(getActivity(), result -> {
-                        if (result.getError() != null) {
-                            Toast.makeText(getActivity(), "can't complete the operation.", Toast.LENGTH_SHORT).show();
-                            vCheckInOut.setEnabled(true);
+                    db.collection("projects").document(currEmployee.getProjectID()).get().addOnSuccessListener(doc -> {
+                        if (!doc.exists())
+                            return;
+                        Project project = doc.toObject(Project.class);
+                        Locus.INSTANCE.getCurrentLocation(getActivity(), result -> {
+                            if (result.getError() != null) {
+                                Toast.makeText(getActivity(), "can't complete the operation.", Toast.LENGTH_SHORT).show();
+                                vCheckInOut.setEnabled(true);
+                                return null;
+                            }
+                            Location location = result.getLocation();
+                            String currentDateAndTime = sdf.format(new Date());
+                            String day = currentDateAndTime.substring(0, 2);
+                            String month = currentDateAndTime.substring(3, 5);
+                            String year = currentDateAndTime.substring(6, 10);
+
+                            longitude = location.getLongitude();
+                            latitude = location.getLatitude();
+
+                            // check if his location inside the project radius
+                            double distance = Math.sqrt(Math.pow(latitude - project.getLat(), 2) + Math.pow(longitude - project.getLng(), 2));
+                            if (distance < RADIUS) // he's in the project area
+                            {
+                                Summary summary = new Summary(latitude, longitude);
+                                HashMap<String, Object> checkOutDetails = new HashMap<>(summary.getGeoMap());
+                                checkOutDetails.put("Time", Timestamp.now());
+                                db.collection("summary").document(id)
+                                        .collection(year + "-" + month).document(day)
+                                        .get().addOnSuccessListener(documentSnapshot -> {
+                                            if (!documentSnapshot.exists() || documentSnapshot.getData().size() == 0) {
+                                                employeeCheckIn(summary);
+                                            } else {
+                                                Summary summary1 = documentSnapshot.toObject(Summary.class);
+                                                if (summary1.getCheckOut() == null) {
+                                                    employeeCheckOut(summary1, checkOutDetails);
+                                                } else {
+                                                    summary1.setLastCheckInTime(Timestamp.now());
+                                                    db.document(documentSnapshot.getReference().getPath()).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null);
+                                                    //db.document(summary1.getLastDayPath()).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null);
+                                                    //db.collection("summary").document(id).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null);
+                                                    Toast.makeText(getContext(), "Checked In successfully!", Toast.LENGTH_SHORT).show();
+                                                    vCheckInOut.setEnabled(true);
+                                                }
+                                            }
+                                        });
+                                isHere = !isHere;
+                                vCheckInOut.setBackgroundColor((isHere) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
+                                vCheckInOut.setText(isHere ? "Out" : "In");
+                                vAddMachine.setClickable(isHere);
+                                if (isOpen) {
+                                    vAddMachine.startAnimation(rotateBackwardHide);
+                                    vAddMachineInside.startAnimation(fabClose);
+                                    vAddMachineOutside.startAnimation(fabClose);
+                                    vInsideText.startAnimation(hide);
+                                    vOutsideText.startAnimation(hide);
+                                    vAddMachineInside.setClickable(false);
+                                    vAddMachineOutside.setClickable(false);
+                                    isOpen = false;
+                                } else {
+                                    vAddMachine.startAnimation(isHere ? show : hide);
+                                }
+
+
+                            } else // he's not, or he's on office work
+                            {
+                                distance = Math.sqrt(Math.pow(latitude - LAT, 2) + Math.pow(longitude - LNG, 2));
+                                if (distance < RADIUS)
+                                    Toast.makeText(getActivity(), "You're in the office", Toast.LENGTH_SHORT).show();
+                                else
+                                    Toast.makeText(getActivity(), "You're not in the project area", Toast.LENGTH_SHORT).show();
+                            }
                             return null;
-                        }
-                        Location location = result.getLocation();
-                        String currentDateAndTime = sdf.format(new Date());
-                        String day = currentDateAndTime.substring(0, 2);
-                        String month = currentDateAndTime.substring(3, 5);
-                        String year = currentDateAndTime.substring(6, 10);
 
-                        longitude = location.getLongitude();
-                        latitude = location.getLatitude();
-
-                        Summary summary = new Summary(latitude, longitude);
-                        HashMap<String, Object> checkOutDetails = new HashMap<>(summary.getGeoMap());
-                        checkOutDetails.put("Time", Timestamp.now());
-                        db.collection("summary").document(id)
-                                .collection(year + "-" + month).document(day)
-                                .get().addOnSuccessListener(documentSnapshot -> {
-                                    if (!documentSnapshot.exists() || documentSnapshot.getData().size() == 0) {
-                                        employeeCheckIn(summary);
-                                    } else {
-                                        Summary summary1 = documentSnapshot.toObject(Summary.class);
-                                        if (summary1.getCheckOut() == null) {
-                                            employeeCheckOut(summary1, checkOutDetails);
-                                        } else {
-                                            summary1.setLastCheckInTime(Timestamp.now());
-                                            db.document(documentSnapshot.getReference().getPath()).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null);
-                                            //db.document(summary1.getLastDayPath()).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null);
-                                            //db.collection("summary").document(id).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null);
-                                            Toast.makeText(getContext(), "Checked In successfully!", Toast.LENGTH_SHORT).show();
-                                            vCheckInOut.setEnabled(true);
-                                        }
-                                    }
-                                });
-                        isHere = !isHere;
-                        vCheckInOut.setBackgroundColor((isHere) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
-                        vCheckInOut.setText(isHere ? "Out" : "In");
-                        vAddMachine.setClickable(isHere);
-                        if (isOpen) {
-                            vAddMachine.startAnimation(rotateBackwardHide);
-                            vAddMachineInside.startAnimation(fabClose);
-                            vAddMachineOutside.startAnimation(fabClose);
-                            vInsideText.startAnimation(hide);
-                            vOutsideText.startAnimation(hide);
-                            vAddMachineInside.setClickable(false);
-                            vAddMachineOutside.setClickable(false);
-                            isOpen = false;
-                        } else {
-                            vAddMachine.startAnimation(isHere ? show : hide);
-                        }
-
-                        return null;
-
+                        });
                     });
+
                 })
                 .show();
     };

@@ -7,7 +7,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.NavController
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -18,6 +17,7 @@ import com.example.igecuser.R
 import com.example.igecuser.databinding.ActivityEdashboardBinding
 import com.example.igecuser.fireBase.Employee
 import com.google.android.material.navigation.NavigationView
+import com.google.firebase.firestore.FirebaseFirestore
 
 class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private var currEmployee: Employee? = null

@@ -82,7 +82,6 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     private final CollectionReference machineCol = db.collection("machine");
     @SuppressLint("SimpleDateFormat")
     private final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
-    private final double RADIUS = 1.0; //TODO change to lesser value
     private final double LAT = 30.103168;
     private final double LNG = 31.373099;
 
@@ -257,8 +256,11 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                             latitude = location.getLatitude();
 
                             // check if his location inside the project radius
-                            double distance = Math.sqrt(Math.pow(latitude - project.getLat(), 2) + Math.pow(longitude - project.getLng(), 2));
-                            if (distance < RADIUS) // he's in the project area
+                            double distance;
+                            float results[] = new float[3];
+                            Location.distanceBetween(latitude, longitude, project.getLat(), project.getLng(), results);
+                            distance = results[0];
+                            if (distance < project.getArea()) // he's in the project area
                             {
                                 Summary summary = new Summary(latitude, longitude);
                                 HashMap<String, Object> checkOutDetails = new HashMap<>(summary.getGeoMap());
@@ -298,12 +300,11 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                 } else {
                                     vAddMachine.startAnimation(isHere ? show : hide);
                                 }
-
-
                             } else // he's not, or he's on office work
                             {
-                                distance = Math.sqrt(Math.pow(latitude - LAT, 2) + Math.pow(longitude - LNG, 2));
-                                if (distance < RADIUS)
+                                Location.distanceBetween(latitude, longitude, LAT, LNG, results);
+                                distance = results[0];
+                                if (distance < 18700 /*TODO Help placeholder for office area*/)
                                     Toast.makeText(getActivity(), "You're in the office", Toast.LENGTH_SHORT).show();
                                 else
                                     Toast.makeText(getActivity(), "You're not in the project area", Toast.LENGTH_SHORT).show();

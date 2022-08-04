@@ -144,8 +144,11 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
+
+
+
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/textInputLayout_ProjectLocation"
+        android:id="@+id/textInputLayout_ProjectArea"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -157,35 +160,36 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/textInputLayout_Area">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/TextInput_ProjectLocation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="@string/plus_code"
-            android:inputType="textPersonName"
-            android:padding="14dp"
-            android:singleLine="true" />
+    <com.google.android.material.textfield.TextInputEditText
+        android:id="@+id/TextInput_ProjectArea"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:digits="0123456789-"
+        android:hint="@string/diameter"
+        android:inputType="number"
+        android:maxLength="6"
+        android:padding="14dp"
+        android:singleLine="true" />
+
     </com.google.android.material.textfield.TextInputLayout>
+
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/button_Locate"
-        android:text="@string/location"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/vhigh"
-        android:layout_marginStart="@dimen/vhigh"
         android:layout_marginTop="@dimen/mid"
         android:textAllCaps= "false"
         android:visibility="visible"
         android:minWidth="0dp"
-        app:iconPadding="10dp"
-        app:iconGravity="textStart"
+        app:iconPadding="0dp"
+        android:gravity="center"
         app:icon="@drawable/ic_baseline_location_on_24"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textInputLayout_Area"
-        tools:layout_editor_absoluteY="190dp" />
-    <!--help: do we need to add options for project sizes ie radius   -->
+        app:layout_constraintStart_toEndOf="@id/textInputLayout_ProjectArea"
+        app:layout_constraintTop_toTopOf="@id/textInputLayout_ProjectArea"
+        app:layout_constraintBottom_toBottomOf="@id/textInputLayout_ProjectArea" />
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/textInputLayout_ContractType"
@@ -226,7 +230,7 @@
         app:helperTextEnabled="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textInputLayout_ProjectLocation">
+        app:layout_constraintTop_toBottomOf="@id/textInputLayout_ProjectArea">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/TextInput_Time"

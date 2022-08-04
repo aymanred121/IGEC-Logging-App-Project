@@ -57,8 +57,8 @@ import java.util.Map;
 public class AddProjectFragment extends Fragment {
 
     // Views
-    private TextInputEditText vName, vTime, vManagerName, vArea, vStreet, vCity, vProjectReference;
-    private TextInputLayout vNameLayout, vTimeLayout, vManagerNameLayout, vAreaLayout, vStreetLayout, vCityLayout, vProjectReferenceLayout, vManagerIDLayout, vContractTypeLayout;
+    private TextInputEditText vName, vTime, vManagerName, vArea, vStreet, vCity, vProjectReference, vAreaM;
+    private TextInputLayout vNameLayout, vTimeLayout, vManagerNameLayout, vAreaLayout, vAreaMLayout, vStreetLayout, vCityLayout, vProjectReferenceLayout, vManagerIDLayout, vContractTypeLayout;
     private MaterialButton vRegister, vAddClient, vAddAllowance, vLocate;
     private AutoCompleteTextView vManagerID, vContractType;
     private RecyclerView recyclerView;
@@ -173,14 +173,10 @@ public class AddProjectFragment extends Fragment {
     // Functions
     private void setUpListeners() {
         // listeners
-        vName.addTextChangedListener(twName);
+
         vProjectReference.addTextChangedListener(twProjectReference);
-        vArea.addTextChangedListener(twArea);
-        vCity.addTextChangedListener(twCity);
-        vStreet.addTextChangedListener(twStreet);
-        vTime.addTextChangedListener(twTime);
-        vContractType.addTextChangedListener(twContractType);
         vManagerID.addTextChangedListener(twManagerID);
+        vAreaM.addTextChangedListener(twArea);
         vOfficeWork.setOnClickListener(oclOfficeWork);
         vAddClient.setOnClickListener(oclAddClient);
         vRegister.setOnClickListener(clRegister);
@@ -189,6 +185,27 @@ public class AddProjectFragment extends Fragment {
         vTimeLayout.setErrorIconOnClickListener(oclTimeDate);
         vTimeDatePicker.addOnPositiveButtonClickListener(pclTimeDatePicker);
         vAddAllowance.setOnClickListener(oclAddAllowance);
+
+
+        for (Pair<TextInputLayout, EditText> v : views) {
+            if (v.first != vManagerIDLayout && v.first != vProjectReferenceLayout && v.first != vAreaMLayout)
+                v.second.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable editable) {
+                        hideError(vTimeLayout);
+                    }
+                });
+        }
     }
 
     private void initialize() {
@@ -202,6 +219,7 @@ public class AddProjectFragment extends Fragment {
         vContractType = view.findViewById(R.id.TextInput_ContractType);
         vManagerID = view.findViewById(R.id.TextInput_ManagerID);
         vManagerName = view.findViewById(R.id.TextInput_ManagerName);
+        vAreaM = view.findViewById(R.id.TextInput_ProjectArea);
 
         vNameLayout = view.findViewById(R.id.textInputLayout_ProjectName);
         vProjectReferenceLayout = view.findViewById(R.id.textInputLayout_ProjectReference);
@@ -212,6 +230,7 @@ public class AddProjectFragment extends Fragment {
         vContractTypeLayout = view.findViewById(R.id.textInputLayout_ContractType);
         vManagerIDLayout = view.findViewById(R.id.textInputLayout_ManagerID);
         vManagerNameLayout = view.findViewById(R.id.textInputLayout_ManagerName);
+        vAreaMLayout = view.findViewById(R.id.textInputLayout_ProjectArea);
 
         views = new ArrayList<>();
         views.add(new Pair<>(vNameLayout, vName));
@@ -219,6 +238,7 @@ public class AddProjectFragment extends Fragment {
         views.add(new Pair<>(vAreaLayout, vArea));
         views.add(new Pair<>(vCityLayout, vCity));
         views.add(new Pair<>(vStreetLayout, vStreet));
+        views.add(new Pair<>(vAreaMLayout, vAreaM));
         views.add(new Pair<>(vTimeLayout, vTime));
         views.add(new Pair<>(vContractTypeLayout, vContractType));
         views.add(new Pair<>(vManagerIDLayout, vManagerID));
@@ -418,8 +438,8 @@ public class AddProjectFragment extends Fragment {
                 , vStreet.getText().toString()
                 , Double.parseDouble(lat)
                 , Double.parseDouble(lng)
-                , vContractType.getText().toString());
-        // TODO: include location
+                , vContractType.getText().toString()
+                , Double.parseDouble(vAreaM.getText().toString()));
         newProject.setId(projectID);
         newProject.setClient(vOfficeWork.isChecked() ? null : client);
         newProject.getAllowancesList().addAll(allowances);
@@ -473,14 +493,9 @@ public class AddProjectFragment extends Fragment {
 
     void clearInputs() {
         vRegister.setEnabled(true);
-        vName.setText(null);
-        vCity.setText(null);
-        vArea.setText(null);
-        vStreet.setText(null);
-        vContractType.setText(null);
-        vManagerID.setText(null);
-        vManagerName.setText(null);
-        vTime.setText(null);
+        for (Pair<TextInputLayout, EditText> v : views) {
+            v.second.setText(null);
+        }
         TeamID.clear();
         Team.clear();
         vManagerID.setAdapter(null);
@@ -601,103 +616,6 @@ public class AddProjectFragment extends Fragment {
             locationDialog.show(getParentFragmentManager(), "");
         }
     };
-
-    private final TextWatcher twName = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void afterTextChanged(Editable editable) {
-            hideError(vNameLayout);
-        }
-    };
-    private final TextWatcher twArea = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void afterTextChanged(Editable editable) {
-            hideError(vAreaLayout);
-        }
-    };
-    private final TextWatcher twCity = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void afterTextChanged(Editable editable) {
-            hideError(vCityLayout);
-        }
-    };
-    private final TextWatcher twStreet = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void afterTextChanged(Editable editable) {
-            hideError(vStreetLayout);
-        }
-    };
-    private final TextWatcher twTime = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void afterTextChanged(Editable editable) {
-            hideError(vTimeLayout);
-        }
-    };
-    private final TextWatcher twContractType = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void afterTextChanged(Editable editable) {
-            hideError(vContractTypeLayout);
-        }
-    };
     private final TextWatcher twProjectReference = new TextWatcher() {
         boolean removeDash = false;
 
@@ -753,6 +671,29 @@ public class AddProjectFragment extends Fragment {
                 }
             }
             hideError(vManagerIDLayout);
+        }
+    };
+    private final TextWatcher twArea = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            if (!vAreaM.getText().toString().trim().isEmpty()) {
+                double value = Double.parseDouble(vAreaM.getText().toString());
+                if (value == 0)
+                    vAreaMLayout.setError("Invalid value");
+                else
+                    hideError(vAreaMLayout);
+            } else
+                hideError(vAreaMLayout);
         }
     };
 }

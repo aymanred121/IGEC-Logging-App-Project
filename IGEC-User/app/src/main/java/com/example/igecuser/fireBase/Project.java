@@ -5,11 +5,20 @@ import java.util.Date;
 import java.util.HashMap;
 
 public class Project {
-    private String managerID,managerName,name,id , reference ,  locationCity ,locationArea ,locationStreet, contractType;
+    private String managerID;
+    private String managerName;
+    private String name;
+    private String id;
+    private String reference;
+    private String locationCity;
+    private String locationArea;
+    private String locationStreet;
+    private String contractType;
     private ArrayList<Allowance> allowancesList = new ArrayList<>();
-    private Client client ;
+    private Client client;
     private Date startDate;
     private double lng, lat;
+    private double area;
     private ArrayList<EmployeeOverview> employees;
     private HashMap<String, Object> employeeWorkedTime = new HashMap<>();
     private HashMap<String, Object> machineWorkedTime = new HashMap<>();
@@ -25,7 +34,7 @@ public class Project {
     public Project() {
     }
 
-    public Project(String managerName, String managerID, String name, Date startDate, ArrayList<EmployeeOverview> employees, String reference, String locationCity, String locationArea, String locationStreet, double lat, double lng, String contractType) {
+    public Project(String managerName, String managerID, String name, Date startDate, ArrayList<EmployeeOverview> employees, String reference, String locationCity, String locationArea, String locationStreet, double lat, double lng, String contractType, double area) {
         this.managerID = managerID;
         this.name = name;
         this.startDate = startDate;
@@ -38,6 +47,15 @@ public class Project {
         this.lng = lng;
         this.lat = lat;
         this.contractType = contractType;
+        this.area = area;
+    }
+
+    public double getArea() {
+        return area;
+    }
+
+    public void setArea(double area) {
+        this.area = area;
     }
 
     public double getLng() {

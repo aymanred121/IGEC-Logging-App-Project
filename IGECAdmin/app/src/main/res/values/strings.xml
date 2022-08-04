@@ -87,4 +87,5 @@
     <string name="menu_gallery">Gallery</string>
     <string name="menu_slideshow">Slideshow</string>
     <string name="plus_code">Plus Code</string>
+    <string name="diameter">Area (m²)</string>
 </resources>

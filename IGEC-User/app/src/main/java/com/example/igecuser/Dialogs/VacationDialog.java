@@ -16,7 +16,9 @@ import androidx.fragment.app.DialogFragment;
 
 import com.example.igecuser.R;
 import com.example.igecuser.databinding.DialogVacationBinding;
+import com.example.igecuser.fireBase.Allowance;
 import com.example.igecuser.fireBase.VacationRequest;
+import com.example.igecuser.utilites.allowancesEnum;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
@@ -117,19 +119,17 @@ public class VacationDialog extends DialogFragment {
         Calendar calendar = Calendar.getInstance();
         Date requestStartDate = vacationRequest.getStartDate();
         calendar.setTime(requestStartDate);
+        day = String.format("%02d", calendar.get(Calendar.DAY_OF_MONTH));
+        month = String.format("%02d", calendar.get(Calendar.MONTH) + 1);
+        year = String.valueOf(calendar.get(Calendar.YEAR));
         if (calendar.get(Calendar.DAY_OF_MONTH) > 25) {
             if (calendar.get(Calendar.MONTH) == 13) {
                 month = "1";
                 year = String.format("%02d", calendar.get(Calendar.YEAR) + 1);
             } else {
-                month = String.format("%02d", calendar.get(Calendar.MONTH) - 1);
+                month = String.format("%02d", calendar.get(Calendar.MONTH) + 2);
             }
-        } else {
-            day = String.format("%02d", calendar.get(Calendar.DAY_OF_MONTH));
-            month = String.format("%02d", calendar.get(Calendar.MONTH) - 1);
-            year = String.valueOf(calendar.get(Calendar.YEAR));
         }
-
         calendar.add(Calendar.DATE, vacationDays);
         Date newEndDate = calendar.getTime();
         vacationRequest.setEndDate(newEndDate);
@@ -139,6 +139,18 @@ public class VacationDialog extends DialogFragment {
         db.collection("employees").document(vacationRequest.getEmployee().getId())
                 .update("totalNumberOfVacationDays", FieldValue.increment(-vacationDays));
         //todo add the unpaid days to the employeeGrossSalary when the allowances implementation is done
+        db.collection("EmployeesGrossSalary").document(vacationRequest.getEmployee().getId()).collection(year).document(month).get().addOnSuccessListener(documentSnapshot -> {
+            if (!documentSnapshot.exists()) {
+
+            } else {
+                Allowance unPaidAllowance = new Allowance();
+                unPaidAllowance.setAmount(-unPaidDays * (vacationRequest.getEmployee().getSalary() / 30));
+                unPaidAllowance.setType(allowancesEnum.RETENTION.ordinal());
+                unPaidAllowance.setName("unpaid");
+                unPaidAllowance.setNote(String.format("%d", unPaidDays));
+                db.document(documentSnapshot.getReference().getPath()).update("allTypes",FieldValue.arrayUnion(unPaidAllowance));
+            }
+        });
     }
 
 

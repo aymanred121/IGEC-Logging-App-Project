@@ -172,7 +172,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (vDrawerLayout.isDrawerOpen(GravityCompat.START))
             vDrawerLayout.closeDrawer(GravityCompat.START);
         else
-            super.onBackPressed();
+            finish();
     }
 
     @Override

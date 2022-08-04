@@ -194,7 +194,6 @@ public class MachineFragmentDialog extends DialogFragment {
         vMachineByWeek.setText(String.valueOf(machine.getWeeklyRentPrice()));
         vMachineByMonth.setText(String.valueOf(machine.getMonthlyRentPrice()));
         getMachineCover();
-        //TODO load the image of machine from database
         vDatePickerBuilder.setTitleText("Purchase Date");
         vDatePicker = vDatePickerBuilder.setSelection(purchaseDate).build();
 

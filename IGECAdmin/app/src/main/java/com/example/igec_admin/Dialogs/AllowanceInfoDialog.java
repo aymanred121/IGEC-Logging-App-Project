@@ -114,7 +114,7 @@ public class AllowanceInfoDialog extends DialogFragment {
         types.add("remote");
         types.add("food");
         types.add("Other");
-        //TODO should we add a detention?
+        //help should we add a detention?
         views = new ArrayList<>();
         views.add(new Pair<>(vAllowanceNameLayout, vAllowanceType));
         views.add(new Pair<>(vAllowanceMountLayout, vAllowanceMount));

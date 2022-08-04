@@ -354,7 +354,6 @@ public class UserFragmentDialog extends DialogFragment {
         empMap.put("city", vCity.getText().toString());
         empMap.put("overTime", (Double.parseDouble(vSalary.getText().toString()) / 30.0 / 10.0) * 1.5);
         empMap.put("admin",vAdmin.isChecked());
-        //TODO discuss whether should we removed him from the projects he is in or not
 //        if(vAdmin.isChecked()){
 //            empMap.put("managerID", null);
 //            empMap.put("projectID", null);

@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
@@ -30,7 +31,8 @@ import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 public class LoginActivity extends AppCompatActivity {
-
+    public static final String IGEC = "IGEC";
+    public static final String ID = "ID";
     private TextInputEditText vEmail;
     private TextInputLayout vEmailLayout, vPasswordLayout;
     private TextInputEditText vPassword;
@@ -195,6 +197,10 @@ public class LoginActivity extends AppCompatActivity {
                             Intent intent;
                             if (currEmployee != null && currEmployee.isAdmin()) {
                                 intent = new Intent(LoginActivity.this, MainActivity.class);
+                                SharedPreferences sharedPreferences = getSharedPreferences(IGEC, MODE_PRIVATE);
+                                SharedPreferences.Editor editor = sharedPreferences.edit();
+                                editor.putString(ID, currEmployee.getId());
+                                editor.apply();
                                 startActivity(intent);
                                 finish();
                             }

@@ -17,7 +17,6 @@ import com.example.igecuser.R
 import com.example.igecuser.databinding.ActivityEdashboardBinding
 import com.example.igecuser.fireBase.Employee
 import com.google.android.material.navigation.NavigationView
-import com.google.firebase.firestore.FirebaseFirestore
 
 class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private var currEmployee: Employee? = null
@@ -42,7 +41,7 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         val graph = inflater.inflate(R.navigation.mobile_navigation_user)
         val args = Bundle()
         args.putSerializable("user", currEmployee)
-        navController.setGraph(graph,args)
+        navController.setGraph(graph, args)
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         appBarConfiguration = AppBarConfiguration(
@@ -139,7 +138,10 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
     }
 
     override fun onBackPressed() {
-        finish()
+        if (binding.drawerLayout.isDrawerOpen(GravityCompat.START))
+            binding.drawerLayout.closeDrawer(GravityCompat.START)
+        else
+            finish()
     }
 
 }

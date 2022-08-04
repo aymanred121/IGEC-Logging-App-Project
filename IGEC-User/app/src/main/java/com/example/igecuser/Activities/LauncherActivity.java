@@ -24,7 +24,6 @@ public class LauncherActivity extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         SharedPreferences preferences = getSharedPreferences(IGEC, MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
         logged = preferences.getBoolean(LOGGED, false);
 
         if (!logged) {

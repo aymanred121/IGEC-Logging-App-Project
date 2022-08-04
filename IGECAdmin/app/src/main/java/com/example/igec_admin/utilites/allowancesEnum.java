@@ -5,6 +5,6 @@ public enum allowancesEnum {
     NETSALARY,
     GIFT ,
     BONUS,
- PENALTY,
+    PENALTY,
     OVERTIME
 }

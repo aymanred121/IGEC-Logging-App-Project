@@ -304,7 +304,6 @@ public class SummaryFragment extends Fragment {
                                 .get().addOnSuccessListener(queryDocumentSnapshots -> {
                                     if (queryDocumentSnapshots.size() == 0)
                                         return;
-                                    //TODO: add project Lat and Lng when implemented
                                     for (QueryDocumentSnapshot q : queryDocumentSnapshots) {
                                         if(q.getData().get("checkOut") == null)
                                             continue;
@@ -354,7 +353,6 @@ public class SummaryFragment extends Fragment {
                         .get().addOnSuccessListener(queryDocumentSnapshots -> {
                             if (queryDocumentSnapshots.size() == 0)
                                 return;
-                            //TODO: add project Lat and Lng when implemented
                             for (QueryDocumentSnapshot q : queryDocumentSnapshots) {
                                 if(q.getData().get("checkOut") == null)
                                     continue;

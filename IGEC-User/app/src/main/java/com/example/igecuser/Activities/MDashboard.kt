@@ -56,7 +56,10 @@ class MDashboard : AppCompatActivity() , NavigationView.OnNavigationItemSelected
         navView.setNavigationItemSelectedListener(this)
     }
     override fun onBackPressed() {
-        finish()
+        if (binding.drawerLayout.isDrawerOpen(GravityCompat.START))
+            binding.drawerLayout.closeDrawer(GravityCompat.START)
+        else
+            finish()
     }
     override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()

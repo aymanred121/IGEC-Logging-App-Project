@@ -146,11 +146,6 @@ public class AddProjectFragment extends Fragment {
 
                 lat = result.getString("lat");
                 lng = result.getString("lng");
-                Toast.makeText(getActivity(), String.format(
-                                "lat: %s, lang: %s",
-                                result.getString("lat"),
-                                result.getString("lng")),
-                        Toast.LENGTH_SHORT).show();
             }
         });
     }

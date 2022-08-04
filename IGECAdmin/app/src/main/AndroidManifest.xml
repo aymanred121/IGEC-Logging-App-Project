@@ -11,8 +11,8 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -25,7 +25,10 @@
         <activity
             android:name=".Activities.MainActivity_navComp"
             android:exported="true"
-            android:theme="@style/Theme.IGECAdmin.NoActionBar" >
+            android:theme="@style/Theme.IGECAdmin.NoActionBar"></activity>
+        <activity
+            android:name=".Activities.LauncherActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -45,11 +48,7 @@
             android:configChanges="uiMode"
             android:exported="true"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan">
-
-            <!-- TODO: move this tag to login -->
-
-        </activity>
+            android:windowSoftInputMode="adjustPan"></activity>
 
         <provider
             android:name="androidx.core.content.FileProvider"

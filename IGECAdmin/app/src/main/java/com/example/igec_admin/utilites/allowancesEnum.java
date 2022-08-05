@@ -3,8 +3,13 @@ package com.example.igec_admin.utilites;
 public enum allowancesEnum {
     PROJECT,
     NETSALARY,
-    GIFT ,
+    TRANSPORTATION ,
+    ACCOMMODATION,
+    RETENTION,
+    SITE,
+    REMOTE,
+    FOOD,
     BONUS,
-    PENALTY,
-    OVERTIME
+    OVERTIME,
+    OTHER;
 }

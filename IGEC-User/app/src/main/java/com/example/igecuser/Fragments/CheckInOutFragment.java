@@ -20,7 +20,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentResultListener;
 
-
 import com.birjuvachhani.locus.Locus;
 import com.example.igecuser.Dialogs.ClientInfoDialog;
 import com.example.igecuser.Dialogs.MachineCheckInOutDialog;
@@ -54,7 +53,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.AppSettingsDialog;
@@ -77,6 +75,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     private double latitude, longitude;
     private Machine currMachine;
     private String machineEmpId;
+    private String year,month,day;
     private FusedLocationProviderClient fusedLocationClient;
     private final CollectionReference machineEmployee = db.collection("Machine_Employee");
     private final CollectionReference machineCol = db.collection("machine");
@@ -84,6 +83,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     private final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
     private final double LAT = 30.103168;
     private final double LNG = 31.373099;
+    private boolean inProjectArea;
 
     public static CheckInOutFragment newInstance(Employee user) {
         Bundle args = new Bundle();
@@ -139,6 +139,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         show = AnimationUtils.loadAnimation(getActivity(), R.anim.show);
         hide = AnimationUtils.loadAnimation(getActivity(), R.anim.hide);
         id = currEmployee.getId();
+        updateDate();
         setCheckInOutBtn();
         //check if the gps permission is granted
         if (ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -151,11 +152,23 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
     }
 
+    private void updateDate() {
+        Calendar calendar = Calendar.getInstance();
+        year = String.valueOf(calendar.get(Calendar.YEAR));
+        month = String.valueOf(calendar.get(Calendar.MONTH) + 1);
+        day = String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
+        if (Integer.parseInt(day) > 25) {
+            if (Integer.parseInt(month) + 1 == 13) {
+                month = "01";
+                year = String.format("%d", Integer.parseInt(year) + 1);
+            } else {
+                month = String.format("%02d", Integer.parseInt(month) + 1);
+            }
+        }
+    }
+
     private void setCheckInOutBtn() {
-        String currentDateAndTime = sdf.format(new Date());
-        String day = currentDateAndTime.substring(0, 2);
-        String month = currentDateAndTime.substring(3, 5);
-        String year = currentDateAndTime.substring(6, 10);
+        updateDate();
         db.collection("summary").document(id)
                 .collection(year + "-" + month)
                 .document(day)
@@ -247,11 +260,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                 return null;
                             }
                             Location location = result.getLocation();
-                            String currentDateAndTime = sdf.format(new Date());
-                            String day = currentDateAndTime.substring(0, 2);
-                            String month = currentDateAndTime.substring(3, 5);
-                            String year = currentDateAndTime.substring(6, 10);
-
+                            updateDate();
                             longitude = location.getLongitude();
                             latitude = location.getLatitude();
 
@@ -262,52 +271,55 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                             distance = results[0];
                             if (distance < project.getArea()) // he's in the project area
                             {
-                                Summary summary = new Summary(latitude, longitude);
-                                HashMap<String, Object> checkOutDetails = new HashMap<>(summary.getGeoMap());
-                                checkOutDetails.put("Time", Timestamp.now());
-                                db.collection("summary").document(id)
-                                        .collection(year + "-" + month).document(day)
-                                        .get().addOnSuccessListener(documentSnapshot -> {
-                                            if (!documentSnapshot.exists() || documentSnapshot.getData().size() == 0) {
-                                                employeeCheckIn(summary);
-                                            } else {
-                                                Summary summary1 = documentSnapshot.toObject(Summary.class);
-                                                if (summary1.getCheckOut() == null) {
-                                                    employeeCheckOut(summary1, checkOutDetails);
-                                                } else {
-                                                    summary1.setLastCheckInTime(Timestamp.now());
-                                                    db.document(documentSnapshot.getReference().getPath()).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null);
-                                                    //db.document(summary1.getLastDayPath()).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null);
-                                                    //db.collection("summary").document(id).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null);
-                                                    Toast.makeText(getContext(), "Checked In successfully!", Toast.LENGTH_SHORT).show();
-                                                    vCheckInOut.setEnabled(true);
-                                                }
-                                            }
-                                        });
-                                isHere = !isHere;
-                                vCheckInOut.setBackgroundColor((isHere) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
-                                vCheckInOut.setText(isHere ? "Out" : "In");
-                                vAddMachine.setClickable(isHere);
-                                if (isOpen) {
-                                    vAddMachine.startAnimation(rotateBackwardHide);
-                                    vAddMachineInside.startAnimation(fabClose);
-                                    vAddMachineOutside.startAnimation(fabClose);
-                                    vInsideText.startAnimation(hide);
-                                    vOutsideText.startAnimation(hide);
-                                    vAddMachineInside.setClickable(false);
-                                    vAddMachineOutside.setClickable(false);
-                                    isOpen = false;
-                                } else {
-                                    vAddMachine.startAnimation(isHere ? show : hide);
-                                }
+                                inProjectArea = true;
                             } else // he's not, or he's on office work
                             {
                                 Location.distanceBetween(latitude, longitude, LAT, LNG, results);
                                 distance = results[0];
-                                if (distance < 18700 /*TODO Help placeholder for office area*/)
+                                if (distance < 18700 /*TODO Help placeholder for office area*/){
+                                    inProjectArea = false;
                                     Toast.makeText(getActivity(), "You're in the office", Toast.LENGTH_SHORT).show();
-                                else
+                                }
+                                else{
                                     Toast.makeText(getActivity(), "You're not in the project area", Toast.LENGTH_SHORT).show();
+                                    return null;
+                                }
+                            }
+                            Summary summary = new Summary(latitude, longitude);
+                            HashMap<String, Object> checkOutDetails = new HashMap<>(summary.getGeoMap());
+                            checkOutDetails.put("Time", Timestamp.now());
+                            db.collection("summary").document(id)
+                                    .collection(year + "-" + month).document(day)
+                                    .get().addOnSuccessListener(documentSnapshot -> {
+                                        if (!documentSnapshot.exists() || documentSnapshot.getData().size() == 0) {
+                                            employeeCheckIn(summary);
+                                        } else {
+                                            Summary summary1 = documentSnapshot.toObject(Summary.class);
+                                            if (summary1.getCheckOut() == null) {
+                                                employeeCheckOut(summary1, checkOutDetails);
+                                            } else {
+                                                summary1.setLastCheckInTime(Timestamp.now());
+                                                db.document(documentSnapshot.getReference().getPath()).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null);
+                                                Toast.makeText(getContext(), "Checked In successfully!", Toast.LENGTH_SHORT).show();
+                                                vCheckInOut.setEnabled(true);
+                                            }
+                                        }
+                                    });
+                            isHere = !isHere;
+                            vCheckInOut.setBackgroundColor((isHere) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
+                            vCheckInOut.setText(isHere ? "Out" : "In");
+                            vAddMachine.setClickable(isHere);
+                            if (isOpen) {
+                                vAddMachine.startAnimation(rotateBackwardHide);
+                                vAddMachineInside.startAnimation(fabClose);
+                                vAddMachineOutside.startAnimation(fabClose);
+                                vInsideText.startAnimation(hide);
+                                vOutsideText.startAnimation(hide);
+                                vAddMachineInside.setClickable(false);
+                                vAddMachineOutside.setClickable(false);
+                                isOpen = false;
+                            } else {
+                                vAddMachine.startAnimation(isHere ? show : hide);
                             }
                             return null;
 
@@ -319,25 +331,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     };
 
     private void employeeCheckOut(Summary summary, HashMap<String, Object> checkOut) {
-        //get current year and month from date
-        String currentDateAndTime = sdf.format(new Date());
-        String day = currentDateAndTime.substring(0, 2);
-        String month = currentDateAndTime.substring(3, 5);
-        String year = currentDateAndTime.substring(6, 10);
-        int dayInt = Integer.parseInt(day);
-        if (dayInt > 25) {
-            if (Integer.parseInt(month) + 1 == 13) {
-                month = "1";
-                year = String.valueOf(Integer.parseInt(year) + 1);
-            } else {
-                month = String.valueOf(Integer.parseInt(month) + 1);
-                if (month.length() == 1) {
-                    month = "0" + month;
-                }
-            }
-        }
-        String finalMonth = month;
-        String finalYear = year;
+        updateDate();
         long checkInTime = (summary.getLastCheckInTime()).getSeconds();
         long checkOutTime = Timestamp.now().getSeconds();
         long workingTime = (checkOutTime - checkInTime);
@@ -349,7 +343,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                 .addOnSuccessListener(unused -> {
                     db.collection("summary")
                             .document(id)
-                            .collection(finalYear + "-" + finalMonth)
+                            .collection(year + "-" + month)
                             .document(day)
                             .get().addOnSuccessListener(doc -> {
                                 long workingTime1 = (long) doc.getData().get("workingTime");
@@ -374,14 +368,14 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                 overTimeAllowance.setNote(prevDay);
                                 overTimeAllowance.setType(allowancesEnum.OVERTIME.ordinal());
                                 overTimeAllowance.setProjectId(currEmployee.getProjectID());
-                                db.collection("EmployeesGrossSalary").document(id).collection(finalYear).document(finalMonth).get().addOnSuccessListener(doc1 -> {
+                                db.collection("EmployeesGrossSalary").document(id).collection(year).document(month).get().addOnSuccessListener(doc1 -> {
                                     EmployeesGrossSalary emp = doc1.toObject(EmployeesGrossSalary.class);
                                     ArrayList<Allowance> allowanceArrayList = emp.getAllTypes();
                                     if (allowanceArrayList != null) {
                                         allowanceArrayList.removeIf(x -> x.getName().equals("overTime") && x.getNote().trim().equals(day));
                                     }
                                     allowanceArrayList.add(overTimeAllowance);
-                                    db.collection("EmployeesGrossSalary").document(id).collection(finalYear).document(finalMonth).update("allTypes", allowanceArrayList);
+                                    db.collection("EmployeesGrossSalary").document(id).collection(year).document(month).update("allTypes", allowanceArrayList);
                                 });
                             });
 
@@ -394,22 +388,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     }
 
     private void employeeCheckIn(Summary summary) {
-        //get current year and month from date
-        String currentDateAndTime = sdf.format(new Date());
-        String day = currentDateAndTime.substring(0, 2);
-        String month = currentDateAndTime.substring(3, 5);
-        String year = currentDateAndTime.substring(6, 10);
-        //each month starts in 25th and end 24th of the next month
-        if (Integer.parseInt(day) > 25) {
-            if (Integer.parseInt(month) + 1 == 13) {
-                month = "1";
-                year = Integer.parseInt(year) + 1 + "";
-            } else {
-                month = String.format("%02d", Integer.parseInt(month) + 1);
-            }
-        }
-        String finalMonth = month;
-        String finalYear = year;
+        updateDate();
         summary.setLastCheckInTime(Timestamp.now());
         HashMap<String, Object> checkInDetails = new HashMap<>(summary.getGeoMap());
         checkInDetails.put("Time", Timestamp.now());
@@ -424,23 +403,48 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                 db.collection("EmployeesGrossSalary").document(currEmployee.getId()).get().addOnSuccessListener(documentSnapshot -> {
                     if (!documentSnapshot.exists()) return;
                     EmployeesGrossSalary employeesGrossSalary = documentSnapshot.toObject(EmployeesGrossSalary.class);
-                    employeesGrossSalary.setBaseAllowances(employeesGrossSalary.getAllTypes().stream().filter(x -> x.getType() == allowancesEnum.PROJECT.ordinal()).collect(Collectors.toCollection(ArrayList::new)));
-                    employeesGrossSalary.getAllTypes().removeIf(x -> x.getType() == allowancesEnum.PROJECT.ordinal());
-                    for (Allowance i : employeesGrossSalary.getBaseAllowances()) {
-                        if (i.getType() != allowancesEnum.BONUS.ordinal())
-                            i.setNote(day);
-                        employeesGrossSalary.getAllTypes().add(i);
+                    ArrayList<Allowance> allowances = new ArrayList<>();
+                    ArrayList<Allowance> allTypes = employeesGrossSalary.getAllTypes();
+                    for (int i = 0; i < allTypes.size(); i++) {
+                        Allowance allowance = allTypes.get(i);
+                        if (allowance.getType() != allowancesEnum.NETSALARY.ordinal()) {
+                            allowances.add(allowance);
+                            employeesGrossSalary.getAllTypes().remove(i);
+                        }
+                    }
+                    employeesGrossSalary.setBaseAllowances(allowances);
+                    for (Allowance allowance : employeesGrossSalary.getBaseAllowances()) {
+                        if(!inProjectArea){
+                            //TODO set allowances to be added when in the office
+                            if(allowance.getType() == allowancesEnum.PROJECT.ordinal()){
+                                allowance.setNote(day);
+                                employeesGrossSalary.getAllTypes().add(allowance);
+                            }
+                        }else{
+                            if (allowance.getType() != allowancesEnum.BONUS.ordinal()) {
+                                allowance.setNote(day);
+                            }
+                            employeesGrossSalary.getAllTypes().add(allowance);
+                        }
                     }
                     db.document(doc.getReference().getPath()).set(employeesGrossSalary, SetOptions.merge());
                 });
                 return;
             }
             EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
-            for (Allowance i : employeesGrossSalary.getBaseAllowances()) {
-                i.setNote(day);
-                employeesGrossSalary.getAllTypes().add(i);
+
+            for (Allowance allowance : employeesGrossSalary.getBaseAllowances()) {
+                if(!inProjectArea){
+                    //TODO set allowances to be added when in the office
+                    if(allowance.getType() == allowancesEnum.PROJECT.ordinal()){
+                        allowance.setNote(day);
+                        employeesGrossSalary.getAllTypes().add(allowance);
+                    }
+                }
+                allowance.setNote(day);
+                employeesGrossSalary.getAllTypes().add(allowance);
             }
-            db.collection("EmployeesGrossSalary").document(currEmployee.getId()).collection(finalYear).document(finalMonth).set(employeesGrossSalary, SetOptions.merge());
+            db.collection("EmployeesGrossSalary").document(currEmployee.getId()).collection(year).document(month).set(employeesGrossSalary, SetOptions.merge());
 
         });
     }

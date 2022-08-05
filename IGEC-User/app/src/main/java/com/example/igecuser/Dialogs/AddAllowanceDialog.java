@@ -230,7 +230,10 @@ public class AddAllowanceDialog extends DialogFragment {
                 });
             } else {
                 //Added projectId to each allowance that is coming from project
-                allowances.forEach(allowance -> allowance.setProjectId(manager.getProjectID()));
+                allowances.forEach(allowance -> {
+                    allowance.setProjectId(manager.getProjectID());
+                    allowance.setType(allowancesEnum.PROJECT.ordinal());
+                });
                 db.collection("projects").document(manager.getProjectID()).get().addOnSuccessListener(documentSnapshot -> {
                     if (!documentSnapshot.exists())
                         return;

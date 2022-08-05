@@ -227,10 +227,9 @@ public class SummaryFragment extends Fragment {
                                             remote += allowance.getAmount();
                                         } else if (allowance.getName().trim().equalsIgnoreCase("food")) {
                                             food += allowance.getAmount();
-                                        } else if (allowance.getType() == allowancesEnum.PENALTY.ordinal()) {
+                                        } else if (allowance.getType() == allowancesEnum.RETENTION.ordinal()) {
                                             cuts += allowance.getAmount();
-                                        } else if (allowance.getType() == allowancesEnum.GIFT.ordinal() ||
-                                                allowance.getType() == allowancesEnum.BONUS.ordinal()) {
+                                        } else if (allowance.getType() == allowancesEnum.BONUS.ordinal()) {
                                             personal += allowance.getAmount();
                                         } else if (allowance.getType() == allowancesEnum.OVERTIME.ordinal()) {
                                             overTime += allowance.getAmount();
@@ -248,7 +247,7 @@ public class SummaryFragment extends Fragment {
                                                 continue;
                                             if (allowance.getName().trim().equalsIgnoreCase("Transportation"))
                                                 continue;
-                                            if (allowance.getType() == allowancesEnum.PENALTY.ordinal()) {
+                                            if (allowance.getType() == allowancesEnum.RETENTION.ordinal()) {
                                                 continue;
                                             } else if (allowance.getType() == allowancesEnum.OVERTIME.ordinal()) {
                                                 continue;

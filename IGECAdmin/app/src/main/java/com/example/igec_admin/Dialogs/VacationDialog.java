@@ -147,7 +147,7 @@ public class VacationDialog extends DialogFragment {
             } else {
                 Allowance unPaidAllowance = new Allowance();
                 unPaidAllowance.setAmount(-unPaidDays * (vacationRequest.getEmployee().getSalary() / 30));
-                unPaidAllowance.setType(allowancesEnum.PENALTY.ordinal());
+                unPaidAllowance.setType(allowancesEnum.RETENTION.ordinal());
                 unPaidAllowance.setName("unpaid");
                 unPaidAllowance.setNote(String.format("%d", unPaidDays));
                 db.document(documentSnapshot.getReference().getPath()).update("allTypes", FieldValue.arrayUnion(unPaidAllowance));

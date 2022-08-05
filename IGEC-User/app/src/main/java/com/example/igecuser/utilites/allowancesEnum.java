@@ -5,11 +5,11 @@ public enum allowancesEnum {
     NETSALARY,
     TRANSPORTATION ,
     ACCOMMODATION,
+    RETENTION,
     SITE,
     REMOTE,
     FOOD,
-    RETENTION,
     BONUS,
     OVERTIME,
-    OTHER
+    OTHER;
 }

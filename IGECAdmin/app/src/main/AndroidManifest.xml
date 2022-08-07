@@ -25,10 +25,13 @@
         <activity
             android:name=".Activities.MainActivity_navComp"
             android:exported="true"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.IGECAdmin.NoActionBar"></activity>
         <activity
             android:name=".Activities.LauncherActivity"
-            android:exported="true">
+            android:exported="true"
+            android:screenOrientation="portrait"
+            android:theme="@style/SplashScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

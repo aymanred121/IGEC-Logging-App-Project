@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">User</string>
+    <string name="app_name">IGEC RP</string>
     <string name="vacation_date">Date</string>
     <string name="vacation_reason">Note</string>
     <string name="send_vacation_request">Send Vacation Request</string>

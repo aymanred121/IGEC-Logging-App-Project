@@ -5,10 +5,13 @@
       <map>
         <entry key="../../../../../../../layout/custom_preview.xml" value="0.10104166666666667" />
         <entry key="../../../../../layout/custom_preview.xml" value="0.22083333333333333" />
+        <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/drawable/background_splashscreen.xml" value="0.104" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/drawable/ic_baseline_access_time_24.xml" value="0.168" />
+        <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/drawable/ic_samsung_galaxy_s10___1.xml" value="0.104" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/activity_edashboard.xml" value="0.1" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/activity_employee_dashboard.xml" value="0.16" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/activity_employee_dashboard2.xml" value="0.16847826086956522" />
+        <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/activity_launcher.xml" value="0.16847826086956522" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/activity_main.xml" value="0.5" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/activity_manager_dashboard.xml" value="0.18432971014492755" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGEC-User/app/src/main/res/layout/activity_manager_dashboard2.xml" value="0.16847826086956522" />

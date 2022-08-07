@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.igecuser.R;
 import com.example.igecuser.fireBase.Allowance;
+import com.example.igecuser.utilites.allowancesEnum;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
@@ -43,9 +44,10 @@ public class AllowanceAdapter extends RecyclerView.Adapter<AllowanceAdapter.Allo
         Allowance allowance = allowances.get(position);
         holder.vName.setText(allowance.getName());
         holder.vNote.setText(allowance.getNote() == null ? "" : String.format("Note: %s", allowance.getNote()));
+
         holder.vAmount.setText(String.format("%.2f EGP", allowance.getAmount()));
-        if (allowance.getName().equals("Net salary")) return;
-        if (allowance.getAmount() > 0) {
+        if (allowance.getType()==allowancesEnum.NETSALARY.ordinal()) return;
+        if (allowance.getType()!=allowancesEnum.RETENTION.ordinal()) {
             holder.vAmount.setTextColor(Color.rgb(0, 153, 0));
             holder.vAmount.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_round_trending_up_24, 0, 0, 0);
             setTextViewDrawableColor(holder.vAmount, Color.rgb(0, 153, 0));

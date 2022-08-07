@@ -17,6 +17,7 @@ import androidx.fragment.app.DialogFragment;
 import com.example.igec_admin.R;
 import com.example.igec_admin.databinding.DialogVacationBinding;
 import com.example.igec_admin.fireBase.Allowance;
+import com.example.igec_admin.fireBase.EmployeesGrossSalary;
 import com.example.igec_admin.fireBase.VacationRequest;
 import com.example.igec_admin.utilites.allowancesEnum;
 import com.google.firebase.firestore.FieldValue;
@@ -24,6 +25,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -140,13 +142,28 @@ public class VacationDialog extends DialogFragment {
                 .set(vacationRequest, SetOptions.merge());
         db.collection("employees").document(vacationRequest.getEmployee().getId())
                 .update("totalNumberOfVacationDays", FieldValue.increment(-(vacationDays - unPaidDays)));
-        //todo add the unpaid days to the employeeGrossSalary when the allowances implementation is done
+        if(unPaidDays==0)
+            return;
         db.collection("EmployeesGrossSalary").document(vacationRequest.getEmployee().getId()).collection(year).document(month).get().addOnSuccessListener(documentSnapshot -> {
             if (!documentSnapshot.exists()) {
-
+                //new month
+                db.collection("EmployeesGrossSalary").document(vacationRequest.getEmployee().getId()).get().addOnSuccessListener(doc->{
+                    if(!doc.exists())
+                        return;
+                    EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
+                    employeesGrossSalary.getAllTypes().stream().filter(allowance -> allowance.getType() == allowancesEnum.PROJECT.ordinal()).forEach(allowance -> employeesGrossSalary.getBaseAllowances().add(allowance));
+                    employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType()!=allowancesEnum.NETSALARY.ordinal());
+                    Allowance unPaidAllowance = new Allowance();
+                    unPaidAllowance.setAmount(unPaidDays * (vacationRequest.getEmployee().getSalary() / 30));
+                    unPaidAllowance.setType(allowancesEnum.RETENTION.ordinal());
+                    unPaidAllowance.setName("unpaid");
+                    unPaidAllowance.setNote(String.format("%d", unPaidDays));
+                    employeesGrossSalary.getAllTypes().add(unPaidAllowance);
+                    db.document(documentSnapshot.getReference().getPath()).set(employeesGrossSalary,SetOptions.merge());
+                });
             } else {
                 Allowance unPaidAllowance = new Allowance();
-                unPaidAllowance.setAmount(-unPaidDays * (vacationRequest.getEmployee().getSalary() / 30));
+                unPaidAllowance.setAmount(unPaidDays * (vacationRequest.getEmployee().getSalary() / 30));
                 unPaidAllowance.setType(allowancesEnum.RETENTION.ordinal());
                 unPaidAllowance.setName("unpaid");
                 unPaidAllowance.setNote(String.format("%d", unPaidDays));

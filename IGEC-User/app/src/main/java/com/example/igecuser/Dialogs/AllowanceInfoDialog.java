@@ -22,12 +22,14 @@ import androidx.fragment.app.DialogFragment;
 import com.example.igecuser.R;
 import com.example.igecuser.fireBase.Allowance;
 import com.example.igecuser.fireBase.Employee;
+import com.example.igecuser.utilites.allowancesEnum;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class AllowanceInfoDialog extends DialogFragment {
     private TextInputEditText vAllowanceMount, vAllowanceName, vAllowanceNote;
@@ -41,6 +43,7 @@ public class AllowanceInfoDialog extends DialogFragment {
     private ArrayList<String> allowancesList = new ArrayList<>();
     private boolean canGivePenalty, isProject;
     private String EmployeeID;
+    private double baseSalary;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     public AllowanceInfoDialog(int position, boolean canGivePenalty, boolean isProject, String id) {
@@ -50,12 +53,13 @@ public class AllowanceInfoDialog extends DialogFragment {
         this.EmployeeID = id;
     }
 
-    public AllowanceInfoDialog(int position, Allowance allowance, boolean canGivePenalty, boolean isProject, String id) {
+    public AllowanceInfoDialog(int position, Allowance allowance, boolean canGivePenalty, boolean isProject, String id,double baseSalary) {
         this.position = position;
         this.allowance = allowance;
         this.canGivePenalty = canGivePenalty;
         this.isProject = isProject;
         this.EmployeeID = id;
+        this.baseSalary = baseSalary;
     }
 
 
@@ -127,8 +131,7 @@ public class AllowanceInfoDialog extends DialogFragment {
                 vAllowanceType.setText(types.get(types.size() - 1));
                 vAllowanceName.setText(allowance.getName());
             }
-
-            vAllowanceMount.setText(String.format("%.2f", Math.abs(allowance.getAmount())));
+            vAllowanceMount.setText(allowance.getName().equals("Retention by Days")? String.format("%d",(int)(allowance.getAmount()*30/baseSalary)): String.format("%.2f", Math.abs(allowance.getAmount())));
             vAllowanceNote.setText(allowance.getNote());
         }
         ArrayAdapter<String> allowancesAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, allowancesList);
@@ -184,13 +187,9 @@ public class AllowanceInfoDialog extends DialogFragment {
                 Allowance allowance = new Allowance();
                 boolean isOther = vAllowanceType.getText().toString().equals("Other");
                 allowance.setName(isOther ? vAllowanceName.getText().toString() : vAllowanceType.getText().toString().trim());
-                // TODO override amount value if it was days or retention with a negative value
                 allowance.setAmount(Double.parseDouble(vAllowanceMount.getText().toString()));
                 allowance.setNote(vAllowanceNote.getText().toString());
 
-                //TODO two properties to be set next Type and projectID
-                // allowance.setProjectId();
-                // allowance.setType();
                 if (isProject) {
                     result.putSerializable("allowance", allowance);
                     result.putInt("position", position);
@@ -201,25 +200,17 @@ public class AllowanceInfoDialog extends DialogFragment {
                     dismiss();
 
                 } else {
-                    Employee[] temp = new Employee[1];
-                    double[] baseSalary = new double[1];
                     db.collection("employees").document(EmployeeID).get().addOnSuccessListener(value -> {
                         if (!value.exists()) return;
-                        temp[0] = value.toObject(Employee.class);
-                        baseSalary[0] = temp[0].getSalary();
-                        //TODO use type instead of modes
-//                        if (vMode.isChecked() && vPenalty.isChecked())
-//                            amount.updateAndGet(v1 -> new Double((double) (v1 * (baseSalary[0] / 30))));
-//                        allowance.setNote(vAllowanceNote.getText().toString());
-//                        if (vPenalty.isChecked()) {
-//                            allowance.setAmount(-1 * amount.get());
-//                            allowance.setType(allowancesEnum.RETENTION.ordinal());
-//                        } else {
-//                            allowance.setAmount(amount.get());
-//                            allowance.setType(vMode.isChecked()?allowancesEnum.BONUS.ordinal(): allowancesEnum.valueOf(vAllowanceName.getText().toString().toUpperCase(Locale.ROOT)).ordinal());
-//
-//                        }
-
+                       Employee employee = value.toObject(Employee.class);
+                        if(vAllowanceType.getText().toString().equals("Retention by Days") || vAllowanceType.getText().toString().equals("Retention by Amount")){
+                            allowance.setType(allowancesEnum.RETENTION.ordinal());
+                            if(vAllowanceType.getText().toString().equals("Retention by Days")){
+                                allowance.setAmount(allowance.getAmount()*(employee.getSalary()/30.0));
+                            }
+                        }else{
+                            allowance.setType(allowancesEnum.valueOf(vAllowanceType.getText().toString().toUpperCase(Locale.ROOT)).ordinal());
+                        }
                         result.putSerializable("allowance", allowance);
                         result.putInt("position", position);
                         if (position == -1)

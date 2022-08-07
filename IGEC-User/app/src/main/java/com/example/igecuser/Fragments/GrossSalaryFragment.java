@@ -19,6 +19,7 @@ import com.example.igecuser.Adapters.AllowanceAdapter;
 import com.example.igecuser.R;
 import com.example.igecuser.fireBase.Allowance;
 import com.example.igecuser.fireBase.EmployeesGrossSalary;
+import com.example.igecuser.utilites.allowancesEnum;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -111,7 +112,7 @@ public class GrossSalaryFragment extends Fragment {
                 if(allowance.getAmount()==0)
                     continue;
                 salarySummaries.add(allowance);
-                salarySummary += allowance.getAmount();
+                salarySummary -= allowance.getType() == allowancesEnum.RETENTION.ordinal() ? allowance.getAmount() : -allowance.getAmount();
             }
             vGrossSalary.setText(String.format("%.2f EGP", salarySummary));
             vGrossSalary.setTextColor(Color.rgb(salarySummary > 0 ? 0 : 153, salarySummary > 0 ? 153 : 0, 0));

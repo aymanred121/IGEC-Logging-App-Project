@@ -414,13 +414,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                     }
                     employeesGrossSalary.setBaseAllowances(allowances);
                     for (Allowance allowance : employeesGrossSalary.getBaseAllowances()) {
-                        if(!inProjectArea){
-                            //TODO set allowances to be added when in the office
-                            if(allowance.getType() == allowancesEnum.PROJECT.ordinal()){
-                                allowance.setNote(day);
-                                employeesGrossSalary.getAllTypes().add(allowance);
-                            }
-                        }else{
+                        if(inProjectArea){
                             if (allowance.getType() != allowancesEnum.BONUS.ordinal()) {
                                 allowance.setNote(day);
                             }
@@ -434,15 +428,10 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
             EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
 
             for (Allowance allowance : employeesGrossSalary.getBaseAllowances()) {
-                if(!inProjectArea){
-                    //TODO set allowances to be added when in the office
-                    if(allowance.getType() == allowancesEnum.PROJECT.ordinal()){
+                if(inProjectArea){
                         allowance.setNote(day);
                         employeesGrossSalary.getAllTypes().add(allowance);
-                    }
                 }
-                allowance.setNote(day);
-                employeesGrossSalary.getAllTypes().add(allowance);
             }
             db.collection("EmployeesGrossSalary").document(currEmployee.getId()).collection(year).document(month).set(employeesGrossSalary, SetOptions.merge());
 

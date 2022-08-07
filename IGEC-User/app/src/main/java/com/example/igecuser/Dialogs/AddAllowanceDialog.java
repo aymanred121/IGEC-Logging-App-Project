@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -51,6 +52,7 @@ public class AddAllowanceDialog extends DialogFragment {
     private Project project;
     private Employee manager;
     private String month, year;
+    private Double baseSalary;
 
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -160,11 +162,10 @@ public class AddAllowanceDialog extends DialogFragment {
                     return;
                 //allowances.clear();
                 EmployeesGrossSalary employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
+                baseSalary = employeesGrossSalary.getAllTypes().stream().filter(x -> x.getType() == allowancesEnum.NETSALARY.ordinal()).findFirst().map(Allowance::getAmount).orElse(baseSalary);
                 //Adds only Bonuses and penalties
-                // get (penalty || gift )
-                employeesGrossSalary.getAllTypes().stream().filter(allowance -> allowance.getType() == allowancesEnum.RETENTION.ordinal()).forEach(allowance -> allowances.add(allowance));
-                // get (bonus)
-                employeesGrossSalary.getBaseAllowances().stream().filter(allowance -> allowance.getType() == allowancesEnum.BONUS.ordinal()).forEach(allowance -> allowances.add(allowance));
+                // get (penalty || bonus )
+                employeesGrossSalary.getAllTypes().stream().filter(allowance -> allowance.getType() == allowancesEnum.RETENTION.ordinal() || allowance.getType() == allowancesEnum.BONUS.ordinal()).forEach(allowance -> allowances.add(allowance));
                 adapter.notifyDataSetChanged();
             });
         }
@@ -201,6 +202,7 @@ public class AddAllowanceDialog extends DialogFragment {
                             employeesGrossSalary1.setBaseAllowances(employeesGrossSalary1.getAllTypes().stream().filter(x -> !x.getProjectId().trim().isEmpty()).collect(Collectors.toCollection(ArrayList::new)));
                             employeesGrossSalary1.getAllTypes().removeIf(x -> x.getType() != allowancesEnum.NETSALARY.ordinal());
                             employeesGrossSalary1.getAllTypes().addAll(oneTimeAllowances);
+                            employeesGrossSalary1.getAllTypes().addAll(bonus);
                             employeesGrossSalary1.getBaseAllowances().addAll(permanentAllowances);
                             db.document(doc.getReference().getPath()).set(employeesGrossSalary1, SetOptions.mergeFields("allTypes", "baseAllowances"));
                             return;
@@ -212,10 +214,10 @@ public class AddAllowanceDialog extends DialogFragment {
                          else remove it from the baseAllowances
                         */
                         if (bonus.size() != 0) {
-                            employeesGrossSalary.getBaseAllowances().removeIf(x -> x.getType() == allowancesEnum.BONUS.ordinal());
-                            employeesGrossSalary.getBaseAllowances().addAll(bonus);
+                            employeesGrossSalary.getAllTypes().removeIf(x -> x.getType() == allowancesEnum.BONUS.ordinal());
+                            employeesGrossSalary.getAllTypes().addAll(bonus);
                         } else {
-                            employeesGrossSalary.getBaseAllowances().removeIf(x -> x.getType() == allowancesEnum.BONUS.ordinal());
+                            employeesGrossSalary.getAllTypes().removeIf(x -> x.getType() == allowancesEnum.BONUS.ordinal());
                         }
                         employeesGrossSalary.getAllTypes().removeIf(x -> x.getType() == allowancesEnum.RETENTION.ordinal());
                         employeesGrossSalary.getAllTypes().addAll(oneTimeAllowances);
@@ -286,7 +288,8 @@ public class AddAllowanceDialog extends DialogFragment {
     private final AllowanceAdapter.OnItemClickListener oclItemClickListener = new AllowanceAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position) {
-            AllowanceInfoDialog allowanceInfoDialog = new AllowanceInfoDialog(position, allowances.get(position), canGivePenalty, isProject, (employee != null) ? employee.getId() : null);
+
+            AllowanceInfoDialog allowanceInfoDialog = new AllowanceInfoDialog(position, allowances.get(position), canGivePenalty, isProject, (employee != null) ? employee.getId() : null,baseSalary);
             allowanceInfoDialog.show(getParentFragmentManager(), "");
         }
 

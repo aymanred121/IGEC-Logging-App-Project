@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import android.widget.TextView
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.NavArgument
@@ -20,7 +21,7 @@ import com.example.igecuser.databinding.ActivityMdashboardBinding
 import com.example.igecuser.fireBase.Employee
 import com.google.android.material.navigation.NavigationView
 
-class MDashboard : AppCompatActivity() , NavigationView.OnNavigationItemSelectedListener {
+class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private var currManager: Employee? = null
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMdashboardBinding
@@ -42,7 +43,7 @@ class MDashboard : AppCompatActivity() , NavigationView.OnNavigationItemSelected
         val graph = inflater.inflate(R.navigation.mobile_navigation_manager)
         val args = Bundle()
         args.putSerializable("user", currManager)
-        navController.setGraph(graph,args)
+        navController.setGraph(graph, args)
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         appBarConfiguration = AppBarConfiguration(
@@ -54,13 +55,21 @@ class MDashboard : AppCompatActivity() , NavigationView.OnNavigationItemSelected
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
         navView.setNavigationItemSelectedListener(this)
+
+        binding.navView.getHeaderView(0).findViewById<TextView>(R.id.EmployeeName).text =
+            "${currManager?.firstName} ${currManager?.lastName}";
+        binding.navView.getHeaderView(0).findViewById<TextView>(R.id.EmployeeID).text =
+            currManager?.id;
+
     }
+
     override fun onBackPressed() {
         if (binding.drawerLayout.isDrawerOpen(GravityCompat.START))
             binding.drawerLayout.closeDrawer(GravityCompat.START)
         else
             finish()
     }
+
     override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
     }
@@ -73,26 +82,35 @@ class MDashboard : AppCompatActivity() , NavigationView.OnNavigationItemSelected
             override fun onDrawerClosed(drawerView: View) {
                 // This method will be called after drawer animation finishes
                 // Perform the fragment replacement
-                if(lastTab != item.itemId) {
+                if (lastTab != item.itemId) {
                     when (item.itemId) {
                         R.id.nav_check_in_out -> {
                             binding.toolbar.title = getString(R.string.check_in_out)
                             supportFragmentManager.beginTransaction()
-                                .replace(R.id.nav_host_fragment_content_main, CheckInOutFragment.newInstance(currManager))
+                                .replace(
+                                    R.id.nav_host_fragment_content_main,
+                                    CheckInOutFragment.newInstance(currManager)
+                                )
                                 .addToBackStack(null)
                                 .commit()
                         }
                         R.id.nav_change_password -> {
                             binding.toolbar.title = getString(R.string.change_password)
                             supportFragmentManager.beginTransaction()
-                                .replace(R.id.nav_host_fragment_content_main, ChangePasswordFragment.newInstance(currManager))
+                                .replace(
+                                    R.id.nav_host_fragment_content_main,
+                                    ChangePasswordFragment.newInstance(currManager)
+                                )
                                 .addToBackStack(null)
                                 .commit()
                         }
                         R.id.nav_gross_salary -> {
                             binding.toolbar.title = getString(R.string.gross_salary)
                             supportFragmentManager.beginTransaction()
-                                .replace(R.id.nav_host_fragment_content_main, GrossSalaryFragment.newInstance(currManager!!.id))
+                                .replace(
+                                    R.id.nav_host_fragment_content_main,
+                                    GrossSalaryFragment.newInstance(currManager!!.id)
+                                )
                                 .addToBackStack(null)
                                 .commit()
                         }
@@ -100,21 +118,30 @@ class MDashboard : AppCompatActivity() , NavigationView.OnNavigationItemSelected
                         R.id.nav_send_vacation_request -> {
                             binding.toolbar.title = getString(R.string.send_vacation_request)
                             supportFragmentManager.beginTransaction()
-                                .replace(R.id.nav_host_fragment_content_main, SendVacationRequestFragment.newInstance(currManager))
+                                .replace(
+                                    R.id.nav_host_fragment_content_main,
+                                    SendVacationRequestFragment.newInstance(currManager)
+                                )
                                 .addToBackStack(null)
                                 .commit()
                         }
                         R.id.nav_vacation_requests -> {
                             binding.toolbar.title = getString(R.string.vacation_requests)
                             supportFragmentManager.beginTransaction()
-                                .replace(R.id.nav_host_fragment_content_main, VacationRequestsFragment.newInstance(currManager))
+                                .replace(
+                                    R.id.nav_host_fragment_content_main,
+                                    VacationRequestsFragment.newInstance(currManager)
+                                )
                                 .addToBackStack(null)
                                 .commit()
                         }
                         R.id.nav_vacations_log -> {
                             binding.toolbar.title = getString(R.string.vacations_log)
                             supportFragmentManager.beginTransaction()
-                                .replace(R.id.nav_host_fragment_content_main, VacationsLogFragment.newInstance(currManager,false))
+                                .replace(
+                                    R.id.nav_host_fragment_content_main,
+                                    VacationsLogFragment.newInstance(currManager, false)
+                                )
                                 .addToBackStack(null)
                                 .commit()
                         }
@@ -142,7 +169,10 @@ class MDashboard : AppCompatActivity() , NavigationView.OnNavigationItemSelected
                         R.id.nav_project_summary -> {
                             binding.toolbar.title = getString(R.string.project_summary)
                             supportFragmentManager.beginTransaction()
-                                .replace(R.id.nav_host_fragment_content_main, ProjectSummaryFragment.newInstance(currManager))
+                                .replace(
+                                    R.id.nav_host_fragment_content_main,
+                                    ProjectSummaryFragment.newInstance(currManager)
+                                )
                                 .addToBackStack(null)
                                 .commit()
                         }

@@ -22,7 +22,8 @@
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
-
+    <string name="name">Name</string>
+    <string name="allowance_type">Type</string>
     <string name="good_morning">Good morning,</string>
     <string name="change_password">Change Password</string>
     <string name="new_password">New Password</string>

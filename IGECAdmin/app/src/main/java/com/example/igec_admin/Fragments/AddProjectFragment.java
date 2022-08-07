@@ -594,7 +594,7 @@ public class AddProjectFragment extends Fragment {
     private final View.OnClickListener oclAddAllowance = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            AddAllowanceDialog addAllowanceDialog = new AddAllowanceDialog(allowances);
+            AddAllowanceDialog addAllowanceDialog = new AddAllowanceDialog((ArrayList<Allowance>) allowances.clone());
             addAllowanceDialog.show(getParentFragmentManager(), "");
         }
     };

@@ -3,6 +3,7 @@ package com.example.igecuser.Activities
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -53,6 +54,11 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
         navView.setNavigationItemSelectedListener(this)
+
+        binding.navView.getHeaderView(0).findViewById<TextView>(R.id.EmployeeName).text =
+            "${currEmployee?.firstName} ${currEmployee?.lastName}";
+        binding.navView.getHeaderView(0).findViewById<TextView>(R.id.EmployeeID).text =
+            currEmployee?.id;
 
     }
 

@@ -100,13 +100,12 @@ public class AddAllowanceDialog extends DialogFragment {
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
                 // We use a String here, but any type that can be put in a Bundle is supported
                 int position = bundle.getInt("position");
-                String note = bundle.getString("note");
                 Allowance allowance = (Allowance) bundle.getSerializable("allowance");
 
                 allowances.get(position).setName(allowance.getName());
                 allowances.get(position).setAmount(allowance.getAmount());
                 allowances.get(position).setType(allowance.getType());
-                allowances.get(position).setNote(note);
+                allowances.get(position).setNote(allowance.getNote());
                 // Do something with the result
                 adapter.notifyItemChanged(position);
             }

@@ -22,26 +22,22 @@ import androidx.fragment.app.DialogFragment;
 import com.example.igecuser.R;
 import com.example.igecuser.fireBase.Allowance;
 import com.example.igecuser.fireBase.Employee;
-import com.example.igecuser.utilites.allowancesEnum;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
-import java.util.Locale;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class AllowanceInfoDialog extends DialogFragment {
-    private TextInputEditText vAllowanceMount, vAllowanceNote;
-    private TextInputLayout vAllowanceNameLayout, vAllowanceMountLayout, vAllowanceNoteLayout;
+    private TextInputEditText vAllowanceMount, vAllowanceName, vAllowanceNote;
+    private AutoCompleteTextView vAllowanceType;
+    private TextInputLayout vAllowanceNameLayout, vAllowanceMountLayout, vAllowanceTypeLayout, vAllowanceNoteLayout;
     private ArrayList<Pair<TextInputLayout, EditText>> views;
-    private MaterialCheckBox vPenalty, vMode;
     private MaterialButton vDone;
-    private AutoCompleteTextView vAllowanceName;
     private int position;
     private Allowance allowance = null;
+    private ArrayList<String> types = new ArrayList<>();
     private ArrayList<String> allowancesList = new ArrayList<>();
     private boolean canGivePenalty, isProject;
     private String EmployeeID;
@@ -97,48 +93,62 @@ public class AllowanceInfoDialog extends DialogFragment {
         super.onViewCreated(view, savedInstanceState);
         initialize(view);
         vDone.setOnClickListener(oclDone);
-        vPenalty.setOnClickListener(oclPenalty);
-        vMode.setOnClickListener(oclPerDay);
-        vAllowanceName.addTextChangedListener(twAllowanceName);
-        vAllowanceMount.addTextChangedListener(twAllowanceMount);
-        vAllowanceNote.addTextChangedListener(twAllowanceNote);
+        vAllowanceType.addTextChangedListener(twType);
+        vAllowanceName.addTextChangedListener(twName);
+        vAllowanceMount.addTextChangedListener(twMount);
+        vAllowanceNote.addTextChangedListener(twNote);
 
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        allowancesList.clear();
+        types.clear();
+        types.add("Transportation");
+        types.add("Accommodation");
+        types.add("Site");
+        types.add("Remote");
+        types.add("Food");
+        if (canGivePenalty) {
+            types.add("Retention by Days");
+            types.add("Retention by Amount");
+            types.add("Bonus");
+        }
+        types.add("Other");
+        allowancesList.addAll(types);
+        if (allowance != null) {
+            int index = types.indexOf(allowance.getName());
+            // if -1 meaning its other else its a valid type
+            if (index != -1) {
+                vAllowanceType.setText(types.get(index));
+            } else {
+                vAllowanceNameLayout.setVisibility(View.VISIBLE);
+                vAllowanceType.setText(types.get(types.size() - 1));
+                vAllowanceName.setText(allowance.getName());
+            }
+
+            vAllowanceMount.setText(String.format("%.2f", Math.abs(allowance.getAmount())));
+            vAllowanceNote.setText(allowance.getNote());
+        }
+        ArrayAdapter<String> allowancesAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, allowancesList);
+        vAllowanceType.setAdapter(allowancesAdapter);
     }
 
     private void initialize(View view) {
         vAllowanceMount = view.findViewById(R.id.TextInput_AllowanceMount);
-        vAllowanceName = view.findViewById(R.id.TextInput_allowanceName);
+        vAllowanceName = view.findViewById(R.id.TextInput_AllowanceName);
         vAllowanceNote = view.findViewById(R.id.TextInput_AllowanceNote);
+        vAllowanceType = view.findViewById(R.id.TextInput_AllowanceType);
         vAllowanceMountLayout = view.findViewById(R.id.textInputLayout_AllowanceMount);
         vAllowanceNameLayout = view.findViewById(R.id.textInputLayout_AllowanceName);
         vAllowanceNoteLayout = view.findViewById(R.id.textInputLayout_AllowanceNote);
-
+        vAllowanceTypeLayout = view.findViewById(R.id.textInputLayout_AllowanceType);
         views = new ArrayList<>();
-        views.add(new Pair<>(vAllowanceNameLayout, vAllowanceName));
+        views.add(new Pair<>(vAllowanceTypeLayout, vAllowanceType));
         views.add(new Pair<>(vAllowanceMountLayout, vAllowanceMount));
         views.add(new Pair<>(vAllowanceNoteLayout, vAllowanceNote));
-
-        vPenalty = view.findViewById(R.id.checkBox_Penalty);
         vDone = view.findViewById(R.id.button_Done);
-        vMode = view.findViewById(R.id.checkBox_PerDay);
-        vPenalty.setVisibility(canGivePenalty ? View.VISIBLE : View.GONE);
-        vMode.setVisibility(canGivePenalty ? View.VISIBLE : View.GONE);
-        if (allowance != null) {
-            vPenalty.setChecked(allowance.getAmount() < 0);
-            vMode.setText(vPenalty.isChecked() ? "Days(s)" : "Bonus");
-            vAllowanceName.setText(allowance.getName());
-            vAllowanceMount.setText(String.format("%.2f",Math.abs(allowance.getAmount())));
-            vAllowanceNote.setText(allowance.getNote());
-        }
-        allowancesList.clear();
-        allowancesList.add("Transportation");
-        allowancesList.add("accommodation");
-        allowancesList.add("site");
-        allowancesList.add("remote");
-        allowancesList.add("food");
-        allowancesList.add("Other");
-        ArrayAdapter<String> allowancesAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, allowancesList);
-        vAllowanceName.setAdapter(allowancesAdapter);
     }
 
     private boolean generateError() {
@@ -152,7 +162,9 @@ public class AllowanceInfoDialog extends DialogFragment {
                 return true;
             }
         }
-        return false;
+        boolean otherNoName = vAllowanceName.getText().toString().trim().isEmpty() && vAllowanceType.getText().toString().equals("Other");
+        vAllowanceNameLayout.setError(otherNoName ? "Missing" : null);
+        return otherNoName;
     }
 
     private void hideError(TextInputLayout textInputLayout) {
@@ -164,44 +176,23 @@ public class AllowanceInfoDialog extends DialogFragment {
         return !generateError();
     }
 
-    private View.OnClickListener oclPerDay = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            if (vPenalty.isChecked()) {
-                vAllowanceMountLayout.setSuffixText(vMode.isChecked() ? "Days(s)" : "£");
-            } else {
-                vAllowanceMountLayout.setSuffixText("£");
-            }
-        }
-    };
-    private View.OnClickListener oclPenalty = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            if (vPenalty.isChecked()) {
-                vMode.setChecked(false);
-                vMode.setText("Days");
-            } else {
-                vMode.setChecked(false);
-                vMode.setText("Bonus");
-            }
-
-        }
-    };
     private final View.OnClickListener oclDone = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             if (validateInput()) {
                 Bundle result = new Bundle();
                 Allowance allowance = new Allowance();
-                allowance.setName(vAllowanceName.getText().toString());
-                AtomicReference<Double> amount = new AtomicReference<>(Double.parseDouble(vAllowanceMount.getText().toString()));
-                if (isProject) {
-                    allowance.setName(vAllowanceName.getText().toString());
-                    allowance.setAmount(Double.parseDouble(vAllowanceMount.getText().toString()));
-                    allowance.setNote(vAllowanceNote.getText().toString());
+                boolean isOther = vAllowanceType.getText().toString().equals("Other");
+                allowance.setName(isOther ? vAllowanceName.getText().toString() : vAllowanceType.getText().toString().trim());
+                // TODO override amount value if it was days or retention with a negative value
+                allowance.setAmount(Double.parseDouble(vAllowanceMount.getText().toString()));
+                allowance.setNote(vAllowanceNote.getText().toString());
 
+                //TODO two properties to be set next Type and projectID
+                // allowance.setProjectId();
+                // allowance.setType();
+                if (isProject) {
                     result.putSerializable("allowance", allowance);
-                    result.putString("note", vAllowanceNote.getText().toString());
                     result.putInt("position", position);
                     if (position == -1)
                         getParentFragmentManager().setFragmentResult("addAllowance", result);
@@ -216,20 +207,20 @@ public class AllowanceInfoDialog extends DialogFragment {
                         if (!value.exists()) return;
                         temp[0] = value.toObject(Employee.class);
                         baseSalary[0] = temp[0].getSalary();
-                        if (vMode.isChecked() && vPenalty.isChecked())
-                            amount.updateAndGet(v1 -> new Double((double) (v1 * (baseSalary[0] / 30))));
-                        allowance.setNote(vAllowanceNote.getText().toString());
-                        if (vPenalty.isChecked()) {
-                            allowance.setAmount(-1 * amount.get());
-                            allowance.setType(allowancesEnum.RETENTION.ordinal());
-                        } else {
-                            allowance.setAmount(amount.get());
-                            allowance.setType(vMode.isChecked()?allowancesEnum.BONUS.ordinal(): allowancesEnum.valueOf(vAllowanceName.getText().toString().toUpperCase(Locale.ROOT)).ordinal());
-
-                        }
+                        //TODO use type instead of modes
+//                        if (vMode.isChecked() && vPenalty.isChecked())
+//                            amount.updateAndGet(v1 -> new Double((double) (v1 * (baseSalary[0] / 30))));
+//                        allowance.setNote(vAllowanceNote.getText().toString());
+//                        if (vPenalty.isChecked()) {
+//                            allowance.setAmount(-1 * amount.get());
+//                            allowance.setType(allowancesEnum.RETENTION.ordinal());
+//                        } else {
+//                            allowance.setAmount(amount.get());
+//                            allowance.setType(vMode.isChecked()?allowancesEnum.BONUS.ordinal(): allowancesEnum.valueOf(vAllowanceName.getText().toString().toUpperCase(Locale.ROOT)).ordinal());
+//
+//                        }
 
                         result.putSerializable("allowance", allowance);
-                        result.putString("note", vAllowanceNote.getText().toString());
                         result.putInt("position", position);
                         if (position == -1)
                             getParentFragmentManager().setFragmentResult("addAllowance", result);
@@ -243,7 +234,7 @@ public class AllowanceInfoDialog extends DialogFragment {
         }
 
     };
-    private TextWatcher twAllowanceName = new TextWatcher() {
+    private TextWatcher twName = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -262,7 +253,7 @@ public class AllowanceInfoDialog extends DialogFragment {
 
         }
     };
-    private TextWatcher twAllowanceMount = new TextWatcher() {
+    private TextWatcher twMount = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -286,7 +277,7 @@ public class AllowanceInfoDialog extends DialogFragment {
             hideError(vAllowanceMountLayout);
         }
     };
-    private TextWatcher twAllowanceNote = new TextWatcher() {
+    private TextWatcher twNote = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -305,12 +296,31 @@ public class AllowanceInfoDialog extends DialogFragment {
             hideError(vAllowanceNoteLayout);
         }
     };
+    private TextWatcher twType = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
-    public String getEmployeeID() {
-        return EmployeeID;
-    }
+        }
 
-    public void setEmployeeID(String employeeID) {
-        EmployeeID = employeeID;
-    }
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            boolean isOther = vAllowanceType.getText().toString().equals("Other");
+            boolean isRetentionByDays = vAllowanceType.getText().toString().equals("Retention by Days");
+            vAllowanceMountLayout.setSuffixText(isRetentionByDays ? "Day(s)" : "£");
+            vAllowanceNameLayout.setVisibility(isOther ? View.VISIBLE : View.GONE);
+            vAllowanceName.setText("");
+//            ConstraintSet constraintSet = new ConstraintSet();
+//            constraintSet.clone(constraintLayout);
+//            constraintSet.connect(
+//                    R.id.textInputLayout_AllowanceMount,
+//                    ConstraintSet.TOP,
+//                    isOther ? R.id.textInputLayout_AllowanceName : R.id.textInputLayout_AllowanceType,
+//                    ConstraintSet.BOTTOM, 32);
+        }
+    };
 }

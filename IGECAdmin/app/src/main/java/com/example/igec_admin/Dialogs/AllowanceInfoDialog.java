@@ -75,7 +75,27 @@ public class AllowanceInfoDialog extends DialogFragment {
     public void onResume() {
         super.onResume();
         allowancesList.clear();
+        types.clear();
+        types.add("Transportation");
+        types.add("Accommodation");
+        types.add("Site");
+        types.add("Remote");
+        types.add("Food");
+        types.add("Other");
         allowancesList.addAll(types);
+        if (allowance != null) {
+            int index = types.indexOf(allowance.getName());
+            // if -1 meaning its other else its a valid type
+            if (index != -1) {
+                vAllowanceType.setText(types.get(index));
+            } else {
+                vAllowanceNameLayout.setVisibility(View.VISIBLE);
+                vAllowanceType.setText(types.get(types.size() - 1));
+                vAllowanceName.setText(allowance.getName());
+            }
+
+            vAllowanceMount.setText(String.format("%.2f", Math.abs(allowance.getAmount())));
+        }
         ArrayAdapter<String> allowancesAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, allowancesList);
         vAllowanceType.setAdapter(allowancesAdapter);
     }
@@ -107,31 +127,9 @@ public class AllowanceInfoDialog extends DialogFragment {
         vAllowanceTypeLayout = view.findViewById(R.id.textInputLayout_AllowanceType);
         vAllowanceNameLayout = view.findViewById(R.id.textInputLayout_AllowanceName);
         vDone = view.findViewById(R.id.button_Done);
-        types.clear();
-        types.add("Transportation");
-        types.add("accommodation");
-        types.add("site");
-        types.add("remote");
-        types.add("food");
-        types.add("Other");
-        //help should we add a detention?
         views = new ArrayList<>();
         views.add(new Pair<>(vAllowanceNameLayout, vAllowanceType));
         views.add(new Pair<>(vAllowanceMountLayout, vAllowanceMount));
-        if (allowance != null) {
-            int index = types.indexOf(allowance.getName());
-            // if -1 meaning its other else its a valid type
-            if (index != -1) {
-                vAllowanceType.setText(types.get(index));
-            } else {
-                vAllowanceNameLayout.setVisibility(View.VISIBLE);
-                vAllowanceType.setText(types.get(types.size() - 1));
-                vAllowanceName.setText(allowance.getName());
-            }
-
-            vAllowanceMount.setText(String.valueOf(allowance.getAmount()));
-        }
-        vAllowanceType.addTextChangedListener(twName);
     }
 
     private boolean generateError() {

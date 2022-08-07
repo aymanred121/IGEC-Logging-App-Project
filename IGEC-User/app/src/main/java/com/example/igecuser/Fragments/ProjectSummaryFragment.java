@@ -107,7 +107,7 @@ public class ProjectSummaryFragment extends Fragment {
     private final View.OnClickListener oclShowProjectAllowances = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            AddAllowanceDialog employeeSummaryDialog = new AddAllowanceDialog(manager, projectAllowance, false, true);
+            AddAllowanceDialog employeeSummaryDialog = new AddAllowanceDialog(manager, (ArrayList<Allowance>) projectAllowance.clone(), false, true);
             employeeSummaryDialog.show(getParentFragmentManager(), "");
         }
     };

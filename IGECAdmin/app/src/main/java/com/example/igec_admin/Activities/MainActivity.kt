@@ -22,19 +22,19 @@ import androidx.navigation.ui.setupWithNavController
 import com.example.igec_admin.Dialogs.ProjectFragmentDialog
 import com.example.igec_admin.Fragments.*
 import com.example.igec_admin.R
-import com.example.igec_admin.databinding.ActivityMain2Binding
+import com.example.igec_admin.databinding.ActivityMainBinding
 import com.google.android.material.navigation.NavigationView
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
-    private lateinit var binding: ActivityMain2Binding
+    private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
     private var lastTab: Int = R.id.nav_add_user
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        binding = ActivityMain2Binding.inflate(layoutInflater)
+        binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         setSupportActionBar(binding.toolbar)
@@ -214,5 +214,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         return true
     }
 
-
+    override fun onBackPressed() {
+        if (binding.drawerLayout.isDrawerOpen(GravityCompat.START))
+            binding.drawerLayout.closeDrawer(GravityCompat.START)
+        else
+            finish()
+    }
 }

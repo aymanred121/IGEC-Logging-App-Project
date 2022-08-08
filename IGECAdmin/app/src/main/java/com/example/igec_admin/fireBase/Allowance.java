@@ -65,10 +65,11 @@ public class Allowance implements Serializable, Parcelable {
         this.name = name;
         this.amount = amount;
     }
-    public Allowance(String name, double amount , int type) {
+    public Allowance(String name, double amount , int type,String currency) {
         this.name = name;
         this.amount = amount;
         this.type = type;
+        this.currency = currency;
     }
 
     @Override

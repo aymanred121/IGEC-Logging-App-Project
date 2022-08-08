@@ -11,6 +11,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -51,8 +53,9 @@ public class AddUserFragment extends Fragment {
     // Views
     private MaterialCheckBox vAdmin, vTemporary;
     private MaterialButton vRegister;
+    private AutoCompleteTextView vSalaryCurrency;
     private TextInputEditText vFirstName, vSecondName, vEmail, vPassword, vPhone, vTitle, vSalary, vNationalID, vArea, vCity, vStreet, vHireDate, vInsuranceNumber, vInsuranceAmount;
-    private TextInputLayout vFirstNameLayout, vSecondNameLayout, vEmailLayout, vPasswordLayout, vPhoneLayout, vTitleLayout, vSalaryLayout, vNationalIDLayout, vAreaLayout, vCityLayout, vStreetLayout, vHireDateLayout, vInsuranceNumberLayout, vInsuranceAmountLayout;
+    private TextInputLayout vFirstNameLayout, vSecondNameLayout, vEmailLayout, vPasswordLayout, vPhoneLayout, vTitleLayout, vSalaryLayout, vNationalIDLayout, vAreaLayout, vCityLayout, vStreetLayout, vHireDateLayout, vInsuranceNumberLayout, vInsuranceAmountLayout, vSalaryCurrencyLayout;
     private MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vDatePicker;
     private ArrayList<Pair<TextInputLayout, EditText>> views;
@@ -82,7 +85,7 @@ public class AddUserFragment extends Fragment {
         vAdmin.setOnClickListener(oclAdmin);
         vHireDateLayout.setErrorIconDrawable(R.drawable.ic_baseline_calendar_month_24);
         for (Pair<TextInputLayout, EditText> v : views) {
-            if(v.first != vEmailLayout)
+            if (v.first != vEmailLayout)
                 v.second.addTextChangedListener(new TextWatcher() {
                     @Override
                     public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -103,6 +106,16 @@ public class AddUserFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        ArrayList<String> currencies = new ArrayList<>();
+        currencies.add("EGP");
+        currencies.add("SAR");
+        ArrayAdapter<String> currenciesAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, currencies);
+        vSalaryCurrency.setAdapter(currenciesAdapter);
+    }
+
     // Functions
     private void initialize(View view) {
         vFirstName = view.findViewById(R.id.TextInput_FirstName);
@@ -121,6 +134,8 @@ public class AddUserFragment extends Fragment {
         vTemporary = view.findViewById(R.id.CheckBox_Temporary);
         vSalary = view.findViewById(R.id.TextInput_Salary);
         vSalaryLayout = view.findViewById(R.id.textInputLayout_Salary);
+        vSalaryCurrency = view.findViewById(R.id.TextInput_SalaryCurrency);
+        vSalaryCurrencyLayout = view.findViewById(R.id.textInputLayout_SalaryCurrency);
         vInsuranceNumber = view.findViewById(R.id.TextInput_InsuranceNumber);
         vInsuranceNumberLayout = view.findViewById(R.id.textInputLayout_InsuranceNumber);
         vInsuranceAmount = view.findViewById(R.id.TextInput_InsuranceAmount);
@@ -147,6 +162,7 @@ public class AddUserFragment extends Fragment {
         views.add(new Pair<>(vPhoneLayout, vPhone));
         views.add(new Pair<>(vTitleLayout, vTitle));
         views.add(new Pair<>(vSalaryLayout, vSalary));
+        views.add(new Pair<>(vSalaryCurrencyLayout, vSalaryCurrency));
         views.add(new Pair<>(vInsuranceNumberLayout, vInsuranceNumber));
         views.add(new Pair<>(vInsuranceAmountLayout, vInsuranceAmount));
         views.add(new Pair<>(vAreaLayout, vArea));
@@ -178,7 +194,7 @@ public class AddUserFragment extends Fragment {
             String id = db.collection("EmployeeOverview").document().getId().substring(0, 5);
             EmployeesGrossSalary employeesGrossSalary = new EmployeesGrossSalary();
             ArrayList<Allowance> allTypes = new ArrayList<>();
-            allTypes.add(new Allowance("Net salary", Double.parseDouble(vSalary.getText().toString()), allowancesEnum.NETSALARY.ordinal()));
+            allTypes.add(new Allowance("Net salary", Double.parseDouble(vSalary.getText().toString()), allowancesEnum.NETSALARY.ordinal(), vSalaryCurrency.getText().toString()));
             employeesGrossSalary.setEmployeeId(id);
             employeesGrossSalary.setAllTypes(allTypes);
             ArrayList<String> empInfo = new ArrayList<>();
@@ -218,6 +234,7 @@ public class AddUserFragment extends Fragment {
                 (vCity.getText()).toString(),
                 (vStreet.getText()).toString(),
                 Double.parseDouble(vSalary.getText().toString()),
+                vSalaryCurrency.getText().toString(),
                 overTime,
                 ((vNationalID.getText()).toString()),
                 new Date(hireDate),

@@ -16,6 +16,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -70,8 +72,9 @@ public class UserFragmentDialog extends DialogFragment {
     private MaterialButton vUpdate;
     private MaterialButton vDelete;
     private MaterialButton vUnlock;
+    private AutoCompleteTextView vSalaryCurrency;
     private TextInputEditText vFirstName, vSecondName, vEmail, vPassword, vPhone, vTitle, vSalary, vNationalID, vArea, vCity, vStreet, vHireDate, vInsuranceNumber, vInsuranceAmount;
-    private TextInputLayout vFirstNameLayout, vSecondNameLayout, vEmailLayout, vPasswordLayout, vPhoneLayout, vTitleLayout, vSalaryLayout, vNationalIDLayout, vAreaLayout, vCityLayout, vStreetLayout, vHireDateLayout, vInsuranceNumberLayout, vInsuranceAmountLayout;
+    private TextInputLayout vFirstNameLayout, vSecondNameLayout, vEmailLayout, vPasswordLayout, vPhoneLayout, vTitleLayout, vSalaryLayout, vNationalIDLayout, vAreaLayout, vCityLayout, vStreetLayout, vHireDateLayout, vInsuranceNumberLayout, vInsuranceAmountLayout, vSalaryCurrencyLayout;
     private final MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vDatePicker;
     private ArrayList<Pair<TextInputLayout, EditText>> views;
@@ -125,7 +128,7 @@ public class UserFragmentDialog extends DialogFragment {
         vUnlock.setOnClickListener(clUnlock);
         vPasswordLayout.setEndIconOnClickListener(oclPasswordGenerate);
         for (Pair<TextInputLayout, EditText> v : views) {
-            if(v.first != vEmailLayout)
+            if (v.first != vEmailLayout)
                 v.second.addTextChangedListener(new TextWatcher() {
                     @Override
                     public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -148,6 +151,16 @@ public class UserFragmentDialog extends DialogFragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        ArrayList<String> currencies = new ArrayList<>();
+        currencies.add("EGP");
+        currencies.add("SAR");
+        ArrayAdapter<String> currenciesAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, currencies);
+        vSalaryCurrency.setAdapter(currenciesAdapter);
+    }
+
     // Functions
     private void initialize(View view) {
         vFirstName = view.findViewById(R.id.TextInput_FirstName);
@@ -166,6 +179,8 @@ public class UserFragmentDialog extends DialogFragment {
         vTemporary = view.findViewById(R.id.CheckBox_Temporary);
         vSalary = view.findViewById(R.id.TextInput_Salary);
         vSalaryLayout = view.findViewById(R.id.textInputLayout_Salary);
+        vSalaryCurrency = view.findViewById(R.id.TextInput_SalaryCurrency);
+        vSalaryCurrencyLayout = view.findViewById(R.id.textInputLayout_SalaryCurrency);
         vInsuranceNumber = view.findViewById(R.id.TextInput_InsuranceNumber);
         vInsuranceNumberLayout = view.findViewById(R.id.textInputLayout_InsuranceNumber);
         vInsuranceAmount = view.findViewById(R.id.TextInput_InsuranceAmount);
@@ -201,6 +216,7 @@ public class UserFragmentDialog extends DialogFragment {
         views.add(new Pair<>(vPhoneLayout, vPhone));
         views.add(new Pair<>(vTitleLayout, vTitle));
         views.add(new Pair<>(vSalaryLayout, vSalary));
+        views.add(new Pair<>(vSalaryCurrencyLayout, vSalaryCurrency));
         views.add(new Pair<>(vInsuranceNumberLayout, vInsuranceNumber));
         views.add(new Pair<>(vInsuranceAmountLayout, vInsuranceAmount));
         views.add(new Pair<>(vAreaLayout, vArea));
@@ -218,6 +234,7 @@ public class UserFragmentDialog extends DialogFragment {
         vStreet.setText(employee.getStreet());
         vEmail.setText(employee.getEmail());
         vSalary.setText(String.valueOf(employee.getSalary()));
+        vSalaryCurrency.setText(employee.getCurrency());
         vNationalID.setText(employee.getSSN());
         vPassword.setText(employee.getDecryptedPassword());
         vPhone.setText(employee.getPhoneNumber());
@@ -246,6 +263,7 @@ public class UserFragmentDialog extends DialogFragment {
             }
         });
     }
+
     private boolean generateError() {
         for (Pair<TextInputLayout, EditText> view : views) {
             if (view.second.getText().toString().trim().isEmpty()) {
@@ -263,6 +281,7 @@ public class UserFragmentDialog extends DialogFragment {
         }
         return false;
     }
+
     boolean validateInputs() {
         return !generateError();
     }
@@ -346,6 +365,7 @@ public class UserFragmentDialog extends DialogFragment {
         empMap.put("email", vEmail.getText().toString());
         empMap.put("password", encryptedPassword());
         empMap.put("salary", Double.parseDouble(vSalary.getText().toString()));
+        empMap.put("currency", vSalaryCurrency.getText().toString());
         empMap.put("ssn", vNationalID.getText().toString());
         empMap.put("hireDate", new Date(hireDate));
         empMap.put("phoneNumber", vPhone.getText().toString());
@@ -353,7 +373,7 @@ public class UserFragmentDialog extends DialogFragment {
         empMap.put("street", vStreet.getText().toString());
         empMap.put("city", vCity.getText().toString());
         empMap.put("overTime", (Double.parseDouble(vSalary.getText().toString()) / 30.0 / 10.0) * 1.5);
-        empMap.put("admin",vAdmin.isChecked());
+        empMap.put("admin", vAdmin.isChecked());
 //        if(vAdmin.isChecked()){
 //            empMap.put("managerID", null);
 //            empMap.put("projectID", null);
@@ -428,7 +448,7 @@ public class UserFragmentDialog extends DialogFragment {
                     HashMap<String, Object> updatedEmployee = fillEmployeeData();
                     db.collection("employees").document(id).update(updatedEmployee).addOnSuccessListener(unused -> {
 
-                        if (employee.getSalary() != Double.parseDouble(vSalary.getText().toString())) {
+                        if (employee.getSalary() != Double.parseDouble(vSalary.getText().toString()) || !employee.getCurrency().equals(vSalaryCurrency.getText().toString())) {
                             ArrayList<Allowance> allTypes = new ArrayList<>();
                             db.collection("EmployeesGrossSalary").document(employee.getId()).get().addOnSuccessListener((value) -> {
                                 if (!value.exists())
@@ -437,7 +457,7 @@ public class UserFragmentDialog extends DialogFragment {
                                 employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
                                 allTypes.addAll(employeesGrossSalary.getAllTypes());
                                 allTypes.removeIf(allowance -> allowance.getType() == NETSALARY);
-                                allTypes.add(new Allowance("Net salary", Double.parseDouble(vSalary.getText().toString()), NETSALARY));
+                                allTypes.add(new Allowance("Net salary", Double.parseDouble(vSalary.getText().toString()), NETSALARY, vSalaryCurrency.getText().toString()));
                                 db.collection("EmployeesGrossSalary").document(employee.getId()).update("allTypes", allTypes);
                             });
                         }

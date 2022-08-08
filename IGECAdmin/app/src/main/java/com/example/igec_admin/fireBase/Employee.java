@@ -11,13 +11,13 @@ public class Employee {
     private Date hireDate;
     private int totalNumberOfVacationDays;
     private boolean isAdmin, temporary,locked;
-
+    private String currency;
 
     public  Employee(){
 
     }
 
-    public Employee(String firstName, String lastName, String Title, String area, String City, String Street, double salary,double overTime, String SSN, Date hireDate, String email, String password,String phoneNumber,String insuranceNumber,boolean labourType,double insuranceAmount,boolean isAdmin) {
+    public Employee(String firstName, String lastName, String Title, String area, String City, String Street, double salary,String currency,double overTime, String SSN, Date hireDate, String email, String password,String phoneNumber,String insuranceNumber,boolean labourType,double insuranceAmount,boolean isAdmin) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.title = Title;
@@ -25,6 +25,7 @@ public class Employee {
         this.city = City;
         this.street = Street;
         this.salary = salary;
+        this.currency = currency;
         this.SSN = SSN;
         this.hireDate = hireDate;
         this.email=email;
@@ -217,5 +218,13 @@ public class Employee {
 
     public void setOverTime(double overTime) {
         this.overTime = overTime;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
     }
 }

@@ -53,6 +53,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.AppSettingsDialog;
@@ -155,8 +156,8 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     private void updateDate() {
         Calendar calendar = Calendar.getInstance();
         year = String.valueOf(calendar.get(Calendar.YEAR));
-        month = String.valueOf(calendar.get(Calendar.MONTH) + 1);
-        day = String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
+        month = String.format("%02d",calendar.get(Calendar.MONTH) + 1);
+        day = String.format("%02d",calendar.get(Calendar.DAY_OF_MONTH));
         if (Integer.parseInt(day) > 25) {
             if (Integer.parseInt(month) + 1 == 13) {
                 month = "01";
@@ -403,21 +404,12 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                 db.collection("EmployeesGrossSalary").document(currEmployee.getId()).get().addOnSuccessListener(documentSnapshot -> {
                     if (!documentSnapshot.exists()) return;
                     EmployeesGrossSalary employeesGrossSalary = documentSnapshot.toObject(EmployeesGrossSalary.class);
-                    ArrayList<Allowance> allowances = new ArrayList<>();
-                    ArrayList<Allowance> allTypes = employeesGrossSalary.getAllTypes();
-                    for (int i = 0; i < allTypes.size(); i++) {
-                        Allowance allowance = allTypes.get(i);
-                        if (allowance.getType() != allowancesEnum.NETSALARY.ordinal()) {
-                            allowances.add(allowance);
-                            employeesGrossSalary.getAllTypes().remove(i);
-                        }
-                    }
+                    ArrayList<Allowance> allowances = employeesGrossSalary.getAllTypes().stream().filter(allowance -> allowance.getType() != allowancesEnum.NETSALARY.ordinal()).collect(Collectors.toCollection(ArrayList::new));
+                    employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType()!= allowancesEnum.NETSALARY.ordinal());
                     employeesGrossSalary.setBaseAllowances(allowances);
+                    if(inProjectArea) {
                     for (Allowance allowance : employeesGrossSalary.getBaseAllowances()) {
-                        if(inProjectArea){
-                            if (allowance.getType() != allowancesEnum.BONUS.ordinal()) {
-                                allowance.setNote(day);
-                            }
+                            allowance.setNote(day);
                             employeesGrossSalary.getAllTypes().add(allowance);
                         }
                     }
@@ -426,9 +418,9 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                 return;
             }
             EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
-
+            employeesGrossSalary.setEmployeeId(currEmployee.getId());
+            if(inProjectArea) {
             for (Allowance allowance : employeesGrossSalary.getBaseAllowances()) {
-                if(inProjectArea){
                         allowance.setNote(day);
                         employeesGrossSalary.getAllTypes().add(allowance);
                 }

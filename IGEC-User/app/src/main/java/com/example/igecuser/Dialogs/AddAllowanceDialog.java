@@ -167,6 +167,8 @@ public class AddAllowanceDialog extends DialogFragment {
                 //Adds only Bonuses and penalties
                 // get (penalty || bonus )
                 employeesGrossSalary.getAllTypes().stream().filter(allowance -> allowance.getType() == allowancesEnum.RETENTION.ordinal() || allowance.getType() == allowancesEnum.BONUS.ordinal()).forEach(allowance -> allowances.add(allowance));
+                //get baseAllowances
+                employeesGrossSalary.getBaseAllowances().stream().filter(allowance -> allowance.getType() != allowancesEnum.PROJECT.ordinal()).forEach(allowance -> allowances.add(allowance));
                 adapter.notifyDataSetChanged();
             });
         }
@@ -180,20 +182,17 @@ public class AddAllowanceDialog extends DialogFragment {
             ArrayList<Allowance> permanentAllowances = new ArrayList<>();
             if (!isProject) {
                 db.collection("EmployeesGrossSalary").document(employee.getId()).get().addOnSuccessListener((value) -> {
-                    ArrayList<Allowance> bonus = new ArrayList<>();
                     if (!value.exists())
                         return;
                     for (Allowance allowance : allowances) {
-                         if (allowance.getType() == allowancesEnum.BONUS.ordinal()) {
-                            bonus.add(allowance);
-                        } else if (allowance.getType() == allowancesEnum.RETENTION.ordinal()) {
+                         if (allowance.getType() == allowancesEnum.BONUS.ordinal() || allowance.getType() == allowancesEnum.RETENTION.ordinal()) {
                             oneTimeAllowances.add(allowance);
                         } else {
                             permanentAllowances.add(allowance);
                         }
                     }
                     EmployeesGrossSalary employeesGrossSalary1 = value.toObject(EmployeesGrossSalary.class);
-                    employeesGrossSalary1.getAllTypes().removeIf(allowance -> allowance.getType() == allowancesEnum.RETENTION.ordinal() || allowance.getType() == allowancesEnum.BONUS.ordinal());
+                    employeesGrossSalary1.getAllTypes().removeIf(allowance -> allowance.getType() != allowancesEnum.NETSALARY.ordinal() && allowance.getType() != allowancesEnum.PROJECT.ordinal());
                     employeesGrossSalary1.getAllTypes().addAll(permanentAllowances);
                     db.collection("EmployeesGrossSalary").document(employee.getId()).update("allTypes", employeesGrossSalary1.getAllTypes());
                     db.collection("EmployeesGrossSalary").document(employee.getId()).collection(year).document(month).get().addOnSuccessListener(doc -> {
@@ -203,24 +202,14 @@ public class AddAllowanceDialog extends DialogFragment {
                             employeesGrossSalary1.setBaseAllowances(employeesGrossSalary1.getAllTypes().stream().filter(x -> !x.getProjectId().trim().isEmpty()).collect(Collectors.toCollection(ArrayList::new)));
                             employeesGrossSalary1.getAllTypes().removeIf(x -> x.getType() != allowancesEnum.NETSALARY.ordinal());
                             employeesGrossSalary1.getAllTypes().addAll(oneTimeAllowances);
-                            employeesGrossSalary1.getAllTypes().addAll(bonus);
                             employeesGrossSalary1.getBaseAllowances().addAll(permanentAllowances);
                             db.document(doc.getReference().getPath()).set(employeesGrossSalary1, SetOptions.mergeFields("allTypes", "baseAllowances"));
                             return;
                         }
                         EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
+                        employeesGrossSalary.getBaseAllowances().removeIf(x->x.getType()!=allowancesEnum.PROJECT.ordinal());
                         employeesGrossSalary.getBaseAllowances().addAll(permanentAllowances);
-                        /*
-                         if bonus(es) exists then remove the old ones and add the new modified ones
-                         else remove it from the baseAllowances
-                        */
-                        if (bonus.size() != 0) {
-                            employeesGrossSalary.getAllTypes().removeIf(x -> x.getType() == allowancesEnum.BONUS.ordinal());
-                            employeesGrossSalary.getAllTypes().addAll(bonus);
-                        } else {
-                            employeesGrossSalary.getAllTypes().removeIf(x -> x.getType() == allowancesEnum.BONUS.ordinal());
-                        }
-                        employeesGrossSalary.getAllTypes().removeIf(x -> x.getType() == allowancesEnum.RETENTION.ordinal());
+                        employeesGrossSalary.getAllTypes().removeIf(x -> x.getType() == allowancesEnum.RETENTION.ordinal() ||x.getType() == allowancesEnum.BONUS.ordinal());
                         employeesGrossSalary.getAllTypes().addAll(oneTimeAllowances);
                         db.document(doc.getReference().getPath()).update("allTypes", employeesGrossSalary.getAllTypes(), "baseAllowances", employeesGrossSalary.getBaseAllowances()).addOnSuccessListener(unused -> {
                             oneTimeAllowances.clear();

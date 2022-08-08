@@ -67,4 +67,5 @@
     <string name="note">Note:</string>
     <string name="allowance_name">Allowance name</string>
     <string name="unpaid_days">Unpaid Days</string>
+    <string name="currency">Currency</string>
 </resources>

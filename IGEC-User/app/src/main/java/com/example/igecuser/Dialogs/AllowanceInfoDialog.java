@@ -33,8 +33,8 @@ import java.util.Locale;
 
 public class AllowanceInfoDialog extends DialogFragment {
     private TextInputEditText vAllowanceMount, vAllowanceName, vAllowanceNote;
-    private AutoCompleteTextView vAllowanceType;
-    private TextInputLayout vAllowanceNameLayout, vAllowanceMountLayout, vAllowanceTypeLayout, vAllowanceNoteLayout;
+    private AutoCompleteTextView vAllowanceType, vAllowanceCurrency;
+    private TextInputLayout vAllowanceNameLayout, vAllowanceMountLayout, vAllowanceTypeLayout, vAllowanceNoteLayout, vAllowanceCurrencyLayout;
     private ArrayList<Pair<TextInputLayout, EditText>> views;
     private MaterialButton vDone;
     private int position;
@@ -53,7 +53,7 @@ public class AllowanceInfoDialog extends DialogFragment {
         this.EmployeeID = id;
     }
 
-    public AllowanceInfoDialog(int position, Allowance allowance, boolean canGivePenalty, boolean isProject, String id,double baseSalary) {
+    public AllowanceInfoDialog(int position, Allowance allowance, boolean canGivePenalty, boolean isProject, String id, double baseSalary) {
         this.position = position;
         this.allowance = allowance;
         this.canGivePenalty = canGivePenalty;
@@ -131,11 +131,18 @@ public class AllowanceInfoDialog extends DialogFragment {
                 vAllowanceType.setText(types.get(types.size() - 1));
                 vAllowanceName.setText(allowance.getName());
             }
-            vAllowanceMount.setText(allowance.getName().equals("Retention by Days")? String.format("%d",(int)(allowance.getAmount()*30/baseSalary)): String.format("%.2f", Math.abs(allowance.getAmount())));
+            vAllowanceCurrency.setText(allowance.getCurrency());
+            vAllowanceMount.setText(allowance.getName().equals("Retention by Days") ? String.format("%d", (int) (allowance.getAmount() * 30 / baseSalary)) : String.format("%.2f", Math.abs(allowance.getAmount())));
             vAllowanceNote.setText(allowance.getNote());
         }
         ArrayAdapter<String> allowancesAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, allowancesList);
         vAllowanceType.setAdapter(allowancesAdapter);
+
+        ArrayList<String> currencies = new ArrayList<>();
+        currencies.add("EGP");
+        currencies.add("SAR");
+        ArrayAdapter<String> currenciesAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, currencies);
+        vAllowanceCurrency.setAdapter(currenciesAdapter);
     }
 
     private void initialize(View view) {
@@ -143,10 +150,12 @@ public class AllowanceInfoDialog extends DialogFragment {
         vAllowanceName = view.findViewById(R.id.TextInput_AllowanceName);
         vAllowanceNote = view.findViewById(R.id.TextInput_AllowanceNote);
         vAllowanceType = view.findViewById(R.id.TextInput_AllowanceType);
+        vAllowanceCurrency = view.findViewById(R.id.TextInput_AllowanceCurrency);
         vAllowanceMountLayout = view.findViewById(R.id.textInputLayout_AllowanceMount);
         vAllowanceNameLayout = view.findViewById(R.id.textInputLayout_AllowanceName);
         vAllowanceNoteLayout = view.findViewById(R.id.textInputLayout_AllowanceNote);
         vAllowanceTypeLayout = view.findViewById(R.id.textInputLayout_AllowanceType);
+        vAllowanceCurrencyLayout = view.findViewById(R.id.textInputLayout_AllowanceCurrency);
         views = new ArrayList<>();
         views.add(new Pair<>(vAllowanceTypeLayout, vAllowanceType));
         views.add(new Pair<>(vAllowanceMountLayout, vAllowanceMount));
@@ -185,11 +194,12 @@ public class AllowanceInfoDialog extends DialogFragment {
             if (validateInput()) {
                 Bundle result = new Bundle();
                 Allowance allowance = new Allowance();
+                boolean isRetentionByDays = vAllowanceType.getText().toString().equals("Retention by Days");
                 boolean isOther = vAllowanceType.getText().toString().equals("Other");
                 allowance.setName(isOther ? vAllowanceName.getText().toString() : vAllowanceType.getText().toString().trim());
                 allowance.setAmount(Double.parseDouble(vAllowanceMount.getText().toString()));
                 allowance.setNote(vAllowanceNote.getText().toString());
-
+                allowance.setCurrency(isRetentionByDays ? "EGP" : vAllowanceCurrency.getText().toString());
                 if (isProject) {
                     result.putSerializable("allowance", allowance);
                     result.putInt("position", position);
@@ -202,13 +212,13 @@ public class AllowanceInfoDialog extends DialogFragment {
                 } else {
                     db.collection("employees").document(EmployeeID).get().addOnSuccessListener(value -> {
                         if (!value.exists()) return;
-                       Employee employee = value.toObject(Employee.class);
-                        if(vAllowanceType.getText().toString().equals("Retention by Days") || vAllowanceType.getText().toString().equals("Retention by Amount")){
+                        Employee employee = value.toObject(Employee.class);
+                        if (vAllowanceType.getText().toString().equals("Retention by Days") || vAllowanceType.getText().toString().equals("Retention by Amount")) {
                             allowance.setType(allowancesEnum.RETENTION.ordinal());
-                            if(vAllowanceType.getText().toString().equals("Retention by Days")){
-                                allowance.setAmount(allowance.getAmount()*(employee.getSalary()/30.0));
+                            if (vAllowanceType.getText().toString().equals("Retention by Days")) {
+                                allowance.setAmount(allowance.getAmount() * (employee.getSalary() / 30.0));
                             }
-                        }else{
+                        } else {
                             allowance.setType(allowancesEnum.valueOf(vAllowanceType.getText().toString().toUpperCase(Locale.ROOT)).ordinal());
                         }
                         result.putSerializable("allowance", allowance);
@@ -302,16 +312,10 @@ public class AllowanceInfoDialog extends DialogFragment {
         public void afterTextChanged(Editable editable) {
             boolean isOther = vAllowanceType.getText().toString().equals("Other");
             boolean isRetentionByDays = vAllowanceType.getText().toString().equals("Retention by Days");
-            vAllowanceMountLayout.setSuffixText(isRetentionByDays ? "Day(s)" : "£");
+            vAllowanceMountLayout.setSuffixText(isRetentionByDays ? "Day(s)" : vAllowanceCurrency.getText().toString());
             vAllowanceNameLayout.setVisibility(isOther ? View.VISIBLE : View.GONE);
+            vAllowanceCurrencyLayout.setVisibility(isRetentionByDays ? View.GONE : View.VISIBLE);
             vAllowanceName.setText("");
-//            ConstraintSet constraintSet = new ConstraintSet();
-//            constraintSet.clone(constraintLayout);
-//            constraintSet.connect(
-//                    R.id.textInputLayout_AllowanceMount,
-//                    ConstraintSet.TOP,
-//                    isOther ? R.id.textInputLayout_AllowanceName : R.id.textInputLayout_AllowanceType,
-//                    ConstraintSet.BOTTOM, 32);
         }
     };
 }

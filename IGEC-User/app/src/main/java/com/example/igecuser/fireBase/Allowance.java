@@ -6,34 +6,22 @@ import android.os.Parcelable;
 import java.io.Serializable;
 
 public class Allowance implements Serializable, Parcelable {
-    private String name, projectId, note;
+    private String name, projectId = "", note;
     private double amount;
-    private int type; // if 0 projectAllowances , if 1 penalties , if 2 bonuses , if 3 personal allowances , if 4 net salary
-    public Allowance() {
-        projectId = "";
-    }
+    private int type; // if 0 projectAllowances , if 1 penalties , if 2 bonuses , if 3 personalAllowances , if 4 net salary
+    //public enum Type {projectAllowances , penalties , bonuses , personalAllowances}
+    private String currency;
 
+    public Allowance() {
+    }
 
     public Allowance(int type) {
         this.type = type;
-        projectId = "";
     }
 
-    public Allowance(double amount , int type) {
+    public Allowance(double amount, int type) {
         this.amount = amount;
         this.type = type;
-        projectId = "";
-    }
-    public Allowance(String name,double amount , int type) {
-        this.name = name;
-        this.amount = amount;
-        this.type = type;
-        projectId = "";
-    }
-    public Allowance(String name,double amount) {
-        this.name = name;
-        this.amount = amount;
-        projectId = "";
     }
 
     protected Allowance(Parcel in) {
@@ -107,7 +95,11 @@ public class Allowance implements Serializable, Parcelable {
         this.note = note;
     }
 
-    public static Creator<Allowance> getCREATOR() {
-        return CREATOR;
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
     }
 }

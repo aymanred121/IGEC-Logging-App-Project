@@ -13,6 +13,7 @@ public class Allowance implements Serializable, Parcelable {
     private double amount ;
     private int type; // if 0 projectAllowances , if 1 penalties , if 2 bonuses , if 3 personalAllowances , if 4 net salary
     //public enum Type {projectAllowances , penalties , bonuses , personalAllowances}
+    private String currency;
     public Allowance() {
     }
 
@@ -29,7 +30,7 @@ public class Allowance implements Serializable, Parcelable {
         name = in.readString();
         amount = in.readDouble();
         type = in.readInt();
-
+        projectId = "";
     }
 
     public static final Creator<Allowance> CREATOR = new Creator<Allowance>() {
@@ -103,5 +104,13 @@ public class Allowance implements Serializable, Parcelable {
 
     public void setNote(String note) {
         this.note = note;
+    }
+
+    public String getCurrency() {
+        return currency;
+    }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
     }
 }

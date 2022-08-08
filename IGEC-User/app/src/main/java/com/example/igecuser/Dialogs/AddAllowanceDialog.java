@@ -52,7 +52,7 @@ public class AddAllowanceDialog extends DialogFragment {
     private Project project;
     private Employee manager;
     private String month, year;
-    private Double baseSalary;
+    private Double baseSalary = (double) 0;
 
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -106,6 +106,7 @@ public class AddAllowanceDialog extends DialogFragment {
 
                 allowances.get(position).setName(allowance.getName());
                 allowances.get(position).setAmount(allowance.getAmount());
+                allowances.get(position).setCurrency(allowance.getCurrency());
                 allowances.get(position).setType(allowance.getType());
                 allowances.get(position).setNote(allowance.getNote());
                 // Do something with the result

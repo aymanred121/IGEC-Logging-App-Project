@@ -43,14 +43,15 @@ public class GrossSalaryFragment extends Fragment {
     private EmployeesGrossSalary employeesGrossSalary;
     private TextView vGrossSalary;
     private String employeeId;
-    private String year,month,prevMonth,prevYear;
+    private String year, month, prevMonth, prevYear;
     private double salarySummary = 0;
+    private double salarySummarySAR = 0;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     public static GrossSalaryFragment newInstance(String employeeId) {
 
         Bundle args = new Bundle();
-        args.putString("employeeId",employeeId);
+        args.putString("employeeId", employeeId);
         GrossSalaryFragment fragment = new GrossSalaryFragment();
         fragment.setArguments(args);
         return fragment;
@@ -99,23 +100,31 @@ public class GrossSalaryFragment extends Fragment {
         getGrossSalary();
 
     }
-    private void getGrossSalary()
-    {
-        salarySummaries.clear();
-        adapter.notifyDataSetChanged();
+
+    private void getGrossSalary() {
         db.collection("EmployeesGrossSalary").document(employeeId).collection(year).document(month).addSnapshotListener((value, error) -> {
             if (!value.exists())
                 return;
+            salarySummaries.clear();
             salarySummary = 0;
+            salarySummarySAR = 0;
             employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
             for (Allowance allowance : employeesGrossSalary.getAllTypes()) {
-                if(allowance.getAmount()==0)
+                if (allowance.getAmount() == 0)
                     continue;
                 salarySummaries.add(allowance);
-                salarySummary -= allowance.getType() == allowancesEnum.RETENTION.ordinal() ? allowance.getAmount() : -allowance.getAmount();
-            }
-            vGrossSalary.setText(String.format("%.2f EGP", salarySummary));
-            vGrossSalary.setTextColor(Color.rgb(salarySummary > 0 ? 0 : 153, salarySummary > 0 ? 153 : 0, 0));
+                if (allowance.getCurrency().equals("EGP"))
+                    salarySummary += allowance.getType() != allowancesEnum.RETENTION.ordinal() ? allowance.getAmount() : -allowance.getAmount();
+                if (allowance.getCurrency().equals("SAR"))
+                    salarySummarySAR += allowance.getType() != allowancesEnum.RETENTION.ordinal() ? allowance.getAmount() : -allowance.getAmount();            }
+            String gross;
+            gross = String.format(
+                    "%s%s%s",
+                    salarySummary == 0 ? "" : String.format("%.2f EGP", salarySummary)
+                    , (salarySummary != 0 && salarySummarySAR != 0) ? " , " : ""
+                    , salarySummarySAR == 0 ? "" : String.format("%.2f SAR", salarySummarySAR)
+            );
+            vGrossSalary.setText(gross);
             adapter.setAllowances(salarySummaries);
             adapter.notifyDataSetChanged();
         });
@@ -147,7 +156,7 @@ public class GrossSalaryFragment extends Fragment {
                         getGrossSalary();
                     }
                 }, today.get(Calendar.YEAR), today.get(Calendar.MONTH));
-        builder.setActivatedMonth(Integer.parseInt(month)-1)
+        builder.setActivatedMonth(Integer.parseInt(month) - 1)
                 .setActivatedYear(Integer.parseInt(year))
                 .setTitle("Select Month")
                 .build().show();

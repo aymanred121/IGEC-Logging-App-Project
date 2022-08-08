@@ -276,7 +276,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                             {
                                 Location.distanceBetween(latitude, longitude, LAT, LNG, results);
                                 distance = results[0];
-                                if (distance < 18700 /*TODO Help placeholder for office area*/){
+                                if (distance < 200 /*TODO Help placeholder for office area*/){
                                     inProjectArea = false;
                                     Toast.makeText(getActivity(), "You're in the office", Toast.LENGTH_SHORT).show();
                                 }

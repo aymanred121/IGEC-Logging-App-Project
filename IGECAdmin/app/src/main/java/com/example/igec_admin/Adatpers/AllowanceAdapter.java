@@ -36,7 +36,7 @@ public class AllowanceAdapter extends RecyclerView.Adapter<AllowanceAdapter.Allo
     public void onBindViewHolder(@NonNull AllowanceViewHolder holder, int position) {
         Allowance allowance = allowances.get(position);
         holder.vName.setText(allowance.getName());
-        holder.vAmount.setText(String.format("%s EGP", allowance.getAmount()));
+        holder.vAmount.setText(String.format("%s %s", allowance.getAmount(), allowance.getCurrency()));
         holder.vAmount.setTextColor(Color.rgb(0, 153, 0));
         holder.vAmount.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_round_trending_up_24, 0, 0, 0);
         setTextViewDrawableColor(holder.vAmount, Color.rgb(0, 153, 0));
@@ -57,6 +57,7 @@ public class AllowanceAdapter extends RecyclerView.Adapter<AllowanceAdapter.Allo
 
     public interface OnItemClickListener {
         void onItemClick(int position);
+
         void onDeleteItem(int position);
     }
 
@@ -91,12 +92,10 @@ public class AllowanceAdapter extends RecyclerView.Adapter<AllowanceAdapter.Allo
             vAmount = itemView.findViewById(R.id.TextView_MountOf);
             vDelete = itemView.findViewById(R.id.button_delete);
 
-            vDelete.setOnClickListener(v->{
-                if(listener != null)
-                {
+            vDelete.setOnClickListener(v -> {
+                if (listener != null) {
                     int position = getAdapterPosition();
-                    if(position != RecyclerView.NO_POSITION)
-                    {
+                    if (position != RecyclerView.NO_POSITION) {
                         listener.onDeleteItem(position);
                     }
                 }

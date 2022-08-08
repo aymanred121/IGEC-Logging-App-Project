@@ -74,7 +74,7 @@ public class AddAllowanceDialog extends DialogFragment {
 
                 allowances.get(position).setName(allowance.getName());
                 allowances.get(position).setAmount(allowance.getAmount());
-                // Do something with the result
+                allowances.get(position).setCurrency(allowance.getCurrency());
                 adapter.notifyItemChanged(position);
             }
         });

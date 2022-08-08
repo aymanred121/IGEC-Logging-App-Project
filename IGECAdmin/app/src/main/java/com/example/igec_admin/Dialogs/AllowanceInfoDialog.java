@@ -27,12 +27,14 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.ArrayList;
+import java.util.Currency;
+import java.util.Locale;
 
 public class AllowanceInfoDialog extends DialogFragment {
 
     private TextInputEditText vAllowanceMount, vAllowanceName;
-    private AutoCompleteTextView vAllowanceType;
-    private TextInputLayout vAllowanceNameLayout, vAllowanceMountLayout, vAllowanceTypeLayout;
+    private AutoCompleteTextView vAllowanceType, vAllowanceCurrency;
+    private TextInputLayout vAllowanceNameLayout, vAllowanceMountLayout, vAllowanceTypeLayout, vAllowanceCurrencyLayout;
     private ArrayList<Pair<TextInputLayout, EditText>> views;
     private MaterialButton vDone;
     private int position;
@@ -93,11 +95,16 @@ public class AllowanceInfoDialog extends DialogFragment {
                 vAllowanceType.setText(types.get(types.size() - 1));
                 vAllowanceName.setText(allowance.getName());
             }
-
+            vAllowanceCurrency.setText(allowance.getCurrency());
             vAllowanceMount.setText(String.format("%.2f", Math.abs(allowance.getAmount())));
         }
         ArrayAdapter<String> allowancesAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, allowancesList);
         vAllowanceType.setAdapter(allowancesAdapter);
+        ArrayList<String> currencies = new ArrayList<>();
+        currencies.add("EGP");
+        currencies.add("SAR");
+        ArrayAdapter<String> currenciesAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, currencies);
+        vAllowanceCurrency.setAdapter(currenciesAdapter);
     }
 
     @Override
@@ -123,13 +130,16 @@ public class AllowanceInfoDialog extends DialogFragment {
         vAllowanceMount = view.findViewById(R.id.TextInput_AllowanceMount);
         vAllowanceType = view.findViewById(R.id.TextInput_AllowanceType);
         vAllowanceName = view.findViewById(R.id.TextInput_AllowanceName);
+        vAllowanceCurrency = view.findViewById(R.id.TextInput_AllowanceCurrency);
         vAllowanceMountLayout = view.findViewById(R.id.textInputLayout_AllowanceMount);
         vAllowanceTypeLayout = view.findViewById(R.id.textInputLayout_AllowanceType);
         vAllowanceNameLayout = view.findViewById(R.id.textInputLayout_AllowanceName);
+        vAllowanceCurrencyLayout = view.findViewById(R.id.textInputLayout_AllowanceCurrency);
         vDone = view.findViewById(R.id.button_Done);
         views = new ArrayList<>();
         views.add(new Pair<>(vAllowanceNameLayout, vAllowanceType));
         views.add(new Pair<>(vAllowanceMountLayout, vAllowanceMount));
+        views.add(new Pair<>(vAllowanceCurrencyLayout, vAllowanceCurrency));
     }
 
     private boolean generateError() {
@@ -161,6 +171,7 @@ public class AllowanceInfoDialog extends DialogFragment {
             boolean isOther = vAllowanceType.getText().toString().equals("Other");
             allowance.setName(isOther ? vAllowanceName.getText().toString() : vAllowanceType.getText().toString().trim());
             allowance.setAmount(Double.parseDouble(vAllowanceMount.getText().toString()));
+            allowance.setCurrency(vAllowanceCurrency.getText().toString());
             result.putSerializable("allowance", allowance);
             result.putInt("position", position);
             if (position == -1)
@@ -187,13 +198,6 @@ public class AllowanceInfoDialog extends DialogFragment {
             boolean isOther = vAllowanceType.getText().toString().equals("Other");
             vAllowanceNameLayout.setVisibility(isOther ? View.VISIBLE : View.GONE);
             vAllowanceName.setText("");
-//            ConstraintSet constraintSet = new ConstraintSet();
-//            constraintSet.clone(constraintLayout);
-//            constraintSet.connect(
-//                    R.id.textInputLayout_AllowanceMount,
-//                    ConstraintSet.TOP,
-//                    isOther ? R.id.textInputLayout_AllowanceName : R.id.textInputLayout_AllowanceType,
-//                    ConstraintSet.BOTTOM, 32);
         }
     };
     private TextWatcher twName = new TextWatcher() {

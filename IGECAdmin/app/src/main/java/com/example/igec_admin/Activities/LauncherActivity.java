@@ -8,7 +8,6 @@ import android.os.Handler;
 
 import androidx.annotation.Nullable;
 
-import com.example.igec_admin.fireBase.Employee;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class LauncherActivity extends Activity {
@@ -29,13 +28,13 @@ public class LauncherActivity extends Activity {
                             Intent intent = new Intent(LauncherActivity.this, LoginActivity.class);
                             startActivity(intent);
                         } else {
-                            Intent intent = new Intent(LauncherActivity.this, MainActivity_navComp.class);
+                            Intent intent = new Intent(LauncherActivity.this, MainActivity.class);
                             startActivity(intent);
                         }
                         finish();
                     });
                 } else {
-                    Intent intent = new Intent(LauncherActivity.this, MainActivity_navComp.class);
+                    Intent intent = new Intent(LauncherActivity.this, MainActivity.class);
                     startActivity(intent);
                     finish();
                 }

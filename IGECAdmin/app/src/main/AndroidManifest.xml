@@ -23,7 +23,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.IGECAdmin">
         <activity
-            android:name=".Activities.MainActivity_navComp"
+            android:name=".Activities.MainActivity"
             android:exported="true"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.IGECAdmin.NoActionBar"></activity>
@@ -46,12 +46,6 @@
             android:name=".Activities.SplashScreen_InternetConnection"
             android:exported="false"
             android:screenOrientation="portrait" />
-        <activity
-            android:name=".Activities.MainActivity"
-            android:configChanges="uiMode"
-            android:exported="true"
-            android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan"></activity>
 
         <provider
             android:name="androidx.core.content.FileProvider"

@@ -25,7 +25,7 @@ import com.example.igec_admin.R
 import com.example.igec_admin.databinding.ActivityMain2Binding
 import com.google.android.material.navigation.NavigationView
 
-class MainActivity_navComp : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMain2Binding
@@ -67,7 +67,7 @@ class MainActivity_navComp : AppCompatActivity(), NavigationView.OnNavigationIte
                 Intent.ACTION_VIEW,
                 Uri.parse("https://" + getString(R.string.nav_header_subtitle))
             )
-            this@MainActivity_navComp.startActivity(intent)
+            this@MainActivity.startActivity(intent)
         }
     }
 
@@ -99,7 +99,7 @@ class MainActivity_navComp : AppCompatActivity(), NavigationView.OnNavigationIte
         val activeNetworkInfo = connectivityManager.activeNetworkInfo
         val connected = activeNetworkInfo != null && activeNetworkInfo.isConnected
         if (!connected) {
-            val intent = Intent(this@MainActivity_navComp, SplashScreen_InternetConnection::class.java)
+            val intent = Intent(this@MainActivity, SplashScreen_InternetConnection::class.java)
             startActivity(intent)
             finish()
         }

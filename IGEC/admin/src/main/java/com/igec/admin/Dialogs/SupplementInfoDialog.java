@@ -32,7 +32,7 @@ import androidx.core.content.FileProvider;
 import androidx.fragment.app.DialogFragment;
 
 import com.igec.admin.R;
-import com.igec.admin.fireBase.Supplement;
+import com.igec.common.firebase.Supplement;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;

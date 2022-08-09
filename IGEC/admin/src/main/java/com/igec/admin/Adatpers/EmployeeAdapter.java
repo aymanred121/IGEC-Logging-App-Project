@@ -10,7 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.igec.admin.R;
-import com.igec.admin.fireBase.EmployeeOverview;
+import com.igec.common.firebase.EmployeeOverview;
 import com.google.android.material.checkbox.MaterialCheckBox;
 
 

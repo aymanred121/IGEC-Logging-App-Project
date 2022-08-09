@@ -17,8 +17,8 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.igec.user.R;
-import com.igec.user.fireBase.Employee;
-import com.igec.user.fireBase.VacationRequest;
+import com.igec.common.firebase.Employee;
+import com.igec.common.firebase.VacationRequest;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.CalendarConstraints;

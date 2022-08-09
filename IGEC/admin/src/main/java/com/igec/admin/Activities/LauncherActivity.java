@@ -9,7 +9,6 @@ import android.os.Handler;
 import androidx.annotation.Nullable;
 
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.igec.admin.Activities.MainActivity;
 
 public class LauncherActivity extends Activity {
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();

@@ -16,8 +16,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.igec.admin.Adatpers.VacationAdapter;
 import com.igec.admin.R;
-import com.igec.admin.fireBase.Employee;
-import com.igec.admin.fireBase.VacationRequest;
+import com.igec.common.firebase.Employee;
+import com.igec.common.firebase.VacationRequest;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;

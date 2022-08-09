@@ -16,10 +16,10 @@ import androidx.fragment.app.DialogFragment;
 
 import com.igec.user.R;
 import com.igec.user.databinding.DialogVacationBinding;
-import com.igec.user.fireBase.Allowance;
-import com.igec.user.fireBase.EmployeesGrossSalary;
-import com.igec.user.fireBase.VacationRequest;
-import com.igec.user.utilites.allowancesEnum;
+import com.igec.common.firebase.Allowance;
+import com.igec.common.firebase.EmployeesGrossSalary;
+import com.igec.common.firebase.VacationRequest;
+import com.igec.common.utilities.allowancesEnum;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;

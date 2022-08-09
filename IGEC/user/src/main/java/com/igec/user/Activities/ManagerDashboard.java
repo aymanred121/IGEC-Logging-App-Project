@@ -28,7 +28,7 @@ import com.igec.user.Fragments.TransferRequestsFragment;
 import com.igec.user.Fragments.VacationRequestsFragment;
 import com.igec.user.Fragments.VacationsLogFragment;
 import com.igec.user.R;
-import com.igec.user.fireBase.Employee;
+import com.igec.common.firebase.Employee;
 import com.google.android.material.navigation.NavigationView;
 
 public class ManagerDashboard extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {

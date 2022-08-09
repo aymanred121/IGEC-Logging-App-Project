@@ -21,7 +21,7 @@ import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.fragment.app.DialogFragment;
 
 import com.igec.admin.R;
-import com.igec.admin.fireBase.Allowance;
+import com.igec.common.firebase.Allowance;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;

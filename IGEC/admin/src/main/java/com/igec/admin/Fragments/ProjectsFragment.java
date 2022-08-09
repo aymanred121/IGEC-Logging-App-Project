@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.igec.admin.Adatpers.ProjectAdapter;
 import com.igec.admin.Dialogs.ProjectFragmentDialog;
 import com.igec.admin.R;
-import com.igec.admin.fireBase.Project;
+import com.igec.common.firebase.Project;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;

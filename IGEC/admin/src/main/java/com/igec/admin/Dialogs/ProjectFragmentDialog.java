@@ -29,12 +29,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.igec.admin.Adatpers.EmployeeAdapter;
 import com.igec.admin.R;
-import com.igec.admin.fireBase.Allowance;
-import com.igec.admin.fireBase.Client;
-import com.igec.admin.fireBase.EmployeeOverview;
-import com.igec.admin.fireBase.EmployeesGrossSalary;
-import com.igec.admin.fireBase.Project;
-import com.igec.admin.utilites.allowancesEnum;
+import com.igec.common.firebase.Allowance;
+import com.igec.common.firebase.Client;
+import com.igec.common.firebase.EmployeeOverview;
+import com.igec.common.firebase.EmployeesGrossSalary;
+import com.igec.common.firebase.Project;
+import com.igec.common.utilities.allowancesEnum;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.datepicker.MaterialDatePicker;

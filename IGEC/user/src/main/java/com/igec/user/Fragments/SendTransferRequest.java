@@ -19,10 +19,10 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.igec.user.R;
-import com.igec.user.fireBase.Employee;
-import com.igec.user.fireBase.EmployeeOverview;
-import com.igec.user.fireBase.Project;
-import com.igec.user.fireBase.TransferRequests;
+import com.igec.common.firebase.Employee;
+import com.igec.common.firebase.EmployeeOverview;
+import com.igec.common.firebase.Project;
+import com.igec.common.firebase.TransferRequests;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.button.MaterialButton;

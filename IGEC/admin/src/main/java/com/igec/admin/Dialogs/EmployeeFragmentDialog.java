@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.igec.admin.Adatpers.EmployeeAdapter;
 import com.igec.admin.R;
-import com.igec.admin.fireBase.Project;
+import com.igec.common.firebase.Project;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class EmployeeFragmentDialog extends DialogFragment {

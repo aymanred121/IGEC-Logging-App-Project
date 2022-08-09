@@ -1,6 +1,6 @@
 package com.igec.admin.Dialogs;
 
-import static com.igec.admin.cryptography.RSAUtil.encrypt;
+import static com.igec.common.cryptography.RSAUtil.encrypt;
 import static com.google.android.material.textfield.TextInputLayout.END_ICON_CUSTOM;
 
 import android.annotation.SuppressLint;
@@ -26,11 +26,11 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 import com.igec.admin.R;
-import com.igec.admin.fireBase.Allowance;
-import com.igec.admin.fireBase.Employee;
-import com.igec.admin.fireBase.EmployeeOverview;
-import com.igec.admin.fireBase.EmployeesGrossSalary;
-import com.igec.admin.fireBase.Project;
+import com.igec.common.firebase.Allowance;
+import com.igec.common.firebase.Employee;
+import com.igec.common.firebase.EmployeeOverview;
+import com.igec.common.firebase.EmployeesGrossSalary;
+import com.igec.common.firebase.Project;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.datepicker.MaterialDatePicker;

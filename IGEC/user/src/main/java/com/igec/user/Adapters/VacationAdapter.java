@@ -12,7 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 
 import com.igec.user.R;
-import com.igec.user.fireBase.VacationRequest;
+import com.igec.common.firebase.VacationRequest;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

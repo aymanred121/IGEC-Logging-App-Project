@@ -18,7 +18,7 @@ import android.view.WindowManager;
 
 import com.igec.admin.Adatpers.AllowanceAdapter;
 import com.igec.admin.R;
-import com.igec.admin.fireBase.Allowance;
+import com.igec.common.firebase.Allowance;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 

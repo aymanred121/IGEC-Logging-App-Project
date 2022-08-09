@@ -36,8 +36,8 @@ import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentResultListener;
 
 import com.igec.admin.R;
-import com.igec.admin.fireBase.Machine;
-import com.igec.admin.fireBase.Supplement;
+import com.igec.common.firebase.Machine;
+import com.igec.common.firebase.Supplement;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;

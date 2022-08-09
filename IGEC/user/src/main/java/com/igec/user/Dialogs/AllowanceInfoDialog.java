@@ -20,9 +20,9 @@ import androidx.fragment.app.DialogFragment;
 
 
 import com.igec.user.R;
-import com.igec.user.fireBase.Allowance;
-import com.igec.user.fireBase.Employee;
-import com.igec.user.utilites.allowancesEnum;
+import com.igec.common.firebase.Allowance;
+import com.igec.common.firebase.Employee;
+import com.igec.common.utilities.allowancesEnum;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;

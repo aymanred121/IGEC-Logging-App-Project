@@ -1,6 +1,6 @@
 package com.igec.user.Fragments;
 
-import static com.igec.user.cryptography.RSAUtil.encrypt;
+import static com.igec.common.cryptography.RSAUtil.encrypt;
 
 import android.os.Bundle;
 
@@ -18,7 +18,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.igec.user.R;
-import com.igec.user.fireBase.Employee;
+import com.igec.common.firebase.Employee;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;

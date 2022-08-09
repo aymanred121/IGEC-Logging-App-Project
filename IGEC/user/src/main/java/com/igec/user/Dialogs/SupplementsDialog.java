@@ -21,9 +21,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.igec.user.Adapters.SupplementsAdapter;
 import com.igec.user.R;
-import com.igec.user.fireBase.Employee;
-import com.igec.user.fireBase.Machine;
-import com.igec.user.fireBase.Supplement;
+import com.igec.common.firebase.Employee;
+import com.igec.common.firebase.Machine;
+import com.igec.common.firebase.Supplement;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;

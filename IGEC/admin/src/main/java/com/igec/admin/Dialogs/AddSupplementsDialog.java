@@ -33,8 +33,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.igec.admin.Adatpers.SupplementAdapter;
 import com.igec.admin.R;
-import com.igec.admin.fireBase.Machine;
-import com.igec.admin.fireBase.Supplement;
+import com.igec.common.firebase.Machine;
+import com.igec.common.firebase.Supplement;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;

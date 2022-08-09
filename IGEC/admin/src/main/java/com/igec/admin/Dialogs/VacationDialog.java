@@ -16,16 +16,15 @@ import androidx.fragment.app.DialogFragment;
 
 import com.igec.admin.R;
 import com.igec.admin.databinding.DialogVacationBinding;
-import com.igec.admin.fireBase.Allowance;
-import com.igec.admin.fireBase.EmployeesGrossSalary;
-import com.igec.admin.fireBase.VacationRequest;
-import com.igec.admin.utilites.allowancesEnum;
+import com.igec.common.firebase.Allowance;
+import com.igec.common.firebase.EmployeesGrossSalary;
+import com.igec.common.firebase.VacationRequest;
+import com.igec.common.utilities.allowancesEnum;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;

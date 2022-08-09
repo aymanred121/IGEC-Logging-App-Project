@@ -10,7 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.igec.admin.R;
-import com.igec.admin.fireBase.Machine_Employee;
+import com.igec.common.firebase.Machine_Employee;
 import com.google.firebase.Timestamp;
 
 import java.text.SimpleDateFormat;

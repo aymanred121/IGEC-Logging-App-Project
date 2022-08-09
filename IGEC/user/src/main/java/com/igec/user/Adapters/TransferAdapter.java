@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.igec.user.R;
-import com.igec.user.fireBase.TransferRequests;
+import com.igec.common.firebase.TransferRequests;
 
 import java.util.ArrayList;
 

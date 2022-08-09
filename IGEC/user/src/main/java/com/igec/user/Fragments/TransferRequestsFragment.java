@@ -17,12 +17,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.igec.user.Adapters.TransferAdapter;
 import com.igec.user.R;
-import com.igec.user.fireBase.Allowance;
-import com.igec.user.fireBase.Employee;
-import com.igec.user.fireBase.EmployeeOverview;
-import com.igec.user.fireBase.EmployeesGrossSalary;
-import com.igec.user.fireBase.Project;
-import com.igec.user.fireBase.TransferRequests;
+import com.igec.common.firebase.Allowance;
+import com.igec.common.firebase.Employee;
+import com.igec.common.firebase.EmployeeOverview;
+import com.igec.common.firebase.EmployeesGrossSalary;
+import com.igec.common.firebase.Project;
+import com.igec.common.firebase.TransferRequests;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.WriteBatch;
@@ -88,7 +88,7 @@ public class TransferRequestsFragment extends Fragment {
                 return;
             requests.clear();
             adapter.notifyDataSetChanged();
-            requests.addAll(values.toObjects(com.igec.user.fireBase.TransferRequests.class));
+            requests.addAll(values.toObjects(com.igec.common.firebase.TransferRequests.class));
             adapter.setTransfers(requests);
             adapter.notifyDataSetChanged();
         });

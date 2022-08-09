@@ -16,7 +16,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.igec.user.Fragments.*
 import com.igec.user.R
 import com.igec.user.databinding.ActivityEdashboardBinding
-import com.igec.user.fireBase.Employee
+import com.igec.common.firebase.Employee
 import com.google.android.material.navigation.NavigationView
 
 class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {

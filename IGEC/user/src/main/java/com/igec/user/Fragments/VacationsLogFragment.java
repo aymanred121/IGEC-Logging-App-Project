@@ -18,8 +18,8 @@ import android.widget.Toast;
 
 import com.igec.user.R;
 import com.igec.user.Adapters.VacationAdapter;
-import com.igec.user.fireBase.Employee;
-import com.igec.user.fireBase.VacationRequest;
+import com.igec.common.firebase.Employee;
+import com.igec.common.firebase.VacationRequest;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;

@@ -17,9 +17,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.igec.user.Adapters.AllowanceAdapter;
 import com.igec.user.R;
-import com.igec.user.fireBase.Allowance;
-import com.igec.user.fireBase.EmployeesGrossSalary;
-import com.igec.user.utilites.allowancesEnum;
+import com.igec.common.firebase.Allowance;
+import com.igec.common.firebase.EmployeesGrossSalary;
+import com.igec.common.utilities.allowancesEnum;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FirebaseFirestore;

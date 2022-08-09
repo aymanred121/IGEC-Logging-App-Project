@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.igec.admin.R;
-import com.igec.admin.utilites.WorkingDay;
+import com.igec.common.utilities.WorkingDay;
 
 import java.text.ParseException;
 import java.util.ArrayList;

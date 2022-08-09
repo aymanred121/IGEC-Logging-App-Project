@@ -24,8 +24,8 @@ import com.igec.user.Fragments.GrossSalaryFragment;
 import com.igec.user.Fragments.SendVacationRequestFragment;
 import com.igec.user.Fragments.VacationsLogFragment;
 import com.igec.user.R;
-import com.igec.user.fireBase.Employee;
-import com.igec.user.fireBase.EmployeesGrossSalary;
+import com.igec.common.firebase.Employee;
+import com.igec.common.firebase.EmployeesGrossSalary;
 import com.google.android.material.navigation.NavigationView;
 
 public class EmployeeDashboard extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {

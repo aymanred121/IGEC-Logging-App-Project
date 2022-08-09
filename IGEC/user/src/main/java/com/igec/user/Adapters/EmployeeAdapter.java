@@ -9,8 +9,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.igec.user.R;
-import com.igec.user.fireBase.EmployeeOverview;
-import com.igec.user.fireBase.Project;
+import com.igec.common.firebase.EmployeeOverview;
+import com.igec.common.firebase.Project;
 
 import java.util.ArrayList;
 

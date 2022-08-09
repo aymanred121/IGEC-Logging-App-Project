@@ -19,12 +19,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.igec.user.Adapters.AllowanceAdapter;
 import com.igec.user.R;
-import com.igec.user.fireBase.Allowance;
-import com.igec.user.fireBase.Employee;
-import com.igec.user.fireBase.EmployeeOverview;
-import com.igec.user.fireBase.EmployeesGrossSalary;
-import com.igec.user.fireBase.Project;
-import com.igec.user.utilites.allowancesEnum;
+import com.igec.common.firebase.Allowance;
+import com.igec.common.firebase.Employee;
+import com.igec.common.firebase.EmployeeOverview;
+import com.igec.common.firebase.EmployeesGrossSalary;
+import com.igec.common.firebase.Project;
+import com.igec.common.utilities.allowancesEnum;
 import com.google.android.gms.common.util.NumberUtils;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;

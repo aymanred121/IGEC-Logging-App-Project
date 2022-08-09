@@ -20,8 +20,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.igec.admin.Adatpers.WorkingDayAdapter;
 import com.igec.admin.R;
-import com.igec.admin.utilites.CsvWriter;
-import com.igec.admin.utilites.WorkingDay;
+import com.igec.common.utilities.CsvWriter;
+import com.igec.common.utilities.WorkingDay;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.firestore.FirebaseFirestore;
 

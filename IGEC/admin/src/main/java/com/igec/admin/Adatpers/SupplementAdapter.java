@@ -10,7 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.igec.admin.R;
-import com.igec.admin.fireBase.Supplement;
+import com.igec.common.firebase.Supplement;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;

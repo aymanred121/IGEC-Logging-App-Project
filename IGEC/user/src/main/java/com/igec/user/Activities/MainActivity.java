@@ -1,8 +1,8 @@
 package com.igec.user.Activities;
 
 
-import static com.igec.user.cryptography.RSAUtil.decrypt;
-import static com.igec.user.cryptography.RSAUtil.privateKey;
+import static com.igec.common.cryptography.RSAUtil.decrypt;
+import static com.igec.common.cryptography.RSAUtil.privateKey;
 
 import android.Manifest;
 import android.content.Context;
@@ -21,7 +21,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
 import com.igec.user.R;
-import com.igec.user.fireBase.Employee;
+import com.igec.common.firebase.Employee;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;

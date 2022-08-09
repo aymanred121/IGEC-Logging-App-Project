@@ -1,6 +1,6 @@
 package com.igec.admin.Fragments;
 
-import static com.igec.admin.cryptography.RSAUtil.encrypt;
+import static com.igec.common.cryptography.RSAUtil.encrypt;
 
 import android.os.Bundle;
 import android.text.Editable;
@@ -10,7 +10,6 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
@@ -21,10 +20,10 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.igec.admin.R;
-import com.igec.admin.fireBase.Allowance;
-import com.igec.admin.fireBase.Employee;
-import com.igec.admin.fireBase.EmployeesGrossSalary;
-import com.igec.admin.utilites.allowancesEnum;
+import com.igec.common.firebase.Allowance;
+import com.igec.common.firebase.Employee;
+import com.igec.common.firebase.EmployeesGrossSalary;
+import com.igec.common.utilities.allowancesEnum;
 import com.github.javafaker.Faker;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.checkbox.MaterialCheckBox;

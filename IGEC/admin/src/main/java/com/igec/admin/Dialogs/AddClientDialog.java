@@ -18,7 +18,7 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.igec.admin.R;
-import com.igec.admin.fireBase.Client;
+import com.igec.common.firebase.Client;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_check_in_out"
+            android:checkable="true"
+            android:icon="@drawable/ic_baseline_access_time_24"
+            android:title="@string/check_in_out"></item>
+        <item
+            android:id="@+id/nav_change_password"
+            android:checkable="true"
+            android:icon="@drawable/ic_baseline_password_24"
+            android:title="@string/change_password"></item>
+        <item
+            android:id="@+id/nav_gross_salary"
+            android:checkable="true"
+            android:icon="@drawable/ic_baseline_wallet_24"
+            android:title="@string/gross_salary"></item>
+        <item
+            android:id="@+id/nav_send_vacation_request"
+            android:checkable="true"
+            android:icon="@drawable/ic_baseline_send_24"
+            android:title="@string/send_vacation_request"></item>
+        <item
+            android:id="@+id/nav_vacations_log"
+            android:checkable="true"
+            android:icon="@drawable/ic_baseline_history_24"
+            android:title="@string/vacations_log"></item>
+    </group>
+</menu>

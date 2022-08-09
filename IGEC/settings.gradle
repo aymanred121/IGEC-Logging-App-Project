@@ -1,0 +1,4 @@
+rootProject.name = "IGEC"
+include ':admin'
+include ':user'
+include ':common'

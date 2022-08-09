@@ -1,2 +1,0 @@
-include ':admin'
-rootProject.name = "IGEC-Admin"

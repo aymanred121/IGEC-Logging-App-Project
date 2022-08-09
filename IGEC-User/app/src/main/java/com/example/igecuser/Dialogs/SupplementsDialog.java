@@ -15,6 +15,7 @@ import android.view.animation.AnimationUtils;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -37,6 +38,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import de.hdodenhof.circleimageview.CircleImageView;
+
 public class SupplementsDialog extends DialogFragment {
 
 
@@ -45,11 +48,13 @@ public class SupplementsDialog extends DialogFragment {
     private ArrayList<Supplement> supplements;
     private MaterialButton vDone;
     private boolean isItAUser;
+    private Supplement machineCover = new Supplement();
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     //Views
     private CircularProgressIndicator vCircularProgressIndicator;
     private TextInputEditText vComment;
+    private CircleImageView vMachineCover;
     private Animation show, hide;
     private RecyclerView recyclerView;
     private SupplementsAdapter adapter;
@@ -100,6 +105,7 @@ public class SupplementsDialog extends DialogFragment {
     // Functions
     private void initialize(View view) {
         supplements = new ArrayList<>();
+        vMachineCover = view.findViewById(R.id.ImageView_MachineIMG);
         show = AnimationUtils.loadAnimation(getActivity(), R.anim.show);
         hide = AnimationUtils.loadAnimation(getActivity(), R.anim.hide);
         vCircularProgressIndicator = view.findViewById(R.id.progress_bar);
@@ -107,7 +113,7 @@ public class SupplementsDialog extends DialogFragment {
         vDone = view.findViewById(R.id.Button_Done);
         recyclerView = view.findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
-        layoutManager = new LinearLayoutManager(getActivity());
+        layoutManager = new GridLayoutManager(getActivity(),3);
         adapter = new SupplementsAdapter(supplements);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
@@ -122,6 +128,22 @@ public class SupplementsDialog extends DialogFragment {
         }
     }
 
+    private void getMachineCover() {
+        String cover = "cover";
+        StorageReference ref = FirebaseStorage.getInstance().getReference().child("/imgs/" + machine.getId() + String.format("/%s.jpg", cover));
+        try {
+            final File localFile = File.createTempFile(cover, "jpg");
+            ref.getFile(localFile).addOnSuccessListener(taskSnapshot -> {
+                Bitmap bitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
+                vMachineCover.setImageBitmap(bitmap);
+                machineCover.setPhoto(bitmap);
+                machineCover.setName("cover");
+            }).addOnFailureListener(e -> {
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     private void getAllSupplements() {
         StorageReference ref;
         final int[] progress = new int[1];
@@ -136,6 +158,7 @@ public class SupplementsDialog extends DialogFragment {
                         supplements.add(new Supplement(name, bitmap));
                         progress[0]++;
                         if (progress[0] == machine.getSupplementsNames().size()) {
+                            getMachineCover();
                             vCircularProgressIndicator.startAnimation(hide);
                             recyclerView.startAnimation(show);
                             vDone.setEnabled(true);

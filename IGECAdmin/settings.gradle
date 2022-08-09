@@ -1,2 +1,2 @@
-include ':app'
+include ':admin'
 rootProject.name = "IGEC-Admin"

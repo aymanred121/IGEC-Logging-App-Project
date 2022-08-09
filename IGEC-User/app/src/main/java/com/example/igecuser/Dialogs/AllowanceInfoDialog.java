@@ -44,6 +44,7 @@ public class AllowanceInfoDialog extends DialogFragment {
     private boolean canGivePenalty, isProject;
     private String EmployeeID;
     private double baseSalary;
+    private String baseCurrency;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     public AllowanceInfoDialog(int position, boolean canGivePenalty, boolean isProject, String id) {
@@ -53,13 +54,14 @@ public class AllowanceInfoDialog extends DialogFragment {
         this.EmployeeID = id;
     }
 
-    public AllowanceInfoDialog(int position, Allowance allowance, boolean canGivePenalty, boolean isProject, String id, double baseSalary) {
+    public AllowanceInfoDialog(int position, Allowance allowance, boolean canGivePenalty, boolean isProject, String id, double baseSalary, String baseCurrency) {
         this.position = position;
         this.allowance = allowance;
         this.canGivePenalty = canGivePenalty;
         this.isProject = isProject;
         this.EmployeeID = id;
         this.baseSalary = baseSalary;
+        this.baseCurrency = baseCurrency;
     }
 
 
@@ -131,8 +133,9 @@ public class AllowanceInfoDialog extends DialogFragment {
                 vAllowanceType.setText(types.get(types.size() - 1));
                 vAllowanceName.setText(allowance.getName());
             }
-            vAllowanceCurrency.setText(allowance.getCurrency());
-            vAllowanceMount.setText(allowance.getName().equals("Retention by Days") ? String.format("%d", (int) (allowance.getAmount() * 30 / baseSalary)) : String.format("%.2f", Math.abs(allowance.getAmount())));
+            boolean isRetentionByDays = allowance.getName().equals("Retention by Days");
+            vAllowanceCurrency.setText(isRetentionByDays ? baseCurrency : allowance.getCurrency());
+            vAllowanceMount.setText(isRetentionByDays ? String.format("%d", (int) (allowance.getAmount() * 30 / baseSalary)) : String.format("%.2f", Math.abs(allowance.getAmount())));
             vAllowanceNote.setText(allowance.getNote());
         }
         ArrayAdapter<String> allowancesAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, allowancesList);
@@ -199,7 +202,7 @@ public class AllowanceInfoDialog extends DialogFragment {
                 allowance.setName(isOther ? vAllowanceName.getText().toString() : vAllowanceType.getText().toString().trim());
                 allowance.setAmount(Double.parseDouble(vAllowanceMount.getText().toString()));
                 allowance.setNote(vAllowanceNote.getText().toString());
-                allowance.setCurrency(isRetentionByDays ? "EGP" : vAllowanceCurrency.getText().toString());
+                allowance.setCurrency(isRetentionByDays ? baseCurrency : vAllowanceCurrency.getText().toString());
                 if (isProject) {
                     result.putSerializable("allowance", allowance);
                     result.putInt("position", position);

@@ -17,7 +17,7 @@ import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.igec.user.Adapters.AllowanceAdapter;
+import com.igec.common.Adapters.AllowanceAdapter;
 import com.igec.user.R;
 import com.igec.common.firebase.Allowance;
 import com.igec.common.firebase.Employee;

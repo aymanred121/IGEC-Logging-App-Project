@@ -18,7 +18,7 @@ import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.igec.admin.Adatpers.WorkingDayAdapter;
+import com.igec.admin.Adapters.WorkingDayAdapter;
 import com.igec.admin.R;
 import com.igec.common.utilities.CsvWriter;
 import com.igec.common.utilities.WorkingDay;

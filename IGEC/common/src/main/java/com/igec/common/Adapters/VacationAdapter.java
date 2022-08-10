@@ -1,4 +1,4 @@
-package com.igec.admin.Adatpers;
+package com.igec.common.Adapters;
 
 import android.graphics.Color;
 import android.view.LayoutInflater;
@@ -9,8 +9,11 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import com.igec.admin.R;
+
+
+import com.igec.common.R;
 import com.igec.common.firebase.VacationRequest;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;

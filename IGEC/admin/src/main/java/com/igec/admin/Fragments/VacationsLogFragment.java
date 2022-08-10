@@ -14,7 +14,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.igec.admin.Adatpers.VacationAdapter;
+import com.igec.common.Adapters.VacationAdapter;
 import com.igec.admin.R;
 import com.igec.common.firebase.Employee;
 import com.igec.common.firebase.VacationRequest;

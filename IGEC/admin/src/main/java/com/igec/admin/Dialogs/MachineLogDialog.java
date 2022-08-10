@@ -15,7 +15,7 @@ import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.igec.admin.Adatpers.MachineLogAdapter;
+import com.igec.admin.Adapters.MachineLogAdapter;
 import com.igec.admin.R;
 import com.igec.common.firebase.Machine;
 import com.igec.common.firebase.Machine_Employee;

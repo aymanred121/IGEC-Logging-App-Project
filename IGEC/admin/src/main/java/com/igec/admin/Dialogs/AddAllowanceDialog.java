@@ -16,8 +16,8 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 
-import com.igec.admin.Adatpers.AllowanceAdapter;
 import com.igec.admin.R;
+import com.igec.common.Adapters.AllowanceAdapter;
 import com.igec.common.firebase.Allowance;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -102,7 +102,7 @@ public class AddAllowanceDialog extends DialogFragment {
         recyclerView = view.findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
-        adapter = new AllowanceAdapter(allowances);
+        adapter = new AllowanceAdapter(allowances,true);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
     }

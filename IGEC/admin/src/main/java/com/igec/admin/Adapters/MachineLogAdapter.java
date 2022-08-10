@@ -1,4 +1,4 @@
-package com.igec.admin.Adatpers;
+package com.igec.admin.Adapters;
 
 import android.annotation.SuppressLint;
 import android.view.LayoutInflater;

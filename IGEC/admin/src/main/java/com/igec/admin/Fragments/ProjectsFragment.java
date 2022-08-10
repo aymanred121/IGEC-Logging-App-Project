@@ -12,7 +12,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.igec.admin.Adatpers.ProjectAdapter;
+import com.igec.admin.Adapters.ProjectAdapter;
 import com.igec.admin.Dialogs.ProjectFragmentDialog;
 import com.igec.admin.R;
 import com.igec.common.firebase.Project;

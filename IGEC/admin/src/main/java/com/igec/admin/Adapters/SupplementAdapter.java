@@ -1,4 +1,4 @@
-package com.igec.admin.Adatpers;
+package com.igec.admin.Adapters;
 
 import android.view.LayoutInflater;
 import android.view.View;

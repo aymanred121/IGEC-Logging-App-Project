@@ -103,6 +103,7 @@ public class AllowanceInfoDialog extends DialogFragment {
         vAllowanceName.addTextChangedListener(twName);
         vAllowanceMount.addTextChangedListener(twMount);
         vAllowanceNote.addTextChangedListener(twNote);
+        vAllowanceCurrency.addTextChangedListener(twCurrency);
 
     }
 
@@ -162,6 +163,7 @@ public class AllowanceInfoDialog extends DialogFragment {
         views = new ArrayList<>();
         views.add(new Pair<>(vAllowanceTypeLayout, vAllowanceType));
         views.add(new Pair<>(vAllowanceMountLayout, vAllowanceMount));
+        views.add(new Pair<>(vAllowanceCurrencyLayout, vAllowanceCurrency));
         views.add(new Pair<>(vAllowanceNoteLayout, vAllowanceNote));
         vDone = view.findViewById(R.id.button_Done);
     }
@@ -183,7 +185,8 @@ public class AllowanceInfoDialog extends DialogFragment {
     }
 
     private void hideError(TextInputLayout textInputLayout) {
-        textInputLayout.setErrorEnabled(textInputLayout.getError() != null);
+        textInputLayout.setError(null);
+        textInputLayout.setErrorEnabled(false);
     }
 
 
@@ -251,10 +254,7 @@ public class AllowanceInfoDialog extends DialogFragment {
 
         @Override
         public void afterTextChanged(Editable editable) {
-            if (!vAllowanceName.getText().toString().trim().isEmpty())
-                vAllowanceNameLayout.setError(null);
             hideError(vAllowanceNameLayout);
-
         }
     };
     private TextWatcher twMount = new TextWatcher() {
@@ -273,12 +273,14 @@ public class AllowanceInfoDialog extends DialogFragment {
             if (!vAllowanceMount.getText().toString().trim().isEmpty()) {
                 if (vAllowanceMount.getText().toString().equals(".") || Double.parseDouble(vAllowanceMount.getText().toString().trim()) == 0)
                     vAllowanceMountLayout.setError("Invalid Value");
-                else
+                else {
                     vAllowanceMountLayout.setError(null);
+                    vAllowanceMountLayout.setErrorEnabled(false);
+                }
             } else {
                 vAllowanceMountLayout.setError(null);
+                vAllowanceMountLayout.setErrorEnabled(false);
             }
-            hideError(vAllowanceMountLayout);
         }
     };
     private TextWatcher twNote = new TextWatcher() {
@@ -295,8 +297,6 @@ public class AllowanceInfoDialog extends DialogFragment {
         @Override
         public void afterTextChanged(Editable editable) {
 
-            if (!vAllowanceNote.getText().toString().trim().isEmpty())
-                vAllowanceNoteLayout.setError(null);
             hideError(vAllowanceNoteLayout);
         }
     };
@@ -319,6 +319,22 @@ public class AllowanceInfoDialog extends DialogFragment {
             vAllowanceNameLayout.setVisibility(isOther ? View.VISIBLE : View.GONE);
             vAllowanceCurrencyLayout.setVisibility(isRetentionByDays ? View.GONE : View.VISIBLE);
             vAllowanceName.setText("");
+        }
+    };
+    private TextWatcher twCurrency = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            hideError(vAllowanceCurrencyLayout);
         }
     };
 }

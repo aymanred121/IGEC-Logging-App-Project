@@ -16,7 +16,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.igec.admin.Adatpers.MachineAdapter;
+import com.igec.admin.Adapters.MachineAdapter;
 import com.igec.admin.Dialogs.MachineFragmentDialog;
 import com.igec.admin.Dialogs.MachineLogDialog;
 import com.igec.admin.R;

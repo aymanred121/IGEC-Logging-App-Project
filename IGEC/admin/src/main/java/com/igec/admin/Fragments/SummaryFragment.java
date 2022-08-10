@@ -17,7 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.igec.admin.Adatpers.EmployeeAdapter;
+import com.igec.admin.Adapters.EmployeeAdapter;
 import com.igec.admin.Dialogs.MonthSummaryDialog;
 import com.igec.admin.R;
 import com.igec.common.firebase.Allowance;

@@ -23,7 +23,7 @@ import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.igec.admin.Adatpers.EmployeeAdapter;
+import com.igec.admin.Adapters.EmployeeAdapter;
 import com.igec.admin.Dialogs.AddAllowanceDialog;
 import com.igec.admin.Dialogs.AddClientDialog;
 import com.igec.admin.Dialogs.LocationDialog;

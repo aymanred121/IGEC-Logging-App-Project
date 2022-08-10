@@ -122,6 +122,7 @@ public class AllowanceInfoDialog extends DialogFragment {
         vAllowanceType.addTextChangedListener(twType);
         vAllowanceName.addTextChangedListener(twName);
         vAllowanceMount.addTextChangedListener(twMount);
+        vAllowanceCurrency.addTextChangedListener(twCurrency);
 
     }
 
@@ -241,5 +242,23 @@ public class AllowanceInfoDialog extends DialogFragment {
             vAllowanceMountLayout.setErrorEnabled(vAllowanceMountLayout.getError() != null);
         }
     };
+    private TextWatcher twCurrency = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            vAllowanceCurrencyLayout.setError(null);
+            vAllowanceCurrencyLayout.setErrorEnabled(false);
+        }
+    };
+
 
 }

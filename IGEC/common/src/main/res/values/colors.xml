@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="primaryColor">#005599</color>
+    <color name="primaryLightColor">#4e81ca</color>
+    <color name="primaryDarkColor">#002d6a</color>
+    <color name="secondaryColor">#005599</color>
+    <color name="secondaryLightColor">#4e81ca</color>
+    <color name="secondaryDarkColor">#002d6a</color>
+    <color name="primaryTextColor">#ffffff</color>
+    <color name="secondaryTextColor">#ffffff</color>
+    <color name="labelBackground">#ededed</color>
+    <color name="black_overlay">#66000000</color>
+    <color name="green">#009900</color>
+    <color name="Red" >#990000</color>
+</resources>

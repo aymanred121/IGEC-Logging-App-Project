@@ -15,18 +15,13 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.igec.admin.Adatpers.EmployeeAdapter;
+import com.igec.admin.Adapters.EmployeeAdapter;
 import com.igec.admin.Dialogs.UserFragmentDialog;
 import com.igec.admin.R;
 import com.igec.common.firebase.Employee;
 import com.igec.common.firebase.EmployeeOverview;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 
 import java.util.ArrayList;
 import java.util.HashMap;

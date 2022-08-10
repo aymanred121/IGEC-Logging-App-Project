@@ -213,26 +213,26 @@ public class SummaryFragment extends Fragment {
                                     double currentMonth = 0;
                                     double previousMonth = 0;
                                     for (Allowance allowance : documentSnapshot1.toObject(EmployeesGrossSalary.class).getAllTypes()) {
-                                        if (allowance.getType() == allowancesEnum.NETSALARY.ordinal())
-                                            continue;
-                                        if (allowance.getName().trim().equalsIgnoreCase("Transportation")) {
-                                            transportation += allowance.getAmount();
-                                        } else if (allowance.getName().trim().equalsIgnoreCase("accommodation")) {
-                                            accommodation += allowance.getAmount();
-                                        } else if (allowance.getName().trim().equalsIgnoreCase("site")) {
-                                            site += allowance.getAmount();
-                                        } else if (allowance.getName().trim().equalsIgnoreCase("remote")) {
-                                            remote += allowance.getAmount();
-                                        } else if (allowance.getName().trim().equalsIgnoreCase("food")) {
-                                            food += allowance.getAmount();
-                                        } else if (allowance.getType() == allowancesEnum.RETENTION.ordinal()) {
-                                            cuts += allowance.getAmount();
-                                        } else if (allowance.getType() == allowancesEnum.BONUS.ordinal()) {
-                                            personal += allowance.getAmount();
-                                        } else if (allowance.getType() == allowancesEnum.OVERTIME.ordinal()) {
-                                            overTime += allowance.getAmount();
-                                        } else {
-                                            other += allowance.getAmount();
+                                        if (allowance.getType() != allowancesEnum.NETSALARY.ordinal()) {
+                                            if (allowance.getName().trim().equalsIgnoreCase("Transportation")) {
+                                                transportation += allowance.getAmount();
+                                            } else if (allowance.getName().trim().equalsIgnoreCase("accommodation")) {
+                                                accommodation += allowance.getAmount();
+                                            } else if (allowance.getName().trim().equalsIgnoreCase("site")) {
+                                                site += allowance.getAmount();
+                                            } else if (allowance.getName().trim().equalsIgnoreCase("remote")) {
+                                                remote += allowance.getAmount();
+                                            } else if (allowance.getName().trim().equalsIgnoreCase("food")) {
+                                                food += allowance.getAmount();
+                                            } else if (allowance.getType() == allowancesEnum.RETENTION.ordinal()) {
+                                                cuts += allowance.getAmount();
+                                            } else if (allowance.getType() == allowancesEnum.BONUS.ordinal()) {
+                                                personal += allowance.getAmount();
+                                            } else if (allowance.getType() == allowancesEnum.OVERTIME.ordinal()) {
+                                                overTime += allowance.getAmount();
+                                            } else {
+                                                other += allowance.getAmount();
+                                            }
                                         }
                                     }
                                     nextMonth = other + personal + accommodation + site + remote + food;
@@ -241,16 +241,16 @@ public class SummaryFragment extends Fragment {
                                         previousMonth = 0;
                                     else {
                                         for (Allowance allowance : doc.toObject(EmployeesGrossSalary.class).getAllTypes()) {
-                                            if (allowance.getType() == allowancesEnum.NETSALARY.ordinal())
-                                                continue;
-                                            if (allowance.getName().trim().equalsIgnoreCase("Transportation"))
-                                                continue;
-                                            if (allowance.getType() == allowancesEnum.RETENTION.ordinal()) {
-                                                continue;
-                                            } else if (allowance.getType() == allowancesEnum.OVERTIME.ordinal()) {
-                                                continue;
-                                            } else {
-                                                previousMonth += allowance.getAmount();
+                                            if (allowance.getType() != allowancesEnum.NETSALARY.ordinal()) {
+                                                if (allowance.getName().trim().equalsIgnoreCase("Transportation"))
+                                                    continue;
+                                                if (allowance.getType() == allowancesEnum.RETENTION.ordinal()) {
+                                                    continue;
+                                                } else if (allowance.getType() == allowancesEnum.OVERTIME.ordinal()) {
+                                                    continue;
+                                                } else {
+                                                    previousMonth += allowance.getAmount();
+                                                }
                                             }
                                         }
                                     }

@@ -1,4 +1,4 @@
-package com.igec.user.Dialogs;
+package com.igec.common.Dialogs;
 
 import android.app.Dialog;
 import android.os.Bundle;
@@ -14,15 +14,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
-import com.igec.user.R;
-import com.igec.user.databinding.DialogVacationBinding;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 import com.igec.common.firebase.Allowance;
 import com.igec.common.firebase.EmployeesGrossSalary;
 import com.igec.common.firebase.VacationRequest;
 import com.igec.common.utilities.allowancesEnum;
-import com.google.firebase.firestore.FieldValue;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.SetOptions;
+import com.igec.common.R;
+import com.igec.common.databinding.DialogVacationBinding;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

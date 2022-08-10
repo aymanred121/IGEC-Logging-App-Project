@@ -62,17 +62,22 @@
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/menu/activity_main_drawer.xml" value="0.67" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/menu/admin_menu.xml" value="0.5" />
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/menu/main_activity2.xml" value="0.20416666666666666" />
+        <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/drawable/ic_baseline_comment_bank_24.xml" value="0.196" />
+        <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/drawable/ic_round_history_24.xml" value="0.196" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/item_allowance.xml" value="0.67" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/item_employee.xml" value="0.25" />
+        <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/item_machine.xml" value="0.5" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/item_vacation_request.xml" value="0.33" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC/common/src/main/res/drawable/ic_baseline_circle_24.xml" value="0.111" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC/common/src/main/res/drawable/ic_baseline_close_24.xml" value="0.1325" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC/common/src/main/res/drawable/ic_round_trending_down_24.xml" value="0.1325" />
+        <entry key="..\:/IGEC-Logging-App-Project/IGEC/common/src/main/res/layout/dialog_vacation.xml" value="0.25" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC/common/src/main/res/layout/item_allowance.xml" value="0.75" />
-        <entry key="..\:/IGEC-Logging-App-Project/IGEC/common/src/main/res/layout/item_vacation_request.xml" value="0.7489177489177489" />
+        <entry key="..\:/IGEC-Logging-App-Project/IGEC/common/src/main/res/layout/item_vacation_request.xml" value="0.33" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC/user/src/main/res/drawable/ic_baseline_circle_24.xml" value="0.196" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC/user/src/main/res/layout/activity_employee_dashboard.xml" value="0.1" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC/user/src/main/res/layout/activity_manager_dashboard.xml" value="0.1" />
+        <entry key="..\:/IGEC-Logging-App-Project/IGEC/user/src/main/res/layout/dialog_vacation.xml" value="0.1" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC/user/src/main/res/layout/item_allowance.xml" value="0.33" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC/user/src/main/res/layout/item_employee.xml" value="0.33" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC/user/src/main/res/layout/item_salary_summary.xml" value="0.25" />

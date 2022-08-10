@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 
+import com.google.android.material.card.MaterialCardView;
 import com.igec.common.R;
 import com.igec.common.firebase.VacationRequest;
 
@@ -24,7 +25,7 @@ public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.Vacati
     private ArrayList<VacationRequest> vacationsList;
     private OnItemClickListener listener;
 
-    public interface OnItemClickListener{
+    public interface OnItemClickListener {
         void onItemClick(int position);
     }
 
@@ -39,9 +40,9 @@ public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.Vacati
     @NonNull
     @Override
     public VacationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.item_vacation_request,parent,false);
-        return new VacationViewHolder(v,listener);
-        
+        View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.item_vacation_request, parent, false);
+        return new VacationViewHolder(v, listener);
+
     }
 
     @Override
@@ -53,27 +54,27 @@ public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.Vacati
         holder.vVacationStartDate.setText(String.format("Start Date: %s", formatDate(vacation.getStartDate())));
         switch (vacation.getVacationStatus()) {
             case 1:
-            holder.vVacationsStatus.setColorFilter(Color.rgb(0, 153, 0));
-            break;
+                holder.layout.setCardBackgroundColor(Color.rgb(0, 153, 0));
+                break;
             case -1:
-            holder.vVacationsStatus.setColorFilter(Color.rgb(153,0,0));
-            break;
+                holder.layout.setCardBackgroundColor(Color.rgb(153, 0, 0));
+                break;
             default:
-                holder.vVacationsStatus.setColorFilter(Color.GRAY);
+                holder.layout.setCardBackgroundColor(Color.GRAY);
         }
         holder.vVacationDays.setText(String.format("for : %s days", getDays(vacation)));
     }
 
-    private String formatDate(Date Date)
-    {
+    private String formatDate(Date Date) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(Date.getTime());
         return simpleDateFormat.format(calendar.getTime());
     }
+
     private String getDays(VacationRequest vacation) {
-        long days= vacation.getEndDate().getTime()-vacation.getStartDate().getTime();
-        days /=(24*3600*1000);
+        long days = vacation.getEndDate().getTime() - vacation.getStartDate().getTime();
+        days /= (24 * 3600 * 1000);
         return String.valueOf(days);
     }
 
@@ -90,29 +91,27 @@ public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.Vacati
         return vacationsList.size();
     }
 
-    public static class VacationViewHolder extends RecyclerView.ViewHolder{
+    public static class VacationViewHolder extends RecyclerView.ViewHolder {
 
+        public MaterialCardView layout;
         public TextView vName;
         public TextView vID;
         public TextView vVacationStartDate;
         public TextView vVacationDays;
-        public ImageView vVacationsStatus;
 
 
-        public VacationViewHolder(@NonNull View itemView,OnItemClickListener listener) {
+        public VacationViewHolder(@NonNull View itemView, OnItemClickListener listener) {
             super(itemView);
+            layout = itemView.findViewById(R.id.layout);
             vName = itemView.findViewById(R.id.TextView_Name);
             vID = itemView.findViewById(R.id.TextView_Id);
             vVacationDays = itemView.findViewById(R.id.TextView_VacationDays);
-            vVacationsStatus = itemView.findViewById(R.id.ImageView_VacationStatus);
             vVacationStartDate = itemView.findViewById(R.id.TextView_VacationStartDate);
 
             itemView.setOnClickListener(v -> {
-                if(listener != null)
-                {
+                if (listener != null) {
                     int position = getAdapterPosition();
-                    if(position != RecyclerView.NO_POSITION)
-                    {
+                    if (position != RecyclerView.NO_POSITION) {
                         listener.onItemClick(position);
                     }
                 }

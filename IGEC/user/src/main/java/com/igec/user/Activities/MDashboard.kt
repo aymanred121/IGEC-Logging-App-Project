@@ -20,6 +20,8 @@ import com.igec.user.R
 import com.igec.user.databinding.ActivityMdashboardBinding
 import com.igec.common.firebase.Employee
 import com.google.android.material.navigation.NavigationView
+import com.igec.common.Fragments.VacationRequestsFragment
+import com.igec.common.Fragments.VacationsLogFragment
 
 class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private var currManager: Employee? = null
@@ -140,7 +142,7 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                             supportFragmentManager.beginTransaction()
                                 .replace(
                                     R.id.nav_host_fragment_content_main,
-                                    VacationsLogFragment.newInstance(currManager, false)
+                                    VacationsLogFragment.newInstance(currManager)
                                 )
                                 .addToBackStack(null)
                                 .commit()

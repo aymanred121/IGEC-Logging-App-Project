@@ -30,6 +30,8 @@ import com.igec.admin.Dialogs.ProjectFragmentDialog
 import com.igec.admin.Fragments.*
 import com.igec.admin.R
 import com.igec.admin.databinding.ActivityMainBinding
+import com.igec.common.Fragments.VacationRequestsFragment
+import com.igec.common.Fragments.VacationsLogFragment
 
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
@@ -206,7 +208,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                             supportFragmentManager.beginTransaction()
                                 .replace(
                                     R.id.nav_host_fragment_content_main,
-                                    VacationRequestsFragment()
+                                    VacationRequestsFragment.newInstance(null)
                                 )
                                 .addToBackStack(null)
                                 .commit()
@@ -216,7 +218,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                             supportFragmentManager.beginTransaction()
                                 .replace(
                                     R.id.nav_host_fragment_content_main,
-                                    VacationsLogFragment()
+                                    VacationsLogFragment.newInstance(null)
                                 )
                                 .addToBackStack(null)
                                 .commit()

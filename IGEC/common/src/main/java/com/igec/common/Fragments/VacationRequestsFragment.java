@@ -1,52 +1,29 @@
-package com.igec.user.Fragments;
+package com.igec.common.Fragments;
 
 import static android.content.ContentValues.TAG;
 
 import android.app.AlertDialog;
-import android.content.ContextWrapper;
-import android.content.DialogInterface;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.InputFilter;
-import android.text.InputType;
-import android.text.TextWatcher;
 import android.util.Log;
-import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.FrameLayout;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.igec.common.Adapters.VacationAdapter;
-import com.igec.user.Dialogs.VacationDialog;
-import com.igec.user.R;
-import com.igec.common.firebase.Allowance;
-import com.igec.common.firebase.Employee;
-import com.igec.common.firebase.EmployeesGrossSalary;
-import com.igec.common.firebase.VacationRequest;
-import com.igec.common.utilities.allowancesEnum;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.SetOptions;
+import com.igec.common.Adapters.VacationAdapter;
+import com.igec.common.firebase.Employee;
+import com.igec.common.firebase.VacationRequest;
+import com.igec.common.Dialogs.VacationDialog;
+import com.igec.common.R;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.stream.Collectors;
 
 
 public class VacationRequestsFragment extends Fragment {
@@ -71,9 +48,6 @@ public class VacationRequestsFragment extends Fragment {
         fragment.setArguments(args);
         return fragment;
     }
-//    public VacationRequestsFragment(Employee currManager) {
-//        this.currManager = currManager;
-//    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -92,7 +66,7 @@ public class VacationRequestsFragment extends Fragment {
 
     // Functions
     private void initialize(View view) {
-        currManager= (Employee) getArguments().getSerializable("currManager");
+        currManager = (Employee) getArguments().getSerializable("currManager");
         vacationRequests = new ArrayList<>();
         recyclerView = view.findViewById(R.id.recyclerview);
         recyclerView.setHasFixedSize(true);
@@ -106,21 +80,39 @@ public class VacationRequestsFragment extends Fragment {
     }
 
     private void loadVacations() {
-        db.collection("Vacation")
-                .whereEqualTo("manager.id", currManager.getId())
-                .whereEqualTo("vacationStatus", 0)
-                .addSnapshotListener((queryDocumentSnapshots, e) -> {
-                    if (e != null) {
-                        Log.w(TAG, "Listen failed.", e);
-                        return;
-                    }
-                    vacationRequests.clear();
-                    for (DocumentSnapshot vacations : queryDocumentSnapshots) {
-                        vacationRequests.add(vacations.toObject(VacationRequest.class));
-                    }
-                    adapter.setVacationsList(vacationRequests);
-                    adapter.notifyDataSetChanged();
-                });
+        if (currManager != null) {
+            db.collection("Vacation")
+                    .whereEqualTo("manager.id", currManager.getId())
+                    .whereEqualTo("vacationStatus", 0)
+                    .addSnapshotListener((queryDocumentSnapshots, e) -> {
+                        if (e != null) {
+                            Log.w(TAG, "Listen failed.", e);
+                            return;
+                        }
+                        vacationRequests.clear();
+                        for (DocumentSnapshot vacations : queryDocumentSnapshots) {
+                            vacationRequests.add(vacations.toObject(VacationRequest.class));
+                        }
+                        adapter.setVacationsList(vacationRequests);
+                        adapter.notifyDataSetChanged();
+                    });
+        } else {
+            db.collection("Vacation")
+                    .whereEqualTo("employee.managerID", "adminID")
+                    .whereEqualTo("vacationStatus", 0)
+                    .addSnapshotListener((queryDocumentSnapshots, e) -> {
+                        if (e != null) {
+                            Log.w(TAG, "Listen failed.", e);
+                            return;
+                        }
+                        vacationRequests.clear();
+                        for (DocumentSnapshot vacations : queryDocumentSnapshots) {
+                            vacationRequests.add(vacations.toObject(VacationRequest.class));
+                        }
+                        adapter.setVacationsList(vacationRequests);
+                        adapter.notifyDataSetChanged();
+                    });
+        }
     }
 
     VacationAdapter.OnItemClickListener itclVacationAdapter = position -> {

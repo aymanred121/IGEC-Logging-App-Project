@@ -20,6 +20,7 @@ import android.widget.Toast;
 import com.igec.admin.Adapters.EmployeeAdapter;
 import com.igec.admin.Dialogs.MonthSummaryDialog;
 import com.igec.admin.R;
+import com.igec.admin.databinding.FragmentSummaryBinding;
 import com.igec.common.firebase.Allowance;
 import com.igec.common.firebase.Employee;
 import com.igec.common.firebase.EmployeeOverview;
@@ -29,9 +30,6 @@ import com.igec.common.utilities.CsvWriter;
 import com.igec.common.utilities.LocationDetails;
 import com.igec.common.utilities.WorkingDay;
 import com.igec.common.utilities.allowancesEnum;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -47,13 +45,6 @@ import java.util.Map;
 import java.util.Objects;
 
 public class SummaryFragment extends Fragment {
-
-
-    // Views
-    private RecyclerView recyclerView;
-    private TextInputLayout selectedMonthLayout;
-    private TextInputEditText selectedMonthEdit;
-    private FloatingActionButton createCSV;
     // Vars
     private EmployeeAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
@@ -64,35 +55,39 @@ public class SummaryFragment extends Fragment {
     ArrayList<Project> projects = new ArrayList();
     CollectionReference projectRef = db.collection("projects");
 
+    private FragmentSummaryBinding binding;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_summary, container, false);
+        binding = FragmentSummaryBinding.inflate(inflater, container, false);
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        binding = null;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        Initialize(view);
-        selectedMonthLayout.setEndIconOnClickListener(oclMonthPicker);
-        selectedMonthLayout.setErrorIconOnClickListener(oclMonthPicker);
-        selectedMonthLayout.setErrorIconDrawable(R.drawable.ic_baseline_calendar_month_24);
+        initialize();
+        binding.monthLayout.setEndIconOnClickListener(oclMonthPicker);
+        binding.monthLayout.setErrorIconOnClickListener(oclMonthPicker);
+        binding.monthLayout.setErrorIconDrawable(R.drawable.ic_baseline_calendar_month_24);
         adapter.setOnItemClickListener(oclEmployee);
-        createCSV.setOnClickListener(oclCSV);
+        binding.createFab.setOnClickListener(oclCSV);
     }
 
     // Functions
-    private void Initialize(View view) {
-        recyclerView = view.findViewById(R.id.recyclerview);
-        selectedMonthEdit = view.findViewById(R.id.TextInput_SelectedMonth);
-        selectedMonthLayout = view.findViewById(R.id.textInputLayout_SelectedMonth);
-        createCSV = view.findViewById(R.id.fab_createCSV);
-        recyclerView.setHasFixedSize(true);
+    private void initialize() {
+        binding.recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
         adapter = new EmployeeAdapter(employees, false);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(adapter);
-//        getProjects();
+        binding.recyclerView.setLayoutManager(layoutManager);
+        binding.recyclerView.setAdapter(adapter);
         getEmployees();
 
     }
@@ -142,10 +137,10 @@ public class SummaryFragment extends Fragment {
                 new MonthPickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(int selectedMonth, int selectedYear) {
-                        selectedMonthLayout.setError(null);
-                        selectedMonthLayout.setErrorEnabled(false);
-                        selectedMonthEdit.setText(String.format("%d/%d", selectedMonth + 1, selectedYear));
-                        String[] selectedDate = selectedMonthEdit.getText().toString().split("/");
+                        binding.monthLayout.setError(null);
+                        binding.monthLayout.setErrorEnabled(false);
+                        binding.monthEdit.setText(String.format("%d/%d", selectedMonth + 1, selectedYear));
+                        String[] selectedDate = binding.monthEdit.getText().toString().split("/");
                         year = selectedDate[1];
                         month = selectedDate[0];
                         if (month.length() == 1) {
@@ -173,10 +168,10 @@ public class SummaryFragment extends Fragment {
     };
 
     private final View.OnClickListener oclCSV = v -> {
-        if (selectedMonthEdit.getText().toString().isEmpty()) {
-            selectedMonthLayout.setError("Please select a month");
+        if (binding.monthEdit.getText().toString().isEmpty()) {
+            binding.monthLayout.setError("Please select a month");
         } else {
-            String[] selectedDate = selectedMonthEdit.getText().toString().split("/");
+            String[] selectedDate = binding.monthEdit.getText().toString().split("/");
             db.collection("employees")
                     .get()
                     .addOnSuccessListener(queryDocumentSnapshots -> {
@@ -184,7 +179,7 @@ public class SummaryFragment extends Fragment {
                         CsvWriter csvWriter = new CsvWriter(header);
                         final int[] counter = new int[1];
                         for (QueryDocumentSnapshot queryDocumentSnapshot : queryDocumentSnapshots) {
-                            month = String.format("%02d",Integer.parseInt(month));
+                            month = String.format("%02d", Integer.parseInt(month));
                             db.collection("EmployeesGrossSalary").document(queryDocumentSnapshot.getId()).collection(prevYear).document(prevMonth).get().addOnSuccessListener(doc -> {
                                 db.collection("EmployeesGrossSalary").document(queryDocumentSnapshot.getId()).collection(year).document(month).get().addOnSuccessListener(documentSnapshot1 -> {
                                     if (!documentSnapshot1.exists()) {
@@ -279,13 +274,13 @@ public class SummaryFragment extends Fragment {
             @SuppressLint("DefaultLocale")
             MonthPickerDialog.Builder builder = new MonthPickerDialog.Builder(getActivity(),
                     (selectedMonth, selectedYear) -> {
-                        selectedMonthLayout.setError(null);
-                        selectedMonthLayout.setErrorEnabled(false);
-                        selectedMonthEdit.setText(String.format("%d/%d", selectedMonth + 1, selectedYear));
-                        String[] selectedDate = selectedMonthEdit.getText().toString().split("/");
+                        binding.monthLayout.setError(null);
+                        binding.monthLayout.setErrorEnabled(false);
+                        binding.monthEdit.setText(String.format("%d/%d", selectedMonth + 1, selectedYear));
+                        String[] selectedDate = binding.monthEdit.getText().toString().split("/");
                         year = selectedDate[1];
                         month = selectedDate[0];
-                        month = String.format("%02d",Integer.parseInt(month));
+                        month = String.format("%02d", Integer.parseInt(month));
                         if ((Integer.parseInt(month) - 1) < 1) {
                             prevMonth = "12";
                             prevYear = Integer.parseInt(year) - 1 + "";
@@ -293,7 +288,7 @@ public class SummaryFragment extends Fragment {
                             prevMonth = (Integer.parseInt(month) - 1) + "";
                             prevYear = year;
                         }
-                        prevMonth = String.format("%02d",Integer.parseInt(prevMonth));
+                        prevMonth = String.format("%02d", Integer.parseInt(prevMonth));
                         ArrayList<WorkingDay> workingDays = new ArrayList<>();
                         EmployeeOverview employee = employees.get(position);
                         String empName = employee.getFirstName() + " " + employee.getLastName();
@@ -302,10 +297,10 @@ public class SummaryFragment extends Fragment {
                                     if (queryDocumentSnapshots.size() == 0)
                                         return;
                                     for (QueryDocumentSnapshot q : queryDocumentSnapshots) {
-                                        if(q.getData().get("checkOut") == null)
+                                        if (q.getData().get("checkOut") == null)
                                             continue;
-                                        db.collection("projects").document((String) q.get("projectId")).get().addOnSuccessListener(doc->{
-                                            if(!doc.exists())
+                                        db.collection("projects").document((String) q.get("projectId")).get().addOnSuccessListener(doc -> {
+                                            if (!doc.exists())
                                                 return;
                                             Project project = doc.toObject(Project.class);
                                             String day = q.getId();
@@ -320,7 +315,7 @@ public class SummaryFragment extends Fragment {
                                             LocationDetails checkOutLocation = new LocationDetails(checkOutGeoHash, checkOutLat, checkOutLng);
                                             String projectLocation = String.format("%s, %s, %s", project.getLocationCity(), project.getLocationArea(), project.getLocationStreet());
                                             workingDays.add(new WorkingDay(day, month, year, hours, empName, checkInLocation, checkOutLocation, project.getName(), projectLocation));
-                                            if(queryDocumentSnapshots.getDocuments().lastIndexOf(q)==queryDocumentSnapshots.getDocuments().size()-1){
+                                            if (queryDocumentSnapshots.getDocuments().lastIndexOf(q) == queryDocumentSnapshots.getDocuments().size() - 1) {
                                                 MonthSummaryDialog monthSummaryDialog = new MonthSummaryDialog(workingDays);
                                                 monthSummaryDialog.show(getParentFragmentManager(), "");
                                             }
@@ -335,13 +330,13 @@ public class SummaryFragment extends Fragment {
                     .setMaxYear(today.get(Calendar.YEAR) + 1)
                     .setTitle("Select Month")
                     .build();
-            if (selectedMonthEdit.getText().toString().isEmpty())
+            if (binding.monthEdit.getText().toString().isEmpty())
                 monthPickerDialog.show();
             else {
-                String[] selectedDate = selectedMonthEdit.getText().toString().split("/");
+                String[] selectedDate = binding.monthEdit.getText().toString().split("/");
                 year = selectedDate[1];
                 month = selectedDate[0];
-                month = String.format("%02d",Integer.parseInt(month));
+                month = String.format("%02d", Integer.parseInt(month));
                 ArrayList<WorkingDay> workingDays = new ArrayList<>();
                 EmployeeOverview employee = employees.get(position);
                 String empName = employee.getFirstName() + " " + employee.getLastName();
@@ -351,12 +346,12 @@ public class SummaryFragment extends Fragment {
                             if (queryDocumentSnapshots.size() == 0)
                                 return;
                             for (QueryDocumentSnapshot q : queryDocumentSnapshots) {
-                                if(q.getData().get("checkOut") == null)
+                                if (q.getData().get("checkOut") == null)
                                     continue;
-                                db.collection("projects").document((String) q.get("projectId")).get().addOnSuccessListener(doc->{
-                                   if(!doc.exists())
-                                   return;
-                                   Project project = doc.toObject(Project.class);
+                                db.collection("projects").document((String) q.get("projectId")).get().addOnSuccessListener(doc -> {
+                                    if (!doc.exists())
+                                        return;
+                                    Project project = doc.toObject(Project.class);
                                     String day = q.getId();
                                     double hours = ((q.getData().get("workingTime") == null) ? 0 : ((long) (q.getData().get("workingTime"))) / 3600.0);
                                     String checkInGeoHash = (String) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkIn"))).get("geohash");
@@ -369,12 +364,12 @@ public class SummaryFragment extends Fragment {
                                     LocationDetails checkOutLocation = new LocationDetails(checkOutGeoHash, checkOutLat, checkOutLng);
                                     String projectLocation = String.format("%s, %s, %s", project.getLocationCity(), project.getLocationArea(), project.getLocationStreet());
                                     workingDays.add(new WorkingDay(day, month, year, hours, empName, checkInLocation, checkOutLocation, project.getName(), projectLocation));
-                                    if(queryDocumentSnapshots.getDocuments().lastIndexOf(q)==queryDocumentSnapshots.getDocuments().size()-1){
+                                    if (queryDocumentSnapshots.getDocuments().lastIndexOf(q) == queryDocumentSnapshots.getDocuments().size() - 1) {
                                         MonthSummaryDialog monthSummaryDialog = new MonthSummaryDialog(workingDays);
                                         monthSummaryDialog.show(getParentFragmentManager(), "");
                                     }
                                 });
-                                }
+                            }
                         });
             }
 

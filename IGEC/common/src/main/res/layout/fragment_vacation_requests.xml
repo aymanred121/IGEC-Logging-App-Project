@@ -7,7 +7,7 @@
     tools:context=".Fragments.VacationRequestsFragment">
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerview"
+        android:id="@+id/recycler_view"
         tools:listitem="@layout/item_vacation_request"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

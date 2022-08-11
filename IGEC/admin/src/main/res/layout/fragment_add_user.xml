@@ -11,7 +11,7 @@
         android:layout_height="wrap_content">
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout_FirstName"
+            android:id="@+id/first_name_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -25,7 +25,7 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/TextInput_FirstName"
+                android:id="@+id/first_name_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/first_name"
@@ -36,7 +36,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout_SecondName"
+            android:id="@+id/second_name_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -47,10 +47,10 @@
             app:helperTextEnabled="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textInputLayout_FirstName">
+            app:layout_constraintTop_toBottomOf="@id/first_name_layout">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/TextInput_SecondName"
+                android:id="@+id/second_name_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/second_name"
@@ -61,7 +61,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout_Email"
+            android:id="@+id/email_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -71,13 +71,13 @@
             app:boxBackgroundMode="outline"
             app:helperText="example@gmail.com"
             app:helperTextEnabled="true"
-            app:layout_constraintEnd_toStartOf="@id/button_unlock"
+            app:layout_constraintEnd_toStartOf="@id/unlock_button"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textInputLayout_SecondName">
+            app:layout_constraintTop_toBottomOf="@+id/second_name_layout">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/TextInput_Email"
+                android:id="@+id/email_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/e_mail"
@@ -88,7 +88,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/button_unlock"
+            android:id="@+id/unlock_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/vhigh"
@@ -98,16 +98,16 @@
             android:minWidth="0dp"
             app:iconPadding="0dp"
             app:icon="@drawable/ic_round_lock_open_24"
-            app:layout_constraintBottom_toBottomOf="@id/textInputLayout_Email"
+            app:layout_constraintBottom_toBottomOf="@id/email_layout"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/textInputLayout_Email"
-            app:layout_constraintTop_toTopOf="@id/textInputLayout_Email" />
+            app:layout_constraintStart_toEndOf="@id/email_layout"
+            app:layout_constraintTop_toTopOf="@id/email_layout" />
 
 
 
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout_Password"
+            android:id="@+id/password_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -120,10 +120,10 @@
             app:helperTextEnabled="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textInputLayout_Email">
+            app:layout_constraintTop_toBottomOf="@+id/email_layout">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/TextInput_Password"
+                android:id="@+id/password_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/password"
@@ -134,7 +134,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout_Phone"
+            android:id="@+id/phone_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -145,10 +145,10 @@
             app:helperTextEnabled="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textInputLayout_Password">
+            app:layout_constraintTop_toBottomOf="@+id/password_layout">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/TextInput_Phone"
+                android:id="@+id/phone_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/phone"
@@ -158,7 +158,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout_Title"
+            android:id="@+id/title_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -167,12 +167,12 @@
             android:layout_marginEnd="@dimen/vhigh"
             app:boxBackgroundMode="outline"
             app:helperTextEnabled="true"
-            app:layout_constraintEnd_toStartOf="@id/CheckBox_Admin"
+            app:layout_constraintEnd_toStartOf="@id/admin_checkbox"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textInputLayout_Phone">
+            app:layout_constraintTop_toBottomOf="@+id/phone_layout">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/TextInput_Title"
+                android:id="@+id/title_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/title"
@@ -183,18 +183,18 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.checkbox.MaterialCheckBox
-            android:id="@+id/CheckBox_Admin"
+            android:id="@+id/admin_checkbox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="32dp"
             android:text="@string/admin"
-            app:layout_constraintBottom_toBottomOf="@id/textInputLayout_Title"
+            app:layout_constraintBottom_toBottomOf="@id/title_layout"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintLeft_toRightOf="@id/textInputLayout_Title"
-            app:layout_constraintTop_toTopOf="@id/textInputLayout_Title" />
+            app:layout_constraintLeft_toRightOf="@id/title_layout"
+            app:layout_constraintTop_toTopOf="@id/title_layout" />
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout_Salary"
+            android:id="@+id/salary_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -205,12 +205,12 @@
             app:endIconMode="clear_text"
             app:endIconTint="@color/primaryColor"
             app:helperTextEnabled="true"
-            app:layout_constraintEnd_toStartOf="@id/textInputLayout_SalaryCurrency"
+            app:layout_constraintEnd_toStartOf="@id/currency_layout"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textInputLayout_Title">
+            app:layout_constraintTop_toBottomOf="@id/title_layout">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/TextInput_Salary"
+                android:id="@+id/salary_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/salary"
@@ -222,7 +222,7 @@
 
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout_SalaryCurrency"
+            android:id="@+id/currency_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -230,13 +230,13 @@
             android:layout_marginEnd="@dimen/vhigh"
             app:boxBackgroundMode="outline"
             app:endIconMode="dropdown_menu"
-            app:layout_constraintBottom_toBottomOf="@id/textInputLayout_Salary"
+            app:layout_constraintBottom_toBottomOf="@id/salary_layout"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/textInputLayout_Salary"
-            app:layout_constraintTop_toBottomOf="@id/textInputLayout_Title">
+            app:layout_constraintStart_toEndOf="@id/salary_layout"
+            app:layout_constraintTop_toBottomOf="@id/title_layout">
 
             <AutoCompleteTextView
-                android:id="@+id/TextInput_SalaryCurrency"
+                android:id="@+id/currency_auto"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/currency"
@@ -247,7 +247,7 @@
 
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout_InsuranceNumber"
+            android:id="@+id/insurance_number_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -260,10 +260,10 @@
             app:helperTextEnabled="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textInputLayout_Salary">
+            app:layout_constraintTop_toBottomOf="@id/salary_layout">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/TextInput_InsuranceNumber"
+                android:id="@+id/insurance_number_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/insurance_number"
@@ -276,7 +276,7 @@
 
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout_InsuranceAmount"
+            android:id="@+id/insurance_amount_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -287,12 +287,12 @@
             app:endIconMode="clear_text"
             app:endIconTint="@color/primaryColor"
             app:helperTextEnabled="true"
-            app:layout_constraintEnd_toStartOf="@id/CheckBox_Temporary"
+            app:layout_constraintEnd_toStartOf="@id/temporary_checkbox"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textInputLayout_InsuranceNumber">
+            app:layout_constraintTop_toBottomOf="@id/insurance_number_layout">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/TextInput_InsuranceAmount"
+                android:id="@+id/insurance_amount_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/insurance_amount"
@@ -305,18 +305,18 @@
         <!-- labor type -->
         <!-- checkbox -->
         <com.google.android.material.checkbox.MaterialCheckBox
-            android:id="@+id/CheckBox_Temporary"
+            android:id="@+id/temporary_checkbox"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="32dp"
             android:text="@string/temporary"
-            app:layout_constraintBottom_toBottomOf="@id/textInputLayout_InsuranceAmount"
+            app:layout_constraintBottom_toBottomOf="@id/insurance_amount_layout"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintLeft_toRightOf="@id/textInputLayout_InsuranceAmount"
-            app:layout_constraintTop_toTopOf="@id/textInputLayout_InsuranceAmount" />
+            app:layout_constraintLeft_toRightOf="@id/insurance_amount_layout"
+            app:layout_constraintTop_toTopOf="@id/insurance_amount_layout" />
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout_Area"
+            android:id="@+id/area_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -327,10 +327,10 @@
             app:helperTextEnabled="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textInputLayout_InsuranceAmount">
+            app:layout_constraintTop_toBottomOf="@id/insurance_amount_layout">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/TextInput_Area"
+                android:id="@+id/area_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/area"
@@ -341,7 +341,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout_City"
+            android:id="@+id/city_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -352,10 +352,10 @@
             app:helperTextEnabled="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textInputLayout_Area">
+            app:layout_constraintTop_toBottomOf="@+id/area_layout">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/TextInput_City"
+                android:id="@+id/city_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/city"
@@ -366,7 +366,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout_Street"
+            android:id="@+id/street_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -377,10 +377,10 @@
             app:helperTextEnabled="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textInputLayout_City">
+            app:layout_constraintTop_toBottomOf="@+id/city_layout">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/TextInput_Street"
+                android:id="@+id/street_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/street"
@@ -391,7 +391,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout_HireDate"
+            android:id="@+id/hire_date_layout"
             style="@style/DatePicker"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -402,10 +402,10 @@
             app:helperTextEnabled="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textInputLayout_Street">
+            app:layout_constraintTop_toBottomOf="@id/street_layout">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/TextInput_HireDate"
+                android:id="@+id/hire_date_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:enabled="false"
@@ -417,7 +417,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout_NationalID"
+            android:id="@+id/national_id_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -432,10 +432,10 @@
             app:errorEnabled="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textInputLayout_HireDate">
+            app:layout_constraintTop_toBottomOf="@id/hire_date_layout">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/TextInput_NationalID"
+                android:id="@+id/national_id_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/nationalId"
@@ -448,7 +448,7 @@
 
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/button_register"
+            android:id="@+id/register_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/vhigh"
@@ -458,11 +458,11 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textInputLayout_NationalID" />
+            app:layout_constraintTop_toBottomOf="@id/national_id_layout" />
 
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/button_update"
+            android:id="@+id/update_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="@dimen/vhigh"
@@ -472,10 +472,10 @@
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textInputLayout_NationalID" />
+            app:layout_constraintTop_toBottomOf="@id/national_id_layout" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/button_delete"
+            android:id="@+id/delete_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/vhigh"
@@ -485,7 +485,7 @@
             android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textInputLayout_NationalID" />
+            app:layout_constraintTop_toBottomOf="@id/national_id_layout" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </ScrollView>

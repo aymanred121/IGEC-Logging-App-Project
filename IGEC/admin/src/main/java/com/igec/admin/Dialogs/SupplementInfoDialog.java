@@ -32,6 +32,7 @@ import androidx.core.content.FileProvider;
 import androidx.fragment.app.DialogFragment;
 
 import com.igec.admin.R;
+import com.igec.admin.databinding.DialogSupplementInfoBinding;
 import com.igec.common.firebase.Supplement;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
@@ -42,11 +43,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class SupplementInfoDialog extends DialogFragment {
-
-    private ImageView vSupplementImg;
-    private TextInputEditText vSupplementName;
-    private TextInputLayout vSupplementNameLayout;
-    private MaterialButton vDone;
     private final Supplement supplement;
     private ActivityResultLauncher<Intent> activityResultLauncher;
     private final int position;
@@ -85,44 +81,48 @@ public class SupplementInfoDialog extends DialogFragment {
         super.onDismiss(dialog);
     }
 
+    private DialogSupplementInfoBinding binding;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.dialog_supplement_info, container, false);
+        binding = DialogSupplementInfoBinding.inflate(inflater, container, false);
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        initialize(view);
-        vDone.setOnClickListener(oclDone);
-        vSupplementImg.setOnClickListener(oclImg);
+        initialize();
+        binding.doneButton.setOnClickListener(oclDone);
+        binding.accessoryImageView.setOnClickListener(oclImg);
         activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
             @Override
             public void onActivityResult(ActivityResult result) {
                 if (result.getResultCode() == RESULT_OK) {
                     //Bundle bundle = result.getData().getExtras();
                     Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath);
-                    vSupplementImg.setImageBitmap(bitmap);
+                    binding.accessoryImageView.setImageBitmap(bitmap);
                 }
             }
         });
-        vSupplementName.addTextChangedListener(twName);
+        binding.nameEdit.addTextChangedListener(twName);
     }
 
-    private void initialize(View view) {
-        vSupplementImg = view.findViewById(R.id.ImageView_Supplement);
-        vSupplementName = view.findViewById(R.id.TextInput_SupplementName);
-        vSupplementNameLayout = view.findViewById(R.id.textInputLayout_SupplementName);
-        vDone = view.findViewById(R.id.button_Done);
-        vSupplementImg.setImageBitmap(supplement.getPhoto());
-        vSupplementName.setText(supplement.getName());
+    private void initialize() {
+        binding.accessoryImageView.setImageBitmap(supplement.getPhoto());
+        binding.nameEdit.setText(supplement.getName());
     }
 
     private boolean validateInput() {
-        boolean isEmpty = vSupplementName.getText().toString().trim().isEmpty();
-        vSupplementNameLayout.setError(isEmpty ? "Missing" : null);
+        boolean isEmpty = binding.nameEdit.getText().toString().trim().isEmpty();
+        binding.nameLayout.setError(isEmpty ? "Missing" : null);
         return !isEmpty;
     }
 
@@ -130,22 +130,22 @@ public class SupplementInfoDialog extends DialogFragment {
         @Override
         public void onClick(View v) {
             if (!validateInput()) return;
-            vDone.setEnabled(false);
+            binding.doneButton.setEnabled(false);
             if (supplementNames != null) {
                 for (int i = 0; i < supplementNames.size(); i++) {
-                    if (position != i && supplementNames.get(i).getName().equals(vSupplementName.getText().toString())) {
+                    if (position != i && supplementNames.get(i).getName().equals(binding.nameEdit.getText().toString())) {
                         Toast.makeText(getContext(), "name is taken , please try another name", Toast.LENGTH_SHORT).show();
-                        vDone.setEnabled(true);
+                        binding.doneButton.setEnabled(true);
                         return;
                     }
                 }
             }
             Bundle result = new Bundle();
             Supplement supplement = new Supplement();
-            vSupplementImg.setDrawingCacheEnabled(true);
-            vSupplementImg.buildDrawingCache();
-            supplement.setName(vSupplementName.getText().toString());
-            supplement.setPhoto(((BitmapDrawable) vSupplementImg.getDrawable()).getBitmap());
+            binding.accessoryImageView.setDrawingCacheEnabled(true);
+            binding.accessoryImageView.buildDrawingCache();
+            supplement.setName(binding.nameEdit.getText().toString());
+            supplement.setPhoto(((BitmapDrawable) binding.accessoryImageView.getDrawable()).getBitmap());
             result.putSerializable("supplement", supplement);
             result.putInt("position", position);
             if (position == -1)
@@ -190,8 +190,8 @@ public class SupplementInfoDialog extends DialogFragment {
 
         @Override
         public void afterTextChanged(Editable editable) {
-            vSupplementNameLayout.setError(null);
-            vSupplementNameLayout.setErrorEnabled(false);
+            binding.nameLayout.setError(null);
+            binding.nameLayout.setErrorEnabled(false);
         }
     };
 

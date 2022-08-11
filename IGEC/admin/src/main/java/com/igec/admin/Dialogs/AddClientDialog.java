@@ -15,27 +15,23 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 import com.igec.admin.R;
+import com.igec.admin.databinding.DialogAddClientBinding;
 import com.igec.common.firebase.Client;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.regex.Pattern;
 
 public class AddClientDialog extends DialogFragment {
 
     //Views
-    private TextInputEditText vCompanyName, vCompanyEmail, vCompanyPhoneNumber, vNote,vPerHour,vOverTime,vPerFriday;
-    private TextInputLayout vCompanyNameLayout, vCompanyEmailLayout, vCompanyPhoneNumberLayout, vNoteLayout,vPerHourLayout,vOverTimeLayout,vPerFridayLayout;
-    private MaterialButton vDone;
     private Client client;
     private ArrayList<Pair<TextInputLayout, TextInputEditText>> views;
+
     public AddClientDialog(Client client) {
         this.client = client;
     }
@@ -61,61 +57,53 @@ public class AddClientDialog extends DialogFragment {
         setStyle(DialogFragment.STYLE_NORMAL, R.style.FullscreenDialogTheme);
     }
 
+    private DialogAddClientBinding binding;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.dialog_add_client, container, false);
+        binding = DialogAddClientBinding.inflate(inflater, container, false);
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        binding = null;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        initialize(view);
-        vDone.setOnClickListener(oclDone);
-        vCompanyName.addTextChangedListener(twName);
-        vCompanyEmail.addTextChangedListener(twEmail);
-        vCompanyPhoneNumber.addTextChangedListener(twPhone);
-        vNote.addTextChangedListener(twNote);
-        vPerHour.addTextChangedListener(twPerHour);
-        vOverTime.addTextChangedListener(twOverTime);
-        vPerFriday.addTextChangedListener(twPerFriday);
+        initialize();
+        binding.doneFab.setOnClickListener(oclDone);
+        binding.nameEdit.addTextChangedListener(twName);
+        binding.emailEdit.addTextChangedListener(twEmail);
+        binding.phoneEdit.addTextChangedListener(twPhone);
+        binding.noteEdit.addTextChangedListener(twNote);
+        binding.perHourEdit.addTextChangedListener(twPerHour);
+        binding.overTimeEdit.addTextChangedListener(twOverTime);
+        binding.perFridayEdit.addTextChangedListener(twPerFriday);
     }
 
-    private void initialize(View view) {
-        vNote = view.findViewById(R.id.TextInput_Note);
-        vCompanyName = view.findViewById(R.id.TextInput_CompanyName);
-        vCompanyEmail = view.findViewById(R.id.TextInput_CompanyEmail);
-        vCompanyPhoneNumber = view.findViewById(R.id.TextInput_CompanyPhoneNumber);
-        vCompanyNameLayout = view.findViewById(R.id.textInputLayout_CompanyName);
-        vCompanyEmailLayout = view.findViewById(R.id.textInputLayout_CompanyEmail);
-        vCompanyPhoneNumberLayout = view.findViewById(R.id.textInputLayout_CompanyPhoneNumber);
-        vPerHour = view.findViewById(R.id.TextInput_PerHour);
-        vOverTime = view.findViewById(R.id.TextInput_OverTime);
-        vPerFriday = view.findViewById(R.id.TextInput_PerFriday);
-        vPerHourLayout = view.findViewById(R.id.textInputLayout_PerHour);
-        vOverTimeLayout  = view.findViewById(R.id.textInputLayout_OverTime);
-        vPerFridayLayout  = view.findViewById(R.id.textInputLayout_PerFriday);
-        vNoteLayout = view.findViewById(R.id.textInputLayout_Note);
-        vDone = view.findViewById(R.id.Button_Done);
-
-
+    private void initialize() {
         views = new ArrayList<>();
-        views.add(new Pair<>(vCompanyNameLayout, vCompanyName));
-        views.add(new Pair<>(vCompanyEmailLayout, vCompanyEmail));
-        views.add(new Pair<>(vCompanyPhoneNumberLayout, vCompanyPhoneNumber));
-        views.add(new Pair<>(vNoteLayout, vNote));
-        views.add(new Pair<>(vPerHourLayout, vPerHour));
-        views.add(new Pair<>(vOverTimeLayout, vOverTime));
-        views.add(new Pair<>(vPerFridayLayout, vPerFriday));
+        views.add(new Pair<>(binding.nameLayout, binding.nameEdit));
+        views.add(new Pair<>(binding.emailLayout, binding.emailEdit));
+        views.add(new Pair<>(binding.phoneLayout, binding.phoneEdit));
+        views.add(new Pair<>(binding.noteLayout, binding.noteEdit));
+        views.add(new Pair<>(binding.perHourLayout, binding.perHourEdit));
+        views.add(new Pair<>(binding.overTimeLayout, binding.overTimeEdit));
+        views.add(new Pair<>(binding.perFridayLayout, binding.perFridayEdit));
         if (client != null) {
-            vCompanyName.setText(client.getName());
-            vCompanyEmail.setText(client.getEmail());
-            vCompanyPhoneNumber.setText(client.getPhoneNumber());
-            vNote.setText(client.getNote());
-            vPerHour.setText(String.valueOf(client.getDefaultPrice()));
-            vOverTime.setText(String.valueOf(client.getOverTimePrice()));
-            vPerFriday.setText(String.valueOf(client.getFridaysPrice()));
+            binding.nameEdit.setText(client.getName());
+            binding.emailEdit.setText(client.getEmail());
+            binding.phoneEdit.setText(client.getPhoneNumber());
+            binding.noteEdit.setText(client.getNote());
+            binding.perHourEdit.setText(String.valueOf(client.getDefaultPrice()));
+            binding.overTimeEdit.setText(String.valueOf(client.getOverTimePrice()));
+            binding.perFridayEdit.setText(String.valueOf(client.getFridaysPrice()));
         }
 
     }
@@ -141,19 +129,19 @@ public class AddClientDialog extends DialogFragment {
         @Override
         public void onClick(View v) {
             if (validateInput()) {
-                vDone.setEnabled(false);
+                binding.doneFab.setEnabled(false);
                 Client client = new Client(
-                        vCompanyName.getText().toString(),
-                        vCompanyEmail.getText().toString(),
-                        vCompanyPhoneNumber.getText().toString(),
-                        vNote.getText().toString(),
-                        Double.parseDouble(vPerHour.getText().toString()),
-                        Double.parseDouble(vOverTime.getText().toString()),
-                        Double.parseDouble(vPerFriday.getText().toString()));
+                        binding.nameEdit.getText().toString(),
+                        binding.emailEdit.getText().toString(),
+                        binding.phoneEdit.getText().toString(),
+                        binding.noteEdit.getText().toString(),
+                        Double.parseDouble(binding.perHourEdit.getText().toString()),
+                        Double.parseDouble(binding.overTimeEdit.getText().toString()),
+                        Double.parseDouble(binding.perFridayEdit.getText().toString()));
                 Bundle result = new Bundle();
                 result.putSerializable("client", client);
                 getParentFragmentManager().setFragmentResult("client", result);
-                vDone.setEnabled(true);
+                binding.doneFab.setEnabled(true);
                 dismiss();
             }
         }
@@ -178,10 +166,10 @@ public class AddClientDialog extends DialogFragment {
         @Override
         public void afterTextChanged(Editable s) {
             if (!isValid(s.toString().trim())) {
-                vCompanyEmailLayout.setError("Wrong E-mail form");
+                binding.emailLayout.setError("Wrong E-mail form");
             } else {
-                vCompanyEmailLayout.setError(null);
-                vCompanyEmailLayout.setErrorEnabled(false);
+                binding.emailLayout.setError(null);
+                binding.emailLayout.setErrorEnabled(false);
             }
         }
     };
@@ -198,8 +186,8 @@ public class AddClientDialog extends DialogFragment {
 
         @Override
         public void afterTextChanged(Editable s) {
-            vCompanyNameLayout.setError(null);
-            vCompanyNameLayout.setErrorEnabled(false);
+            binding.nameLayout.setError(null);
+            binding.nameLayout.setErrorEnabled(false);
         }
     };
     private TextWatcher twNote = new TextWatcher() {
@@ -215,8 +203,8 @@ public class AddClientDialog extends DialogFragment {
 
         @Override
         public void afterTextChanged(Editable s) {
-            vNoteLayout.setError(null);
-            vNoteLayout.setErrorEnabled(false);
+            binding.noteLayout.setError(null);
+            binding.noteLayout.setErrorEnabled(false);
         }
     };
     private TextWatcher twPhone = new TextWatcher() {
@@ -232,8 +220,8 @@ public class AddClientDialog extends DialogFragment {
 
         @Override
         public void afterTextChanged(Editable s) {
-            vCompanyPhoneNumberLayout.setError(null);
-            vCompanyPhoneNumberLayout.setErrorEnabled(false);
+            binding.phoneLayout.setError(null);
+            binding.phoneLayout.setErrorEnabled(false);
         }
     };
     private TextWatcher twPerHour = new TextWatcher() {
@@ -249,8 +237,8 @@ public class AddClientDialog extends DialogFragment {
 
         @Override
         public void afterTextChanged(Editable s) {
-            vPerHourLayout.setError(null);
-            vPerHourLayout.setErrorEnabled(false);
+            binding.perHourLayout.setError(null);
+            binding.perHourLayout.setErrorEnabled(false);
         }
     };
     private TextWatcher twOverTime = new TextWatcher() {
@@ -266,8 +254,8 @@ public class AddClientDialog extends DialogFragment {
 
         @Override
         public void afterTextChanged(Editable s) {
-            vOverTimeLayout.setError(null);
-            vOverTimeLayout.setErrorEnabled(false);
+            binding.overTimeLayout.setError(null);
+            binding.overTimeLayout.setErrorEnabled(false);
         }
     };
     private TextWatcher twPerFriday = new TextWatcher() {
@@ -283,8 +271,8 @@ public class AddClientDialog extends DialogFragment {
 
         @Override
         public void afterTextChanged(Editable s) {
-            vPerFridayLayout.setError(null);
-            vPerFridayLayout.setErrorEnabled(false);
+            binding.perFridayLayout.setError(null);
+            binding.perFridayLayout.setErrorEnabled(false);
         }
     };
 }

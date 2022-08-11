@@ -7,7 +7,7 @@
     tools:context=".Fragments.CheckInOutFragment">
 
     <TextView
-        android:id="@+id/TextView_Greeting"
+        android:id="@+id/greeting_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/good_morning"
@@ -21,7 +21,7 @@
 
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
-        android:id="@+id/Button_CheckInOut"
+        android:id="@+id/check_in_out_fab"
         android:layout_width="150dp"
         android:layout_height="150dp"
         android:layout_marginBottom="32dp"
@@ -33,7 +33,7 @@
         android:backgroundTint="@color/green"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/TextView_Greeting"/>
+        app:layout_constraintTop_toBottomOf="@+id/greeting_text"/>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/container"
@@ -44,7 +44,7 @@
         app:layout_constraintEnd_toEndOf="parent">
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/Button_AddMachine"
+            android:id="@+id/add_machine_fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|right"
@@ -56,7 +56,7 @@
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/Button_AddMachineInside"
+        android:id="@+id/inside_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|right"
@@ -64,11 +64,11 @@
         android:layout_marginBottom="16dp"
         android:src="@drawable/ic_round_desk_24"
         android:visibility="invisible"
-        app:layout_constraintBottom_toTopOf="@+id/Button_AddMachineOutside"
+        app:layout_constraintBottom_toTopOf="@+id/outside_fab"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/Button_AddMachineOutside"
+        android:id="@+id/outside_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|right"
@@ -80,29 +80,29 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
     <TextView
-        android:id="@+id/textView_non_user"
+        android:id="@+id/outside_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:background="@drawable/fab_label_background"
-        android:text="Company"
+        android:text="@string/company"
         android:textSize="12sp"
         android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="@+id/Button_AddMachineOutside"
-        app:layout_constraintEnd_toStartOf="@+id/Button_AddMachineOutside"
-        app:layout_constraintTop_toTopOf="@+id/Button_AddMachineOutside" />
+        app:layout_constraintBottom_toBottomOf="@+id/outside_fab"
+        app:layout_constraintEnd_toStartOf="@+id/outside_fab"
+        app:layout_constraintTop_toTopOf="@+id/outside_fab" />
 
     <TextView
-        android:id="@+id/textView_user"
+        android:id="@+id/inside_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:background="@drawable/fab_label_background"
-        android:text="User"
+        android:text="@string/employee"
         android:textSize="12sp"
         android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="@+id/Button_AddMachineInside"
-        app:layout_constraintEnd_toStartOf="@+id/Button_AddMachineInside"
-        app:layout_constraintTop_toTopOf="@+id/Button_AddMachineInside" />
+        app:layout_constraintBottom_toBottomOf="@+id/inside_fab"
+        app:layout_constraintEnd_toStartOf="@+id/inside_fab"
+        app:layout_constraintTop_toTopOf="@+id/inside_fab" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.igec.admin.Adapters.ProjectAdapter;
 import com.igec.admin.Dialogs.ProjectFragmentDialog;
 import com.igec.admin.R;
+import com.igec.admin.databinding.FragmentProjectsBinding;
 import com.igec.common.firebase.Project;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -28,24 +29,35 @@ public class ProjectsFragment extends Fragment {
     CollectionReference projectRef = db.collection("projects");
     ArrayList<Project>projects = new ArrayList<>();
     ProjectAdapter adapter;
-    RecyclerView recyclerView;
     RecyclerView.LayoutManager layoutManager;
+
+    private FragmentProjectsBinding binding;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_projects,container,false);
-        initialize(view);
-
-        adapter.setOnItemClickListener(itclProjectAdapter);
-        return view;
+        binding = FragmentProjectsBinding.inflate(inflater,container,false);
+        return binding.getRoot();
     }
-    void initialize(View view){
-        recyclerView = view.findViewById(R.id.recyclerview);
-        recyclerView.setHasFixedSize(true);
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        binding = null;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        initialize();
+        adapter.setOnItemClickListener(itclProjectAdapter);
+    }
+
+    void initialize(){
+        binding.recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
         adapter = new ProjectAdapter(projects);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(adapter);
+        binding.recyclerView.setLayoutManager(layoutManager);
+        binding.recyclerView.setAdapter(adapter);
         getProjects();
     }
     @SuppressLint("NotifyDataSetChanged")

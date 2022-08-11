@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private var lastTab: Int = R.id.nav_add_user
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if(!checkStoragePermission())
+        if (!checkStoragePermission())
             requestStoragePermission()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -68,17 +68,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         navView.setNavigationItemSelectedListener(this)
 
 
-        val navigationView = findViewById<NavigationView>(R.id.nav_view)
-
-
-        val contact_info = navigationView.getHeaderView(0).findViewById<TextView>(R.id.contact_info)
-        contact_info.setOnClickListener { view: View? ->
-            val intent = Intent(
-                Intent.ACTION_VIEW,
-                Uri.parse("https://" + getString(R.string.nav_header_subtitle))
-            )
-            this@MainActivity.startActivity(intent)
-        }
+        binding.navView.getHeaderView(0).findViewById<TextView>(R.id.contact_info)
+            .setOnClickListener { view: View? ->
+                val intent = Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("https://" + getString(R.string.nav_header_subtitle))
+                )
+                this@MainActivity.startActivity(intent)
+            }
     }
 
     override fun onStop() {
@@ -86,6 +83,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         AddProjectFragment.clearTeam()
         ProjectFragmentDialog.clearTeam()
     }
+
     override fun onResume() {
         super.onResume()
         isNetworkAvailable()
@@ -103,6 +101,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             result == PackageManager.PERMISSION_GRANTED && result1 == PackageManager.PERMISSION_GRANTED
         }
     }
+
     private fun requestStoragePermission() {
         if (SDK_INT >= Build.VERSION_CODES.R) {
             try {
@@ -154,7 +153,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             override fun onDrawerClosed(drawerView: View) {
                 // This method will be called after drawer animation finishes
                 // Perform the fragment replacement
-                if(lastTab != item.itemId) {
+                if (lastTab != item.itemId) {
                     if (lastTab == R.id.nav_add_project) {
                         AddProjectFragment.clearTeam()
                     }

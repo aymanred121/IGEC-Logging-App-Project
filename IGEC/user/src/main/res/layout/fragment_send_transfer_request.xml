@@ -16,7 +16,7 @@
         app:layout_constraintVertical_bias=".4">
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout_ProjectReferences"
+            android:id="@+id/project_references_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -30,7 +30,7 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <AutoCompleteTextView
-                android:id="@+id/TextInput_ProjectReferences"
+                android:id="@+id/project_references_auto"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/project_reference_name"
@@ -44,7 +44,7 @@
 
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout_EmployeeId"
+            android:id="@+id/employee_id_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -56,10 +56,10 @@
             app:helperTextEnabled="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textInputLayout_ProjectReferences">
+            app:layout_constraintTop_toBottomOf="@id/project_references_layout">
 
             <AutoCompleteTextView
-                android:id="@+id/TextInput_EmployeeId"
+                android:id="@+id/employee_id_auto"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/employee_id_name"
@@ -74,7 +74,7 @@
 
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout_TransferNote"
+            android:id="@+id/note_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="120dp"
@@ -87,10 +87,10 @@
             app:helperTextEnabled="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textInputLayout_EmployeeId">
+            app:layout_constraintTop_toBottomOf="@id/employee_id_layout">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/TextInput_TransferNote"
+                android:id="@+id/note_edit"
                 android:layout_width="match_parent"
                 android:layout_height="90dp"
                 android:gravity="top"
@@ -100,18 +100,18 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/Button_SendRequest"
+            android:id="@+id/send_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
-            android:text="@string/send_transfer_request"
+            android:text="@string/send"
             android:textAllCaps="false"
             android:textSize="16sp"
             app:cornerRadius="8dp"
             android:enabled="false"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textInputLayout_TransferNote" />
+            app:layout_constraintTop_toBottomOf="@+id/note_layout" />
 
 
 

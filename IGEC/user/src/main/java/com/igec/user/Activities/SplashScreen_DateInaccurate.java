@@ -9,16 +9,17 @@ import android.provider.Settings;
 
 import com.igec.user.R;
 import com.google.android.material.button.MaterialButton;
+import com.igec.user.databinding.ActivitySplashScreenDateIncorrectBinding;
 
 public class SplashScreen_DateInaccurate extends AppCompatActivity {
 
-    private MaterialButton vAdjustTime;
+    private ActivitySplashScreenDateIncorrectBinding binding;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_splash_screen_date_incorrect);
-        vAdjustTime = findViewById(R.id.Adjust_Date);
-        vAdjustTime.setOnClickListener(view -> {
+        binding = ActivitySplashScreenDateIncorrectBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+        binding.adjustDateButton.setOnClickListener(view -> {
             startActivity(new Intent(android.provider.Settings.ACTION_DATE_SETTINGS));
         });
     }

@@ -14,7 +14,6 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.igec.user.R;
 import com.igec.common.firebase.Employee;
@@ -23,12 +22,11 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.CalendarConstraints;
 import com.google.android.material.datepicker.DateValidatorPointForward;
-import com.google.android.material.datepicker.MaterialDatePicker;
-import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.igec.user.databinding.FragmentSendVacationRequestBinding;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
 import java.text.SimpleDateFormat;
@@ -41,10 +39,7 @@ import java.util.List;
 public class SendVacationRequestFragment extends Fragment implements DatePickerDialog.OnDateSetListener {
 
     //Views
-    private TextInputEditText vVacationDate, vVacationNote, vVacationDays;
-    private TextInputLayout vVacationDateLayout, vVacationDaysLayout, vVacationNoteLayout;
     private ArrayList<Pair<TextInputLayout, TextInputEditText>> views;
-    private MaterialButton vSendRequest;
     private DatePickerDialog dpd;
     //Vars
     private int remainingDays, daysAfterVacationIsTaken;
@@ -54,24 +49,31 @@ public class SendVacationRequestFragment extends Fragment implements DatePickerD
     private VacationRequest vacationRequest;
 
     //Overrides
+    private FragmentSendVacationRequestBinding binding;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_vacation_request, container, false);
+        binding = FragmentSendVacationRequestBinding.inflate(inflater, container, false);
+        return binding.getRoot();
+    }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        binding = null;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        Initialize(view);
+        Initialize();
 
-        vVacationDateLayout.setEndIconOnClickListener(oclVacationDate);
-        vVacationDateLayout.setErrorIconOnClickListener(oclVacationDate);
-        vSendRequest.setOnClickListener(oclSendRequest);
-        vVacationDays.addTextChangedListener(twVacationDays);
-        vVacationDate.addTextChangedListener(twVacationDate);
-        vVacationNote.addTextChangedListener(twVacationNote);
+        binding.dateLayout.setEndIconOnClickListener(oclVacationDate);
+        binding.dateLayout.setErrorIconOnClickListener(oclVacationDate);
+        binding.sendButton.setOnClickListener(oclSendRequest);
+        binding.daysEdit.addTextChangedListener(twVacationDays);
+        binding.dateEdit.addTextChangedListener(twVacationDate);
+        binding.noteEdit.addTextChangedListener(twVacationNote);
     }
 
     public static SendVacationRequestFragment newInstance(Employee currEmployee) {
@@ -88,25 +90,18 @@ public class SendVacationRequestFragment extends Fragment implements DatePickerD
 //    }
 
     @SuppressLint("DefaultLocale")
-    private void Initialize(View view) {
+    private void Initialize() {
         currEmployee = (Employee) getArguments().getSerializable("currEmployee");
-        vVacationDate = view.findViewById(R.id.TextInput_VacationDate);
-        vVacationNote = view.findViewById(R.id.TextInput_VacationNote);
-        vVacationDays = view.findViewById(R.id.TextInput_VacationDays);
-        vVacationDateLayout = view.findViewById(R.id.textInputLayout_VacationDate);
-        vVacationDaysLayout = view.findViewById(R.id.textInputLayout_VacationDays);
-        vVacationNoteLayout = view.findViewById(R.id.textInputLayout_VacationNote);
-        vSendRequest = view.findViewById(R.id.Button_SendRequest);
 
         views = new ArrayList<>();
-        views.add(new Pair<>(vVacationDateLayout, vVacationDate));
-        views.add(new Pair<>(vVacationDaysLayout, vVacationDays));
-        views.add(new Pair<>(vVacationNoteLayout, vVacationNote));
+        views.add(new Pair<>(binding.dateLayout, binding.dateEdit));
+        views.add(new Pair<>(binding.daysLayout, binding.daysEdit));
+        views.add(new Pair<>(binding.noteLayout, binding.noteEdit));
 
         CalendarConstraints.Builder builder = new CalendarConstraints.Builder();
         builder.setValidator(DateValidatorPointForward.now());
         remainingDays = currEmployee.getTotalNumberOfVacationDays();
-        vVacationDaysLayout.setHelperText(String.format("%d days Remaining", remainingDays));
+        binding.daysLayout.setHelperText(String.format("%d days Remaining", remainingDays));
         datePickerSetup();
 
 
@@ -148,14 +143,14 @@ public class SendVacationRequestFragment extends Fragment implements DatePickerD
         db.collection("employees")
                 .document(currEmployee.getManagerID())
                 .addSnapshotListener((value, error) -> {
-                    days = ((long) Integer.parseInt(vVacationDays.getText().toString()) * 24 * 3600 * 1000) + startDate;
+                    days = ((long) Integer.parseInt(binding.daysEdit.getText().toString()) * 24 * 3600 * 1000) + startDate;
                     vacationRequest = new VacationRequest(
                             new Date(startDate),
                             new Date(days),
                             (new Date()),
                             value.toObject(Employee.class),
                             currEmployee,
-                            vVacationNote.getText().toString()
+                            binding.noteEdit.getText().toString()
                     );
                     vacationRequest.setId(vacationID);
                     db.collection("Vacation").document(vacationID).set(vacationRequest).addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -169,16 +164,16 @@ public class SendVacationRequestFragment extends Fragment implements DatePickerD
     }
 
     private void clearInputs() {
-        vVacationDate.setText(null);
-        vVacationDays.setText(null);
-        vVacationNote.setText(null);
+        binding.dateEdit.setText(null);
+        binding.daysEdit.setText(null);
+        binding.noteEdit.setText(null);
     }
 
     private boolean generateError() {
 
         for (Pair<TextInputLayout, TextInputEditText> view : views) {
             if (view.second.getText().toString().trim().isEmpty()) {
-                if (view.first == vVacationDateLayout)
+                if (view.first == binding.dateLayout)
                     view.first.setErrorIconDrawable(R.drawable.ic_baseline_calendar_month_24);
 
                 view.first.setError("Missing");
@@ -223,17 +218,17 @@ public class SendVacationRequestFragment extends Fragment implements DatePickerD
         @SuppressLint("DefaultLocale")
         @Override
         public void afterTextChanged(Editable editable) {
-            daysAfterVacationIsTaken = vVacationDays.getText().toString().trim().equals("") ? remainingDays : remainingDays - Integer.parseInt(vVacationDays.getText().toString());
+            daysAfterVacationIsTaken = binding.daysEdit.getText().toString().trim().equals("") ? remainingDays : remainingDays - Integer.parseInt(binding.daysEdit.getText().toString());
             if (daysAfterVacationIsTaken < 0) {
-                vVacationDaysLayout.setHelperText(String.format("Exceeds remaining by %d", -daysAfterVacationIsTaken));
-            } else if (daysAfterVacationIsTaken == remainingDays && !vVacationDays.getText().toString().trim().isEmpty()) {
-                vVacationDaysLayout.setError("Invalid Value");
+                binding.daysLayout.setHelperText(String.format("Exceeds remaining by %d", -daysAfterVacationIsTaken));
+            } else if (daysAfterVacationIsTaken == remainingDays && !binding.daysEdit.getText().toString().trim().isEmpty()) {
+                binding.daysLayout.setError("Invalid Value");
             } else {
-                vVacationDaysLayout.setHelperText(String.format("%d days Remaining", daysAfterVacationIsTaken));
-                vVacationDaysLayout.setError(null);
+                binding.daysLayout.setHelperText(String.format("%d days Remaining", daysAfterVacationIsTaken));
+                binding.daysLayout.setError(null);
             }
 
-            hideError(vVacationDaysLayout);
+            hideError(binding.daysLayout);
         }
     };
     private TextWatcher twVacationDate = new TextWatcher() {
@@ -249,10 +244,10 @@ public class SendVacationRequestFragment extends Fragment implements DatePickerD
 
         @Override
         public void afterTextChanged(Editable editable) {
-            if (!vVacationDate.getText().toString().trim().isEmpty())
-                vVacationDateLayout.setError(null);
+            if (!binding.dateEdit.getText().toString().trim().isEmpty())
+                binding.dateLayout.setError(null);
 
-            hideError(vVacationDateLayout);
+            hideError(binding.dateLayout);
         }
     };
     private TextWatcher twVacationNote = new TextWatcher() {
@@ -268,10 +263,10 @@ public class SendVacationRequestFragment extends Fragment implements DatePickerD
 
         @Override
         public void afterTextChanged(Editable editable) {
-            if (!vVacationNote.getText().toString().trim().isEmpty())
-                vVacationNoteLayout.setError(null);
+            if (!binding.noteEdit.getText().toString().trim().isEmpty())
+                binding.noteLayout.setError(null);
 
-            hideError(vVacationNoteLayout);
+            hideError(binding.noteLayout);
         }
     };
     private View.OnClickListener oclSendRequest = v -> {
@@ -305,7 +300,7 @@ public class SendVacationRequestFragment extends Fragment implements DatePickerD
     public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
         Calendar vacation = Calendar.getInstance();
         vacation.set(year, monthOfYear, dayOfMonth);
-        vVacationDate.setText(convertDateToString(vacation.getTime().getTime()));
+        binding.dateEdit.setText(convertDateToString(vacation.getTime().getTime()));
         startDate = vacation.getTime().getTime();
     }
 }

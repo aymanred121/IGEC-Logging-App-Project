@@ -27,10 +27,10 @@
         android:id="@+id/nav_send_vacation_request"
         android:name="com.igec.user.Fragments.SendVacationRequestFragment"
         android:label="@string/send_vacation_request"
-        tools:layout="@layout/fragment_vacation_request" />
+        tools:layout="@layout/fragment_send_vacation_request" />
     <fragment
         android:id="@+id/nav_vacations_log"
-        android:name="com.igec.user.Fragments.VacationsLogFragment"
+        android:name="com.igec.common.Fragments.VacationsLogFragment"
         android:label="@string/vacations_log"
         tools:layout="@layout/fragment_vacations_log" />
 </navigation>

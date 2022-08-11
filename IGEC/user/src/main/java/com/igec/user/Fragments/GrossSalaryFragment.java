@@ -1,13 +1,10 @@
 package com.igec.user.Fragments;
 
 import android.annotation.SuppressLint;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,32 +13,26 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.igec.common.Adapters.AllowanceAdapter;
-import com.igec.user.R;
 import com.igec.common.firebase.Allowance;
 import com.igec.common.firebase.EmployeesGrossSalary;
 import com.igec.common.utilities.allowancesEnum;
-import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.igec.user.databinding.FragmentGrossSalaryBinding;
 import com.whiteelephant.monthpicker.MonthPickerDialog;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.stream.IntStream;
 
 public class GrossSalaryFragment extends Fragment {
 
 
-    private TextInputLayout selectedMonthLayout;
-    private TextInputEditText selectedMonthEdit;
-    private RecyclerView recyclerView;
+
     private AllowanceAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
     private ArrayList<Allowance> salarySummaries;
     private EmployeesGrossSalary employeesGrossSalary;
-    private TextView vGrossSalary;
     private String employeeId;
     private String year, month, prevMonth, prevYear;
     private double salarySummary = 0;
@@ -56,16 +47,19 @@ public class GrossSalaryFragment extends Fragment {
         fragment.setArguments(args);
         return fragment;
     }
-//    public GrossSalaryFragment(String employeeId) {
-//        this.employeeId = employeeId;
-//    }
 
+    private FragmentGrossSalaryBinding binding;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_gross_salary, container, false);
+        binding = FragmentGrossSalaryBinding.inflate(inflater, container, false);
+        return binding.getRoot();
     }
-
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        binding = null;
+    }
 
     AllowanceAdapter.OnItemClickListener onItemClickListener = new AllowanceAdapter.OnItemClickListener() {
         @Override
@@ -79,24 +73,20 @@ public class GrossSalaryFragment extends Fragment {
     };
 
     // Functions
-    private void initialize(View view) {
+    private void initialize() {
         employeeId = getArguments().getString("employeeId");
-        selectedMonthEdit = view.findViewById(R.id.TextInput_SelectedMonth);
-        selectedMonthLayout = view.findViewById(R.id.textInputLayout_SelectedMonth);
         salarySummaries = new ArrayList<>();
-        recyclerView = view.findViewById(R.id.recyclerview);
-        vGrossSalary = view.findViewById(R.id.TextView_GrossSalary);
-        recyclerView.setHasFixedSize(true);
+        binding.recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
         adapter = new AllowanceAdapter(salarySummaries, false);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(adapter);
+        binding.recyclerView.setLayoutManager(layoutManager);
+        binding.recyclerView.setAdapter(adapter);
         @SuppressLint("SimpleDateFormat")
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
         String currentDateAndTime = sdf.format(new Date());
         month = currentDateAndTime.substring(3, 5);
         year = currentDateAndTime.substring(6, 10);
-        selectedMonthEdit.setText(String.format("%s/%s", month, year));
+        binding.monthEdit.setText(String.format("%s/%s", month, year));
         getGrossSalary();
 
     }
@@ -124,7 +114,7 @@ public class GrossSalaryFragment extends Fragment {
                     , (salarySummary != 0 && salarySummarySAR != 0) ? " , " : ""
                     , salarySummarySAR == 0 ? "" : String.format("%.2f SAR", salarySummarySAR)
             );
-            vGrossSalary.setText(gross);
+            binding.grossSalaryText.setText(gross);
             adapter.setAllowances(salarySummaries);
             adapter.notifyDataSetChanged();
         });
@@ -133,9 +123,9 @@ public class GrossSalaryFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        initialize(view);
+        initialize();
         adapter.setOnItemClickListener(onItemClickListener);
-        selectedMonthLayout.setEndIconOnClickListener(oclMonthPicker);
+        binding.monthLayout.setEndIconOnClickListener(oclMonthPicker);
     }
 
     private final View.OnClickListener oclMonthPicker = v -> {
@@ -144,10 +134,10 @@ public class GrossSalaryFragment extends Fragment {
                 new MonthPickerDialog.OnDateSetListener() {
                     @Override
                     public void onDateSet(int selectedMonth, int selectedYear) {
-                        selectedMonthLayout.setError(null);
-                        selectedMonthLayout.setErrorEnabled(false);
-                        selectedMonthEdit.setText(String.format("%d/%d", selectedMonth + 1, selectedYear));
-                        String[] selectedDate = selectedMonthEdit.getText().toString().split("/");
+                        binding.monthLayout.setError(null);
+                        binding.monthLayout.setErrorEnabled(false);
+                        binding.monthEdit.setText(String.format("%d/%d", selectedMonth + 1, selectedYear));
+                        String[] selectedDate = binding.monthEdit.getText().toString().split("/");
                         year = selectedDate[1];
                         month = selectedDate[0];
                         if (month.length() == 1) {

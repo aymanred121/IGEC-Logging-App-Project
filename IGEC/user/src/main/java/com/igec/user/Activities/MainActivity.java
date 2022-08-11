@@ -1,6 +1,11 @@
 package com.igec.user.Activities;
 
 
+import static com.igec.common.CONSTANTS.CAMERA_REQUEST_CODE;
+import static com.igec.common.CONSTANTS.ID;
+import static com.igec.common.CONSTANTS.IGEC;
+import static com.igec.common.CONSTANTS.LOCATION_REQUEST_CODE;
+import static com.igec.common.CONSTANTS.LOGGED;
 import static com.igec.common.cryptography.RSAUtil.decrypt;
 import static com.igec.common.cryptography.RSAUtil.privateKey;
 
@@ -28,6 +33,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
+import com.igec.user.databinding.ActivityMainBinding;
 
 import java.util.regex.Pattern;
 
@@ -42,30 +48,20 @@ public class MainActivity extends AppCompatActivity {
     private final int BONUS = 3;
     private final int PENALTY = 4;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
-    // Views
-    private TextInputEditText vEmail;
-    private TextInputLayout vEmailLayout;
-    private TextInputEditText vPassword;
-    private MaterialButton vSignIn;
-    // Vars
-    private final int CAMERA_REQUEST_CODE = 123;
-    private final int LOCATION_REQUEST_CODE = 155;
-    public static final String IGEC = "IGEC";
-    public static final String ID = "ID";
-    public static final String LOGGED = "LOGGED";
-
     // Overrides
+    private ActivityMainBinding binding;
     @RequiresApi(api = Build.VERSION_CODES.Q)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-        setContentView(R.layout.activity_main);
+        setContentView(binding.getRoot());
         validateDate(this);
         initialize();
         // Listeners
-        vEmail.addTextChangedListener(twEmail);
-        vSignIn.setOnClickListener(clSignIn);
+        binding.emailEdit.addTextChangedListener(twEmail);
+        binding.signInButton.setOnClickListener(clSignIn);
 
     }
 
@@ -86,11 +82,6 @@ public class MainActivity extends AppCompatActivity {
 
     // Functions
     private void initialize() {
-        vEmail = findViewById(R.id.TextInput_email);
-        vPassword = findViewById(R.id.TextInput_password);
-        vEmailLayout = findViewById(R.id.textInputLayout_Email);
-        vSignIn = findViewById(R.id.Button_SignIn);
-
         getLocationPermissions();
         getCameraPermission();
     }
@@ -126,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean isPasswordRight(String password) {
         try {
             String decryptedPassword = decrypt(password, privateKey);
-            if (vPassword.getText() != null && !vPassword.getText().toString().equals(decryptedPassword)) {
+            if (binding.passwordEdit.getText() != null && !binding.passwordEdit.getText().toString().equals(decryptedPassword)) {
                 Toast.makeText(MainActivity.this, "please enter a valid email or password", Toast.LENGTH_SHORT).show();
                 return false;
             }
@@ -163,11 +154,11 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void afterTextChanged(Editable s) {
             if (!isValid(s)) {
-                vEmailLayout.setError("Wrong E-mail form");
+                binding.emailLayout.setError("Wrong E-mail form");
             } else {
-                vEmailLayout.setError(null);
+                binding.emailLayout.setError(null);
             }
-            hideError(vEmailLayout);
+            hideError(binding.emailLayout);
         }
     };
     private final View.OnClickListener clSignIn = new View.OnClickListener() {
@@ -176,7 +167,7 @@ public class MainActivity extends AppCompatActivity {
         public void onClick(View v) {
             FirebaseFirestore db = FirebaseFirestore.getInstance();
             db.collection("employees")
-                    .whereEqualTo("email", (vEmail.getText() != null) ? vEmail.getText().toString() : "")
+                    .whereEqualTo("email", (binding.emailEdit.getText() != null) ? binding.emailEdit.getText().toString() : "")
                     .limit(1)
                     .get().addOnSuccessListener(queryDocumentSnapshots -> {
                         if (queryDocumentSnapshots.size() == 0) {

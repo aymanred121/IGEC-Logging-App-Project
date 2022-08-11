@@ -4,6 +4,7 @@
     <string name="vacation_reason">Note</string>
     <string name="send_vacation_request">Send Vacation Request</string>
     <string name="send_transfer_request">Send transfer Request</string>
+    <string name="send">Send</string>
     <string name="check_in_out">Check In/Out</string>
     <string name="vacation_request">Vacation Request</string>
     <string name="vacation_days">Days</string>
@@ -35,7 +36,7 @@
     <string name="company_phone_number">Company Phone Number</string>
     <string name="start_date">Start Date of use</string>
     <string name="Done">Done</string>
-    <string name="supplementsComment">Comment</string>
+    <string name="comment">Comment</string>
     <string name="gross_salary">Gross Salary</string>
     <string name="reason_for">Reason For:</string>
     <string name="_0_00">0.00 EGP</string>
@@ -68,4 +69,6 @@
     <string name="allowance_name">Allowance name</string>
     <string name="unpaid_days">Unpaid Days</string>
     <string name="currency">Currency</string>
+    <string name="company">Company</string>
+    <string name="employee">Employee</string>
 </resources>

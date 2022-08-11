@@ -21,6 +21,7 @@ import com.igec.common.firebase.Client;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.igec.user.databinding.DialogClientInfoBinding;
 
 import java.util.ArrayList;
 import java.util.regex.Pattern;
@@ -29,10 +30,7 @@ public class ClientInfoDialog extends DialogFragment {
 
 
     //Views
-    private TextInputEditText vCompanyName, vCompanyEmail, vCompanyPhoneNumber;
-    private TextInputLayout vCompanyNameLayout, vCompanyEmailLayout, vCompanyPhoneNumberLayout;
     private ArrayList<Pair<TextInputLayout, TextInputEditText>> views;
-    private MaterialButton vDone;
     //Vars
     private float startDate;
     private String note;
@@ -63,39 +61,38 @@ public class ClientInfoDialog extends DialogFragment {
         setStyle(DialogFragment.STYLE_NORMAL, R.style.FullscreenDialogTheme);
     }
 
+    private DialogClientInfoBinding binding;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.dialog_client_info, container, false);
+        binding = DialogClientInfoBinding.inflate(inflater, container, false);
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        initialize(view);
-        vDone.setOnClickListener(oclDone);
-        vCompanyEmail.addTextChangedListener(twEmail);
-        vCompanyName.addTextChangedListener(twName);
-        vCompanyPhoneNumber.addTextChangedListener(twPhone);
+        initialize();
+        binding.doneFab.setOnClickListener(oclDone);
+        binding.emailEdit.addTextChangedListener(twEmail);
+        binding.nameEdit.addTextChangedListener(twName);
+        binding.phoneEdit.addTextChangedListener(twPhone);
 
     }
 
     // Functions
-    private void initialize(View view) {
-        vCompanyName = view.findViewById(R.id.TextInput_CompanyName);
-        vCompanyEmail = view.findViewById(R.id.TextInput_CompanyEmail);
-        vCompanyPhoneNumber = view.findViewById(R.id.TextInput_CompanyPhoneNumber);
-
-        vCompanyNameLayout = view.findViewById(R.id.textInputLayout_CompanyName);
-        vCompanyEmailLayout = view.findViewById(R.id.textInputLayout_CompanyEmail);
-        vCompanyPhoneNumberLayout = view.findViewById(R.id.textInputLayout_CompanyPhoneNumber);
-
+    private void initialize() {
         views = new ArrayList<>();
-        views.add(new Pair<>(vCompanyNameLayout, vCompanyName));
-        views.add(new Pair<>(vCompanyEmailLayout, vCompanyEmail));
-        views.add(new Pair<>(vCompanyPhoneNumberLayout, vCompanyPhoneNumber));
-
-        vDone = view.findViewById(R.id.Button_Done);
+        views.add(new Pair<>(binding.nameLayout, binding.nameEdit));
+        views.add(new Pair<>(binding.emailLayout, binding.emailEdit));
+        views.add(new Pair<>(binding.phoneLayout, binding.phoneEdit));
     }
 
     private boolean generateError() {
@@ -129,7 +126,7 @@ public class ClientInfoDialog extends DialogFragment {
             return;
         }
         Bundle bundle = new Bundle();
-        Client client = new Client(vCompanyName.getText().toString(), vCompanyEmail.getText().toString(), vCompanyPhoneNumber.getText().toString());
+        Client client = new Client(binding.nameEdit.getText().toString(), binding.emailEdit.getText().toString(), binding.phoneEdit.getText().toString());
         bundle.putSerializable("client", client);
         bundle.putString("note", note);
         getParentFragmentManager().setFragmentResult("clientInfo", bundle);
@@ -158,11 +155,11 @@ public class ClientInfoDialog extends DialogFragment {
         @Override
         public void afterTextChanged(Editable s) {
             if (!isValid(s)) {
-                vCompanyEmailLayout.setError("Wrong E-mail form");
+                binding.emailLayout.setError("Wrong E-mail form");
             } else {
-                vCompanyEmailLayout.setError(null);
+                binding.emailLayout.setError(null);
             }
-            hideError(vCompanyEmailLayout);
+            hideError(binding.emailLayout);
         }
     };
     private final TextWatcher twName = new TextWatcher() {
@@ -178,8 +175,8 @@ public class ClientInfoDialog extends DialogFragment {
 
         @Override
         public void afterTextChanged(Editable s) {
-            vCompanyNameLayout.setError(null);
-            hideError(vCompanyNameLayout);
+            binding.nameLayout.setError(null);
+            hideError(binding.nameLayout);
         }
     };
     private final TextWatcher twPhone = new TextWatcher() {
@@ -195,8 +192,8 @@ public class ClientInfoDialog extends DialogFragment {
 
         @Override
         public void afterTextChanged(Editable s) {
-            vCompanyPhoneNumberLayout.setError(null);
-            hideError(vCompanyPhoneNumberLayout);
+            binding.phoneLayout.setError(null);
+            hideError(binding.phoneLayout);
         }
     };
 

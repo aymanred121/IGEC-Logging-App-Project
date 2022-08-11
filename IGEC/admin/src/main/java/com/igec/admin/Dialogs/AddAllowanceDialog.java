@@ -17,6 +17,7 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import com.igec.admin.R;
+import com.igec.admin.databinding.DialogAddAllowanceBinding;
 import com.igec.common.Adapters.AllowanceAdapter;
 import com.igec.common.firebase.Allowance;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -26,10 +27,8 @@ import java.util.ArrayList;
 
 public class AddAllowanceDialog extends DialogFragment {
 
-    private FloatingActionButton vAddAllowance, vDone;
     private ArrayList<Allowance> allowances;
     private AllowanceAdapter adapter;
-    private RecyclerView recyclerView;
     private RecyclerView.LayoutManager layoutManager;
 
     public AddAllowanceDialog(ArrayList<Allowance> allowances) {
@@ -80,41 +79,47 @@ public class AddAllowanceDialog extends DialogFragment {
         });
     }
 
+    private DialogAddAllowanceBinding binding;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.dialog_add_allowance, container, false);
+        binding = DialogAddAllowanceBinding.inflate(inflater, container, false);
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        binding = null;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        initialize(view);
-        vAddAllowance.setOnClickListener(oclAddAllowance);
-        vDone.setOnClickListener(oclDone);
+        initialize();
+        binding.addFab.setOnClickListener(oclAddAllowance);
+        binding.doneFab.setOnClickListener(oclDone);
         adapter.setOnItemClickListener(oclItemClickListener);
     }
 
-    private void initialize(View view) {
-        vAddAllowance = view.findViewById(R.id.Button_AddAllowance);
-        vDone = view.findViewById(R.id.Button_Done);
-        recyclerView = view.findViewById(R.id.recyclerview);
-        recyclerView.setHasFixedSize(true);
+    private void initialize() {
+        binding.recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
-        adapter = new AllowanceAdapter(allowances,true);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(adapter);
+        adapter = new AllowanceAdapter(allowances, true);
+        binding.recyclerView.setLayoutManager(layoutManager);
+        binding.recyclerView.setAdapter(adapter);
     }
 
     private View.OnClickListener oclDone = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            vDone.setEnabled(false);
+            binding.doneFab.setEnabled(false);
             Bundle result = new Bundle();
             result.putSerializable("allowances", allowances);
             getParentFragmentManager().setFragmentResult("allowances", result);
-            vDone.setEnabled(true);
+            binding.doneFab.setEnabled(true);
             dismiss();
         }
     };

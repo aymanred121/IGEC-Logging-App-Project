@@ -28,6 +28,7 @@ import com.igec.admin.Dialogs.AddAllowanceDialog;
 import com.igec.admin.Dialogs.AddClientDialog;
 import com.igec.admin.Dialogs.LocationDialog;
 import com.igec.admin.R;
+import com.igec.admin.databinding.FragmentAddProjectBinding;
 import com.igec.common.firebase.Allowance;
 import com.igec.common.firebase.Client;
 import com.igec.common.firebase.EmployeeOverview;
@@ -57,12 +58,6 @@ import java.util.Map;
 public class AddProjectFragment extends Fragment {
 
     // Views
-    private TextInputEditText vName, vTime, vManagerName, vArea, vStreet, vCity, vProjectReference, vAreaM;
-    private TextInputLayout vNameLayout, vTimeLayout, vManagerNameLayout, vAreaLayout, vAreaMLayout, vStreetLayout, vCityLayout, vProjectReferenceLayout, vManagerIDLayout, vContractTypeLayout;
-    private MaterialButton vRegister, vAddClient, vAddAllowance, vLocate;
-    private AutoCompleteTextView vManagerID, vContractType;
-    private RecyclerView recyclerView;
-    private MaterialCheckBox vOfficeWork;
     private EmployeeAdapter adapter;
 
     // Vars
@@ -84,7 +79,6 @@ public class AddProjectFragment extends Fragment {
             .document("emp");
     private final CollectionReference employeeCol = db.collection("employees");
     private WriteBatch batch = FirebaseFirestore.getInstance().batch();
-    private View view;
 
     public static void clearTeam() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -110,9 +104,9 @@ public class AddProjectFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        vManagerID.setText(null);
+        binding.managerIdAuto.setText(null);
         ArrayAdapter<String> idAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, TeamID);
-        vManagerID.setAdapter(idAdapter);
+        binding.managerIdAuto.setAdapter(idAdapter);
         setUpContractType();
     }
 
@@ -150,40 +144,40 @@ public class AddProjectFragment extends Fragment {
         });
     }
 
+    private FragmentAddProjectBinding binding;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_add_project, container, false);
+        binding =  FragmentAddProjectBinding.inflate(inflater, container, false);
+        return  binding.getRoot();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        this.view = view;
         initialize();
         setUpListeners();
-
     }
 
     // Functions
     private void setUpListeners() {
         // listeners
 
-        vProjectReference.addTextChangedListener(twProjectReference);
-        vManagerID.addTextChangedListener(twManagerID);
-        vAreaM.addTextChangedListener(twArea);
-        vOfficeWork.setOnClickListener(oclOfficeWork);
-        vAddClient.setOnClickListener(oclAddClient);
-        vRegister.setOnClickListener(clRegister);
-        vLocate.setOnClickListener(clLocate);
-        vTimeLayout.setEndIconOnClickListener(oclTimeDate);
-        vTimeLayout.setErrorIconOnClickListener(oclTimeDate);
+        binding.referenceEdit.addTextChangedListener(twProjectReference);
+        binding.managerIdAuto.addTextChangedListener(twManagerID);
+        binding.projectAreaEdit.addTextChangedListener(twArea);
+        binding.officeWorkCheckbox.setOnClickListener(oclOfficeWork);
+        binding.clientButton.setOnClickListener(oclAddClient);
+        binding.registerButton.setOnClickListener(clRegister);
+        binding.locateButton.setOnClickListener(clLocate);
+        binding.dateLayout.setEndIconOnClickListener(oclTimeDate);
+        binding.dateLayout.setErrorIconOnClickListener(oclTimeDate);
         vTimeDatePicker.addOnPositiveButtonClickListener(pclTimeDatePicker);
-        vAddAllowance.setOnClickListener(oclAddAllowance);
+        binding.allowancesButton.setOnClickListener(oclAddAllowance);
 
 
         for (Pair<TextInputLayout, EditText> v : views) {
-            if (v.first != vManagerIDLayout && v.first != vProjectReferenceLayout && v.first != vAreaMLayout)
+            if (v.first != binding.managerIdLayout && v.first != binding.referenceLayout && v.first != binding.projectAreaLayout)
                 v.second.addTextChangedListener(new TextWatcher() {
                     @Override
                     public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -197,7 +191,7 @@ public class AddProjectFragment extends Fragment {
 
                     @Override
                     public void afterTextChanged(Editable editable) {
-                        hideError(vTimeLayout);
+                        hideError(binding.dateLayout);
                     }
                 });
         }
@@ -205,57 +199,28 @@ public class AddProjectFragment extends Fragment {
 
     private void initialize() {
         employees = new ArrayList<>();
-        vName = view.findViewById(R.id.TextInput_ProjectName);
-        vProjectReference = view.findViewById(R.id.TextInput_ProjectReference);
-        vArea = view.findViewById(R.id.TextInput_Area);
-        vCity = view.findViewById(R.id.TextInput_City);
-        vStreet = view.findViewById(R.id.TextInput_Street);
-        vTime = view.findViewById(R.id.TextInput_Time);
-        vContractType = view.findViewById(R.id.TextInput_ContractType);
-        vManagerID = view.findViewById(R.id.TextInput_ManagerID);
-        vManagerName = view.findViewById(R.id.TextInput_ManagerName);
-        vAreaM = view.findViewById(R.id.TextInput_ProjectArea);
-
-        vNameLayout = view.findViewById(R.id.textInputLayout_ProjectName);
-        vProjectReferenceLayout = view.findViewById(R.id.textInputLayout_ProjectReference);
-        vAreaLayout = view.findViewById(R.id.textInputLayout_Area);
-        vCityLayout = view.findViewById(R.id.textInputLayout_City);
-        vStreetLayout = view.findViewById(R.id.textInputLayout_Street);
-        vTimeLayout = view.findViewById(R.id.textInputLayout_Time);
-        vContractTypeLayout = view.findViewById(R.id.textInputLayout_ContractType);
-        vManagerIDLayout = view.findViewById(R.id.textInputLayout_ManagerID);
-        vManagerNameLayout = view.findViewById(R.id.textInputLayout_ManagerName);
-        vAreaMLayout = view.findViewById(R.id.textInputLayout_ProjectArea);
-
         views = new ArrayList<>();
-        views.add(new Pair<>(vNameLayout, vName));
-        views.add(new Pair<>(vProjectReferenceLayout, vProjectReference));
-        views.add(new Pair<>(vAreaLayout, vArea));
-        views.add(new Pair<>(vCityLayout, vCity));
-        views.add(new Pair<>(vStreetLayout, vStreet));
-        views.add(new Pair<>(vAreaMLayout, vAreaM));
-        views.add(new Pair<>(vTimeLayout, vTime));
-        views.add(new Pair<>(vContractTypeLayout, vContractType));
-        views.add(new Pair<>(vManagerIDLayout, vManagerID));
-
-        vOfficeWork = view.findViewById(R.id.checkbox_officeWork);
-        vRegister = view.findViewById(R.id.button_register);
-        vAddAllowance = view.findViewById(R.id.button_AddAllowances);
-        vAddClient = view.findViewById(R.id.button_AddClient);
-        vLocate = view.findViewById(R.id.button_Locate);
+        views.add(new Pair<>(binding.nameLayout, binding.nameEdit));
+        views.add(new Pair<>(binding.referenceLayout, binding.referenceEdit));
+        views.add(new Pair<>(binding.areaLayout, binding.areaEdit));
+        views.add(new Pair<>(binding.cityLayout, binding.cityEdit));
+        views.add(new Pair<>(binding.streetLayout, binding.streetEdit));
+        views.add(new Pair<>(binding.projectAreaLayout, binding.projectAreaEdit));
+        views.add(new Pair<>(binding.dateLayout, binding.dateEdit));
+        views.add(new Pair<>(binding.contractTypeLayout, binding.contractTypeAuto));
+        views.add(new Pair<>(binding.managerIdLayout, binding.managerIdAuto));
         vTimeDatePickerBuilder.setTitleText("Time");
         vTimeDatePicker = vTimeDatePickerBuilder.build();
 
 
-        recyclerView = view.findViewById(R.id.recyclerview);
-        recyclerView.setHasFixedSize(true);
+        binding.recyclerView.setHasFixedSize(true);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
         adapter = new EmployeeAdapter(employees, true);
         adapter.setOnItemClickListener(itclEmployeeAdapter);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(adapter);
+        binding.recyclerView.setLayoutManager(layoutManager);
+        binding.recyclerView.setAdapter(adapter);
         projectID = db.collection("projects").document().getId().substring(0, 5);
-        vAddClient.setEnabled(!vOfficeWork.isChecked());
+        binding.clientButton.setEnabled(!binding.officeWorkCheckbox.isChecked());
         getEmployees();
         setUpContractType();
         //TODO: remove fakeData() when all testing is finished
@@ -268,7 +233,7 @@ public class AddProjectFragment extends Fragment {
         contract.add("lump sum");
         contract.add("timesheet");
         ArrayAdapter<String> ContractAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, contract);
-        vContractType.setAdapter(ContractAdapter);
+        binding.contractTypeAuto.setAdapter(ContractAdapter);
     }
 
     private void ChangeSelectedTeam(int position) {
@@ -293,8 +258,8 @@ public class AddProjectFragment extends Fragment {
 
         } else {
 
-            if (!vManagerID.getText().toString().isEmpty() && vManagerID.getText().toString().equals(employees.get(position).getId()))
-                vManagerID.setText("");
+            if (!binding.managerIdAuto.getText().toString().isEmpty() && binding.managerIdAuto.getText().toString().equals(employees.get(position).getId()))
+                binding.managerIdAuto.setText("");
 //            Team.remove(employees.get(position));
             Team.removeIf(employeeOverview -> employeeOverview.getId().equals(employees.get(position).getId()));
             TeamID.remove(String.valueOf(employees.get(position).getId()));
@@ -306,11 +271,11 @@ public class AddProjectFragment extends Fragment {
                     .document("emp"), empInfoMap);
         }
         batch.commit();
-        if (!vManagerIDLayout.isEnabled())
-            vManagerID.setText("");
+        if (!binding.managerIdLayout.isEnabled())
+            binding.managerIdAuto.setText("");
         if (TeamID.size() > 0) {
             ArrayAdapter<String> idAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, TeamID);
-            vManagerID.setAdapter(idAdapter);
+            binding.managerIdAuto.setAdapter(idAdapter);
 
         }
         adapter.notifyItemChanged(position);
@@ -321,8 +286,8 @@ public class AddProjectFragment extends Fragment {
 //        Team.clear();
         employeeOverviewRef
                 .addSnapshotListener((documentSnapshot, e) -> {
-                    vManagerID.setText(null);
-                    vManagerName.setText(null);
+                    binding.managerIdAuto.setText(null);
+                    binding.managerNameEdit.setText(null);
                     if (e != null) {
                         Log.w(TAG, "Listen failed.", e);
                         return;
@@ -337,9 +302,9 @@ public class AddProjectFragment extends Fragment {
 
 
     private void updateEmployeesDetails(String projectID) {
-        String day = vTime.getText().toString().substring(0, 2);
-        String year = vTime.getText().toString().substring(6, 10);
-        String month = vTime.getText().toString().substring(3, 5);
+        String day = binding.dateEdit.getText().toString().substring(0, 2);
+        String year = binding.dateEdit.getText().toString().substring(6, 10);
+        String month = binding.dateEdit.getText().toString().substring(3, 5);
         if (Integer.parseInt(day) > 25) {
             if (Integer.parseInt(month) + 1 == 13) {
                 month = "01";
@@ -422,21 +387,21 @@ public class AddProjectFragment extends Fragment {
             allowance.setType(allowancesEnum.PROJECT.ordinal());
             allowance.setProjectId(projectID);
         });
-        Project newProject = new Project(vManagerName.getText().toString()
-                , vManagerID.getText().toString()
-                , vName.getText().toString()
+        Project newProject = new Project(binding.managerNameEdit.getText().toString()
+                , binding.managerIdAuto.getText().toString()
+                , binding.nameEdit.getText().toString()
                 , new Date(startDate)
                 , Team
-                , vProjectReference.getText().toString()
-                , vCity.getText().toString()
-                , vArea.getText().toString()
-                , vStreet.getText().toString()
+                , binding.referenceEdit.getText().toString()
+                , binding.cityEdit.getText().toString()
+                , binding.areaEdit.getText().toString()
+                , binding.streetEdit.getText().toString()
                 , Double.parseDouble(lat)
                 , Double.parseDouble(lng)
-                , vContractType.getText().toString()
-                , Double.parseDouble(vAreaM.getText().toString()));
+                , binding.contractTypeAuto.getText().toString()
+                , Double.parseDouble(binding.projectAreaEdit.getText().toString()));
         newProject.setId(projectID);
-        newProject.setClient(vOfficeWork.isChecked() ? null : client);
+        newProject.setClient(binding.officeWorkCheckbox.isChecked() ? null : client);
         newProject.getAllowancesList().addAll(allowances);
         allowances = newProject.getAllowancesList();
         batch = FirebaseFirestore.getInstance().batch();
@@ -487,13 +452,13 @@ public class AddProjectFragment extends Fragment {
     }
 
     void clearInputs() {
-        vRegister.setEnabled(true);
+        binding.registerButton.setEnabled(true);
         for (Pair<TextInputLayout, EditText> v : views) {
             v.second.setText(null);
         }
         TeamID.clear();
         Team.clear();
-        vManagerID.setAdapter(null);
+        binding.managerIdAuto.setAdapter(null);
         client = null;
         vTimeDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
         vTimeDatePicker = vTimeDatePickerBuilder.build();
@@ -503,19 +468,19 @@ public class AddProjectFragment extends Fragment {
 
     void fakeData() {
         Faker faker = new Faker();
-        vName.setText(faker.bothify("??????"));
-        vCity.setText(faker.address().cityName());
-        vArea.setText(faker.address().cityName());
-        vStreet.setText(faker.address().streetName());
+        binding.nameEdit.setText(faker.bothify("??????"));
+        binding.cityEdit.setText(faker.address().cityName());
+        binding.areaEdit.setText(faker.address().cityName());
+        binding.streetEdit.setText(faker.address().streetName());
         startDate = faker.date().birthday().getTime();
-//        vTime.setText(convertDateToString(startDate));
+//        binding.dateEdit.setText(convertDateToString(startDate));
 
     }
 
     private boolean generateError() {
         for (Pair<TextInputLayout, EditText> view : views) {
             if (view.second.getText().toString().trim().isEmpty()) {
-                if (view.first == vTimeLayout)
+                if (view.first == binding.dateLayout)
                     view.first.setErrorIconDrawable(R.drawable.ic_baseline_calendar_month_24);
                 view.first.setError("Missing");
                 return true;
@@ -524,7 +489,7 @@ public class AddProjectFragment extends Fragment {
                 return true;
             }
         }
-        boolean isClientMissing = (!vOfficeWork.isChecked() && client == null);
+        boolean isClientMissing = (!binding.officeWorkCheckbox.isChecked() && client == null);
         boolean isLocationMissing = (lat == null && lng == null);
         if (isClientMissing) {
             Toast.makeText(getActivity(), "client Info Missing", Toast.LENGTH_SHORT).show();
@@ -550,12 +515,12 @@ public class AddProjectFragment extends Fragment {
         @Override
         public void onPositiveButtonClick(Object selection) {
             startDate = (long) selection;
-            vTime.setText(String.format("%s", convertDateToString(startDate)));
+            binding.dateEdit.setText(String.format("%s", convertDateToString(startDate)));
         }
     };
     private final View.OnClickListener clRegister = v -> {
         if (validateInputs()) {
-            vRegister.setEnabled(false);
+            binding.registerButton.setEnabled(false);
             addProject();
         }
     };
@@ -580,13 +545,13 @@ public class AddProjectFragment extends Fragment {
     private final View.OnClickListener oclOfficeWork = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            vAddClient.setEnabled(!vOfficeWork.isChecked());
-            vProjectReference.setEnabled(!vOfficeWork.isChecked());
-            vProjectReferenceLayout.setEnabled(!vOfficeWork.isChecked());
-            if (vOfficeWork.isChecked()) {
-                vProjectReference.setText("-99999");
+            binding.clientButton.setEnabled(!binding.officeWorkCheckbox.isChecked());
+            binding.referenceEdit.setEnabled(!binding.officeWorkCheckbox.isChecked());
+            binding.referenceLayout.setEnabled(!binding.officeWorkCheckbox.isChecked());
+            if (binding.officeWorkCheckbox.isChecked()) {
+                binding.referenceEdit.setText("-99999");
             } else {
-                vProjectReference.setText(null);
+                binding.referenceEdit.setText(null);
             }
 
         }
@@ -629,7 +594,7 @@ public class AddProjectFragment extends Fragment {
             if (s.toString().length() == 2 && !removeDash) {
                 s.append('-');
             }
-            hideError(vProjectReferenceLayout);
+            hideError(binding.referenceLayout);
         }
     };
     private final TextWatcher twManagerID = new TextWatcher() {
@@ -645,27 +610,27 @@ public class AddProjectFragment extends Fragment {
 
         @Override
         public void afterTextChanged(Editable s) {
-            if (vManagerID.getText().length() > 0) {
-                if (selectedManager == null || !selectedManager.getId().equals(vManagerID.getText().toString())) {
+            if (binding.managerIdAuto.getText().length() > 0) {
+                if (selectedManager == null || !selectedManager.getId().equals(binding.managerIdAuto.getText().toString())) {
                     for (int i = 0; i < Team.size(); i++) {
                         if (String.valueOf(Team.get(i).getId()).equals(s.toString())) {
                             selectedManager = Team.get(i);
                         }
                     }
                 }
-                vManagerName.setText(String.format("%s %s", selectedManager.getFirstName(), selectedManager.getLastName()));
+                binding.managerNameEdit.setText(String.format("%s %s", selectedManager.getFirstName(), selectedManager.getLastName()));
             } else {
-                vManagerName.setText(null);
+                binding.managerNameEdit.setText(null);
                 selectedManager = null;
             }
             for (EmployeeOverview emp : Team) {
-                if (!emp.getId().equals(vManagerID.getText().toString())) {
-                    emp.setManagerID(!vManagerID.getText().toString().equals("") ? vManagerID.getText().toString() : null);
+                if (!emp.getId().equals(binding.managerIdAuto.getText().toString())) {
+                    emp.setManagerID(!binding.managerIdAuto.getText().toString().equals("") ? binding.managerIdAuto.getText().toString() : null);
                 } else {
                     emp.setManagerID("adminID");
                 }
             }
-            hideError(vManagerIDLayout);
+            hideError(binding.managerIdLayout);
         }
     };
     private final TextWatcher twArea = new TextWatcher() {
@@ -681,14 +646,14 @@ public class AddProjectFragment extends Fragment {
 
         @Override
         public void afterTextChanged(Editable editable) {
-            if (!vAreaM.getText().toString().trim().isEmpty()) {
-                double value = Double.parseDouble(vAreaM.getText().toString());
+            if (!binding.projectAreaEdit.getText().toString().trim().isEmpty()) {
+                double value = Double.parseDouble(binding.projectAreaEdit.getText().toString());
                 if (value == 0)
-                    vAreaMLayout.setError("Invalid value");
+                    binding.projectAreaLayout.setError("Invalid value");
                 else
-                    hideError(vAreaMLayout);
+                    hideError(binding.projectAreaLayout);
             } else
-                hideError(vAreaMLayout);
+                hideError(binding.projectAreaLayout);
         }
     };
 }

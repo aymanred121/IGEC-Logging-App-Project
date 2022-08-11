@@ -26,6 +26,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 import com.igec.admin.R;
+import com.igec.admin.databinding.FragmentAddUserBinding;
 import com.igec.common.firebase.Allowance;
 import com.igec.common.firebase.Employee;
 import com.igec.common.firebase.EmployeeOverview;
@@ -68,13 +69,6 @@ public class UserFragmentDialog extends DialogFragment {
     private final int BONUS = 3;
     private final int PENALTY = 4;
     // Views
-    private MaterialCheckBox vAdmin, vTemporary;
-    private MaterialButton vUpdate;
-    private MaterialButton vDelete;
-    private MaterialButton vUnlock;
-    private AutoCompleteTextView vSalaryCurrency;
-    private TextInputEditText vFirstName, vSecondName, vEmail, vPassword, vPhone, vTitle, vSalary, vNationalID, vArea, vCity, vStreet, vHireDate, vInsuranceNumber, vInsuranceAmount;
-    private TextInputLayout vFirstNameLayout, vSecondNameLayout, vEmailLayout, vPasswordLayout, vPhoneLayout, vTitleLayout, vSalaryLayout, vNationalIDLayout, vAreaLayout, vCityLayout, vStreetLayout, vHireDateLayout, vInsuranceNumberLayout, vInsuranceAmountLayout, vSalaryCurrencyLayout;
     private final MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vDatePicker;
     private ArrayList<Pair<TextInputLayout, EditText>> views;
@@ -113,22 +107,28 @@ public class UserFragmentDialog extends DialogFragment {
         return dialog;
     }
 
+    private FragmentAddUserBinding binding;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_add_user, container, false);
-        initialize(view);
+        binding = FragmentAddUserBinding.inflate(inflater, container, false);
+        return binding.getRoot();
+    }
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        initialize();
         // Listeners
-        vEmail.addTextChangedListener(twEmail);
+        binding.emailEdit.addTextChangedListener(twEmail);
         vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);
-        vHireDateLayout.setEndIconOnClickListener(oclHireDate);
-        vHireDateLayout.setErrorIconOnClickListener(oclHireDate);
-        vUpdate.setOnClickListener(clUpdate);
-        vDelete.setOnClickListener(clDelete);
-        vUnlock.setOnClickListener(clUnlock);
-        vPasswordLayout.setEndIconOnClickListener(oclPasswordGenerate);
+        binding.hireDateLayout.setEndIconOnClickListener(oclHireDate);
+        binding.hireDateLayout.setErrorIconOnClickListener(oclHireDate);
+        binding.updateButton.setOnClickListener(clUpdate);
+        binding.deleteButton.setOnClickListener(clDelete);
+        binding.unlockButton.setOnClickListener(clUnlock);
+        binding.passwordLayout.setEndIconOnClickListener(oclPasswordGenerate);
         for (Pair<TextInputLayout, EditText> v : views) {
-            if (v.first != vEmailLayout)
+            if (v.first != binding.emailLayout)
                 v.second.addTextChangedListener(new TextWatcher() {
                     @Override
                     public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -147,8 +147,11 @@ public class UserFragmentDialog extends DialogFragment {
                     }
                 });
         }
+    }
 
-        return view;
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
     }
 
     @Override
@@ -158,108 +161,71 @@ public class UserFragmentDialog extends DialogFragment {
         currencies.add("EGP");
         currencies.add("SAR");
         ArrayAdapter<String> currenciesAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, currencies);
-        vSalaryCurrency.setAdapter(currenciesAdapter);
+        binding.currencyAuto.setAdapter(currenciesAdapter);
     }
 
     // Functions
-    private void initialize(View view) {
-        vFirstName = view.findViewById(R.id.TextInput_FirstName);
-        vFirstNameLayout = view.findViewById(R.id.textInputLayout_FirstName);
-        vSecondName = view.findViewById(R.id.TextInput_SecondName);
-        vSecondNameLayout = view.findViewById(R.id.textInputLayout_SecondName);
-        vEmail = view.findViewById(R.id.TextInput_Email);
-        vEmailLayout = view.findViewById(R.id.textInputLayout_Email);
-        vPassword = view.findViewById(R.id.TextInput_Password);
-        vPasswordLayout = view.findViewById(R.id.textInputLayout_Password);
-        vPhone = view.findViewById(R.id.TextInput_Phone);
-        vPhoneLayout = view.findViewById(R.id.textInputLayout_Phone);
-        vTitle = view.findViewById(R.id.TextInput_Title);
-        vTitleLayout = view.findViewById(R.id.textInputLayout_Title);
-        vAdmin = view.findViewById(R.id.CheckBox_Admin);
-        vTemporary = view.findViewById(R.id.CheckBox_Temporary);
-        vSalary = view.findViewById(R.id.TextInput_Salary);
-        vSalaryLayout = view.findViewById(R.id.textInputLayout_Salary);
-        vSalaryCurrency = view.findViewById(R.id.TextInput_SalaryCurrency);
-        vSalaryCurrencyLayout = view.findViewById(R.id.textInputLayout_SalaryCurrency);
-        vInsuranceNumber = view.findViewById(R.id.TextInput_InsuranceNumber);
-        vInsuranceNumberLayout = view.findViewById(R.id.textInputLayout_InsuranceNumber);
-        vInsuranceAmount = view.findViewById(R.id.TextInput_InsuranceAmount);
-        vInsuranceAmountLayout = view.findViewById(R.id.textInputLayout_InsuranceAmount);
-        vNationalID = view.findViewById(R.id.TextInput_NationalID);
-        vNationalIDLayout = view.findViewById(R.id.textInputLayout_NationalID);
-        vArea = view.findViewById(R.id.TextInput_Area);
-        vAreaLayout = view.findViewById(R.id.textInputLayout_Area);
-        vCity = view.findViewById(R.id.TextInput_City);
-        vCityLayout = view.findViewById(R.id.textInputLayout_City);
-        vStreet = view.findViewById(R.id.TextInput_Street);
-        vStreetLayout = view.findViewById(R.id.textInputLayout_Street);
-        vHireDate = view.findViewById(R.id.TextInput_HireDate);
-        vHireDateLayout = view.findViewById(R.id.textInputLayout_HireDate);
+    private void initialize() {
         vDatePickerBuilder.setTitleText("Hire Date");
         vDatePicker = vDatePickerBuilder.build();
-//        vRegister = view.findViewById(R.id.button_register);
-        MaterialButton vRegister = view.findViewById(R.id.button_register);
-        vDelete = view.findViewById(R.id.button_delete);
-        vUpdate = view.findViewById(R.id.button_update);
-        vUnlock = view.findViewById(R.id.button_unlock);
-        vRegister.setVisibility(View.GONE);
-        vDelete.setVisibility(View.VISIBLE);
-        vUpdate.setVisibility(View.VISIBLE);
-        vUnlock.setVisibility(View.VISIBLE);
+        binding.registerButton.setVisibility(View.GONE);
+        binding.deleteButton.setVisibility(View.VISIBLE);
+        binding.updateButton.setVisibility(View.VISIBLE);
+        binding.unlockButton.setVisibility(View.VISIBLE);
 
 
         views = new ArrayList<>();
-        views.add(new Pair<>(vFirstNameLayout, vFirstName));
-        views.add(new Pair<>(vSecondNameLayout, vSecondName));
-        views.add(new Pair<>(vEmailLayout, vEmail));
-        views.add(new Pair<>(vPasswordLayout, vPassword));
-        views.add(new Pair<>(vPhoneLayout, vPhone));
-        views.add(new Pair<>(vTitleLayout, vTitle));
-        views.add(new Pair<>(vSalaryLayout, vSalary));
-        views.add(new Pair<>(vSalaryCurrencyLayout, vSalaryCurrency));
-        views.add(new Pair<>(vInsuranceNumberLayout, vInsuranceNumber));
-        views.add(new Pair<>(vInsuranceAmountLayout, vInsuranceAmount));
-        views.add(new Pair<>(vAreaLayout, vArea));
-        views.add(new Pair<>(vCityLayout, vCity));
-        views.add(new Pair<>(vStreetLayout, vStreet));
-        views.add(new Pair<>(vHireDateLayout, vHireDate));
-        views.add(new Pair<>(vNationalIDLayout, vNationalID));
+        views.add(new Pair<>(binding.firstNameLayout, binding.firstNameEdit));
+        views.add(new Pair<>(binding.secondNameLayout, binding.secondNameEdit));
+        views.add(new Pair<>(binding.emailLayout, binding.emailEdit));
+        views.add(new Pair<>(binding.passwordLayout, binding.passwordEdit));
+        views.add(new Pair<>(binding.phoneLayout, binding.phoneEdit));
+        views.add(new Pair<>(binding.titleLayout, binding.titleEdit));
+        views.add(new Pair<>(binding.salaryLayout, binding.salaryEdit));
+        views.add(new Pair<>(binding.currencyLayout, binding.currencyAuto));
+        views.add(new Pair<>(binding.insuranceNumberLayout, binding.insuranceNumberEdit));
+        views.add(new Pair<>(binding.insuranceAmountLayout, binding.insuranceAmountEdit));
+        views.add(new Pair<>(binding.areaLayout, binding.areaEdit));
+        views.add(new Pair<>(binding.cityLayout, binding.cityEdit));
+        views.add(new Pair<>(binding.streetLayout, binding.streetEdit));
+        views.add(new Pair<>(binding.hireDateLayout, binding.hireDateEdit));
+        views.add(new Pair<>(binding.nationalIdLayout, binding.nationalIdEdit));
 
 
-        vFirstName.setText(employee.getFirstName());
-        vSecondName.setText(employee.getLastName());
-        vTitle.setText(employee.getTitle());
-        vArea.setText(employee.getArea());
-        vCity.setText(employee.getCity());
-        vStreet.setText(employee.getStreet());
-        vEmail.setText(employee.getEmail());
-        vSalary.setText(String.valueOf(employee.getSalary()));
-        vSalaryCurrency.setText(employee.getCurrency());
-        vNationalID.setText(employee.getSSN());
-        vPassword.setText(employee.getDecryptedPassword());
-        vPhone.setText(employee.getPhoneNumber());
-        vAdmin.setChecked(employee.isAdmin());
-        vTemporary.setChecked(employee.isTemporary());
-        vInsuranceNumber.setText(employee.getInsuranceNumber());
-        vInsuranceAmount.setText(String.valueOf(employee.getInsuranceAmount()));
-        vHireDate.setText(convertDateToString(employee.getHireDate().getTime()));
+        binding.firstNameEdit.setText(employee.getFirstName());
+        binding.secondNameEdit.setText(employee.getLastName());
+        binding.titleEdit.setText(employee.getTitle());
+        binding.areaEdit.setText(employee.getArea());
+        binding.cityEdit.setText(employee.getCity());
+        binding.streetEdit.setText(employee.getStreet());
+        binding.emailEdit.setText(employee.getEmail());
+        binding.salaryEdit.setText(String.valueOf(employee.getSalary()));
+        binding.currencyAuto.setText(employee.getCurrency());
+        binding.nationalIdEdit.setText(employee.getSSN());
+        binding.passwordEdit.setText(employee.getDecryptedPassword());
+        binding.phoneEdit.setText(employee.getPhoneNumber());
+        binding.adminCheckbox.setChecked(employee.isAdmin());
+        binding.temporaryCheckbox.setChecked(employee.isTemporary());
+        binding.insuranceNumberEdit.setText(employee.getInsuranceNumber());
+        binding.insuranceAmountEdit.setText(String.valueOf(employee.getInsuranceAmount()));
+        binding.hireDateEdit.setText(convertDateToString(employee.getHireDate().getTime()));
         hireDate = employee.getHireDate().getTime();
         vDatePickerBuilder.setTitleText("Hire Date");
         vDatePicker = vDatePickerBuilder.setSelection(hireDate).build();
-        vPasswordLayout.setEndIconMode(END_ICON_CUSTOM);
-        vPasswordLayout.setEndIconDrawable(R.drawable.ic_baseline_autorenew_24);
-        vPassword.setEnabled(false);
-        vDelete.setEnabled(employee.getManagerID() == null || !employee.getManagerID().equals("adminID"));
+        binding.passwordLayout.setEndIconMode(END_ICON_CUSTOM);
+        binding.passwordLayout.setEndIconDrawable(R.drawable.ic_baseline_autorenew_24);
+        binding.passwordEdit.setEnabled(false);
+        binding.deleteButton.setEnabled(employee.getManagerID() == null || !employee.getManagerID().equals("adminID"));
         db.collection("Machine_Employee").whereEqualTo("employee.id", employee.getId()).addSnapshotListener((docs, e) -> {
             // no machines found = enabled X
             // a machine without a check-out = disabled
             // all machines have been checked-out = enabled
             for (QueryDocumentSnapshot doc : docs) {
                 if (doc.get("checkOut") == null || ((HashMap) doc.get("checkOut")).size() == 0) {
-                    vDelete.setEnabled(false);
+                    binding.deleteButton.setEnabled(false);
                     return;
                 }
-                vDelete.setEnabled(true);
+                binding.deleteButton.setEnabled(true);
             }
         });
     }
@@ -274,9 +240,9 @@ public class UserFragmentDialog extends DialogFragment {
                 return true;
             }
         }
-        boolean isNationalIdValid = vNationalID.getText().toString().length() == 14;
+        boolean isNationalIdValid = binding.nationalIdEdit.getText().toString().length() == 14;
         if (!isNationalIdValid) {
-            vNationalIDLayout.setError("Must be 14 digits");
+            binding.nationalIdLayout.setError("Must be 14 digits");
             return true;
         }
         return false;
@@ -320,14 +286,14 @@ public class UserFragmentDialog extends DialogFragment {
             for (QueryDocumentSnapshot d : queryDocumentSnapshots) {
                 summaryCOl.document(d.getId()).update("Employee", updatedEmployeeMap);
             }
-            vUpdate.setEnabled(true);
+            binding.updateButton.setEnabled(true);
             Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
             dismiss();
         });
     }
 
     private void updateProjects(HashMap<String, Object> updatedEmployeeMap) {
-        EmployeeOverview tempEmp = new EmployeeOverview(vFirstName.getText().toString(), vSecondName.getText().toString(), vTitle.getText().toString(), employee.getId(), employee.getProjectID(), employee.getProjectID() != null);
+        EmployeeOverview tempEmp = new EmployeeOverview(binding.firstNameEdit.getText().toString(), binding.secondNameEdit.getText().toString(), binding.titleEdit.getText().toString(), employee.getId(), employee.getProjectID(), employee.getProjectID() != null);
         tempEmp.setManagerID(employee.getManagerID());
         employeeOverviewArrayList.set(currEmpOverviewPos, tempEmp);
         if (employee.getProjectID() == null) {
@@ -359,22 +325,22 @@ public class UserFragmentDialog extends DialogFragment {
     private HashMap<String, Object> fillEmployeeData() {
         HashMap<String, Object> empMap = new HashMap<>();
         empMap.put("id", employee.getId());
-        empMap.put("firstName", vFirstName.getText().toString());
-        empMap.put("lastName", vSecondName.getText().toString());
-        empMap.put("title", vTitle.getText().toString());
-        empMap.put("email", vEmail.getText().toString());
+        empMap.put("firstName", binding.firstNameEdit.getText().toString());
+        empMap.put("lastName", binding.secondNameEdit.getText().toString());
+        empMap.put("title", binding.titleEdit.getText().toString());
+        empMap.put("email", binding.emailEdit.getText().toString());
         empMap.put("password", encryptedPassword());
-        empMap.put("salary", Double.parseDouble(vSalary.getText().toString()));
-        empMap.put("currency", vSalaryCurrency.getText().toString());
-        empMap.put("ssn", vNationalID.getText().toString());
+        empMap.put("salary", Double.parseDouble(binding.salaryEdit.getText().toString()));
+        empMap.put("currency", binding.currencyAuto.getText().toString());
+        empMap.put("ssn", binding.nationalIdEdit.getText().toString());
         empMap.put("hireDate", new Date(hireDate));
-        empMap.put("phoneNumber", vPhone.getText().toString());
-        empMap.put("area", vArea.getText().toString());
-        empMap.put("street", vStreet.getText().toString());
-        empMap.put("city", vCity.getText().toString());
-        empMap.put("overTime", (Double.parseDouble(vSalary.getText().toString()) / 30.0 / 10.0) * 1.5);
-        empMap.put("admin", vAdmin.isChecked());
-//        if(vAdmin.isChecked()){
+        empMap.put("phoneNumber", binding.phoneEdit.getText().toString());
+        empMap.put("area", binding.areaEdit.getText().toString());
+        empMap.put("street", binding.streetEdit.getText().toString());
+        empMap.put("city", binding.cityEdit.getText().toString());
+        empMap.put("overTime", (Double.parseDouble(binding.salaryEdit.getText().toString()) / 30.0 / 10.0) * 1.5);
+        empMap.put("admin", binding.adminCheckbox.isChecked());
+//        if(binding.adminCheckbox.isChecked()){
 //            empMap.put("managerID", null);
 //            empMap.put("projectID", null);
 //        }
@@ -383,7 +349,7 @@ public class UserFragmentDialog extends DialogFragment {
 
     private String encryptedPassword() {
         try {
-            return Base64.getEncoder().encodeToString(encrypt(vPassword.getText().toString()));
+            return Base64.getEncoder().encodeToString(encrypt(binding.passwordEdit.getText().toString()));
         } catch (Exception e) {
             Log.e("error in encryption", e.toString());
             return null;
@@ -402,7 +368,7 @@ public class UserFragmentDialog extends DialogFragment {
             employeeOverviewRef.update(employee.getId(), FieldValue.delete()).addOnSuccessListener(unused1 -> {
                 if (employee.getProjectID() == null) {
                     Toast.makeText(getActivity(), "Deleted", Toast.LENGTH_SHORT).show();
-                    vDelete.setEnabled(true);
+                    binding.deleteButton.setEnabled(true);
                     dismiss();
                     return;
                 }
@@ -416,7 +382,7 @@ public class UserFragmentDialog extends DialogFragment {
                                     vacationCol.document(d.getId()).delete();
                                 }
                                 Toast.makeText(getActivity(), "Deleted", Toast.LENGTH_SHORT).show();
-                                vDelete.setEnabled(true);
+                                binding.deleteButton.setEnabled(true);
                                 dismiss();
                             });
                         });
@@ -427,20 +393,20 @@ public class UserFragmentDialog extends DialogFragment {
     }
 
     private void updateEmployee() {
-        db.collection("employees").whereEqualTo("email", vEmail.getText().toString().trim())
+        db.collection("employees").whereEqualTo("email", binding.emailEdit.getText().toString().trim())
                 .whereNotEqualTo("id", employee.getId())
                 .get().addOnSuccessListener(documents -> {
                     if (documents.getDocuments().size() != 0) {
-                        vEmailLayout.setError("This Email already exists");
-                        vUpdate.setEnabled(true);
+                        binding.emailLayout.setError("This Email already exists");
+                        binding.updateButton.setEnabled(true);
                         return;
                     }
                     String id = employee.getId();
                     Map<String, Object> updatedEmpOverviewMap = new HashMap<>();
                     ArrayList<String> empInfo = new ArrayList<>();
-                    empInfo.add((vFirstName.getText()).toString());
-                    empInfo.add((vSecondName.getText()).toString());
-                    empInfo.add((vTitle.getText()).toString());
+                    empInfo.add((binding.firstNameEdit.getText()).toString());
+                    empInfo.add((binding.secondNameEdit.getText()).toString());
+                    empInfo.add((binding.titleEdit.getText()).toString());
                     empInfo.add((employee.getManagerID()));
                     empInfo.add((employee.getProjectID()));
                     empInfo.add((employee.getManagerID() == null) ? "0" : "1");
@@ -448,7 +414,7 @@ public class UserFragmentDialog extends DialogFragment {
                     HashMap<String, Object> updatedEmployee = fillEmployeeData();
                     db.collection("employees").document(id).update(updatedEmployee).addOnSuccessListener(unused -> {
 
-                        if (employee.getSalary() != Double.parseDouble(vSalary.getText().toString()) || !employee.getCurrency().equals(vSalaryCurrency.getText().toString())) {
+                        if (employee.getSalary() != Double.parseDouble(binding.salaryEdit.getText().toString()) || !employee.getCurrency().equals(binding.currencyAuto.getText().toString())) {
                             ArrayList<Allowance> allTypes = new ArrayList<>();
                             db.collection("EmployeesGrossSalary").document(employee.getId()).get().addOnSuccessListener((value) -> {
                                 if (!value.exists())
@@ -457,7 +423,7 @@ public class UserFragmentDialog extends DialogFragment {
                                 employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
                                 allTypes.addAll(employeesGrossSalary.getAllTypes());
                                 allTypes.removeIf(allowance -> allowance.getType() == NETSALARY);
-                                allTypes.add(new Allowance("Net salary", Double.parseDouble(vSalary.getText().toString()), NETSALARY, vSalaryCurrency.getText().toString()));
+                                allTypes.add(new Allowance("Net salary", Double.parseDouble(binding.salaryEdit.getText().toString()), NETSALARY, binding.currencyAuto.getText().toString()));
                                 db.collection("EmployeesGrossSalary").document(employee.getId()).update("allTypes", allTypes);
                             });
                         }
@@ -476,17 +442,17 @@ public class UserFragmentDialog extends DialogFragment {
         if (!validateInputs()) {
             return;
         }
-        vUpdate.setEnabled(false);
+        binding.updateButton.setEnabled(false);
         updateEmployee();
 
     };
     private View.OnClickListener clDelete = v -> {
-        vDelete.setEnabled(false);
+        binding.deleteButton.setEnabled(false);
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
         builder.setTitle(getString(R.string.Delete))
                 .setMessage(getString(R.string.AreUSure))
                 .setNegativeButton(getString(R.string.cancel), (dialogInterface, i) -> {
-                    vDelete.setEnabled(true);
+                    binding.deleteButton.setEnabled(true);
                 })
                 .setPositiveButton(getString(R.string.accept), (dialogInterface, i) -> {
                     deleteEmployee();
@@ -510,7 +476,7 @@ public class UserFragmentDialog extends DialogFragment {
     private MaterialPickerOnPositiveButtonClickListener pclDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
         @Override
         public void onPositiveButtonClick(Object selection) {
-            vHireDate.setText(convertDateToString((long) selection));
+            binding.hireDateEdit.setText(convertDateToString((long) selection));
             hireDate = (long) selection;
         }
     };
@@ -534,17 +500,17 @@ public class UserFragmentDialog extends DialogFragment {
         @Override
         public void afterTextChanged(Editable s) {
             if (!isValid(s)) {
-                vEmailLayout.setError("Wrong E-mail form");
+                binding.emailLayout.setError("Wrong E-mail form");
             } else {
-                vEmailLayout.setError(null);
+                binding.emailLayout.setError(null);
             }
         }
     };
     private View.OnClickListener oclPasswordGenerate = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            vPassword.setText("1234");
-            vPassword.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
+            binding.passwordEdit.setText("1234");
+            binding.passwordEdit.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
         }
     };
 

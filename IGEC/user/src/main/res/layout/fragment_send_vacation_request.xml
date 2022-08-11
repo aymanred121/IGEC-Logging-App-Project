@@ -16,7 +16,7 @@
         app:layout_constraintVertical_bias=".4">
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout_VacationDate"
+            android:id="@+id/date_layout"
             style="@style/DatePicker"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -24,12 +24,12 @@
             android:layout_marginTop="@dimen/high"
             app:boxBackgroundMode="outline"
             app:helperTextEnabled="true"
-            app:layout_constraintEnd_toStartOf="@id/textInputLayout_VacationDays"
+            app:layout_constraintEnd_toStartOf="@id/days_layout"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/TextInput_VacationDate"
+                android:id="@+id/date_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:enabled="false"
@@ -40,7 +40,7 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout_VacationDays"
+            android:id="@+id/days_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -51,11 +51,11 @@
             app:helperText="0 days Remaining"
             app:helperTextEnabled="true"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/textInputLayout_VacationDate"
+            app:layout_constraintStart_toEndOf="@id/date_layout"
             app:layout_constraintTop_toTopOf="parent">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/TextInput_VacationDays"
+                android:id="@+id/days_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/vacation_days"
@@ -67,7 +67,7 @@
 
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/textInputLayout_VacationNote"
+        android:id="@+id/note_layout"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="230dp"
@@ -80,10 +80,10 @@
         app:helperTextEnabled="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textInputLayout_VacationDays">
+        app:layout_constraintTop_toBottomOf="@id/days_layout">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/TextInput_VacationNote"
+            android:id="@+id/note_edit"
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:gravity="top"
@@ -93,18 +93,18 @@
     </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/Button_SendRequest"
+            android:id="@+id/send_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="8dp"
             android:layout_marginTop="@dimen/mid"
-            android:text="@string/send_vacation_request"
+            android:text="@string/send"
             android:textAllCaps="false"
             android:textSize="16sp"
             app:cornerRadius="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textInputLayout_VacationNote" />
+            app:layout_constraintTop_toBottomOf="@id/note_layout" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

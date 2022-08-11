@@ -15,7 +15,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:id="@+id/Headline"
+            android:id="@+id/header_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/date_is_inaccurate"
@@ -27,26 +27,26 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/ImageView_Time"
+            android:id="@+id/time_image_view"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_marginTop="@dimen/high"
             android:src="@color/primaryColor"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/Headline" />
+            app:layout_constraintTop_toBottomOf="@id/header_text" />
 
         <androidx.constraintlayout.utils.widget.ImageFilterView
             android:layout_width="75dp"
             android:layout_height="75dp"
             android:src="@drawable/ic_baseline_access_time_24"
-            app:layout_constraintBottom_toBottomOf="@+id/ImageView_Time"
-            app:layout_constraintEnd_toEndOf="@+id/ImageView_Time"
-            app:layout_constraintStart_toStartOf="@+id/ImageView_Time"
-            app:layout_constraintTop_toTopOf="@+id/ImageView_Time" />
+            app:layout_constraintBottom_toBottomOf="@+id/time_image_view"
+            app:layout_constraintEnd_toEndOf="@+id/time_image_view"
+            app:layout_constraintStart_toStartOf="@+id/time_image_view"
+            app:layout_constraintTop_toTopOf="@+id/time_image_view" />
 
         <TextView
-            android:id="@+id/description"
+            android:id="@+id/description_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Your phone date is inaccurate!\nAdjust your clock and try again."
@@ -56,10 +56,10 @@
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/ImageView_Time" />
+            app:layout_constraintTop_toBottomOf="@id/time_image_view" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/Adjust_Date"
+            android:id="@+id/adjust_date_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/high"
@@ -67,7 +67,7 @@
             android:text="@string/adjust_date"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/description" />
+            app:layout_constraintTop_toBottomOf="@id/description_text" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 

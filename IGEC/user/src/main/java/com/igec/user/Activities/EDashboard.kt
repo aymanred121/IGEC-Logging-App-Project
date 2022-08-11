@@ -109,7 +109,7 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                         }
 
                         R.id.nav_send_vacation_request -> {
-                            binding.toolbar.title = getString(R.string.send_vacation_request)
+                            binding.toolbar.title = getString(R.string.send)
                             supportFragmentManager.beginTransaction()
                                 .replace(
                                     R.id.nav_host_fragment_content_main,

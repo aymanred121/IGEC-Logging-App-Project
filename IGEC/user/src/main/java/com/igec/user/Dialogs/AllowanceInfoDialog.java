@@ -11,7 +11,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.util.Pair;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 
 import androidx.annotation.NonNull;
@@ -23,20 +22,15 @@ import com.igec.user.R;
 import com.igec.common.firebase.Allowance;
 import com.igec.common.firebase.Employee;
 import com.igec.common.utilities.allowancesEnum;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.igec.user.databinding.DialogAllowanceInfoBinding;
 
 import java.util.ArrayList;
 import java.util.Locale;
 
 public class AllowanceInfoDialog extends DialogFragment {
-    private TextInputEditText vAllowanceMount, vAllowanceName, vAllowanceNote;
-    private AutoCompleteTextView vAllowanceType, vAllowanceCurrency;
-    private TextInputLayout vAllowanceNameLayout, vAllowanceMountLayout, vAllowanceTypeLayout, vAllowanceNoteLayout, vAllowanceCurrencyLayout;
     private ArrayList<Pair<TextInputLayout, EditText>> views;
-    private MaterialButton vDone;
     private int position;
     private Allowance allowance = null;
     private ArrayList<String> types = new ArrayList<>();
@@ -86,24 +80,32 @@ public class AllowanceInfoDialog extends DialogFragment {
         setStyle(DialogFragment.STYLE_NORMAL, R.style.FullscreenDialogTheme);
     }
 
+    private DialogAllowanceInfoBinding binding;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.dialog_allowance_info, container, false);
+        binding = DialogAllowanceInfoBinding.inflate(inflater, container, false);
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        binding = null;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        initialize(view);
-        vDone.setOnClickListener(oclDone);
-        vAllowanceType.addTextChangedListener(twType);
-        vAllowanceName.addTextChangedListener(twName);
-        vAllowanceMount.addTextChangedListener(twMount);
-        vAllowanceNote.addTextChangedListener(twNote);
-        vAllowanceCurrency.addTextChangedListener(twCurrency);
+        initialize();
+        binding.doneButton.setOnClickListener(oclDone);
+        binding.typeAuto.addTextChangedListener(twType);
+        binding.nameEdit.addTextChangedListener(twName);
+        binding.mountEdit.addTextChangedListener(twMount);
+        binding.noteEdit.addTextChangedListener(twNote);
+        binding.currencyAuto.addTextChangedListener(twCurrency);
 
     }
 
@@ -128,44 +130,33 @@ public class AllowanceInfoDialog extends DialogFragment {
             int index = types.indexOf(allowance.getName());
             // if -1 meaning its other else its a valid type
             if (index != -1) {
-                vAllowanceType.setText(types.get(index));
+                binding.typeAuto.setText(types.get(index));
             } else {
-                vAllowanceNameLayout.setVisibility(View.VISIBLE);
-                vAllowanceType.setText(types.get(types.size() - 1));
-                vAllowanceName.setText(allowance.getName());
+                binding.nameLayout.setVisibility(View.VISIBLE);
+                binding.typeAuto.setText(types.get(types.size() - 1));
+                binding.nameEdit.setText(allowance.getName());
             }
             boolean isRetentionByDays = allowance.getName().equals("Retention by Days");
-            vAllowanceCurrency.setText(isRetentionByDays ? baseCurrency : allowance.getCurrency());
-            vAllowanceMount.setText(isRetentionByDays ? String.format("%d", (int) (allowance.getAmount() * 30 / baseSalary)) : String.format("%.2f", Math.abs(allowance.getAmount())));
-            vAllowanceNote.setText(allowance.getNote());
+            binding.currencyAuto.setText(isRetentionByDays ? baseCurrency : allowance.getCurrency());
+            binding.mountEdit.setText(isRetentionByDays ? String.format("%d", (int) (allowance.getAmount() * 30 / baseSalary)) : String.format("%.2f", Math.abs(allowance.getAmount())));
+            binding.noteEdit.setText(allowance.getNote());
         }
         ArrayAdapter<String> allowancesAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, allowancesList);
-        vAllowanceType.setAdapter(allowancesAdapter);
+        binding.typeAuto.setAdapter(allowancesAdapter);
 
         ArrayList<String> currencies = new ArrayList<>();
         currencies.add("EGP");
         currencies.add("SAR");
         ArrayAdapter<String> currenciesAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, currencies);
-        vAllowanceCurrency.setAdapter(currenciesAdapter);
+        binding.currencyAuto.setAdapter(currenciesAdapter);
     }
 
-    private void initialize(View view) {
-        vAllowanceMount = view.findViewById(R.id.TextInput_AllowanceMount);
-        vAllowanceName = view.findViewById(R.id.TextInput_AllowanceName);
-        vAllowanceNote = view.findViewById(R.id.TextInput_AllowanceNote);
-        vAllowanceType = view.findViewById(R.id.TextInput_AllowanceType);
-        vAllowanceCurrency = view.findViewById(R.id.TextInput_AllowanceCurrency);
-        vAllowanceMountLayout = view.findViewById(R.id.textInputLayout_AllowanceMount);
-        vAllowanceNameLayout = view.findViewById(R.id.textInputLayout_AllowanceName);
-        vAllowanceNoteLayout = view.findViewById(R.id.textInputLayout_AllowanceNote);
-        vAllowanceTypeLayout = view.findViewById(R.id.textInputLayout_AllowanceType);
-        vAllowanceCurrencyLayout = view.findViewById(R.id.textInputLayout_AllowanceCurrency);
+    private void initialize() {
         views = new ArrayList<>();
-        views.add(new Pair<>(vAllowanceTypeLayout, vAllowanceType));
-        views.add(new Pair<>(vAllowanceMountLayout, vAllowanceMount));
-        views.add(new Pair<>(vAllowanceCurrencyLayout, vAllowanceCurrency));
-        views.add(new Pair<>(vAllowanceNoteLayout, vAllowanceNote));
-        vDone = view.findViewById(R.id.button_Done);
+        views.add(new Pair<>(binding.typeLayout, binding.typeAuto));
+        views.add(new Pair<>(binding.mountLayout, binding.mountEdit));
+        views.add(new Pair<>(binding.currencyLayout, binding.currencyAuto));
+        views.add(new Pair<>(binding.noteLayout, binding.noteEdit));
     }
 
     private boolean generateError() {
@@ -179,8 +170,8 @@ public class AllowanceInfoDialog extends DialogFragment {
                 return true;
             }
         }
-        boolean otherNoName = vAllowanceName.getText().toString().trim().isEmpty() && vAllowanceType.getText().toString().equals("Other");
-        vAllowanceNameLayout.setError(otherNoName ? "Missing" : null);
+        boolean otherNoName = binding.nameEdit.getText().toString().trim().isEmpty() && binding.typeAuto.getText().toString().equals("Other");
+        binding.nameLayout.setError(otherNoName ? "Missing" : null);
         return otherNoName;
     }
 
@@ -200,12 +191,12 @@ public class AllowanceInfoDialog extends DialogFragment {
             if (validateInput()) {
                 Bundle result = new Bundle();
                 Allowance allowance = new Allowance();
-                boolean isRetentionByDays = vAllowanceType.getText().toString().equals("Retention by Days");
-                boolean isOther = vAllowanceType.getText().toString().equals("Other");
-                allowance.setName(isOther ? vAllowanceName.getText().toString() : vAllowanceType.getText().toString().trim());
-                allowance.setAmount(Double.parseDouble(vAllowanceMount.getText().toString()));
-                allowance.setNote(vAllowanceNote.getText().toString());
-                allowance.setCurrency(isRetentionByDays ? baseCurrency : vAllowanceCurrency.getText().toString());
+                boolean isRetentionByDays = binding.typeAuto.getText().toString().equals("Retention by Days");
+                boolean isOther = binding.typeAuto.getText().toString().equals("Other");
+                allowance.setName(isOther ? binding.nameEdit.getText().toString() : binding.typeAuto.getText().toString().trim());
+                allowance.setAmount(Double.parseDouble(binding.mountEdit.getText().toString()));
+                allowance.setNote(binding.noteEdit.getText().toString());
+                allowance.setCurrency(isRetentionByDays ? baseCurrency : binding.currencyAuto.getText().toString());
                 if (isProject) {
                     result.putSerializable("allowance", allowance);
                     result.putInt("position", position);
@@ -219,13 +210,13 @@ public class AllowanceInfoDialog extends DialogFragment {
                     db.collection("employees").document(EmployeeID).get().addOnSuccessListener(value -> {
                         if (!value.exists()) return;
                         Employee employee = value.toObject(Employee.class);
-                        if (vAllowanceType.getText().toString().equals("Retention by Days") || vAllowanceType.getText().toString().equals("Retention by Amount")) {
+                        if (binding.typeAuto.getText().toString().equals("Retention by Days") || binding.typeAuto.getText().toString().equals("Retention by Amount")) {
                             allowance.setType(allowancesEnum.RETENTION.ordinal());
-                            if (vAllowanceType.getText().toString().equals("Retention by Days")) {
+                            if (binding.typeAuto.getText().toString().equals("Retention by Days")) {
                                 allowance.setAmount(allowance.getAmount() * (employee.getSalary() / 30.0));
                             }
                         } else {
-                            allowance.setType(allowancesEnum.valueOf(vAllowanceType.getText().toString().toUpperCase(Locale.ROOT)).ordinal());
+                            allowance.setType(allowancesEnum.valueOf(binding.typeAuto.getText().toString().toUpperCase(Locale.ROOT)).ordinal());
                         }
                         result.putSerializable("allowance", allowance);
                         result.putInt("position", position);
@@ -254,7 +245,7 @@ public class AllowanceInfoDialog extends DialogFragment {
 
         @Override
         public void afterTextChanged(Editable editable) {
-            hideError(vAllowanceNameLayout);
+            hideError(binding.nameLayout);
         }
     };
     private TextWatcher twMount = new TextWatcher() {
@@ -270,16 +261,16 @@ public class AllowanceInfoDialog extends DialogFragment {
 
         @Override
         public void afterTextChanged(Editable editable) {
-            if (!vAllowanceMount.getText().toString().trim().isEmpty()) {
-                if (vAllowanceMount.getText().toString().equals(".") || Double.parseDouble(vAllowanceMount.getText().toString().trim()) == 0)
-                    vAllowanceMountLayout.setError("Invalid Value");
+            if (!binding.mountEdit.getText().toString().trim().isEmpty()) {
+                if (binding.mountEdit.getText().toString().equals(".") || Double.parseDouble(binding.mountEdit.getText().toString().trim()) == 0)
+                    binding.mountLayout.setError("Invalid Value");
                 else {
-                    vAllowanceMountLayout.setError(null);
-                    vAllowanceMountLayout.setErrorEnabled(false);
+                    binding.mountLayout.setError(null);
+                    binding.mountLayout.setErrorEnabled(false);
                 }
             } else {
-                vAllowanceMountLayout.setError(null);
-                vAllowanceMountLayout.setErrorEnabled(false);
+                binding.mountLayout.setError(null);
+                binding.mountLayout.setErrorEnabled(false);
             }
         }
     };
@@ -297,7 +288,7 @@ public class AllowanceInfoDialog extends DialogFragment {
         @Override
         public void afterTextChanged(Editable editable) {
 
-            hideError(vAllowanceNoteLayout);
+            hideError(binding.noteLayout);
         }
     };
     private TextWatcher twType = new TextWatcher() {
@@ -313,12 +304,13 @@ public class AllowanceInfoDialog extends DialogFragment {
 
         @Override
         public void afterTextChanged(Editable editable) {
-            boolean isOther = vAllowanceType.getText().toString().equals("Other");
-            boolean isRetentionByDays = vAllowanceType.getText().toString().equals("Retention by Days");
-            vAllowanceMountLayout.setSuffixText(isRetentionByDays ? "Day(s)" : vAllowanceCurrency.getText().toString());
-            vAllowanceNameLayout.setVisibility(isOther ? View.VISIBLE : View.GONE);
-            vAllowanceCurrencyLayout.setVisibility(isRetentionByDays ? View.GONE : View.VISIBLE);
-            vAllowanceName.setText("");
+            boolean isOther = binding.typeAuto.getText().toString().equals("Other");
+            boolean isRetentionByDays = binding.typeAuto.getText().toString().equals("Retention by Days");
+            binding.mountLayout.setSuffixText(isRetentionByDays ? "Day(s)" : binding.currencyAuto.getText().toString());
+            binding.nameLayout.setVisibility(isOther ? View.VISIBLE : View.GONE);
+            binding.currencyLayout.setVisibility(isRetentionByDays ? View.GONE : View.VISIBLE);
+            binding.nameEdit.setText("");
+            hideError(binding.typeLayout);
         }
     };
     private TextWatcher twCurrency = new TextWatcher() {
@@ -334,7 +326,7 @@ public class AllowanceInfoDialog extends DialogFragment {
 
         @Override
         public void afterTextChanged(Editable editable) {
-            hideError(vAllowanceCurrencyLayout);
+            hideError(binding.currencyLayout);
         }
     };
 }

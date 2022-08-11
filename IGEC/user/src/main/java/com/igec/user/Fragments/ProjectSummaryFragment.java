@@ -13,29 +13,24 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.igec.user.Adapters.EmployeeAdapter;
 import com.igec.user.Dialogs.AddAllowanceDialog;
-import com.igec.user.R;
 import com.igec.common.firebase.Allowance;
 import com.igec.common.firebase.Employee;
 import com.igec.common.firebase.EmployeeOverview;
-import com.igec.common.firebase.EmployeesGrossSalary;
 import com.igec.common.firebase.Project;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.igec.user.R;
+import com.igec.user.databinding.FragmentProjectSummaryBinding;
 
 import java.util.ArrayList;
 
 public class ProjectSummaryFragment extends Fragment {
 
-    private RecyclerView recyclerView;
     private EmployeeAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
     private ArrayList<EmployeeOverview> employeeOverviews;
     private Employee manager;
     private Project project;
     private ArrayList<Allowance> projectAllowance;
-    private TextInputEditText vProjectName, vProjectReference;
-    private MaterialButton vShowProjectAllowances;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     public static ProjectSummaryFragment newInstance(Employee manager) {
@@ -45,32 +40,36 @@ public class ProjectSummaryFragment extends Fragment {
         fragment.setArguments(args);
         return fragment;
     }
-//    public ProjectSummaryFragment(Employee manager) {
-//        this.manager = manager;
-//    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
     }
 
+    private FragmentProjectSummaryBinding binding;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_project_summary, container, false);
+        binding = FragmentProjectSummaryBinding.inflate(inflater, container, false);
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        binding = null;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        initialize(view);
-
+        initialize();
     }
 
 
     // Functions
-    private void initialize(View view) {
+    private void initialize() {
         manager = (Employee) getArguments().getSerializable("manager");
         db.collection("projects").document(manager.getProjectID()).addSnapshotListener((documentSnapshot, error) -> {
             if (!documentSnapshot.exists())
@@ -87,19 +86,15 @@ public class ProjectSummaryFragment extends Fragment {
             }
             projectAllowance = new ArrayList<>();
             projectAllowance.addAll(project.getAllowancesList());
-            vProjectName = view.findViewById(R.id.TextInput_ProjectName);
-            vProjectReference = view.findViewById(R.id.TextInput_ProjectReference);
-            vShowProjectAllowances = view.findViewById(R.id.Button_ShowProjectAllowances);
-            recyclerView = view.findViewById(R.id.recyclerview);
-            recyclerView.setHasFixedSize(true);
+            binding.recyclerView.setHasFixedSize(true);
             layoutManager = new LinearLayoutManager(getActivity());
             adapter = new EmployeeAdapter(employeeOverviews, project);
-            recyclerView.setLayoutManager(layoutManager);
-            recyclerView.setAdapter(adapter);
-            vProjectName.setText(project.getName());
-            vProjectReference.setText(project.getReference());
+            binding.recyclerView.setLayoutManager(layoutManager);
+            binding.recyclerView.setAdapter(adapter);
+            binding.projectNameEdit.setText(project.getName());
+            binding.projectReferenceEdit.setText(project.getReference());
             adapter.setOnItemClickListener(itemClickListener);
-            vShowProjectAllowances.setOnClickListener(oclShowProjectAllowances);
+            binding.showProjectAllowancesButton.setOnClickListener(oclShowProjectAllowances);
         });
 
     }

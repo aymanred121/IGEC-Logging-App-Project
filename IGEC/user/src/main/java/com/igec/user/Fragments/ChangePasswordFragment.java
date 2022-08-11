@@ -25,6 +25,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.igec.user.databinding.FragmentChangePasswordBinding;
 
 import java.util.ArrayList;
 import java.util.Base64;
@@ -32,9 +33,6 @@ import java.util.Base64;
 public class ChangePasswordFragment extends Fragment {
 
     //Views
-    private TextInputEditText vNewPassword, vConfirmPassword;
-    private TextInputLayout vConfirmPasswordLayout, vNewPasswordLayout;
-    private MaterialButton vChangePassword;
     private ArrayList<Pair<TextInputLayout, TextInputEditText>> views;
     //Vars
     private Employee user;
@@ -47,44 +45,38 @@ public class ChangePasswordFragment extends Fragment {
         fragment.setArguments(args);
         return fragment;
     }
-
-//    public ChangePasswordFragment(Employee user) {
-//        this.user = user;
-//    }
-
+    private FragmentChangePasswordBinding binding;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_change_password, container, false);
+        binding = FragmentChangePasswordBinding.inflate(inflater,container,false);
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        binding = null;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        initialize(view);
-        vChangePassword.setOnClickListener(oclChangePassword);
-        vConfirmPassword.addTextChangedListener(twConfirmPassword);
-        vNewPassword.addTextChangedListener(twNewPassword);
+        initialize();
+        binding.changePasswordButton.setOnClickListener(oclChangePassword);
+        binding.confirmPasswordEdit.addTextChangedListener(twConfirmPassword);
+        binding.newPasswordEdit.addTextChangedListener(twNewPassword);
     }
 
-    private void initialize(View v) {
+    private void initialize() {
         user = (Employee) getArguments().getSerializable("user");
-        vNewPassword = v.findViewById(R.id.TextInput_NewPassword);
-        vConfirmPassword = v.findViewById(R.id.TextInput_ConfirmPassword);
-        vChangePassword = v.findViewById(R.id.Button_ChangePassword);
-
-
-        vConfirmPasswordLayout = v.findViewById(R.id.textInputLayout_ConfirmPassword);
-        vNewPasswordLayout = v.findViewById(R.id.textInputLayout_NewPassword);
-
         views = new ArrayList<>();
-        views.add(new Pair<>(vNewPasswordLayout, vNewPassword));
-        views.add(new Pair<>(vConfirmPasswordLayout, vConfirmPassword));
+        views.add(new Pair<>(binding.newPasswordLayout, binding.newPasswordEdit));
+        views.add(new Pair<>(binding.confirmPasswordLayout, binding.confirmPasswordEdit));
     }
 
     private boolean validateInput() {
-
         return !generateError();
     }
 
@@ -107,13 +99,13 @@ public class ChangePasswordFragment extends Fragment {
 
     }
     private void clearInput() {
-        vNewPassword.setText(null);
-        vConfirmPassword.setText(null);
+        binding.newPasswordEdit.setText(null);
+        binding.confirmPasswordEdit.setText(null);
     }
 
     private String encryptedPassword() {
         try {
-            return Base64.getEncoder().encodeToString(encrypt(vNewPassword.getText().toString()));
+            return Base64.getEncoder().encodeToString(encrypt(binding.newPasswordEdit.getText().toString()));
         } catch (Exception e) {
             Log.e("error in encryption", e.toString());
             return null;
@@ -131,7 +123,7 @@ public class ChangePasswordFragment extends Fragment {
                     .setNegativeButton(getString(R.string.cancel), (dialogInterface, i) -> {
                     })
                     .setPositiveButton(getString(R.string.accept), (dialogInterface, i) -> {
-                        user.setPassword(vNewPassword.getText().toString());
+                        user.setPassword(binding.newPasswordEdit.getText().toString());
                         db.collection("employees").document(user.getId()).update("password", encryptedPassword()).addOnSuccessListener(unused -> {
                             Toast.makeText(getActivity(), "Password Changed Successfully", Toast.LENGTH_SHORT).show();
                             clearInput();
@@ -152,20 +144,20 @@ public class ChangePasswordFragment extends Fragment {
 
         @Override
         public void afterTextChanged(Editable s) {
-            if (!vConfirmPassword.getText().toString().trim().isEmpty()) {
-                if (vConfirmPasswordLayout.getError() == "Missing") {
-                    vConfirmPasswordLayout.setError(null);
+            if (!binding.confirmPasswordEdit.getText().toString().trim().isEmpty()) {
+                if (binding.confirmPasswordLayout.getError() == "Missing") {
+                    binding.confirmPasswordLayout.setError(null);
                 }
-                boolean bothAreNotEqualWithTrim = !vNewPassword.getText().toString().trim().equals(vConfirmPassword.getText().toString().trim());
+                boolean bothAreNotEqualWithTrim = !binding.newPasswordEdit.getText().toString().trim().equals(binding.confirmPasswordEdit.getText().toString().trim());
                 if (bothAreNotEqualWithTrim)
-                    vConfirmPasswordLayout.setError("not Matched");
+                    binding.confirmPasswordLayout.setError("not Matched");
                 else
-                    vConfirmPasswordLayout.setError(null);
+                    binding.confirmPasswordLayout.setError(null);
             } else {
-                vConfirmPasswordLayout.setError(null);
+                binding.confirmPasswordLayout.setError(null);
             }
 
-            hideError(vConfirmPasswordLayout);
+            hideError(binding.confirmPasswordLayout);
         }
 
     };
@@ -180,18 +172,18 @@ public class ChangePasswordFragment extends Fragment {
 
         @Override
         public void afterTextChanged(Editable s) {
-            if (vNewPasswordLayout.getError() == "Missing" && !vNewPassword.getText().toString().trim().isEmpty()) {
-                vNewPasswordLayout.setError(null);
+            if (binding.newPasswordLayout.getError() == "Missing" && !binding.newPasswordEdit.getText().toString().trim().isEmpty()) {
+                binding.newPasswordLayout.setError(null);
             }
 
-            if (!vConfirmPassword.getText().toString().trim().isEmpty() && !vNewPassword.getText().toString().trim().isEmpty()) {
-                boolean bothAreNotEqualWithTrim = !vNewPassword.getText().toString().trim().equals(vConfirmPassword.getText().toString().trim());
+            if (!binding.confirmPasswordEdit.getText().toString().trim().isEmpty() && !binding.newPasswordEdit.getText().toString().trim().isEmpty()) {
+                boolean bothAreNotEqualWithTrim = !binding.newPasswordEdit.getText().toString().trim().equals(binding.confirmPasswordEdit.getText().toString().trim());
                 if (bothAreNotEqualWithTrim)
-                    vConfirmPasswordLayout.setError("not Matched");
+                    binding.confirmPasswordLayout.setError("not Matched");
                 else
-                    vConfirmPasswordLayout.setError(null);
+                    binding.confirmPasswordLayout.setError(null);
             }
-            hideError(vNewPasswordLayout);
+            hideError(binding.newPasswordLayout);
         }
     };
 }

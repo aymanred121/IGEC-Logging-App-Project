@@ -16,7 +16,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.igec.user.Adapters.SupplementsAdapter;
@@ -26,37 +25,27 @@ import com.igec.common.firebase.Machine;
 import com.igec.common.firebase.Supplement;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.progressindicator.CircularProgressIndicator;
-import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.igec.user.databinding.DialogAccessoriesBinding;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-
-import de.hdodenhof.circleimageview.CircleImageView;
-
-public class SupplementsDialog extends DialogFragment {
+public class AccessoriesDialog extends DialogFragment {
 
 
     private Machine machine;
     private Employee employee;
     private ArrayList<Supplement> supplements;
-    private MaterialButton vDone;
     private boolean isItAUser;
     private Supplement machineCover = new Supplement();
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     //Views
-    private CircularProgressIndicator vCircularProgressIndicator;
-    private TextInputEditText vComment;
-    private CircleImageView vMachineCover;
     private Animation show, hide;
-    private RecyclerView recyclerView;
     private SupplementsAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
 
@@ -82,49 +71,52 @@ public class SupplementsDialog extends DialogFragment {
         setStyle(DialogFragment.STYLE_NORMAL, R.style.FullscreenDialogTheme);
     }
 
+    private DialogAccessoriesBinding binding;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.dialog_supplements, container, false);
+        binding = DialogAccessoriesBinding.inflate(inflater, container, false);
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        binding = null;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        initialize(view);
-        vDone.setOnClickListener(oclDone);
+        initialize();
+        binding.doneFab.setOnClickListener(oclDone);
     }
 
-    public SupplementsDialog(boolean isItAUser, Machine machine, Employee employee) {
+    public AccessoriesDialog(boolean isItAUser, Machine machine, Employee employee) {
         this.isItAUser = isItAUser;
         this.machine = machine;
         this.employee = employee;
     }
 
     // Functions
-    private void initialize(View view) {
+    private void initialize() {
         supplements = new ArrayList<>();
-        vMachineCover = view.findViewById(R.id.ImageView_MachineIMG);
         show = AnimationUtils.loadAnimation(getActivity(), R.anim.show);
         hide = AnimationUtils.loadAnimation(getActivity(), R.anim.hide);
-        vCircularProgressIndicator = view.findViewById(R.id.progress_bar);
-        vComment = view.findViewById(R.id.TextInput_Comment);
-        vDone = view.findViewById(R.id.Button_Done);
-        recyclerView = view.findViewById(R.id.recyclerview);
-        recyclerView.setHasFixedSize(true);
-        layoutManager = new GridLayoutManager(getActivity(),3);
+        binding.recyclerView.setHasFixedSize(true);
+        layoutManager = new GridLayoutManager(getActivity(), 3);
         adapter = new SupplementsAdapter(supplements);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(adapter);
+        binding.recyclerView.setLayoutManager(layoutManager);
+        binding.recyclerView.setAdapter(adapter);
         if (machine.getSupplementsNames().size() != 0) {
             getAllSupplements();
-            vCircularProgressIndicator.setVisibility(View.VISIBLE);
-            vCircularProgressIndicator.startAnimation(show);
-            recyclerView.startAnimation(hide);
+            binding.progressBar.setVisibility(View.VISIBLE);
+            binding.progressBar.startAnimation(show);
+            binding.recyclerView.startAnimation(hide);
         } else {
-            vCircularProgressIndicator.startAnimation(hide);
-            recyclerView.startAnimation(show);
+            binding.progressBar.startAnimation(hide);
+            binding.recyclerView.startAnimation(show);
         }
     }
 
@@ -135,7 +127,7 @@ public class SupplementsDialog extends DialogFragment {
             final File localFile = File.createTempFile(cover, "jpg");
             ref.getFile(localFile).addOnSuccessListener(taskSnapshot -> {
                 Bitmap bitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
-                vMachineCover.setImageBitmap(bitmap);
+                binding.coverImageView.setImageBitmap(bitmap);
                 machineCover.setPhoto(bitmap);
                 machineCover.setName("cover");
             }).addOnFailureListener(e -> {
@@ -144,6 +136,7 @@ public class SupplementsDialog extends DialogFragment {
             e.printStackTrace();
         }
     }
+
     private void getAllSupplements() {
         StorageReference ref;
         final int[] progress = new int[1];
@@ -159,9 +152,9 @@ public class SupplementsDialog extends DialogFragment {
                         progress[0]++;
                         if (progress[0] == machine.getSupplementsNames().size()) {
                             getMachineCover();
-                            vCircularProgressIndicator.startAnimation(hide);
-                            recyclerView.startAnimation(show);
-                            vDone.setEnabled(true);
+                            binding.progressBar.startAnimation(hide);
+                            binding.recyclerView.startAnimation(show);
+                            binding.doneFab.setEnabled(true);
                             adapter.notifyDataSetChanged();
                         }
                     }
@@ -179,7 +172,7 @@ public class SupplementsDialog extends DialogFragment {
 
     private final View.OnClickListener oclDone = v -> {
         Bundle bundle = new Bundle();
-        bundle.putString("supplementState", vComment.getText().toString());
+        bundle.putString("supplementState", binding.commentEdit.getText().toString());
         bundle.putBoolean("isItAUser", isItAUser);
         getParentFragmentManager().setFragmentResult("supplements", bundle);
         dismiss();

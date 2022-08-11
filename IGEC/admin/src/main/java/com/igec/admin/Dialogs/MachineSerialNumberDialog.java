@@ -15,6 +15,7 @@ import androidx.fragment.app.DialogFragment;
 import com.budiyev.android.codescanner.CodeScanner;
 import com.budiyev.android.codescanner.CodeScannerView;
 import com.igec.admin.R;
+import com.igec.admin.databinding.DialogMachineSerialCodeBinding;
 
 public class MachineSerialNumberDialog extends DialogFragment {
     //Views
@@ -40,21 +41,26 @@ public class MachineSerialNumberDialog extends DialogFragment {
         super.onCreate(savedInstanceState);
         setStyle(DialogFragment.STYLE_NORMAL, R.style.FullscreenDialogTheme);
     }
+    private DialogMachineSerialCodeBinding binding;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View v =  inflater.inflate(R.layout.dialog_machine_serial_code, container, false);
-        CodeScannerView scannerView = v.findViewById(R.id.scanner_view);
-        mCodeScanner = new CodeScanner(getActivity(), scannerView);
+        binding =  DialogMachineSerialCodeBinding.inflate(inflater, container, false);
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        mCodeScanner = new CodeScanner(getActivity(), binding.scannerView);
         mCodeScanner.setDecodeCallback(result -> getActivity().runOnUiThread(() -> {
             Bundle res = new Bundle();
             res.putString("SerialNumber", result.getText());
             getParentFragmentManager().setFragmentResult("machine", res);
             dismiss();
         }));
-        scannerView.setOnClickListener(view -> mCodeScanner.startPreview());
-        return v;
+        binding.scannerView.setOnClickListener(v -> mCodeScanner.startPreview());
     }
 
     @Override

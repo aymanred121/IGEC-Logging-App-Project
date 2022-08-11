@@ -18,10 +18,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.igec.common.Adapters.VacationAdapter;
+import com.igec.common.databinding.FragmentVacationRequestsBinding;
 import com.igec.common.firebase.Employee;
 import com.igec.common.firebase.VacationRequest;
 import com.igec.common.Dialogs.VacationDialog;
-import com.igec.common.R;
 
 import java.util.ArrayList;
 
@@ -31,7 +31,6 @@ public class VacationRequestsFragment extends Fragment {
     private Employee employee;
     private int requestedDays;
     private AlertDialog dialog;
-    private RecyclerView recyclerView;
     private VacationAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
     private ArrayList<VacationRequest> vacationRequests;
@@ -49,31 +48,38 @@ public class VacationRequestsFragment extends Fragment {
         return fragment;
     }
 
+    private FragmentVacationRequestsBinding binding;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_vacation_requests, container, false);
+        binding = FragmentVacationRequestsBinding.inflate(inflater, container, false);
+        return binding.getRoot();
+    }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        binding = null;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        initialize(view);
+        initialize();
         adapter.setOnItemClickListener(itclVacationAdapter);
 
     }
 
     // Functions
-    private void initialize(View view) {
+    private void initialize() {
         currManager = (Employee) getArguments().getSerializable("currManager");
         vacationRequests = new ArrayList<>();
-        recyclerView = view.findViewById(R.id.recyclerview);
-        recyclerView.setHasFixedSize(true);
+        binding.recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
         adapter = new VacationAdapter(vacationRequests);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(adapter);
+        binding.recyclerView.setLayoutManager(layoutManager);
+        binding.recyclerView.setAdapter(adapter);
         loadVacations();
 
 

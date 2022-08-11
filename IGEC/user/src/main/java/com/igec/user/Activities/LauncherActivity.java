@@ -1,5 +1,9 @@
 package com.igec.user.Activities;
 
+import static com.igec.common.CONSTANTS.ID;
+import static com.igec.common.CONSTANTS.IGEC;
+import static com.igec.common.CONSTANTS.LOGGED;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -17,9 +21,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 public class LauncherActivity extends Activity {
     private boolean logged = false;
-    public static final String IGEC = "IGEC";
-    public static final String ID = "ID";
-    public static final String LOGGED = "LOGGED";
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     @Override

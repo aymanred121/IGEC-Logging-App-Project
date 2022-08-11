@@ -106,7 +106,7 @@ public class AllowanceAdapter extends RecyclerView.Adapter<AllowanceAdapter.Allo
             vName = itemView.findViewById(R.id.TextView_ReasonFor);
             vAmount = itemView.findViewById(R.id.TextView_MountOf);
             vNote = itemView.findViewById(R.id.TextView_Note);
-            vDelete = itemView.findViewById(R.id.button_delete);
+            vDelete = itemView.findViewById(R.id.delete_button);
             vDelete.setVisibility(View.GONE);
 
             if (canRemove) {

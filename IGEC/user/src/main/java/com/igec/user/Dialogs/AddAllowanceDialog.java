@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,25 +24,18 @@ import com.igec.common.firebase.EmployeeOverview;
 import com.igec.common.firebase.EmployeesGrossSalary;
 import com.igec.common.firebase.Project;
 import com.igec.common.utilities.allowancesEnum;
-import com.google.android.gms.common.util.NumberUtils;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
-import com.google.zxing.common.StringUtils;
+import com.igec.user.databinding.DialogAddAllowanceBinding;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.stream.Collectors;
 
 public class AddAllowanceDialog extends DialogFragment {
-    private FloatingActionButton vAddAllowance, vDone;
     private ArrayList<Allowance> allowances;
     private AllowanceAdapter adapter;
-    private RecyclerView recyclerView;
     private RecyclerView.LayoutManager layoutManager;
     private final boolean canGivePenalty;
     private final boolean canRemove;
@@ -116,32 +108,38 @@ public class AddAllowanceDialog extends DialogFragment {
         });
     }
 
+    private DialogAddAllowanceBinding binding;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.dialog_add_allowance, container, false);
+        binding = DialogAddAllowanceBinding.inflate(inflater, container, false);
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        binding = null;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        initialize(view);
-        vAddAllowance.setOnClickListener(oclAddAllowance);
-        vDone.setOnClickListener(oclDone);
+        initialize();
+        binding.addFab.setOnClickListener(oclAddAllowance);
+        binding.doneFab.setOnClickListener(oclDone);
         adapter.setOnItemClickListener(oclItemClickListener);
     }
 
     @SuppressLint("DefaultLocale")
-    private void initialize(View view) {
-        vAddAllowance = view.findViewById(R.id.Button_AddAllowance);
-        vDone = view.findViewById(R.id.Button_Done);
-        recyclerView = view.findViewById(R.id.recyclerview);
-        recyclerView.setHasFixedSize(true);
+    private void initialize() {
+        binding.recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
-        recyclerView.setLayoutManager(layoutManager);
+        binding.recyclerView.setLayoutManager(layoutManager);
         adapter = new AllowanceAdapter(canRemove);
-        recyclerView.setAdapter(adapter);
+        binding.recyclerView.setAdapter(adapter);
         final Calendar today = Calendar.getInstance();
         year = String.valueOf(today.get(Calendar.YEAR));
         month = String.format("%02d", today.get(Calendar.MONTH) + 1);
@@ -164,8 +162,8 @@ public class AddAllowanceDialog extends DialogFragment {
                     return;
                 //allowances.clear();
                 EmployeesGrossSalary employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
-                for (Allowance allowance :employeesGrossSalary.getAllTypes()) {
-                    if(allowance.getType() == allowancesEnum.NETSALARY.ordinal()) {
+                for (Allowance allowance : employeesGrossSalary.getAllTypes()) {
+                    if (allowance.getType() == allowancesEnum.NETSALARY.ordinal()) {
                         currency = allowance.getCurrency();
                         baseSalary = allowance.getAmount();
                     }
@@ -286,7 +284,7 @@ public class AddAllowanceDialog extends DialogFragment {
         @Override
         public void onItemClick(int position) {
 
-            AllowanceInfoDialog allowanceInfoDialog = new AllowanceInfoDialog(position, allowances.get(position), canGivePenalty, isProject, (employee != null) ? employee.getId() : null, baseSalary,currency);
+            AllowanceInfoDialog allowanceInfoDialog = new AllowanceInfoDialog(position, allowances.get(position), canGivePenalty, isProject, (employee != null) ? employee.getId() : null, baseSalary, currency);
             allowanceInfoDialog.show(getParentFragmentManager(), "");
         }
 

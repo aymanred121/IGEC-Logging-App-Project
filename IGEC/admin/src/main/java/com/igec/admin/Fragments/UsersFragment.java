@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.igec.admin.Adapters.EmployeeAdapter;
 import com.igec.admin.Dialogs.UserFragmentDialog;
 import com.igec.admin.R;
+import com.igec.admin.databinding.FragmentUsersBinding;
 import com.igec.common.firebase.Employee;
 import com.igec.common.firebase.EmployeeOverview;
 import com.google.firebase.firestore.DocumentReference;
@@ -32,25 +33,35 @@ public class UsersFragment extends Fragment {
     private DocumentReference employeeOverviewRef = db.collection("EmployeeOverview").document("emp");
     private ArrayList<EmployeeOverview> employees = new ArrayList<>();
     private EmployeeAdapter adapter;
-    private RecyclerView recyclerView;
     private RecyclerView.LayoutManager layoutManager;
 
+
+    private FragmentUsersBinding binding;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_users,container,false);
-        initialize(view);
-
-        adapter.setOnItemClickListener(itclEmployeeAdapter);
-        return view;
+        binding = FragmentUsersBinding.inflate(inflater,container,false);
+        return binding.getRoot();
     }
-    void initialize(View view){
-        recyclerView = view.findViewById(R.id.recyclerview);
-        recyclerView.setHasFixedSize(true);
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        binding = null;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        initialize();
+        adapter.setOnItemClickListener(itclEmployeeAdapter);
+    }
+
+    void initialize(){
+        binding.recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
         adapter = new EmployeeAdapter(employees,false);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(adapter);
+        binding.recyclerView.setLayoutManager(layoutManager);
+        binding.recyclerView.setAdapter(adapter);
         getEmployees();
 
     }

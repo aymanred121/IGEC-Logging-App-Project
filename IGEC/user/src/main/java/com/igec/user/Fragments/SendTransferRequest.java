@@ -10,7 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -25,10 +24,9 @@ import com.igec.common.firebase.Project;
 import com.igec.common.firebase.TransferRequests;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.igec.user.databinding.FragmentSendTransferRequestBinding;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -40,11 +38,7 @@ public class SendTransferRequest extends Fragment {
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private final ArrayList<Project> projects = new ArrayList<>();
     private Project thisProject, chosenProject;
-    private AutoCompleteTextView vProjectsReference, vEmployeesId;
-    private TextInputEditText vTransferNote;
-    private TextInputLayout vTransferNoteLayout, vProjectReferenceLayout, vEmployeesIdLayout;
     private ArrayList<Pair<TextInputLayout, EditText>> views;
-    private MaterialButton vSend;
     private ArrayList<String> employeesId = new ArrayList<>();
     private ArrayAdapter<String> idAdapter;
     private EmployeeOverview selectedEmployee;
@@ -59,42 +53,39 @@ public class SendTransferRequest extends Fragment {
         fragment.setArguments(args);
         return fragment;
     }
-//    public SendTransferRequest(Employee manager) {
-//        this.manager = manager;
-//    }
 
+    private FragmentSendTransferRequestBinding binding;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_send_transfer_request, container, false);
+        binding = FragmentSendTransferRequestBinding.inflate(inflater, container, false);
+        return binding.getRoot();
+    }
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        binding = null;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        initialize(view);
-        vProjectsReference.addTextChangedListener(twProjectRef);
-        vEmployeesId.addTextChangedListener(twEmployeeID);
-        vTransferNote.addTextChangedListener(twTransferNote);
-        vSend.setOnClickListener(oclSend);
+        initialize();
+        binding.projectReferencesAuto.addTextChangedListener(twProjectRef);
+        binding.employeeIdAuto.addTextChangedListener(twEmployeeID);
+        binding.noteEdit.addTextChangedListener(twTransferNote);
+        binding.sendButton.setOnClickListener(oclSend);
     }
 
-    private void initialize(View view) {
+    private void initialize() {
         manager = (Employee) getArguments().getSerializable("manager");
-        vSend = view.findViewById(R.id.Button_SendRequest);
-        vTransferNote = view.findViewById(R.id.TextInput_TransferNote);
-        vProjectsReference = view.findViewById(R.id.TextInput_ProjectReferences);
-        vEmployeesId = view.findViewById(R.id.TextInput_EmployeeId);
-        vTransferNoteLayout = view.findViewById(R.id.textInputLayout_TransferNote);
-        vEmployeesIdLayout = view.findViewById(R.id.textInputLayout_EmployeeId);
-        vProjectReferenceLayout = view.findViewById(R.id.textInputLayout_ProjectReferences);
         projectsRef = new ArrayList<>();
         refAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, projectsRef);
         views = new ArrayList<>();
-        views.add(new Pair<>(vProjectReferenceLayout, vProjectsReference));
-        views.add(new Pair<>(vEmployeesIdLayout, vEmployeesId));
-        views.add(new Pair<>(vTransferNoteLayout, vTransferNote));
+        views.add(new Pair<>( binding.projectReferencesLayout,  binding.projectReferencesAuto));
+        views.add(new Pair<>(binding.employeeIdLayout, binding.employeeIdAuto));
+        views.add(new Pair<>(binding.noteLayout, binding.noteEdit));
         idAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, employeesId);
         getProject();
     }
@@ -110,7 +101,7 @@ public class SendTransferRequest extends Fragment {
         request.setOldProjectId(chosenProject.getId());
         request.setOldProjectName(chosenProject.getName());
         request.setOldProjectReference(chosenProject.getReference());
-        request.setNote(vTransferNote.getText().toString());
+        request.setNote(binding.noteEdit.getText().toString());
         return db.collection("TransferRequests").document(transferId).set(request);
     }
 
@@ -125,12 +116,12 @@ public class SendTransferRequest extends Fragment {
 
     private void freezeViews(boolean freeze) {
 
-        vProjectsReference.setText(freeze ? "No Available Projects" : null);
-        vEmployeesId.setText(freeze ? "No Available Employee" : null);
-        vProjectReferenceLayout.setEnabled(!freeze);
-        vTransferNoteLayout.setEnabled(!freeze);
-        vEmployeesIdLayout.setEnabled(!freeze);
-        vSend.setEnabled(!freeze);
+        binding.projectReferencesAuto.setText(freeze ? "No Available Projects" : null);
+        binding.employeeIdAuto.setText(freeze ? "No Available Employee" : null);
+        binding.projectReferencesLayout.setEnabled(!freeze);
+        binding.noteLayout.setEnabled(!freeze);
+        binding.employeeIdLayout.setEnabled(!freeze);
+        binding.sendButton.setEnabled(!freeze);
     }
 
     private void getAllProjects(String projectId) {
@@ -148,8 +139,8 @@ public class SendTransferRequest extends Fragment {
                     projectsRef.add("IGEC" + project.getReference() + " | " + project.getName());
 
             chosenProject = projects.get(0);
-            vProjectsReference.setText(String.format("IGEC%s | %s", chosenProject.getReference(), chosenProject.getName()));
-            vProjectsReference.setAdapter(refAdapter);
+            binding.projectReferencesAuto.setText(String.format("IGEC%s | %s", chosenProject.getReference(), chosenProject.getName()));
+            binding.projectReferencesAuto.setAdapter(refAdapter);
 
 
 //            getAllEmployees();
@@ -181,7 +172,7 @@ public class SendTransferRequest extends Fragment {
     }
 
     private void clearInput() {
-        vTransferNote.setText(null);
+        binding.noteEdit.setText(null);
     }
 
     private final TextWatcher twTransferNote = new TextWatcher() {
@@ -197,9 +188,9 @@ public class SendTransferRequest extends Fragment {
 
         @Override
         public void afterTextChanged(Editable editable) {
-            if (!vTransferNote.getText().toString().trim().isEmpty())
-                vTransferNoteLayout.setError(null);
-            hideError(vTransferNoteLayout);
+            if (!binding.noteEdit.getText().toString().trim().isEmpty())
+                binding.noteLayout.setError(null);
+            hideError(binding.noteLayout);
         }
     };
     private final TextWatcher twEmployeeID = new TextWatcher() {
@@ -216,12 +207,12 @@ public class SendTransferRequest extends Fragment {
         @Override
         public void afterTextChanged(Editable s) {
             for (EmployeeOverview emp : chosenProject.getEmployees()) {
-                if (vEmployeesId.getText().toString().contains(emp.getId())) {
+                if (binding.employeeIdAuto.getText().toString().contains(emp.getId())) {
                     selectedEmployee = emp;
                     break;
                 }
             }
-            vEmployeesIdLayout.setErrorEnabled(vEmployeesId.getText().toString().isEmpty());
+            binding.employeeIdLayout.setErrorEnabled(binding.employeeIdAuto.getText().toString().isEmpty());
         }
     };
     private final TextWatcher twProjectRef = new TextWatcher() {
@@ -238,8 +229,8 @@ public class SendTransferRequest extends Fragment {
         @Override
         public void afterTextChanged(Editable s) {
             for (Project project : projects) {
-                if (vProjectsReference.getText().toString().contains(project.getReference()) &&
-                        vProjectsReference.getText().toString().contains(project.getName())) {
+                if (binding.projectReferencesAuto.getText().toString().contains(project.getReference()) &&
+                        binding.projectReferencesAuto.getText().toString().contains(project.getName())) {
                     chosenProject = project;
 
                     employeesId.clear();
@@ -251,11 +242,12 @@ public class SendTransferRequest extends Fragment {
                     }
                     // no employees can be requested
                     boolean isThereEmployees = employeesId.size() != 0;
-                    vEmployeesId.setText(isThereEmployees ? null : "No Available Employee");
-                    vEmployeesId.setEnabled(isThereEmployees);
-                    vSend.setEnabled(isThereEmployees);
+                    binding.employeeIdAuto.setText(isThereEmployees ? null : "No Available Employee");
+                    binding.employeeIdLayout.setEnabled(isThereEmployees);
+                    binding.sendButton.setEnabled(isThereEmployees);
+                    binding.noteLayout.setEnabled(isThereEmployees);
                     idAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, employeesId);
-                    vEmployeesId.setAdapter(idAdapter);
+                    binding.employeeIdAuto.setAdapter(idAdapter);
                     break;
                 }
             }

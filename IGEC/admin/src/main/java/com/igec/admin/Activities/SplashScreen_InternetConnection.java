@@ -10,16 +10,17 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.igec.admin.R;
 import com.google.android.material.button.MaterialButton;
+import com.igec.admin.databinding.ActivitySplashScreenInternetConnectionBinding;
 
 public class SplashScreen_InternetConnection extends AppCompatActivity {
 
-    private MaterialButton vRetry;
+    private ActivitySplashScreenInternetConnectionBinding binding;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_splash_screen_internet_connection);
-        vRetry = findViewById(R.id.Open_Wifi);
-        vRetry.setOnClickListener(view -> {
+        binding = ActivitySplashScreenInternetConnectionBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+        binding.retryButton.setOnClickListener(view -> {
             isNetworkAvailable();
         });
 

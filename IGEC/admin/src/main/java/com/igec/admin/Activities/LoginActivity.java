@@ -1,6 +1,8 @@
 package com.igec.admin.Activities;
 
 
+import static com.igec.common.CONSTANTS.ID;
+import static com.igec.common.CONSTANTS.IGEC;
 import static com.igec.common.cryptography.RSAUtil.decrypt;
 import static com.igec.common.cryptography.RSAUtil.privateKey;
 
@@ -18,7 +20,6 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Pair;
 import android.view.View;
-import android.widget.Toast;
 
 import com.igec.admin.R;
 import com.google.android.material.button.MaterialButton;
@@ -26,31 +27,28 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.igec.admin.databinding.ActivityLoginBinding;
 import com.igec.common.firebase.Employee;
 
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 
 public class LoginActivity extends AppCompatActivity {
-    public static final String IGEC = "IGEC";
-    public static final String ID = "ID";
-    private TextInputEditText vEmail;
-    private TextInputLayout vEmailLayout, vPasswordLayout;
-    private TextInputEditText vPassword;
-    private MaterialButton vSignIn;
     private ArrayList<Pair<TextInputLayout, TextInputEditText>> views;
 
 
+    private ActivityLoginBinding binding;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        binding = ActivityLoginBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
         isNetworkAvailable();
         initialize();
         // Listeners
-        vEmail.addTextChangedListener(twEmail);
-        vPassword.addTextChangedListener(twPassword);
-        vSignIn.setOnClickListener(clSignIn);
+        binding.emailEdit.addTextChangedListener(twEmail);
+        binding.passwordEdit.addTextChangedListener(twPassword);
+        binding.signInButton.setOnClickListener(clSignIn);
     }
 
     @Override
@@ -61,17 +59,12 @@ public class LoginActivity extends AppCompatActivity {
 
     // Functions
     private void initialize() {
-        vEmail = findViewById(R.id.TextInput_email);
-        vPassword = findViewById(R.id.TextInput_password);
-        vEmailLayout = findViewById(R.id.textInputLayout_Email);
-        vPasswordLayout = findViewById(R.id.textInputLayout_Password);
-        vSignIn = findViewById(R.id.Button_SignIn);
-        vEmail.setText("admin@gmail.com");
-        vPassword.setText("1");
+        binding.emailEdit.setText("admin@gmail.com");
+        binding.passwordEdit.setText("1");
 
         views = new ArrayList<>();
-        views.add(new Pair<>(vEmailLayout, vEmail));
-        views.add(new Pair<>(vPasswordLayout, vPassword));
+        views.add(new Pair<>(binding.emailLayout, binding.emailEdit));
+        views.add(new Pair<>(binding.passwordLayout, binding.passwordEdit));
 
     }
 
@@ -107,14 +100,14 @@ public class LoginActivity extends AppCompatActivity {
     private boolean isPasswordRight(String password) {
         try {
             String decryptedPassword = decrypt(password, privateKey);
-            if (vPassword.getText() != null && !vPassword.getText().toString().equals(decryptedPassword)) {
-                vEmailLayout.setError(" ");
-                vPasswordLayout.setError("Wrong E-mail or password");
+            if (binding.passwordEdit.getText() != null && !binding.passwordEdit.getText().toString().equals(decryptedPassword)) {
+                binding.emailLayout.setError(" ");
+                binding.passwordLayout.setError("Wrong E-mail or password");
                 return false;
             }
         } catch (Exception e) {
-            vEmailLayout.setError(" ");
-            vPasswordLayout.setError("Wrong E-mail or password");
+            binding.emailLayout.setError(" ");
+            binding.passwordLayout.setError("Wrong E-mail or password");
             return false;
         }
         return true;
@@ -146,11 +139,11 @@ public class LoginActivity extends AppCompatActivity {
         @Override
         public void afterTextChanged(Editable s) {
             if (!isValid(s)) {
-                vEmailLayout.setError("Wrong E-mail form");
+                binding.emailLayout.setError("Wrong E-mail form");
             } else {
-                vEmailLayout.setError(null);
+                binding.emailLayout.setError(null);
             }
-            hideError(vEmailLayout);
+            hideError(binding.emailLayout);
         }
     };
     private final TextWatcher twPassword = new TextWatcher() {
@@ -167,8 +160,8 @@ public class LoginActivity extends AppCompatActivity {
         @Override
         public void afterTextChanged(Editable editable) {
             // remove any error when changed
-            vPasswordLayout.setError(null);
-            vPasswordLayout.setErrorEnabled(false);
+            binding.passwordLayout.setError(null);
+            binding.passwordLayout.setErrorEnabled(false);
         }
     };
     private final View.OnClickListener clSignIn = new View.OnClickListener() {
@@ -176,23 +169,23 @@ public class LoginActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             if (!validateInput()) return;
-            vSignIn.setEnabled(false);
+            binding.signInButton.setEnabled(false);
             FirebaseFirestore db = FirebaseFirestore.getInstance();
             db.collection("employees")
-                    .whereEqualTo("email", (vEmail.getText() != null) ? vEmail.getText().toString() : "")
+                    .whereEqualTo("email", (binding.emailEdit.getText() != null) ? binding.emailEdit.getText().toString() : "")
                     .limit(1)
                     .get().addOnSuccessListener(queryDocumentSnapshots -> {
                         if (queryDocumentSnapshots.size() == 0) {
-                            vEmailLayout.setError(" ");
-                            vPasswordLayout.setError("Wrong E-mail or password");
-                            vSignIn.setEnabled(true);
+                            binding.emailLayout.setError(" ");
+                            binding.passwordLayout.setError("Wrong E-mail or password");
+                            binding.signInButton.setEnabled(true);
                             return;
                         }
                         DocumentSnapshot d = queryDocumentSnapshots.getDocuments().get(0);
                         if (d.exists()) {
                             Employee currEmployee = d.toObject(Employee.class);
                             if (currEmployee != null && !isPasswordRight(currEmployee.getPassword())) {
-                                vSignIn.setEnabled(true);
+                                binding.signInButton.setEnabled(true);
                                 return;
                             }
                             Intent intent;

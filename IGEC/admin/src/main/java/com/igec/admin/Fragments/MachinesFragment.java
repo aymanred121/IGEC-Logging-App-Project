@@ -3,6 +3,7 @@ package com.igec.admin.Fragments;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +13,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -20,6 +22,7 @@ import com.igec.admin.Adapters.MachineAdapter;
 import com.igec.admin.Dialogs.MachineFragmentDialog;
 import com.igec.admin.Dialogs.MachineLogDialog;
 import com.igec.admin.R;
+import com.igec.admin.databinding.FragmentMachinesBinding;
 import com.igec.common.firebase.Machine;
 import com.igec.common.firebase.MachineDefectsLog;
 import com.google.firebase.firestore.CollectionReference;
@@ -35,25 +38,35 @@ public class MachinesFragment extends Fragment {
     CollectionReference machineRef = db.collection("machine");
     ArrayList<Machine> machines = new ArrayList();
     MachineAdapter adapter;
-    RecyclerView recyclerView;
     RecyclerView.LayoutManager layoutManager;
+
+    private FragmentMachinesBinding binding;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_machines, container, false);
-        initialize(view);
-        adapter.setOnItemClickListener(itclMachineAdapter);
-        return view;
+        binding = FragmentMachinesBinding.inflate(inflater, container, false);
+        return binding.getRoot();
     }
 
-    private void initialize(View view) {
-        recyclerView = view.findViewById(R.id.recyclerview);
-        recyclerView.setHasFixedSize(true);
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        initialize();
+        adapter.setOnItemClickListener(itclMachineAdapter);
+    }
+
+    private void initialize() {
+        binding.recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
         adapter = new MachineAdapter(machines);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(adapter);
+        binding.recyclerView.setLayoutManager(layoutManager);
+        binding.recyclerView.setAdapter(adapter);
         getMachines();
     }
 
@@ -77,6 +90,7 @@ public class MachinesFragment extends Fragment {
     }
 
     private final MachineAdapter.OnItemClickListener itclMachineAdapter = new MachineAdapter.OnItemClickListener() {
+        @RequiresApi(api = Build.VERSION_CODES.R)
         @Override
         public void onItemClick(int position) {
             MachineFragmentDialog machineFragmentDialog = new MachineFragmentDialog(adapter.getMachinesList().get(position));
@@ -103,7 +117,7 @@ public class MachinesFragment extends Fragment {
                 machineDefectsLogArrayList.addAll(values.toObjects(MachineDefectsLog.class));
                 for (DocumentSnapshot d : values)
                     arrayAdapter.add("Issue Date: " + convertDateToString(d.toObject(MachineDefectsLog.class).getIssueDate().getTime()));
-                    builderSingle.show();
+                builderSingle.show();
             });
             builderSingle.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
                 @Override

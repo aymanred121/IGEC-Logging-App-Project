@@ -4,11 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Dialogs.SupplementsDialog">
+    tools:context=".Dialogs.AccessoriesDialog">
 
 
     <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/ImageView_MachineIMG"
+        android:id="@+id/cover_image_view"
         android:layout_width="150dp"
         android:layout_height="150dp"
         android:layout_marginStart="@dimen/vhigh"
@@ -32,14 +32,14 @@
         android:layout_marginEnd="32dp"
         android:indeterminate="true"
         android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="@+id/recyclerview"
+        app:layout_constraintBottom_toBottomOf="@+id/recycler_view"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/recyclerview" />
+        app:layout_constraintTop_toTopOf="@+id/recycler_view" />
 
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerview"
+        android:id="@+id/recycler_view"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="32dp"
@@ -48,16 +48,16 @@
         android:layout_marginBottom="16dp"
         android:overScrollMode="never"
         android:scrollbars="vertical|horizontal"
-        app:layout_constraintBottom_toTopOf="@+id/textInputLayout_SupplementsNote"
+        app:layout_constraintBottom_toTopOf="@+id/comment_layout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/ImageView_MachineIMG"
+        app:layout_constraintTop_toBottomOf="@id/cover_image_view"
         app:layout_constraintVertical_bias="0.0"
         tools:listitem="@layout/item_supplement" />
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/textInputLayout_SupplementsNote"
+        android:id="@+id/comment_layout"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -68,13 +68,13 @@
         app:counterEnabled="true"
         app:counterMaxLength="250"
         app:helperTextEnabled="true"
-        app:layout_constraintBottom_toTopOf="@+id/Button_Done"
+        app:layout_constraintBottom_toTopOf="@+id/done_fab"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/TextInput_Comment"
+            android:id="@+id/comment_edit"
             android:layout_width="match_parent"
             android:layout_height="100dp"
             android:gravity="top"
@@ -84,7 +84,7 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/Button_Done"
+        android:id="@+id/done_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"

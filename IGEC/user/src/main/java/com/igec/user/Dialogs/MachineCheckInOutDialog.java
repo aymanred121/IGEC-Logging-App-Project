@@ -13,11 +13,10 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 import com.budiyev.android.codescanner.CodeScanner;
-import com.budiyev.android.codescanner.CodeScannerView;
 import com.igec.user.R;
+import com.igec.user.databinding.DialogMachineCheckInOutBinding;
 
 public class MachineCheckInOutDialog extends DialogFragment {
-    //Views
     private CodeScanner mCodeScanner;
     private final boolean isItAUser;
 
@@ -28,15 +27,11 @@ public class MachineCheckInOutDialog extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-
-
         Dialog dialog = super.onCreateDialog(savedInstanceState);
         Window window = dialog.getWindow();
-
         if (window != null) {
             dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING);
         }
-
         return dialog;
     }
 
@@ -45,13 +40,25 @@ public class MachineCheckInOutDialog extends DialogFragment {
         super.onCreate(savedInstanceState);
         setStyle(DialogFragment.STYLE_NORMAL, R.style.FullscreenDialogTheme);
     }
+    private DialogMachineCheckInOutBinding binding;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View v =  inflater.inflate(R.layout.dialog_machine_check_in_out, container, false);
-        CodeScannerView scannerView = v.findViewById(R.id.scanner_view);
-        mCodeScanner = new CodeScanner(getActivity(), scannerView);
+        binding =  DialogMachineCheckInOutBinding.inflate(inflater, container, false);
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        mCodeScanner = new CodeScanner(getActivity(), binding.scannerView);
         mCodeScanner.setDecodeCallback(result -> getActivity().runOnUiThread(() -> {
             Bundle res = new Bundle();
             res.putString("machineID", result.getText());
@@ -59,8 +66,7 @@ public class MachineCheckInOutDialog extends DialogFragment {
             getParentFragmentManager().setFragmentResult("machine", res);
             dismiss();
         }));
-        scannerView.setOnClickListener(view -> mCodeScanner.startPreview());
-        return v;
+        binding.scannerView.setOnClickListener(v -> mCodeScanner.startPreview());
     }
 
     @Override

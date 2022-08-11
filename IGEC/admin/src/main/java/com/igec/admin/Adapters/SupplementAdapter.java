@@ -76,7 +76,7 @@ public class SupplementAdapter extends RecyclerView.Adapter<SupplementAdapter.Su
 
             vName = itemView.findViewById(R.id.TextView_SupplementName);
             vImg = itemView.findViewById(R.id.TextView_SupplementIMG);
-            vDelete = itemView.findViewById(R.id.button_delete);
+            vDelete = itemView.findViewById(R.id.delete_button);
 
             itemView.setOnClickListener(v -> {
                 if(listener != null)

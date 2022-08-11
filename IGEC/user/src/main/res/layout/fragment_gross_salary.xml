@@ -7,7 +7,7 @@
     tools:context=".Fragments.GrossSalaryFragment">
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/textInputLayout_SelectedMonth"
+        android:id="@+id/month_layout"
         style="@style/DatePicker"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -21,7 +21,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/TextInput_SelectedMonth"
+            android:id="@+id/month_edit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:enabled="false"
@@ -34,21 +34,21 @@
 
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recyclerview"
+        android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginStart="@dimen/high"
         android:layout_marginEnd="@dimen/high"
         android:layout_marginTop="@dimen/vhigh"
         android:overScrollMode="never"
-        app:layout_constraintBottom_toTopOf="@+id/TextView_GrossSalary"
+        app:layout_constraintBottom_toTopOf="@+id/gross_salary_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textInputLayout_SelectedMonth"
+        app:layout_constraintTop_toBottomOf="@+id/month_layout"
         tools:listitem="@layout/item_allowance" />
 
     <TextView
-        android:id="@+id/TextView_GrossSalary"
+        android:id="@+id/gross_salary_text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:gravity="center"

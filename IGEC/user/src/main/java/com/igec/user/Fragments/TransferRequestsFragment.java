@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,16 +15,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.igec.user.Adapters.TransferAdapter;
-import com.igec.user.R;
 import com.igec.common.firebase.Allowance;
 import com.igec.common.firebase.Employee;
 import com.igec.common.firebase.EmployeeOverview;
 import com.igec.common.firebase.EmployeesGrossSalary;
 import com.igec.common.firebase.Project;
 import com.igec.common.firebase.TransferRequests;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.WriteBatch;
+import com.igec.user.databinding.FragmentTransferRequestsBinding;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -38,7 +36,6 @@ public class TransferRequestsFragment extends Fragment {
     private int transferRequestStatus;
     private TransferAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
-    private RecyclerView recyclerView;
     private Employee manager;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private ArrayList<TransferRequests> requests;
@@ -52,33 +49,37 @@ public class TransferRequestsFragment extends Fragment {
         fragment.setArguments(args);
         return fragment;
     }
-//    public TransferRequestsFragment(Employee manager) {
-//        this.manager = manager;
-//    }
 
+    private FragmentTransferRequestsBinding binding;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_transfer_requests, container, false);
+        binding = FragmentTransferRequestsBinding.inflate(inflater, container, false);
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        binding = null;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        initialize(view);
+        initialize();
         adapter.setOnItemClickListener(oclRequest);
     }
 
-    private void initialize(View view) {
+    private void initialize() {
         manager = (Employee) getArguments().getSerializable("manager");
         requests = new ArrayList<>();
-        recyclerView = view.findViewById(R.id.recyclerview);
-        recyclerView.setHasFixedSize(true);
+        binding.recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
         adapter = new TransferAdapter(requests);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(adapter);
+        binding.recyclerView.setLayoutManager(layoutManager);
+        binding.recyclerView.setAdapter(adapter);
         getRequests();
     }
 

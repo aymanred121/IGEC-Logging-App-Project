@@ -1,5 +1,8 @@
 package com.igec.user.Fragments;
 
+import static com.igec.common.CONSTANTS.CAMERA_REQUEST_CODE;
+import static com.igec.common.CONSTANTS.LOCATION_REQUEST_CODE;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.pm.PackageManager;
@@ -11,7 +14,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -21,9 +23,10 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentResultListener;
 
 import com.birjuvachhani.locus.Locus;
+import com.google.android.gms.location.FusedLocationProviderClient;
 import com.igec.user.Dialogs.ClientInfoDialog;
 import com.igec.user.Dialogs.MachineCheckInOutDialog;
-import com.igec.user.Dialogs.SupplementsDialog;
+import com.igec.user.Dialogs.AccessoriesDialog;
 import com.igec.user.R;
 import com.igec.common.firebase.Allowance;
 import com.igec.common.firebase.Client;
@@ -35,17 +38,15 @@ import com.igec.common.firebase.Machine_Employee;
 import com.igec.common.firebase.Project;
 import com.igec.common.firebase.Summary;
 import com.igec.common.utilities.allowancesEnum;
-import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.WriteBatch;
+import com.igec.user.databinding.FragmentCheckInOutBinding;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -61,13 +62,7 @@ import pub.devrel.easypermissions.EasyPermissions;
 
 public class CheckInOutFragment extends Fragment implements EasyPermissions.PermissionCallbacks {
 
-    private ExtendedFloatingActionButton vCheckInOut;
-    private FloatingActionButton vAddMachine, vAddMachineInside, vAddMachineOutside;
-    private TextView vInsideText, vOutsideText;
-    // Vars
     private boolean isOpen = false;
-    private final int CAMERA_REQUEST_CODE = 123;
-    private final int LOCATION_REQUEST_CODE = 155;
     private Animation fabClose, fabOpen, rotateForward, rotateBackward, show, hide, rotateBackwardHide;
     private Boolean isHere = Boolean.FALSE;
     private Employee currEmployee = null;
@@ -93,45 +88,43 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         fragment.setArguments(args);
         return fragment;
     }
-//    public CheckInOutFragment(Employee currEmployee) {
-//        this.currEmployee = currEmployee;
-//    }
-
 
     private final View.OnClickListener oclMachine = view -> {
         animationFab();
     };
 
+    private FragmentCheckInOutBinding binding;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_check_in_out, container, false);
+        binding = FragmentCheckInOutBinding.inflate(inflater, container, false);
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        binding = null;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        initialize(view);
+        initialize();
         getLocationPermissions();
         getCameraPermission();
         // Listeners
-        vCheckInOut.setOnClickListener(oclCheckInOut);
-        vAddMachine.setOnClickListener(oclMachine);
-        vAddMachineInside.setOnClickListener(oclInside);
-        vAddMachineOutside.setOnClickListener(oclOutside);
+
+        binding.checkInOutFab.setOnClickListener(oclCheckInOut);
+        binding.addMachineFab.setOnClickListener(oclMachine);
+        binding.insideFab.setOnClickListener(oclInside);
+        binding.outsideFab.setOnClickListener(oclOutside);
     }
 
-    private void initialize(View view) {
+    private void initialize() {
         //Views
         currEmployee = (Employee) getArguments().getSerializable("user");
-        TextView vGreeting = view.findViewById(R.id.TextView_Greeting);
-        vCheckInOut = view.findViewById(R.id.Button_CheckInOut);
-        vAddMachine = view.findViewById(R.id.Button_AddMachine);
-        vAddMachineInside = view.findViewById(R.id.Button_AddMachineInside);
-        vAddMachineOutside = view.findViewById(R.id.Button_AddMachineOutside);
-        vOutsideText = view.findViewById(R.id.textView_non_user);
-        vInsideText = view.findViewById(R.id.textView_user);
-
         fabClose = AnimationUtils.loadAnimation(getActivity(), R.anim.fab_close);
         fabOpen = AnimationUtils.loadAnimation(getActivity(), R.anim.fab_open);
         rotateForward = AnimationUtils.loadAnimation(getActivity(), R.anim.rotate_forward);
@@ -149,15 +142,15 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         }
 
 
-        vGreeting.setText(String.format("%s\n%s", getString(R.string.good_morning), currEmployee.getFirstName()));
+        binding.greetingText.setText(String.format("%s\n%s", getString(R.string.good_morning), currEmployee.getFirstName()));
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
     }
 
     private void updateDate() {
         Calendar calendar = Calendar.getInstance();
         year = String.valueOf(calendar.get(Calendar.YEAR));
-        month = String.format("%02d",calendar.get(Calendar.MONTH) + 1);
-        day = String.format("%02d",calendar.get(Calendar.DAY_OF_MONTH));
+        month = String.format("%02d", calendar.get(Calendar.MONTH) + 1);
+        day = String.format("%02d", calendar.get(Calendar.DAY_OF_MONTH));
         if (Integer.parseInt(day) > 25) {
             if (Integer.parseInt(month) + 1 == 13) {
                 month = "01";
@@ -179,33 +172,33 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                     else {
                         isHere = value.getData().get("checkOut") == null;
                     }
-                    vCheckInOut.setBackgroundColor((isHere) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
-                    vCheckInOut.setText(isHere ? "Out" : "In");
-                    vAddMachine.setClickable(isHere);
+                    binding.checkInOutFab.setBackgroundColor((isHere) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
+                    binding.checkInOutFab.setText(isHere ? "Out" : "In");
+                    binding.addMachineFab.setClickable(isHere);
                     if (isHere)
-                        vAddMachine.startAnimation(show);
+                        binding.addMachineFab.startAnimation(show);
                 });
     }
 
 
     private void animationFab() {
         if (isOpen) {
-            vAddMachine.startAnimation(rotateBackward);
-            vAddMachineInside.startAnimation(fabClose);
-            vAddMachineOutside.startAnimation(fabClose);
-            vInsideText.startAnimation(hide);
-            vOutsideText.startAnimation(hide);
-            vAddMachineInside.setClickable(false);
-            vAddMachineOutside.setClickable(false);
+            binding.addMachineFab.startAnimation(rotateBackward);
+            binding.insideFab.startAnimation(fabClose);
+            binding.outsideFab.startAnimation(fabClose);
+            binding.insideText.startAnimation(hide);
+            binding.outsideText.startAnimation(hide);
+            binding.insideFab.setClickable(false);
+            binding.outsideFab.setClickable(false);
         } else {
 
-            vAddMachine.startAnimation(rotateForward);
-            vAddMachineInside.startAnimation(fabOpen);
-            vAddMachineOutside.startAnimation(fabOpen);
-            vInsideText.startAnimation(show);
-            vOutsideText.startAnimation(show);
-            vAddMachineInside.setClickable(true);
-            vAddMachineOutside.setClickable(true);
+            binding.addMachineFab.startAnimation(rotateForward);
+            binding.insideFab.startAnimation(fabOpen);
+            binding.outsideFab.startAnimation(fabOpen);
+            binding.insideText.startAnimation(show);
+            binding.outsideText.startAnimation(show);
+            binding.insideFab.setClickable(true);
+            binding.outsideFab.setClickable(true);
         }
         isOpen = !isOpen;
     }
@@ -241,13 +234,13 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     // Listeners
     @SuppressLint("MissingPermission")
     private final View.OnClickListener oclCheckInOut = v -> {
-        vCheckInOut.setEnabled(false);
+        binding.checkInOutFab.setEnabled(false);
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
         builder.setTitle(getString(R.string.do_you_want_to_confirm_this_action))
                 .setNegativeButton(getString(R.string.No), (dialogInterface, i) -> {
-                    vCheckInOut.setEnabled(true);
+                    binding.checkInOutFab.setEnabled(true);
                 }).setOnDismissListener(unused -> {
-                    vCheckInOut.setEnabled(true);
+                    binding.checkInOutFab.setEnabled(true);
                 })
                 .setPositiveButton(getString(R.string.Yes), (dialogInterface, i) -> {
                     db.collection("projects").document(currEmployee.getProjectID()).get().addOnSuccessListener(doc -> {
@@ -257,7 +250,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                         Locus.INSTANCE.getCurrentLocation(getActivity(), result -> {
                             if (result.getError() != null) {
                                 Toast.makeText(getActivity(), "can't complete the operation.", Toast.LENGTH_SHORT).show();
-                                vCheckInOut.setEnabled(true);
+                                binding.checkInOutFab.setEnabled(true);
                                 return null;
                             }
                             Location location = result.getLocation();
@@ -277,11 +270,10 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                             {
                                 Location.distanceBetween(latitude, longitude, LAT, LNG, results);
                                 distance = results[0];
-                                if (distance < 200 /*TODO Help placeholder for office area*/){
+                                if (distance < 200 /*TODO Help placeholder for office area*/) {
                                     inProjectArea = false;
                                     Toast.makeText(getActivity(), "You're in the office", Toast.LENGTH_SHORT).show();
-                                }
-                                else{
+                                } else {
                                     Toast.makeText(getActivity(), "You're not in the project area", Toast.LENGTH_SHORT).show();
                                     return null;
                                 }
@@ -302,25 +294,25 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                                 summary1.setLastCheckInTime(Timestamp.now());
                                                 db.document(documentSnapshot.getReference().getPath()).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null);
                                                 Toast.makeText(getContext(), "Checked In successfully!", Toast.LENGTH_SHORT).show();
-                                                vCheckInOut.setEnabled(true);
+                                                binding.checkInOutFab.setEnabled(true);
                                             }
                                         }
                                     });
                             isHere = !isHere;
-                            vCheckInOut.setBackgroundColor((isHere) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
-                            vCheckInOut.setText(isHere ? "Out" : "In");
-                            vAddMachine.setClickable(isHere);
+                            binding.checkInOutFab.setBackgroundColor((isHere) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
+                            binding.checkInOutFab.setText(isHere ? "Out" : "In");
+                            binding.addMachineFab.setClickable(isHere);
                             if (isOpen) {
-                                vAddMachine.startAnimation(rotateBackwardHide);
-                                vAddMachineInside.startAnimation(fabClose);
-                                vAddMachineOutside.startAnimation(fabClose);
-                                vInsideText.startAnimation(hide);
-                                vOutsideText.startAnimation(hide);
-                                vAddMachineInside.setClickable(false);
-                                vAddMachineOutside.setClickable(false);
+                                binding.addMachineFab.startAnimation(rotateBackwardHide);
+                                binding.insideFab.startAnimation(fabClose);
+                                binding.outsideFab.startAnimation(fabClose);
+                                binding.insideText.startAnimation(hide);
+                                binding.outsideText.startAnimation(hide);
+                                binding.insideFab.setClickable(false);
+                                binding.outsideFab.setClickable(false);
                                 isOpen = false;
                             } else {
-                                vAddMachine.startAnimation(isHere ? show : hide);
+                                binding.addMachineFab.startAnimation(isHere ? show : hide);
                             }
                             return null;
 
@@ -380,7 +372,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                 });
                             });
 
-                    vCheckInOut.setEnabled(true);
+                    binding.checkInOutFab.setEnabled(true);
                     db.collection("projects").document(currEmployee.getProjectID())
                             .update("employeeWorkedTime." + currEmployee.getId(), FieldValue.increment(workingTime));
 
@@ -405,10 +397,10 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                     if (!documentSnapshot.exists()) return;
                     EmployeesGrossSalary employeesGrossSalary = documentSnapshot.toObject(EmployeesGrossSalary.class);
                     ArrayList<Allowance> allowances = employeesGrossSalary.getAllTypes().stream().filter(allowance -> allowance.getType() != allowancesEnum.NETSALARY.ordinal()).collect(Collectors.toCollection(ArrayList::new));
-                    employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType()!= allowancesEnum.NETSALARY.ordinal());
+                    employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() != allowancesEnum.NETSALARY.ordinal());
                     employeesGrossSalary.setBaseAllowances(allowances);
-                    if(inProjectArea) {
-                    for (Allowance allowance : employeesGrossSalary.getBaseAllowances()) {
+                    if (inProjectArea) {
+                        for (Allowance allowance : employeesGrossSalary.getBaseAllowances()) {
                             allowance.setNote(day);
                             employeesGrossSalary.getAllTypes().add(allowance);
                         }
@@ -419,10 +411,10 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
             }
             EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
             employeesGrossSalary.setEmployeeId(currEmployee.getId());
-            if(inProjectArea) {
-            for (Allowance allowance : employeesGrossSalary.getBaseAllowances()) {
-                        allowance.setNote(day);
-                        employeesGrossSalary.getAllTypes().add(allowance);
+            if (inProjectArea) {
+                for (Allowance allowance : employeesGrossSalary.getBaseAllowances()) {
+                    allowance.setNote(day);
+                    employeesGrossSalary.getAllTypes().add(allowance);
                 }
             }
             db.collection("EmployeesGrossSalary").document(currEmployee.getId()).collection(year).document(month).set(employeesGrossSalary, SetOptions.merge());
@@ -565,7 +557,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                 Location location = locusResult.getLocation();
                                 if (locusResult.getError() != null) {
                                     Toast.makeText(getActivity(), "can't complete the operation.", Toast.LENGTH_SHORT).show();
-                                    vCheckInOut.setEnabled(true);
+                                    binding.checkInOutFab.setEnabled(true);
                                     return null;
                                 }
                                 longitude = location.getLongitude();
@@ -576,8 +568,8 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                     return null;
                                 }
                                 // open supplements dialog if not
-                                SupplementsDialog supplementsDialog = new SupplementsDialog(isItAUser, currMachine, currEmployee);
-                                supplementsDialog.show(getParentFragmentManager(), "");
+                                AccessoriesDialog accessoriesDialog = new AccessoriesDialog(isItAUser, currMachine, currEmployee);
+                                accessoriesDialog.show(getParentFragmentManager(), "");
                                 return null;
                             });
 

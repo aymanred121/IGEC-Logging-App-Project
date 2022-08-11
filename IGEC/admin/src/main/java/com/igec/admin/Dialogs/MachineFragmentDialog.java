@@ -20,7 +20,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResult;
@@ -36,11 +35,11 @@ import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentResultListener;
 
 import com.igec.admin.R;
+import com.igec.admin.databinding.FragmentAddMachineBinding;
 import com.igec.common.firebase.Machine;
 import com.igec.common.firebase.Supplement;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -60,24 +59,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.stream.IntStream;
 
 import androidmads.library.qrgenearator.QRGContents;
 import androidmads.library.qrgenearator.QRGEncoder;
-import de.hdodenhof.circleimageview.CircleImageView;
 
 @RequiresApi(api = Build.VERSION_CODES.R)
 public class MachineFragmentDialog extends DialogFragment {
-
-
-    // Views
-    private TextInputLayout vIDLayout, vPurchaseDateLayout, vSerialNumberLayout, vByDayLayout, vByWeekLayout, vByMonthLayout;
-    private TextInputEditText vID, vPurchaseDate, vSerialNumber, vMachineByDay, vMachineByWeek, vMachineByMonth;
-    private MaterialButton vRegister, vDelete, vUpdate, vAddSupplements;
-    private ImageView vQRImg;
-    private CircleImageView vMachineImg;
-
     // Vars
     private String currentPhotoPath;
     private ActivityResultLauncher<Intent> activityResultLauncher;
@@ -129,83 +117,74 @@ public class MachineFragmentDialog extends DialogFragment {
         getParentFragmentManager().setFragmentResultListener("machine", this, new FragmentResultListener() {
             @Override
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
-                vSerialNumber.setText(result.getString("SerialNumber"));
+                binding.serialNumberEdit.setText(result.getString("SerialNumber"));
             }
         });
     }
 
+    private FragmentAddMachineBinding binding;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_add_machine, container, false);
-        initialize(view);
+        binding =  FragmentAddMachineBinding.inflate(inflater, container, false);
+        initialize();
+        return binding.getRoot();
+    }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        binding = null;
+    }
 
-        vMachineImg.setOnClickListener(oclMachineImg);
-        vUpdate.setOnClickListener(oclUpdate);
-        vDelete.setOnClickListener(oclDelete);
-        vPurchaseDateLayout.setEndIconOnClickListener(oclDate);
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        binding.coverImageView.setOnClickListener(oclMachineImg);
+        binding.updateButton.setOnClickListener(oclUpdate);
+        binding.deleteButton.setOnClickListener(oclDelete);
+        binding.purchaseDateLayout.setEndIconOnClickListener(oclDate);
         vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);
-        vSerialNumberLayout.setEndIconOnClickListener(oclSerialNumber);
-        vPurchaseDateLayout.setErrorIconOnClickListener(oclDate);
-        vSerialNumberLayout.setErrorIconOnClickListener(oclSerialNumber);
-        vAddSupplements.setOnClickListener(oclAddSupplement);
-        vSerialNumber.addTextChangedListener(twSerialNumber);
-        vPurchaseDate.addTextChangedListener(twPurchaseDate);
-        vMachineByDay.addTextChangedListener(twByDay);
-        vMachineByWeek.addTextChangedListener(twByWeek);
-        vMachineByMonth.addTextChangedListener(twByMonth);
-        return view;
+        binding.serialNumberLayout.setEndIconOnClickListener(oclSerialNumber);
+        binding.purchaseDateLayout.setErrorIconOnClickListener(oclDate);
+        binding.serialNumberLayout.setErrorIconOnClickListener(oclSerialNumber);
+        binding.addButton.setOnClickListener(oclAddSupplement);
+        binding.serialNumberEdit.addTextChangedListener(twSerialNumber);
+        binding.purchaseDateEdit.addTextChangedListener(twPurchaseDate);
+        binding.dayEdit.addTextChangedListener(twByDay);
+        binding.weekEdit.addTextChangedListener(twByWeek);
+        binding.monthEdit.addTextChangedListener(twByMonth);
     }
 
     // Functions
-    private void initialize(View view) {
+    private void initialize() {
         oldNames = new ArrayList<>();
-        vRegister = view.findViewById(R.id.button_register);
-        vUpdate = view.findViewById(R.id.button_update);
-        vDelete = view.findViewById(R.id.button_delete);
-        vSerialNumberLayout = view.findViewById(R.id.textInputLayout_MachineSerialNumber);
-        vSerialNumber = view.findViewById(R.id.TextInput_MachineSerialNumber);
-        vPurchaseDate = view.findViewById(R.id.TextInput_MachinePurchaseDate);
-        vPurchaseDateLayout = view.findViewById(R.id.textInputLayout_MachinePurchaseDate);
-        vID = view.findViewById(R.id.TextInput_MachineID);
-        vIDLayout = view.findViewById(R.id.textInputLayout_MachineID);
-        vQRImg = view.findViewById(R.id.ImageView_MachineIDIMG);
-        vAddSupplements = view.findViewById(R.id.button_addSupplements);
-        vMachineByDay = view.findViewById(R.id.TextInput_MachineByDay);
-        vMachineByWeek = view.findViewById(R.id.TextInput_MachineByWeek);
-        vMachineByMonth = view.findViewById(R.id.TextInput_MachineByMonth);
-        vMachineImg = view.findViewById(R.id.ImageView_MachineIMG);
-        vByDayLayout = view.findViewById(R.id.textInputLayout_MachineByDay);
-        vByWeekLayout = view.findViewById(R.id.textInputLayout_MachineByWeek);
-        vByMonthLayout = view.findViewById(R.id.textInputLayout_MachineByMonth);
+        binding.registerButton.setVisibility(View.GONE);
+        binding.deleteButton.setVisibility(View.VISIBLE);
+        binding.updateButton.setVisibility(View.VISIBLE);
 
-        vRegister.setVisibility(View.GONE);
-        vDelete.setVisibility(View.VISIBLE);
-        vUpdate.setVisibility(View.VISIBLE);
+        binding.idEdit.setEnabled(false);
 
-        vID.setEnabled(false);
-
-        vSerialNumber.setText(machine.getReference());
-        vID.setText(machine.getId());
+        binding.serialNumberEdit.setText(machine.getReference());
+        binding.idEdit.setText(machine.getId());
         purchaseDate = machine.getPurchaseDate().getTime();
-        vPurchaseDate.setText(convertDateToString(machine.getPurchaseDate().getTime()));
-        vMachineByDay.setText(String.valueOf(machine.getDailyRentPrice()));
-        vMachineByWeek.setText(String.valueOf(machine.getWeeklyRentPrice()));
-        vMachineByMonth.setText(String.valueOf(machine.getMonthlyRentPrice()));
+        binding.purchaseDateEdit.setText(convertDateToString(machine.getPurchaseDate().getTime()));
+        binding.dayEdit.setText(String.valueOf(machine.getDailyRentPrice()));
+        binding.weekEdit.setText(String.valueOf(machine.getWeeklyRentPrice()));
+        binding.monthEdit.setText(String.valueOf(machine.getMonthlyRentPrice()));
         getMachineCover();
         vDatePickerBuilder.setTitleText("Purchase Date");
         vDatePicker = vDatePickerBuilder.setSelection(purchaseDate).build();
 
         views = new ArrayList<>();
-        views.add(new Pair<>(vSerialNumberLayout, vSerialNumber));
-        views.add(new Pair<>(vPurchaseDateLayout, vPurchaseDate));
-        views.add(new Pair<>(vByDayLayout, vMachineByDay));
-        views.add(new Pair<>(vByWeekLayout, vMachineByWeek));
-        views.add(new Pair<>(vByMonthLayout, vMachineByMonth));
-        qrgEncoder = new QRGEncoder(vID.getText().toString(), null, QRGContents.Type.TEXT, 25 * 25);
+        views.add(new Pair<>(binding.serialNumberLayout, binding.serialNumberEdit));
+        views.add(new Pair<>(binding.purchaseDateLayout, binding.purchaseDateEdit));
+        views.add(new Pair<>(binding.dayLayout, binding.dayEdit));
+        views.add(new Pair<>(binding.weekLayout, binding.weekEdit));
+        views.add(new Pair<>(binding.monthLayout, binding.monthEdit));
+        qrgEncoder = new QRGEncoder(binding.idEdit.getText().toString(), null, QRGContents.Type.TEXT, 25 * 25);
         try {
-            vQRImg.setImageBitmap(qrgEncoder.encodeAsBitmap());
+            binding.idImageView.setImageBitmap(qrgEncoder.encodeAsBitmap());
         } catch (WriterException e) {
             e.printStackTrace();
         }
@@ -215,8 +194,8 @@ public class MachineFragmentDialog extends DialogFragment {
                 if (result.getResultCode() == RESULT_OK) {
                     //Bundle bundle = result.getData().getExtras();
                     Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath);
-                    vMachineImg.setImageBitmap(bitmap);
-                    vMachineImg.setBorderWidth(2);
+                    binding.coverImageView.setImageBitmap(bitmap);
+                    binding.coverImageView.setBorderWidth(2);
                     machineCover.setPhoto(bitmap);
                     machineCover.setName("cover");
                 }
@@ -231,7 +210,7 @@ public class MachineFragmentDialog extends DialogFragment {
             final File localFile = File.createTempFile(cover, "jpg");
             ref.getFile(localFile).addOnSuccessListener(taskSnapshot -> {
                 Bitmap bitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
-                vMachineImg.setImageBitmap(bitmap);
+                binding.coverImageView.setImageBitmap(bitmap);
                 machineCover.setPhoto(bitmap);
                 machineCover.setName("cover");
             }).addOnFailureListener(e -> {
@@ -249,7 +228,7 @@ public class MachineFragmentDialog extends DialogFragment {
           in the first place
           */
         for (String name : machine.getSupplementsNames()) {
-            storageRef.child("imgs/" + vID.getText().toString() + "/" + name + ".jpg").delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+            storageRef.child("imgs/" + binding.idEdit.getText().toString() + "/" + name + ".jpg").delete().addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
                 public void onSuccess(Void unused) {
                     //do nothing
@@ -260,10 +239,10 @@ public class MachineFragmentDialog extends DialogFragment {
                 }
             });
         }
-        storageRef.child("imgs/" + vID.getText().toString() + "/" + "cover" + ".jpg").delete();
+        storageRef.child("imgs/" + binding.idEdit.getText().toString() + "/" + "cover" + ".jpg").delete();
         machineCol.document(machine.getId()).delete().addOnSuccessListener(unused -> {
             Toast.makeText(getActivity(), "Deleted", Toast.LENGTH_SHORT).show();
-            vDelete.setEnabled(true);
+            binding.deleteButton.setEnabled(true);
             dismiss();
         });
     }
@@ -284,7 +263,7 @@ public class MachineFragmentDialog extends DialogFragment {
                 IntStream.range(0, supplements.size()).forEach(i -> machine.getSupplementsNames().add(supplements.get(i).getName()));
             }
             for (String name : oldNames) {
-                storageRef.child("imgs/" + vID.getText().toString() + "/" + name + ".jpg").delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                storageRef.child("imgs/" + binding.idEdit.getText().toString() + "/" + name + ".jpg").delete().addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void unused) {
                         //do nothing
@@ -299,7 +278,7 @@ public class MachineFragmentDialog extends DialogFragment {
             for (int i = 0; i < size; i++) {
                 Integer[] finalI = new Integer[1];
                 finalI[0] = i;
-                supplements.get(i).saveToCloudStorage(storageRef, vID.getText().toString()).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                supplements.get(i).saveToCloudStorage(storageRef, binding.idEdit.getText().toString()).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                         if (finalI[0] == size - 1) {
@@ -309,11 +288,11 @@ public class MachineFragmentDialog extends DialogFragment {
                 });
             }
         }
-        machine.setReference(vSerialNumber.getText().toString());
-        machine.setPurchaseDate(new SimpleDateFormat("dd/MM/yyyy").parse(vPurchaseDate.getText().toString()));
-        machine.setDailyRentPrice(Double.parseDouble(vMachineByDay.getText().toString()));
-        machine.setWeeklyRentPrice(Double.parseDouble(vMachineByWeek.getText().toString()));
-        machine.setMonthlyRentPrice(Double.parseDouble(vMachineByMonth.getText().toString()));
+        machine.setReference(binding.serialNumberEdit.getText().toString());
+        machine.setPurchaseDate(new SimpleDateFormat("dd/MM/yyyy").parse(binding.purchaseDateEdit.getText().toString()));
+        machine.setDailyRentPrice(Double.parseDouble(binding.dayEdit.getText().toString()));
+        machine.setWeeklyRentPrice(Double.parseDouble(binding.weekEdit.getText().toString()));
+        machine.setMonthlyRentPrice(Double.parseDouble(binding.monthEdit.getText().toString()));
         machineCover.saveToCloudStorage(storageRef, machine.getId()).addOnSuccessListener(uv -> {
             machineCol.document(machine.getId()).set(machine).addOnSuccessListener(unused -> {
                 db.collection("Machine_Employee").whereEqualTo("machine.id", machine.getId()).get().addOnSuccessListener(queryDocumentSnapshots -> {
@@ -324,7 +303,7 @@ public class MachineFragmentDialog extends DialogFragment {
                     }
                 });
                 Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
-                vUpdate.setEnabled(true);
+                binding.updateButton.setEnabled(true);
                 dismiss();
             });
         });
@@ -336,9 +315,9 @@ public class MachineFragmentDialog extends DialogFragment {
     private boolean generateError() {
         for (Pair<TextInputLayout, TextInputEditText> view : views) {
             if (view.second.getText().toString().trim().isEmpty()) {
-                if (view.first == vSerialNumberLayout)
+                if (view.first == binding.serialNumberLayout)
                     view.first.setErrorIconDrawable(R.drawable.ic_barcode);
-                else if (view.first == vPurchaseDateLayout)
+                else if (view.first == binding.purchaseDateLayout)
                     view.first.setErrorIconDrawable(R.drawable.ic_baseline_calendar_month_24);
 
 
@@ -385,7 +364,7 @@ public class MachineFragmentDialog extends DialogFragment {
     };
     private final View.OnClickListener oclUpdate = v -> {
         if (validateInput()) {
-            vUpdate.setEnabled(false);
+            binding.updateButton.setEnabled(false);
             try {
                 updateMachine();
             } catch (ParseException e) {
@@ -396,12 +375,12 @@ public class MachineFragmentDialog extends DialogFragment {
     private final View.OnClickListener oclAddSupplement = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            AddSupplementsDialog addSupplementsDialog;
+            AddAccessoriesDialog addAccessoriesDialog;
             if (supplements == null)
-                addSupplementsDialog = new AddSupplementsDialog(machine);
+                addAccessoriesDialog = new AddAccessoriesDialog(machine);
             else
-                addSupplementsDialog = new AddSupplementsDialog(supplements);
-            addSupplementsDialog.show(getParentFragmentManager(), "");
+                addAccessoriesDialog = new AddAccessoriesDialog(supplements);
+            addAccessoriesDialog.show(getParentFragmentManager(), "");
         }
     };
     private View.OnClickListener oclMachineImg = new View.OnClickListener() {
@@ -433,12 +412,12 @@ public class MachineFragmentDialog extends DialogFragment {
     };
     private final View.OnClickListener oclDelete = v -> {
 
-        vDelete.setEnabled(false);
+        binding.deleteButton.setEnabled(false);
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
         builder.setTitle(getString(R.string.Delete))
                 .setMessage(getString(R.string.AreUSure))
                 .setNegativeButton(getString(R.string.cancel), (dialogInterface, i) -> {
-                    vDelete.setEnabled(true);
+                    binding.deleteButton.setEnabled(true);
                 })
                 .setPositiveButton(getString(R.string.accept), (dialogInterface, i) -> {
                     deleteMachine();
@@ -460,8 +439,8 @@ public class MachineFragmentDialog extends DialogFragment {
 
         @Override
         public void afterTextChanged(Editable editable) {
-            vSerialNumberLayout.setError(null);
-            vSerialNumberLayout.setErrorEnabled(false);
+            binding.serialNumberLayout.setError(null);
+            binding.serialNumberLayout.setErrorEnabled(false);
         }
     };
     private final TextWatcher twPurchaseDate = new TextWatcher() {
@@ -477,8 +456,8 @@ public class MachineFragmentDialog extends DialogFragment {
 
         @Override
         public void afterTextChanged(Editable editable) {
-            vPurchaseDateLayout.setError(null);
-            vPurchaseDateLayout.setErrorEnabled(false);
+            binding.purchaseDateLayout.setError(null);
+            binding.purchaseDateLayout.setErrorEnabled(false);
         }
     };
     private final TextWatcher twByDay = new TextWatcher() {
@@ -494,8 +473,8 @@ public class MachineFragmentDialog extends DialogFragment {
 
         @Override
         public void afterTextChanged(Editable editable) {
-            vByDayLayout.setError(null);
-            vByDayLayout.setErrorEnabled(false);
+            binding.dayLayout.setError(null);
+            binding.dayLayout.setErrorEnabled(false);
         }
     };
     private final TextWatcher twByWeek = new TextWatcher() {
@@ -511,8 +490,8 @@ public class MachineFragmentDialog extends DialogFragment {
 
         @Override
         public void afterTextChanged(Editable editable) {
-            vByWeekLayout.setError(null);
-            vByWeekLayout.setErrorEnabled(false);
+            binding.weekLayout.setError(null);
+            binding.weekLayout.setErrorEnabled(false);
         }
     };
     private final TextWatcher twByMonth = new TextWatcher() {
@@ -528,14 +507,14 @@ public class MachineFragmentDialog extends DialogFragment {
 
         @Override
         public void afterTextChanged(Editable editable) {
-            vByMonthLayout.setError(null);
-            vByMonthLayout.setErrorEnabled(false);
+            binding.monthLayout.setError(null);
+            binding.monthLayout.setErrorEnabled(false);
         }
     };
     private final MaterialPickerOnPositiveButtonClickListener pclDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
         @Override
         public void onPositiveButtonClick(Object selection) {
-            vPurchaseDate.setText(convertDateToString((long) selection));
+            binding.purchaseDateEdit.setText(convertDateToString((long) selection));
             purchaseDate = (long) selection;
         }
     };

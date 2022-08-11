@@ -1,5 +1,9 @@
 package com.igec.admin.Activities;
 
+
+import static com.igec.common.CONSTANTS.ID;
+import static com.igec.common.CONSTANTS.IGEC;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,8 +16,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 public class LauncherActivity extends Activity {
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
-    public static final String IGEC = "IGEC";
-    public static final String ID = "ID";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

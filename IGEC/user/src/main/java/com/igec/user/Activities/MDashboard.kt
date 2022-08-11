@@ -7,9 +7,7 @@ import android.view.View
 import android.widget.TextView
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.navigation.NavArgument
 import androidx.navigation.NavController
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -118,7 +116,7 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                         }
 
                         R.id.nav_send_vacation_request -> {
-                            binding.toolbar.title = getString(R.string.send_vacation_request)
+                            binding.toolbar.title = getString(R.string.send)
                             supportFragmentManager.beginTransaction()
                                 .replace(
                                     R.id.nav_host_fragment_content_main,
@@ -149,7 +147,7 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                         }
 
                         R.id.nav_send_transfer_request -> {
-                            binding.toolbar.title = getString(R.string.send_transfer_request)
+                            binding.toolbar.title = getString(R.string.send)
                             supportFragmentManager.beginTransaction()
                                 .replace(
                                     R.id.nav_host_fragment_content_main,

@@ -1,5 +1,7 @@
 package com.igec.admin.Dialogs;
 
+import static com.igec.common.CONSTANTS.LOCATION_REQUEST_CODE;
+
 import android.Manifest;
 import android.app.Dialog;
 import android.os.Bundle;
@@ -13,24 +15,18 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 import com.igec.admin.R;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
-import java.util.ArrayList;
+import com.igec.admin.databinding.DialogLocationBinding;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
 public class LocationDialog extends DialogFragment {
-    private final int LOCATION_REQUEST_CODE = 155;
-    private FloatingActionButton fbSubmit;
-    private WebView webView;
     private String currentUrl;
     private WebViewClient webViewClient = new WebViewClient() {
         @Override
@@ -38,7 +34,7 @@ public class LocationDialog extends DialogFragment {
             super.doUpdateVisitedHistory(view, url, isReload);
             currentUrl = url;
             if(currentUrl.contains("!3d"))
-                fbSubmit.setEnabled(true);
+                binding.submitFab.setEnabled(true);
         }
     };
 
@@ -87,12 +83,20 @@ public class LocationDialog extends DialogFragment {
         setStyle(DialogFragment.STYLE_NORMAL, R.style.FullscreenDialogTheme);
     }
 
+    private DialogLocationBinding binding;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.dialog_location, container, false);
+        binding = DialogLocationBinding.inflate(inflater,container,false);
+        return binding.getRoot();
     }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        binding.getRoot();
+    }
+
     @AfterPermissionGranted(LOCATION_REQUEST_CODE)
     private boolean getLocationPermissions() {
         String[] perms = {Manifest.permission.ACCESS_FINE_LOCATION};
@@ -113,16 +117,14 @@ public class LocationDialog extends DialogFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         getLocationPermissions();
-        fbSubmit = view.findViewById(R.id.button_submit);
-        webView = view.findViewById(R.id.web_view);
-        webView.getSettings().setGeolocationEnabled(true);
-        webView.getSettings().setJavaScriptEnabled(true);
-        webView.getSettings().setLoadWithOverviewMode(true);
-        webView.getSettings().setUseWideViewPort(true);
-        webView.getSettings().setBuiltInZoomControls(true);
-        webView.getSettings().setPluginState(WebSettings.PluginState.ON);
-        webView.setWebViewClient(webViewClient);
-        webView.setWebChromeClient(new WebChromeClient(){
+        binding.webView.getSettings().setGeolocationEnabled(true);
+        binding.webView.getSettings().setJavaScriptEnabled(true);
+        binding.webView.getSettings().setLoadWithOverviewMode(true);
+        binding.webView.getSettings().setUseWideViewPort(true);
+        binding.webView.getSettings().setBuiltInZoomControls(true);
+        binding.webView.getSettings().setPluginState(WebSettings.PluginState.ON);
+        binding.webView.setWebViewClient(webViewClient);
+        binding.webView.setWebChromeClient(new WebChromeClient(){
 
             @Override
             public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
@@ -132,12 +134,12 @@ public class LocationDialog extends DialogFragment {
         });
         // first time
         if (getArguments().size() == 0) {
-            webView.loadUrl("https://www.google.com/maps");
+            binding.webView.loadUrl("https://www.google.com/maps");
         } else {
-            fbSubmit.setEnabled(true);
-            webView.loadUrl(String.format("https://www.google.com/maps/search/%s,%s", getArguments().get("lat"), getArguments().get("lng")));
+            binding.submitFab.setEnabled(true);
+            binding.webView.loadUrl(String.format("https://www.google.com/maps/search/%s,%s", getArguments().get("lat"), getArguments().get("lng")));
         }
-        fbSubmit.setOnClickListener(v -> {
+        binding.submitFab.setOnClickListener(v -> {
             if (!currentUrl.contains("!3d"))
                 return;
             String sub = currentUrl.substring(currentUrl.indexOf("!3d"));

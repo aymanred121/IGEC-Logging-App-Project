@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.igec.admin.Adapters.MachineLogAdapter;
 import com.igec.admin.R;
+import com.igec.admin.databinding.DialogMachineLogBinding;
 import com.igec.common.firebase.Machine;
 import com.igec.common.firebase.Machine_Employee;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -31,9 +32,7 @@ public class MachineLogDialog extends DialogFragment {
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private ArrayList<Machine_Employee> machineSummaryData;
     private MachineLogAdapter adapter;
-    private RecyclerView recyclerView;
     private RecyclerView.LayoutManager layoutManager;
-    private TextView vLogState;
 
     public MachineLogDialog(Machine machine) {
         this.machine = machine;
@@ -44,12 +43,12 @@ public class MachineLogDialog extends DialogFragment {
                     if (queryDocumentSnapshots.size() != 0) {
                         machineSummaryData.addAll(queryDocumentSnapshots.toObjects(Machine_Employee.class));
                         adapter.setMachineEmployees(machineSummaryData);
-                        vLogState.setVisibility(View.GONE);
+                        binding.stateText.setVisibility(View.GONE);
                         adapter.notifyDataSetChanged();
                     }
                     else
                     {
-                        vLogState.setVisibility(View.VISIBLE);
+                        binding.stateText.setVisibility(View.VISIBLE);
                     }
                 }
         );
@@ -76,29 +75,34 @@ public class MachineLogDialog extends DialogFragment {
 
     }
 
+    private DialogMachineLogBinding binding;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.dialog_machine_log, container, false);
+        binding = DialogMachineLogBinding.inflate(inflater,container,false);
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        binding = null;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        initialize(view);
-
+        initialize();
     }
 
-    void initialize(View view) {
+    void initialize() {
         machineSummaryData = new ArrayList<>();
-        recyclerView = view.findViewById(R.id.recyclerview);
-        vLogState = view.findViewById(R.id.TextView_state);
-        recyclerView.setHasFixedSize(true);
+        binding.recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
         adapter = new MachineLogAdapter(machineSummaryData);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(adapter);
+        binding.recyclerView.setLayoutManager(layoutManager);
+        binding.recyclerView.setAdapter(adapter);
         retrieveMachineSummary();
 
     }

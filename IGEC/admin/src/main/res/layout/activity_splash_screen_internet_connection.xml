@@ -15,7 +15,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TextView
-            android:id="@+id/Headline"
+            android:id="@+id/header_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/no_internet_connection"
@@ -27,14 +27,14 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/ImageView_Time"
+            android:id="@+id/wifi_sign_image_view"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_marginTop="@dimen/high"
             android:src="@color/primaryColor"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/Headline" />
+            app:layout_constraintTop_toBottomOf="@id/header_text" />
 
         <androidx.constraintlayout.utils.widget.ImageFilterView
             android:layout_width="75dp"
@@ -42,14 +42,14 @@
             android:layout_marginBottom="@dimen/high"
             android:rotation="-45"
             android:src="@drawable/ic_round_rss_feed_24"
-            app:layout_constraintBottom_toBottomOf="@+id/ImageView_Time"
-            app:layout_constraintEnd_toEndOf="@+id/ImageView_Time"
-            app:layout_constraintStart_toStartOf="@+id/ImageView_Time"
-            app:layout_constraintTop_toTopOf="@+id/ImageView_Time" />
+            app:layout_constraintBottom_toBottomOf="@+id/wifi_sign_image_view"
+            app:layout_constraintEnd_toEndOf="@+id/wifi_sign_image_view"
+            app:layout_constraintStart_toStartOf="@+id/wifi_sign_image_view"
+            app:layout_constraintTop_toTopOf="@+id/wifi_sign_image_view" />
 
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/Open_Wifi"
+            android:id="@+id/retry_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/high"
@@ -57,7 +57,7 @@
             android:text="@string/retry"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/ImageView_Time" />
+            app:layout_constraintTop_toBottomOf="@id/wifi_sign_image_view" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

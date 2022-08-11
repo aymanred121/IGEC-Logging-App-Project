@@ -12,7 +12,7 @@
         android:layout_centerInParent="true">
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout_CompanyName"
+            android:id="@+id/name_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -22,7 +22,7 @@
             app:helperTextEnabled="true">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/TextInput_CompanyName"
+                android:id="@+id/name_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="top"
@@ -33,11 +33,11 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout_CompanyEmail"
+            android:id="@+id/email_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/textInputLayout_CompanyName"
+            android:layout_below="@id/name_layout"
             android:layout_marginStart="@dimen/vhigh"
             android:layout_marginTop="@dimen/low"
             android:layout_marginEnd="@dimen/vhigh"
@@ -45,7 +45,7 @@
             app:helperTextEnabled="true">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/TextInput_CompanyEmail"
+                android:id="@+id/email_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="top"
@@ -56,11 +56,11 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout_CompanyPhoneNumber"
+            android:id="@+id/phone_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/textInputLayout_CompanyEmail"
+            android:layout_below="@id/email_layout"
             android:layout_marginStart="@dimen/vhigh"
             android:layout_marginTop="@dimen/low"
             android:layout_marginEnd="@dimen/vhigh"
@@ -68,7 +68,7 @@
             app:helperTextEnabled="true">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/TextInput_CompanyPhoneNumber"
+                android:id="@+id/phone_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="top"
@@ -82,13 +82,13 @@
             android:id="@+id/container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/textInputLayout_CompanyPhoneNumber"
+            android:layout_below="@id/phone_layout"
             android:layout_marginStart="@dimen/vhigh"
             android:layout_marginEnd="@dimen/vhigh"
             android:orientation="horizontal">
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/textInputLayout_PerHour"
+                android:id="@+id/per_hour_layout"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -99,7 +99,7 @@
                 app:suffixText="%">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/TextInput_PerHour"
+                    android:id="@+id/per_hour_edit"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="top"
@@ -111,7 +111,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/textInputLayout_OverTime"
+                android:id="@+id/over_time_layout"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -122,7 +122,7 @@
                 app:suffixText="%">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/TextInput_OverTime"
+                    android:id="@+id/over_time_edit"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="top"
@@ -133,7 +133,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/textInputLayout_PerFriday"
+                android:id="@+id/per_friday_layout"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -143,7 +143,7 @@
                 app:suffixText="%">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/TextInput_PerFriday"
+                    android:id="@+id/per_friday_edit"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="top"
@@ -156,7 +156,7 @@
 
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout_Note"
+            android:id="@+id/note_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="150dp"
@@ -170,7 +170,7 @@
             app:helperTextEnabled="true">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/TextInput_Note"
+                android:id="@+id/note_edit"
                 android:layout_width="match_parent"
                 android:layout_height="120dp"
                 android:gravity="top"
@@ -180,10 +180,10 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/Button_Done"
+            android:id="@+id/done_fab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/textInputLayout_Note"
+            android:layout_below="@id/note_layout"
             android:layout_centerHorizontal="true"
             android:text="@string/Done"
             android:textAllCaps="false"

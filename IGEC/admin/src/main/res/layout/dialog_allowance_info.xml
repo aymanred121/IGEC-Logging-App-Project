@@ -20,7 +20,7 @@
 
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout_AllowanceType"
+            android:id="@+id/type_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -31,12 +31,12 @@
             app:boxBackgroundMode="outline"
             app:endIconMode="dropdown_menu"
             app:helperTextEnabled="true"
-            app:layout_constraintEnd_toStartOf="@id/textInputLayout_AllowanceName"
+            app:layout_constraintEnd_toStartOf="@id/name_layout"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
             <AutoCompleteTextView
-                android:id="@+id/TextInput_AllowanceType"
+                android:id="@+id/type_auto"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/allowance_type"
@@ -47,7 +47,7 @@
 
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout_AllowanceName"
+            android:id="@+id/name_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -55,13 +55,13 @@
             android:layout_marginEnd="@dimen/vhigh"
             android:visibility="gone"
             app:boxBackgroundMode="outline"
-            app:layout_constraintBottom_toBottomOf="@id/textInputLayout_AllowanceType"
+            app:layout_constraintBottom_toBottomOf="@id/type_layout"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/textInputLayout_AllowanceType"
+            app:layout_constraintStart_toEndOf="@id/type_layout"
             app:layout_constraintTop_toTopOf="parent">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/TextInput_AllowanceName"
+                android:id="@+id/name_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/name"
@@ -72,7 +72,7 @@
 
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout_AllowanceMount"
+            android:id="@+id/mount_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -80,12 +80,12 @@
             android:layout_marginTop="@dimen/high"
             android:layout_marginEnd="@dimen/vhigh"
             app:boxBackgroundMode="outline"
-            app:layout_constraintEnd_toStartOf="@id/textInputLayout_AllowanceCurrency"
+            app:layout_constraintEnd_toStartOf="@id/currency_layout"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textInputLayout_AllowanceType">
+            app:layout_constraintTop_toBottomOf="@id/type_layout">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/TextInput_AllowanceMount"
+                android:id="@+id/mount_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/Mount"
@@ -96,7 +96,7 @@
 
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout_AllowanceCurrency"
+            android:id="@+id/currency_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -104,13 +104,13 @@
             android:layout_marginEnd="@dimen/vhigh"
             app:boxBackgroundMode="outline"
             app:endIconMode="dropdown_menu"
-            app:layout_constraintBottom_toBottomOf="@id/textInputLayout_AllowanceMount"
+            app:layout_constraintBottom_toBottomOf="@id/mount_layout"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/textInputLayout_AllowanceMount"
-            app:layout_constraintTop_toBottomOf="@id/textInputLayout_AllowanceType">
+            app:layout_constraintStart_toEndOf="@id/mount_layout"
+            app:layout_constraintTop_toBottomOf="@id/type_layout">
 
             <AutoCompleteTextView
-                android:id="@+id/TextInput_AllowanceCurrency"
+                android:id="@+id/currency_auto"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/currency"
@@ -121,7 +121,7 @@
 
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/button_Done"
+            android:id="@+id/done_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/high"
@@ -130,6 +130,6 @@
             android:textAllCaps="false"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textInputLayout_AllowanceMount" />
+            app:layout_constraintTop_toBottomOf="@id/mount_layout" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -2,7 +2,7 @@
     <string name="app_name">IGEC RP</string>
     <string name="name">Name</string>
     <string name="location">Location</string>
-    <string name="start_time">Time</string>
+    <string name="start_time">Date</string>
     <string name="end_time">End Time</string>
     <string name="manager_id">Manager ID</string>
     <string name="manager_name">Manager Name</string>

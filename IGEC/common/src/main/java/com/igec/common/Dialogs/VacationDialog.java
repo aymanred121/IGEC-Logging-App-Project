@@ -70,6 +70,12 @@ public class VacationDialog extends DialogFragment {
     }
 
     @Override
+    public void onDestroy() {
+        super.onDestroy();
+        binding = null;
+    }
+
+    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         int accepted = Integer.parseInt(getDays(vacationRequest));

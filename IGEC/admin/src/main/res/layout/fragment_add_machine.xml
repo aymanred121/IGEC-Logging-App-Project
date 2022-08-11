@@ -7,7 +7,7 @@
     tools:context=".Fragments.AddMachineFragment">
 
     <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/ImageView_MachineIMG"
+        android:id="@+id/cover_image_view"
         android:layout_width="200dp"
         android:layout_height="200dp"
         android:layout_marginStart="@dimen/vhigh"
@@ -24,7 +24,7 @@
 
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/textInputLayout_MachineID"
+        android:id="@+id/id_layout"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -37,10 +37,10 @@
         app:endIconTint="@color/primaryColor"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/ImageView_MachineIMG">
+        app:layout_constraintTop_toBottomOf="@id/cover_image_view">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/TextInput_MachineID"
+            android:id="@+id/id_edit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/machine_id"
@@ -51,7 +51,7 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/textInputLayout_MachineSerialNumber"
+        android:id="@+id/serial_number_layout"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -64,10 +64,10 @@
         app:endIconTint="@color/primaryColor"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textInputLayout_MachineID">
+        app:layout_constraintTop_toBottomOf="@id/id_layout">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/TextInput_MachineSerialNumber"
+            android:id="@+id/serial_number_edit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/machine_serial_number"
@@ -78,7 +78,7 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/textInputLayout_MachinePurchaseDate"
+        android:id="@+id/purchase_date_layout"
         style="@style/DatePicker"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -88,10 +88,10 @@
         app:boxBackgroundMode="outline"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textInputLayout_MachineSerialNumber">
+        app:layout_constraintTop_toBottomOf="@id/serial_number_layout">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/TextInput_MachinePurchaseDate"
+            android:id="@+id/purchase_date_edit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:enabled="false"
@@ -104,7 +104,7 @@
 
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/textInputLayout_MachineByDay"
+        android:id="@+id/day_layout"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -113,12 +113,12 @@
         android:layout_marginEnd="@dimen/mid"
         app:boxBackgroundMode="outline"
         app:helperTextEnabled="true"
-        app:layout_constraintEnd_toStartOf="@+id/textInputLayout_MachineByWeek"
+        app:layout_constraintEnd_toStartOf="@+id/week_layout"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textInputLayout_MachinePurchaseDate">
+        app:layout_constraintTop_toBottomOf="@id/purchase_date_layout">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/TextInput_MachineByDay"
+            android:id="@+id/day_edit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/perDay"
@@ -129,7 +129,7 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/textInputLayout_MachineByWeek"
+        android:id="@+id/week_layout"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -138,12 +138,12 @@
         android:layout_marginEnd="@dimen/mid"
         app:boxBackgroundMode="outline"
         app:helperTextEnabled="true"
-        app:layout_constraintEnd_toStartOf="@+id/textInputLayout_MachineByMonth"
-        app:layout_constraintStart_toEndOf="@+id/textInputLayout_MachineByDay"
-        app:layout_constraintTop_toBottomOf="@+id/textInputLayout_MachinePurchaseDate">
+        app:layout_constraintEnd_toStartOf="@+id/month_layout"
+        app:layout_constraintStart_toEndOf="@+id/day_layout"
+        app:layout_constraintTop_toBottomOf="@+id/purchase_date_layout">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/TextInput_MachineByWeek"
+            android:id="@+id/week_edit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/PerWeek"
@@ -154,7 +154,7 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/textInputLayout_MachineByMonth"
+        android:id="@+id/month_layout"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -164,11 +164,11 @@
         app:boxBackgroundMode="outline"
         app:helperTextEnabled="true"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/textInputLayout_MachineByWeek"
-        app:layout_constraintTop_toBottomOf="@+id/textInputLayout_MachinePurchaseDate">
+        app:layout_constraintStart_toEndOf="@+id/week_layout"
+        app:layout_constraintTop_toBottomOf="@+id/purchase_date_layout">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/TextInput_MachineByMonth"
+            android:id="@+id/month_edit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/PerMonth"
@@ -179,7 +179,7 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/button_addSupplements"
+        android:id="@+id/add_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/high"
@@ -188,10 +188,10 @@
         android:textAllCaps="false"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/textInputLayout_MachineByWeek" />
+        app:layout_constraintTop_toBottomOf="@id/week_layout" />
 
     <ImageView
-        android:id="@+id/ImageView_MachineIDIMG"
+        android:id="@+id/id_image_view"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_marginStart="@dimen/vhigh"
@@ -200,13 +200,13 @@
         android:layout_marginBottom="@dimen/mid"
         android:scaleType="fitCenter"
         android:src="@drawable/ic_baseline_image_24"
-        app:layout_constraintBottom_toTopOf="@id/button_register"
+        app:layout_constraintBottom_toTopOf="@id/register_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/button_addSupplements" />
+        app:layout_constraintTop_toBottomOf="@id/add_button" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/button_register"
+        android:id="@+id/register_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="@dimen/vhigh"
@@ -217,7 +217,7 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/button_update"
+        android:id="@+id/update_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/vhigh"
@@ -229,7 +229,7 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/button_delete"
+        android:id="@+id/delete_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/vhigh"

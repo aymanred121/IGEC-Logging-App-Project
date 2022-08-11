@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.igec.admin.Adapters.WorkingDayAdapter;
 import com.igec.admin.R;
+import com.igec.admin.databinding.FragmentMonthSummaryBinding;
 import com.igec.common.utilities.CsvWriter;
 import com.igec.common.utilities.WorkingDay;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -36,10 +37,8 @@ public class MonthSummaryDialog extends DialogFragment {
 
 
     private WorkingDayAdapter adapter;
-    private RecyclerView recyclerView;
     private RecyclerView.LayoutManager layoutManager;
     private ArrayList<WorkingDay> workingDays;
-    private FloatingActionButton createCSV;
     private final int MONTH31DAYS = 0xA55;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -68,28 +67,35 @@ public class MonthSummaryDialog extends DialogFragment {
         return dialog;
     }
 
+    private FragmentMonthSummaryBinding binding;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_month_summary, container, false);
+
+        binding = FragmentMonthSummaryBinding.inflate(inflater,container,false);
+        return binding.getRoot();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        initialize(view);
+        initialize();
         adapter.setOnItemClickListener(oclWorkingDay);
-        createCSV.setOnClickListener(oclCSV);
+        binding.createFab.setOnClickListener(oclCSV);
     }
 
-    void initialize(View view) {
-        createCSV = view.findViewById(R.id.fab_createCSV);
-        recyclerView = view.findViewById(R.id.recyclerview);
-        recyclerView.setHasFixedSize(true);
+    void initialize() {
+        binding.recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
         adapter = new WorkingDayAdapter(workingDays);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(adapter);
+        binding.recyclerView.setLayoutManager(layoutManager);
+        binding.recyclerView.setAdapter(adapter);
 
     }
 

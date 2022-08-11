@@ -17,7 +17,6 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -25,19 +24,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
+import com.google.firebase.firestore.WriteBatch;
 import com.igec.admin.R;
 import com.igec.admin.databinding.FragmentAddUserBinding;
 import com.igec.common.firebase.Allowance;
 import com.igec.common.firebase.Employee;
 import com.igec.common.firebase.EmployeeOverview;
-import com.igec.common.firebase.EmployeesGrossSalary;
-import com.igec.common.firebase.Project;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
@@ -45,6 +40,7 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.SetOptions;
+import com.igec.common.utilities.allowancesEnum;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -63,11 +59,6 @@ public class UserFragmentDialog extends DialogFragment {
         setStyle(DialogFragment.STYLE_NORMAL, R.style.FullscreenDialogTheme);
     }
 
-    private final int PROJECT = 0;
-    private final int NETSALARY = 1;
-    private final int ALLOWANCE = 2;
-    private final int BONUS = 3;
-    private final int PENALTY = 4;
     // Views
     private final MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vDatePicker;
@@ -75,16 +66,19 @@ public class UserFragmentDialog extends DialogFragment {
 
 
     //Var
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private CollectionReference machineEmployeeCol = db.collection("Machine_Employee");
-    private CollectionReference vacationCol = db.collection("Vacation");
-    private CollectionReference projectCol = db.collection("projects");
-    private CollectionReference summaryCOl = db.collection("summary");
-    private DocumentReference employeeOverviewRef = db.collection("EmployeeOverview").document("emp");
+    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private final CollectionReference machineEmployeeCol = db.collection("Machine_Employee");
+    private final CollectionReference vacationCol = db.collection("Vacation");
+    private final CollectionReference projectCol = db.collection("projects");
+    private final DocumentReference employeeOverviewRef = db.collection("EmployeeOverview").document("emp");
     private Employee employee;
+    private EmployeeOverview oldEmployeeOverviewData;
+    private Allowance oldNetSalary = new Allowance();
     private ArrayList<EmployeeOverview> employeeOverviewArrayList;
     private int currEmpOverviewPos;
     private long hireDate;
+    private String year,month,day;
+    private WriteBatch batch = db.batch();
 
     public UserFragmentDialog(Employee employee, ArrayList<EmployeeOverview> employeeOverviewArrayList, int currEmpOverviewPos) {
         this.employee = employee;
@@ -252,99 +246,82 @@ public class UserFragmentDialog extends DialogFragment {
         return !generateError();
     }
 
-    private void updateEmployeeOverview(Map<String, Object> updatedEmpOverviewMap, HashMap<String, Object> updatedEmployeeMap) {
-        employeeOverviewRef.update(updatedEmpOverviewMap).addOnSuccessListener(unused -> updateMachineEmployee(updatedEmployeeMap));
+    private void updateEmployeeOverview(Map<String, Object> updatedEmpOverviewMap) {
+        batch.update(employeeOverviewRef,updatedEmpOverviewMap);
+        updateMachineEmployee();
     }
 
-    private void updateMachineEmployee(HashMap<String, Object> updatedEmployeeMap) {
-        machineEmployeeCol.whereEqualTo("Employee.id", employee.getId()).get().addOnSuccessListener(queryDocumentSnapshots -> {
+    private void updateMachineEmployee() {
+        machineEmployeeCol.whereEqualTo("employee.id", employee.getId()).get().addOnSuccessListener(queryDocumentSnapshots -> {
             for (QueryDocumentSnapshot d : queryDocumentSnapshots) {
-                machineEmployeeCol.document(d.getId()).update("Employee", updatedEmployeeMap);
+                batch.update( machineEmployeeCol.document(d.getId()),"employee", employee);
             }
-            //updateVacation(updatedEmployeeMap);
-            updateProjects(updatedEmployeeMap);
+            updateProjects();
         });
     }
 
-    private void updateVacation(HashMap<String, Object> updatedEmployeeMap) {
+    private void updateVacation() {
         vacationCol.whereEqualTo("employee.id", employee.getId()).get().addOnSuccessListener(queryDocumentSnapshots -> {
             for (QueryDocumentSnapshot d : queryDocumentSnapshots) {
-                vacationCol.document(d.getId()).update("employee", updatedEmployeeMap);
+                batch.update( vacationCol.document(d.getId()),"employee", employee);
             }
             vacationCol.whereEqualTo("manager.id", employee.getId()).get().addOnSuccessListener(queryDocumentSnapshot -> {
                 for (QueryDocumentSnapshot d : queryDocumentSnapshot) {
-                    vacationCol.document(d.getId()).update("manager", updatedEmployeeMap);
+                    batch.update(vacationCol.document(d.getId()),"manager", employee);
                 }
-                updateSummary(updatedEmployeeMap);
+                batch.commit().addOnSuccessListener(unused1 -> {
+                    binding.updateButton.setEnabled(true);
+                    dismiss();
+                }).addOnFailureListener(e-> Toast.makeText(getActivity(), e.toString(), Toast.LENGTH_SHORT).show());
             });
         });
 
     }
 
-    private void updateSummary(HashMap<String, Object> updatedEmployeeMap) {
-        summaryCOl.whereEqualTo("Employee.id", employee.getId()).get().addOnSuccessListener(queryDocumentSnapshots -> {
-            for (QueryDocumentSnapshot d : queryDocumentSnapshots) {
-                summaryCOl.document(d.getId()).update("Employee", updatedEmployeeMap);
-            }
-            binding.updateButton.setEnabled(true);
-            Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
-            dismiss();
-        });
-    }
-
-    private void updateProjects(HashMap<String, Object> updatedEmployeeMap) {
+    private void updateProjects() {
         EmployeeOverview tempEmp = new EmployeeOverview(binding.firstNameEdit.getText().toString(), binding.secondNameEdit.getText().toString(), binding.titleEdit.getText().toString(), employee.getId(), employee.getProjectID(), employee.getProjectID() != null);
         tempEmp.setManagerID(employee.getManagerID());
         employeeOverviewArrayList.set(currEmpOverviewPos, tempEmp);
         if (employee.getProjectID() == null) {
-            updateVacation(updatedEmployeeMap);
+            updateVacation();
             return;
         }
-        projectCol.document(employee.getProjectID()).get().addOnSuccessListener(documentSnapshot ->
-        {
-            Project currProject = documentSnapshot.toObject(Project.class);
-            ArrayList<EmployeeOverview> temp = currProject.getEmployees();
-            EmployeeOverview tempemp = null;
-            for (int i = 0; i < temp.size(); i++) {
-                if (employee.getId().equals(temp.get(i).getId())) {
-                    tempemp = temp.get(i);
-                }
-            }
-            temp.remove(tempemp);
-            temp.add(tempEmp);
-            currProject.setEmployees(temp);
-            if (tempEmp.getManagerID().equals("adminID")) {
-                projectCol.document(employee.getProjectID()).update("managerName", tempEmp.getFirstName() + " " + tempEmp.getLastName(), "employees", temp);
-            } else {
-                projectCol.document(employee.getProjectID()).update("employees", temp);
-            }
-            updateVacation(updatedEmployeeMap);
-        });
+        batch.update( projectCol.document(employee.getProjectID()),"employees",FieldValue.arrayRemove(oldEmployeeOverviewData));
+        if (tempEmp.getManagerID().equals("adminID")){
+            batch.update(projectCol.document(employee.getProjectID()),"managerName", tempEmp.getFirstName() + " " + tempEmp.getLastName(), "employees", FieldValue.arrayUnion(tempEmp));
+        }else{
+            batch.update(  projectCol.document(employee.getProjectID()),"employees",FieldValue.arrayUnion(tempEmp));
+        }
+        updateVacation();
+
     }
 
-    private HashMap<String, Object> fillEmployeeData() {
-        HashMap<String, Object> empMap = new HashMap<>();
-        empMap.put("id", employee.getId());
-        empMap.put("firstName", binding.firstNameEdit.getText().toString());
-        empMap.put("lastName", binding.secondNameEdit.getText().toString());
-        empMap.put("title", binding.titleEdit.getText().toString());
-        empMap.put("email", binding.emailEdit.getText().toString());
-        empMap.put("password", encryptedPassword());
-        empMap.put("salary", Double.parseDouble(binding.salaryEdit.getText().toString()));
-        empMap.put("currency", binding.currencyAuto.getText().toString());
-        empMap.put("ssn", binding.nationalIdEdit.getText().toString());
-        empMap.put("hireDate", new Date(hireDate));
-        empMap.put("phoneNumber", binding.phoneEdit.getText().toString());
-        empMap.put("area", binding.areaEdit.getText().toString());
-        empMap.put("street", binding.streetEdit.getText().toString());
-        empMap.put("city", binding.cityEdit.getText().toString());
-        empMap.put("overTime", (Double.parseDouble(binding.salaryEdit.getText().toString()) / 30.0 / 10.0) * 1.5);
-        empMap.put("admin", binding.adminCheckbox.isChecked());
-//        if(binding.adminCheckbox.isChecked()){
-//            empMap.put("managerID", null);
-//            empMap.put("projectID", null);
-//        }
-        return empMap;
+
+    private void updateEmployeeData() {
+        oldNetSalary.setAmount(employee.getSalary());
+        oldNetSalary.setType(allowancesEnum.NETSALARY.ordinal());
+        oldNetSalary.setCurrency(employee.getCurrency());
+        oldNetSalary.setName("Net salary");
+        oldEmployeeOverviewData = new EmployeeOverview(employee.getFirstName(), employee.getLastName(), employee.getTitle(), employee.getId(),employee.getProjectID(),employee.getProjectID() != null);
+        oldEmployeeOverviewData.setManagerID(employee.getManagerID());
+        employee.setAdmin(binding.adminCheckbox.isChecked());
+        employee.setArea(binding.areaEdit.getText().toString());
+        employee.setCity(binding.cityEdit.getText().toString());
+        employee.setCurrency(binding.currencyAuto.getText().toString());
+        employee.setEmail(binding.emailEdit.getText().toString());
+        employee.setFirstName(binding.firstNameEdit.getText().toString());
+        employee.setHireDate(new Date(hireDate));
+        employee.setInsuranceAmount(Double.parseDouble(binding.insuranceAmountEdit.getText().toString()));
+        employee.setInsuranceNumber(binding.insuranceNumberEdit.getText().toString());
+        employee.setLastName(binding.secondNameEdit.getText().toString());
+        employee.setOverTime(Double.parseDouble(binding.salaryEdit.getText().toString()) / 30.0 / 10.0 * 1.5);
+        employee.setPassword(encryptedPassword());
+        employee.setPhoneNumber(binding.phoneEdit.getText().toString());
+        employee.setSalary(Double.parseDouble(binding.salaryEdit.getText().toString()));
+        employee.setSSN(binding.nationalIdEdit.getText().toString());
+        employee.setStreet(binding.streetEdit.getText().toString());
+        employee.setTemporary(binding.temporaryCheckbox.isChecked());
+        employee.setTitle(binding.titleEdit.getText().toString());
     }
 
     private String encryptedPassword() {
@@ -362,6 +339,22 @@ public class UserFragmentDialog extends DialogFragment {
         calendar.setTimeInMillis(selection);
         return simpleDateFormat.format(calendar.getTime());
     }
+
+    private void updateDate() {
+        Calendar calendar = Calendar.getInstance();
+        year = String.valueOf(calendar.get(Calendar.YEAR));
+        month = String.format("%02d", calendar.get(Calendar.MONTH) + 1);
+        day = String.format("%02d", calendar.get(Calendar.DAY_OF_MONTH));
+        if (Integer.parseInt(day) > 25) {
+            if (Integer.parseInt(month) + 1 == 13) {
+                month = "01";
+                year = String.format("%d", Integer.parseInt(year) + 1);
+            } else {
+                month = String.format("%02d", Integer.parseInt(month) + 1);
+            }
+        }
+    }
+
 
     private void deleteEmployee() {
         db.collection("employees").document(employee.getId()).delete().addOnSuccessListener(unused -> {
@@ -393,6 +386,7 @@ public class UserFragmentDialog extends DialogFragment {
     }
 
     private void updateEmployee() {
+        updateDate();
         db.collection("employees").whereEqualTo("email", binding.emailEdit.getText().toString().trim())
                 .whereNotEqualTo("id", employee.getId())
                 .get().addOnSuccessListener(documents -> {
@@ -401,7 +395,6 @@ public class UserFragmentDialog extends DialogFragment {
                         binding.updateButton.setEnabled(true);
                         return;
                     }
-                    String id = employee.getId();
                     Map<String, Object> updatedEmpOverviewMap = new HashMap<>();
                     ArrayList<String> empInfo = new ArrayList<>();
                     empInfo.add((binding.firstNameEdit.getText()).toString());
@@ -410,30 +403,20 @@ public class UserFragmentDialog extends DialogFragment {
                     empInfo.add((employee.getManagerID()));
                     empInfo.add((employee.getProjectID()));
                     empInfo.add((employee.getManagerID() == null) ? "0" : "1");
-                    updatedEmpOverviewMap.put(id, empInfo);
-                    HashMap<String, Object> updatedEmployee = fillEmployeeData();
-                    db.collection("employees").document(id).update(updatedEmployee).addOnSuccessListener(unused -> {
-
-                        if (employee.getSalary() != Double.parseDouble(binding.salaryEdit.getText().toString()) || !employee.getCurrency().equals(binding.currencyAuto.getText().toString())) {
-                            ArrayList<Allowance> allTypes = new ArrayList<>();
-                            db.collection("EmployeesGrossSalary").document(employee.getId()).get().addOnSuccessListener((value) -> {
-                                if (!value.exists())
-                                    return;
-                                EmployeesGrossSalary employeesGrossSalary;
-                                employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
-                                allTypes.addAll(employeesGrossSalary.getAllTypes());
-                                allTypes.removeIf(allowance -> allowance.getType() == NETSALARY);
-                                allTypes.add(new Allowance("Net salary", Double.parseDouble(binding.salaryEdit.getText().toString()), NETSALARY, binding.currencyAuto.getText().toString()));
-                                db.collection("EmployeesGrossSalary").document(employee.getId()).update("allTypes", allTypes);
-                            });
-                        }
-                        updateEmployeeOverview(updatedEmpOverviewMap, updatedEmployee);
-
-                    }).addOnFailureListener(e -> {
-                        Toast.makeText(getActivity(), "Failed to update due to corrupted data ", Toast.LENGTH_SHORT).show();
-                        dismiss();
-
-                    });
+                    updatedEmpOverviewMap.put(employee.getId(), empInfo);
+                    updateEmployeeData();
+                    batch.set(db.collection("employees").document(employee.getId()),employee,SetOptions.merge());
+                    if (oldNetSalary.getAmount() != Double.parseDouble(binding.salaryEdit.getText().toString())
+                            || oldNetSalary.getCurrency()==null //for current data as some employees don't have currency
+                            || !oldNetSalary.getCurrency().equals(binding.currencyAuto.getText().toString())) {
+                        batch.update( db.collection("EmployeesGrossSalary").document(employee.getId()),"allTypes",FieldValue.arrayRemove(oldNetSalary));
+                        batch.update(db.collection("EmployeesGrossSalary").document(employee.getId()).collection(year).document(month),"allTypes",FieldValue.arrayRemove(oldNetSalary));
+                        oldNetSalary.setCurrency(binding.currencyAuto.getText().toString());
+                        oldNetSalary.setAmount(Double.parseDouble(binding.salaryEdit.getText().toString()));
+                        batch.update(db.collection("EmployeesGrossSalary").document(employee.getId()),"allTypes",FieldValue.arrayUnion(oldNetSalary));
+                        batch.update( db.collection("EmployeesGrossSalary").document(employee.getId()).collection(year).document(month),"allTypes",FieldValue.arrayUnion(oldNetSalary));
+                    }
+                    updateEmployeeOverview(updatedEmpOverviewMap);
                 });
     }
 

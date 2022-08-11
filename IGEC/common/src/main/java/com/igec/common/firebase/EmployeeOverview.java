@@ -1,9 +1,7 @@
 package com.igec.common.firebase;
 
-import com.google.firebase.firestore.Exclude;
 
 public class EmployeeOverview {
-    @Exclude
     public boolean isSelected = false;
     private String firstName, lastName, title, id, managerID, projectId;
 

@@ -145,11 +145,12 @@ public class AddProjectFragment extends Fragment {
     }
 
     private FragmentAddProjectBinding binding;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        binding =  FragmentAddProjectBinding.inflate(inflater, container, false);
-        return  binding.getRoot();
+        binding = FragmentAddProjectBinding.inflate(inflater, container, false);
+        return binding.getRoot();
     }
 
     @Override
@@ -271,13 +272,9 @@ public class AddProjectFragment extends Fragment {
                     .document("emp"), empInfoMap);
         }
         batch.commit();
-        if (!binding.managerIdLayout.isEnabled())
-            binding.managerIdAuto.setText("");
-        if (TeamID.size() > 0) {
-            ArrayAdapter<String> idAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, TeamID);
-            binding.managerIdAuto.setAdapter(idAdapter);
-
-        }
+        binding.managerIdLayout.setEnabled(Team.size() > 0);
+        ArrayAdapter<String> idAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, TeamID);
+        binding.managerIdAuto.setAdapter(idAdapter);
         adapter.notifyItemChanged(position);
     }
 

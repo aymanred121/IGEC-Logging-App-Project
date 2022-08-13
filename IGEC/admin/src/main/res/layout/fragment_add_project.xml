@@ -254,6 +254,7 @@
         android:layout_marginEnd="@dimen/mid"
         app:boxBackgroundMode="outline"
         app:endIconMode="dropdown_menu"
+        android:enabled="false"
         app:helperTextEnabled="true"
         app:layout_constraintEnd_toStartOf="@+id/manager_name_layout"
         app:layout_constraintStart_toStartOf="parent"

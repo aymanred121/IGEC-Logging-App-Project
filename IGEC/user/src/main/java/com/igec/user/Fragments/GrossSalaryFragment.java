@@ -78,7 +78,7 @@ public class GrossSalaryFragment extends Fragment {
         salarySummaries = new ArrayList<>();
         binding.recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
-        adapter = new AllowanceAdapter(salarySummaries, false);
+        adapter = new AllowanceAdapter(salarySummaries, false,false);
         binding.recyclerView.setLayoutManager(layoutManager);
         binding.recyclerView.setAdapter(adapter);
         @SuppressLint("SimpleDateFormat")

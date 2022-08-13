@@ -22,10 +22,12 @@ public class AllowanceAdapter extends RecyclerView.Adapter<AllowanceAdapter.Allo
     private ArrayList<Allowance> allowances = new ArrayList<>();
     private OnItemClickListener listener;
     private boolean canRemove;
+    private boolean clickable = true;
 
-    public AllowanceAdapter(ArrayList<Allowance> supplements, boolean canRemoveItem) {
+    public AllowanceAdapter(ArrayList<Allowance> supplements, boolean canRemoveItem, boolean clickable) {
         this.allowances = supplements;
         this.canRemove = canRemoveItem;
+        this.clickable = clickable;
     }
 
     public AllowanceAdapter(boolean canRemove) {
@@ -36,7 +38,7 @@ public class AllowanceAdapter extends RecyclerView.Adapter<AllowanceAdapter.Allo
     @Override
     public AllowanceViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.item_allowance, parent, false);
-        return new AllowanceViewHolder(v, listener, canRemove);
+        return new AllowanceViewHolder(v, listener, canRemove, clickable);
     }
 
     @Override
@@ -100,7 +102,7 @@ public class AllowanceAdapter extends RecyclerView.Adapter<AllowanceAdapter.Allo
         public TextView vName, vAmount, vNote;
         public FloatingActionButton vDelete;
 
-        public AllowanceViewHolder(@NonNull View itemView, OnItemClickListener listener, boolean canRemove) {
+        public AllowanceViewHolder(@NonNull View itemView, OnItemClickListener listener, boolean canRemove, boolean clickable) {
             super(itemView);
 
             vName = itemView.findViewById(R.id.TextView_ReasonFor);
@@ -120,14 +122,15 @@ public class AllowanceAdapter extends RecyclerView.Adapter<AllowanceAdapter.Allo
                     }
                 });
             }
-            itemView.setOnClickListener(v -> {
-                if (listener != null) {
-                    int position = getAdapterPosition();
-                    if (position != RecyclerView.NO_POSITION) {
-                        listener.onItemClick(position);
+            if (clickable)
+                itemView.setOnClickListener(v -> {
+                    if (listener != null) {
+                        int position = getAdapterPosition();
+                        if (position != RecyclerView.NO_POSITION) {
+                            listener.onItemClick(position);
+                        }
                     }
-                }
-            });
+                });
 
         }
     }

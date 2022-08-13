@@ -68,7 +68,7 @@ public class VacationsLogFragment extends Fragment {
 
         binding.recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
-        adapter = new VacationAdapter(vacations);
+        adapter = new VacationAdapter(vacations,false);
         binding.recyclerView.setLayoutManager(layoutManager);
         binding.recyclerView.setAdapter(adapter);
 

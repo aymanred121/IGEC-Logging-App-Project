@@ -107,7 +107,7 @@ public class AddAllowanceDialog extends DialogFragment {
     private void initialize() {
         binding.recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
-        adapter = new AllowanceAdapter(allowances, true);
+        adapter = new AllowanceAdapter(allowances, true,true);
         binding.recyclerView.setLayoutManager(layoutManager);
         binding.recyclerView.setAdapter(adapter);
     }

@@ -42,16 +42,17 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
             super(itemView);
             vName = itemView.findViewById(R.id.TextView_Name);
             vID = itemView.findViewById(R.id.TextView_ID);
-            itemView.setOnClickListener(v -> {
-                if (listener != null) {
-                    int position = getAdapterPosition();
-                    if (position != RecyclerView.NO_POSITION) {
-                        listener.onItemClick(position);
-                    }
-                }
-            });
-
             vSelected = itemView.findViewById(R.id.ImageView_EmployeeSelected);
+            if (!isAdd) {
+                itemView.setOnClickListener(v -> {
+                    if (listener != null) {
+                        int position = getAdapterPosition();
+                        if (position != RecyclerView.NO_POSITION) {
+                            listener.onItemClick(position);
+                        }
+                    }
+                });
+            }
             vSelected.setVisibility(isAdd ? View.VISIBLE : View.GONE);
             vSelected.setOnClickListener(v -> {
                 if (listener != null) {

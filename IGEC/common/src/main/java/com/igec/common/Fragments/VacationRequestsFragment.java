@@ -77,7 +77,7 @@ public class VacationRequestsFragment extends Fragment {
         vacationRequests = new ArrayList<>();
         binding.recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
-        adapter = new VacationAdapter(vacationRequests);
+        adapter = new VacationAdapter(vacationRequests,true);
         binding.recyclerView.setLayoutManager(layoutManager);
         binding.recyclerView.setAdapter(adapter);
         loadVacations();

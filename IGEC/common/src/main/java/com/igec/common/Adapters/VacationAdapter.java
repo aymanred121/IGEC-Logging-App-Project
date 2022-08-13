@@ -24,6 +24,7 @@ import java.util.Locale;
 public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.VacationViewHolder> {
     private ArrayList<VacationRequest> vacationsList;
     private OnItemClickListener listener;
+    private boolean clickable;
 
     public interface OnItemClickListener {
         void onItemClick(int position);
@@ -33,15 +34,16 @@ public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.Vacati
         this.listener = listener;
     }
 
-    public VacationAdapter(ArrayList<VacationRequest> vacationsList) {
+    public VacationAdapter(ArrayList<VacationRequest> vacationsList, boolean clickable) {
         this.vacationsList = vacationsList;
+        this.clickable = clickable;
     }
 
     @NonNull
     @Override
     public VacationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.item_vacation_request, parent, false);
-        return new VacationViewHolder(v, listener);
+        return new VacationViewHolder(v, listener, clickable);
 
     }
 
@@ -100,7 +102,7 @@ public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.Vacati
         public TextView vVacationDays;
 
 
-        public VacationViewHolder(@NonNull View itemView, OnItemClickListener listener) {
+        public VacationViewHolder(@NonNull View itemView, OnItemClickListener listener, boolean clickable) {
             super(itemView);
             layout = itemView.findViewById(R.id.layout);
             vName = itemView.findViewById(R.id.TextView_Name);
@@ -108,14 +110,15 @@ public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.Vacati
             vVacationDays = itemView.findViewById(R.id.TextView_VacationDays);
             vVacationStartDate = itemView.findViewById(R.id.TextView_VacationStartDate);
 
-            itemView.setOnClickListener(v -> {
-                if (listener != null) {
-                    int position = getAdapterPosition();
-                    if (position != RecyclerView.NO_POSITION) {
-                        listener.onItemClick(position);
+            if (clickable)
+                itemView.setOnClickListener(v -> {
+                    if (listener != null) {
+                        int position = getAdapterPosition();
+                        if (position != RecyclerView.NO_POSITION) {
+                            listener.onItemClick(position);
+                        }
                     }
-                }
-            });
+                });
 
 
         }

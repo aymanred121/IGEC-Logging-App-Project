@@ -6,4 +6,5 @@ public class CONSTANTS {
     public static final String IGEC = "IGEC";
     public static final String ID = "ID";
     public static final String LOGGED = "LOGGED";
+    public static final String ADMIN = "adminID";
 }

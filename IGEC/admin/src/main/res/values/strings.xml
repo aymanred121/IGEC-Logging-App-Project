@@ -40,7 +40,7 @@
     <string name="company_name">Company Name</string>
     <string name="company_email">Company Email</string>
     <string name="company_phone_number">Company Phone Number</string>
-    <string name="Done">Done</string>
+    <string name="done">Done</string>
     <string name="note">Notes</string>
     <string name="reference">Reference</string>
     <string name="office_work">Office Work</string>
@@ -89,4 +89,5 @@
     <string name="plus_code">Plus Code</string>
     <string name="diameter">Area (m²)</string>
     <string name="currency">Currency</string>
+    <string name="team">Team</string>
 </resources>

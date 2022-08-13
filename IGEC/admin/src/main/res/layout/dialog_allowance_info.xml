@@ -126,7 +126,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/high"
             android:layout_marginBottom="@dimen/vhigh"
-            android:text="@string/Done"
+            android:text="@string/done"
             android:textAllCaps="false"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

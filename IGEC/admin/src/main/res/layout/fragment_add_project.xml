@@ -256,6 +256,7 @@
         app:endIconMode="dropdown_menu"
         android:enabled="false"
         app:helperTextEnabled="true"
+        android:visibility="gone"
         app:layout_constraintEnd_toStartOf="@+id/manager_name_layout"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/contract_type_layout">
@@ -281,6 +282,7 @@
         android:layout_marginEnd="@dimen/vhigh"
         app:boxBackgroundMode="outline"
         app:helperTextEnabled="true"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/manager_id_Layout"
         app:layout_constraintTop_toBottomOf="@id/contract_type_layout">
@@ -309,7 +311,7 @@
         android:textAllCaps="false"
         app:layout_constraintEnd_toStartOf="@id/allowances_button"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/manager_id_Layout" />
+        app:layout_constraintTop_toBottomOf="@id/contract_type_layout" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/allowances_button"
@@ -323,7 +325,7 @@
         android:textAllCaps="false"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/client_button"
-        app:layout_constraintTop_toBottomOf="@id/manager_id_Layout" />
+        app:layout_constraintTop_toBottomOf="@id/contract_type_layout" />
 
 
     <androidx.recyclerview.widget.RecyclerView
@@ -336,6 +338,7 @@
         android:layout_marginBottom="96dp"
         android:overScrollMode="never"
         android:scrollbars="vertical"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -350,6 +353,19 @@
         android:text="@string/register"
         android:textAllCaps="false"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/team_button"
+        android:layout_width="0dp"
+        android:layout_marginStart="@dimen/vhigh"
+        android:layout_marginEnd="@dimen/vhigh"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/vhigh"
+        android:text="@string/team"
+        android:textAllCaps="false"
+        app:layout_constraintTop_toBottomOf="@id/client_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 

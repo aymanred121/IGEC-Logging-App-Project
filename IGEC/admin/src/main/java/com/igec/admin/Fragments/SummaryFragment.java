@@ -44,6 +44,7 @@ import com.whiteelephant.monthpicker.MonthPickerDialog;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -53,9 +54,7 @@ public class SummaryFragment extends Fragment {
     private EmployeeAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
     private String year, month, prevMonth, prevYear;
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    ArrayList<EmployeeOverview> employees = new ArrayList();
-    ArrayList<Project> projects = new ArrayList();
+    private ArrayList<EmployeeOverview> employees;
 
 
     private FragmentSummaryBinding binding;
@@ -86,6 +85,7 @@ public class SummaryFragment extends Fragment {
 
     // Functions
     private void initialize() {
+        employees = new ArrayList<>();
         binding.recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
         adapter = new EmployeeAdapter(employees, false);
@@ -93,15 +93,6 @@ public class SummaryFragment extends Fragment {
         binding.recyclerView.setAdapter(adapter);
         getEmployees();
 
-    }
-
-    void getProjects() {
-        PROJECT_COL.addSnapshotListener((queryDocumentSnapshots, e) -> {
-            projects.clear();
-            for (DocumentSnapshot d : queryDocumentSnapshots) {
-                projects.add(d.toObject(Project.class));
-            }
-        });
     }
 
     void getEmployees() {
@@ -130,6 +121,7 @@ public class SummaryFragment extends Fragment {
             String id = (key);
             employees.add(new EmployeeOverview(firstName, lastName, title, id));
         }
+        employees.sort(Comparator.comparing(EmployeeOverview::getId));
         adapter.setEmployeeOverviewsList(employees);
         adapter.notifyDataSetChanged();
     }
@@ -143,28 +135,21 @@ public class SummaryFragment extends Fragment {
                         binding.monthLayout.setError(null);
                         binding.monthLayout.setErrorEnabled(false);
                         binding.monthEdit.setText(String.format("%d/%d", selectedMonth + 1, selectedYear));
-                        String[] selectedDate = binding.monthEdit.getText().toString().split("/");
-                        year = selectedDate[1];
-                        month = selectedDate[0];
-                        if (month.length() == 1) {
-                            month = "0" + month;
-                        }
-                        if ((Integer.parseInt(month) - 1) < 1) {
+                        year = String.format("%d", selectedYear);
+                        month = String.format("%02d", selectedMonth);
+
+                        if (selectedMonth - 1 == 0) {
                             prevMonth = "12";
-                            prevYear = Integer.parseInt(year) - 1 + "";
+                            prevYear = String.format("%d", selectedYear - 1);
                         } else {
-                            prevMonth = (Integer.parseInt(month) - 1) + "";
+                            prevMonth = String.format("%02d", selectedMonth - 1);
                             prevYear = year;
-                        }
-                        if (prevMonth.length() == 1) {
-                            prevMonth = "0" + prevMonth;
                         }
                     }
                 }, today.get(Calendar.YEAR), today.get(Calendar.MONTH));
         builder.setActivatedMonth(today.get(Calendar.MONTH))
-                .setMinYear(today.get(Calendar.YEAR) - 1)
                 .setActivatedYear(today.get(Calendar.YEAR))
-                .setMaxYear(today.get(Calendar.YEAR) + 1)
+                .setMaxYear(today.get(Calendar.YEAR))
                 .setTitle("Select Month")
                 .build().show();
 
@@ -174,7 +159,6 @@ public class SummaryFragment extends Fragment {
         if (binding.monthEdit.getText().toString().isEmpty()) {
             binding.monthLayout.setError("Please select a month");
         } else {
-            String[] selectedDate = binding.monthEdit.getText().toString().split("/");
             EMPLOYEE_COL
                     .get()
                     .addOnSuccessListener(queryDocumentSnapshots -> {
@@ -233,6 +217,9 @@ public class SummaryFragment extends Fragment {
                                             }
                                         }
                                     }
+
+
+
                                     nextMonth = other + personal + accommodation + site + remote + food;
                                     currentMonth = transportation + emp.getSalary() + cuts + overTime;
                                     if (!doc.exists())

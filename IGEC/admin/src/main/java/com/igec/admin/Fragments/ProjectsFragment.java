@@ -25,11 +25,9 @@ import java.util.ArrayList;
 
 public class ProjectsFragment extends Fragment {
     //vars
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
-    ArrayList<Project>projects = new ArrayList<>();
+    ArrayList<Project> projects;
     ProjectAdapter adapter;
     RecyclerView.LayoutManager layoutManager;
-
     private FragmentProjectsBinding binding;
     @Nullable
     @Override
@@ -52,6 +50,7 @@ public class ProjectsFragment extends Fragment {
     }
 
     void initialize(){
+        projects = new ArrayList<>();
         binding.recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
         adapter = new ProjectAdapter(projects);

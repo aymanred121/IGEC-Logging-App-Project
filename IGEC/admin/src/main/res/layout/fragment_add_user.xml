@@ -268,7 +268,7 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/insurance_number"
 
-                android:inputType="number"
+                android:inputType="text"
                 android:padding="14dp"
                 android:singleLine="true" />
 

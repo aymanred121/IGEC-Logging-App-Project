@@ -35,11 +35,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 
 public class MachinesFragment extends Fragment {
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
-    ArrayList<Machine> machines = new ArrayList();
+    ArrayList<Machine> machines;
     MachineAdapter adapter;
     RecyclerView.LayoutManager layoutManager;
-
     private FragmentMachinesBinding binding;
 
     @Nullable
@@ -52,6 +50,7 @@ public class MachinesFragment extends Fragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        binding = null;
     }
 
     @Override
@@ -62,6 +61,7 @@ public class MachinesFragment extends Fragment {
     }
 
     private void initialize() {
+        machines = new ArrayList<>();
         binding.recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
         adapter = new MachineAdapter(machines);

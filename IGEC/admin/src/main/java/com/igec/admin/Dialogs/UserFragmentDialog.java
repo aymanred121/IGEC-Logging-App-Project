@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -75,23 +76,20 @@ public class UserFragmentDialog extends DialogFragment {
     private Employee employee;
     private EmployeeOverview oldEmployeeOverviewData;
     private Allowance oldNetSalary = new Allowance();
-    private ArrayList<EmployeeOverview> employeeOverviewArrayList;
-    private int currEmpOverviewPos;
     private long hireDate;
-    private String year,month,day;
+    private String year, month, day;
     private WriteBatch batch = db.batch();
-
-    public UserFragmentDialog(Employee employee, ArrayList<EmployeeOverview> employeeOverviewArrayList, int currEmpOverviewPos) {
-        this.employee = employee;
-        this.employeeOverviewArrayList = employeeOverviewArrayList;
-        this.currEmpOverviewPos = currEmpOverviewPos;
+    public static UserFragmentDialog newInstance(Employee employee) {
+        Bundle args = new Bundle();
+        args.putSerializable("employee", employee);
+        UserFragmentDialog fragment = new UserFragmentDialog();
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-
-
         Dialog dialog = super.onCreateDialog(savedInstanceState);
         Window window = dialog.getWindow();
 
@@ -103,12 +101,14 @@ public class UserFragmentDialog extends DialogFragment {
     }
 
     private FragmentAddUserBinding binding;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         binding = FragmentAddUserBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -121,6 +121,7 @@ public class UserFragmentDialog extends DialogFragment {
         binding.updateButton.setOnClickListener(clUpdate);
         binding.deleteButton.setOnClickListener(clDelete);
         binding.unlockButton.setOnClickListener(clUnlock);
+        binding.adminCheckbox.setOnCheckedChangeListener((compoundButton, b) -> binding.deleteButton.setEnabled(!b));
         binding.passwordLayout.setEndIconOnClickListener(oclPasswordGenerate);
         for (Pair<TextInputLayout, EditText> v : views) {
             if (v.first != binding.emailLayout)
@@ -147,6 +148,7 @@ public class UserFragmentDialog extends DialogFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        binding = null;
     }
 
     @Override
@@ -161,6 +163,7 @@ public class UserFragmentDialog extends DialogFragment {
 
     // Functions
     private void initialize() {
+        employee = (Employee) getArguments().getSerializable("employee");
         vDatePickerBuilder.setTitleText("Hire Date");
         vDatePicker = vDatePickerBuilder.build();
         binding.registerButton.setVisibility(View.GONE);
@@ -210,7 +213,8 @@ public class UserFragmentDialog extends DialogFragment {
         binding.passwordLayout.setEndIconMode(END_ICON_CUSTOM);
         binding.passwordLayout.setEndIconDrawable(R.drawable.ic_baseline_autorenew_24);
         binding.passwordEdit.setEnabled(false);
-        binding.deleteButton.setEnabled(employee.getManagerID() == null || !employee.getManagerID().equals(ADMIN));
+        binding.deleteButton.setEnabled((employee.getManagerID() == null || !employee.getManagerID().equals(ADMIN)) && !employee.isAdmin());
+        // can't remove employee without having checkout all his machines
         MACHINE_EMPLOYEE_COL.whereEqualTo("employee.id", employee.getId()).addSnapshotListener((docs, e) -> {
             // no machines found = enabled X
             // a machine without a check-out = disabled
@@ -247,15 +251,88 @@ public class UserFragmentDialog extends DialogFragment {
         return !generateError();
     }
 
-    private void updateEmployeeOverview(Map<String, Object> updatedEmpOverviewMap) {
-        batch.update(EMPLOYEE_OVERVIEW_REF,updatedEmpOverviewMap);
-        updateMachineEmployee();
+    // update data
+    private void updateEmployee() {
+        updateDate();
+        // check if the new e-mail is taken
+        EMPLOYEE_COL.whereEqualTo("email", binding.emailEdit.getText().toString().trim())
+                .whereNotEqualTo("id", employee.getId())
+                .get().addOnSuccessListener(documents -> {
+
+                    if (documents.getDocuments().size() != 0) {
+                        binding.emailLayout.setError("This Email already exists");
+                        binding.updateButton.setEnabled(true);
+                        return;
+                    }
+                    // employeeOverview
+                    updateEmployeeOverview();
+                    // employees
+                    updateEmployeeData();
+                    // grossSalary
+
+                    if (oldNetSalary.getAmount() != Double.parseDouble(binding.salaryEdit.getText().toString())
+                            || oldNetSalary.getCurrency() == null //for current data as some employees don't have currency
+                            || !oldNetSalary.getCurrency().equals(binding.currencyAuto.getText().toString())) {
+                        // remove old grossSalary
+                        EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()).collection(year).document(month).get().addOnSuccessListener(un -> {
+                            if (!un.exists()) {
+                                batch.update(EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()), "allTypes", FieldValue.arrayRemove(oldNetSalary));
+                                // update netSalary
+                                oldNetSalary.setCurrency(binding.currencyAuto.getText().toString());
+                                oldNetSalary.setAmount(Double.parseDouble(binding.salaryEdit.getText().toString()));
+                                // update grossSalary
+                                batch.update(EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()), "allTypes", FieldValue.arrayUnion(oldNetSalary));
+                            } else {
+                                batch.update(EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()), "allTypes", FieldValue.arrayRemove(oldNetSalary));
+                                batch.update(EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()).collection(year).document(month), "allTypes", FieldValue.arrayRemove(oldNetSalary));
+
+                                // update netSalary
+                                oldNetSalary.setCurrency(binding.currencyAuto.getText().toString());
+                                oldNetSalary.setAmount(Double.parseDouble(binding.salaryEdit.getText().toString()));
+
+                                batch.update(EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()), "allTypes", FieldValue.arrayUnion(oldNetSalary));
+                                batch.update(EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()).collection(year).document(month), "allTypes", FieldValue.arrayUnion(oldNetSalary));
+                            }
+                            // machine employee
+                            updateMachineEmployee();
+
+                        });
+                    }
+                });
+    }
+
+    private void updateDate() {
+        Calendar calendar = Calendar.getInstance();
+        year = String.valueOf(calendar.get(Calendar.YEAR));
+        month = String.format("%02d", calendar.get(Calendar.MONTH) + 1);
+        day = String.format("%02d", calendar.get(Calendar.DAY_OF_MONTH));
+        if (Integer.parseInt(day) > 25) {
+            if (Integer.parseInt(month) + 1 == 13) {
+                month = "01";
+                year = String.format("%d", Integer.parseInt(year) + 1);
+            } else {
+                month = String.format("%02d", Integer.parseInt(month) + 1);
+            }
+        }
+    }
+
+    private void updateEmployeeOverview() {
+        Map<String, Object> updatedEmpOverviewMap = new HashMap<>();
+        ArrayList<String> empInfo = new ArrayList<>();
+        empInfo.add((binding.firstNameEdit.getText()).toString());
+        empInfo.add((binding.secondNameEdit.getText()).toString());
+        empInfo.add((binding.titleEdit.getText()).toString());
+        empInfo.add((employee.getManagerID()));
+        empInfo.add((employee.getProjectID()));
+        empInfo.add((employee.getManagerID() == null) ? "0" : "1");
+        updatedEmpOverviewMap.put(employee.getId(), empInfo);
+        batch.update(EMPLOYEE_OVERVIEW_REF, updatedEmpOverviewMap);
     }
 
     private void updateMachineEmployee() {
         MACHINE_EMPLOYEE_COL.whereEqualTo("employee.id", employee.getId()).get().addOnSuccessListener(queryDocumentSnapshots -> {
             for (QueryDocumentSnapshot d : queryDocumentSnapshots) {
-                batch.update( MACHINE_EMPLOYEE_COL.document(d.getId()),"employee", employee);
+                batch.update(MACHINE_EMPLOYEE_COL.document(d.getId()), "employee", employee);
             }
             updateProjects();
         });
@@ -264,16 +341,18 @@ public class UserFragmentDialog extends DialogFragment {
     private void updateVacation() {
         VACATION_COL.whereEqualTo("employee.id", employee.getId()).get().addOnSuccessListener(queryDocumentSnapshots -> {
             for (QueryDocumentSnapshot d : queryDocumentSnapshots) {
-                batch.update( VACATION_COL.document(d.getId()),"employee", employee);
+                batch.update(VACATION_COL.document(d.getId()), "employee", employee);
             }
             VACATION_COL.whereEqualTo("manager.id", employee.getId()).get().addOnSuccessListener(queryDocumentSnapshot -> {
                 for (QueryDocumentSnapshot d : queryDocumentSnapshot) {
-                    batch.update(VACATION_COL.document(d.getId()),"manager", employee);
+                    batch.update(VACATION_COL.document(d.getId()), "manager", employee);
                 }
                 batch.commit().addOnSuccessListener(unused1 -> {
                     binding.updateButton.setEnabled(true);
                     dismiss();
-                }).addOnFailureListener(e-> Toast.makeText(getActivity(), e.toString(), Toast.LENGTH_SHORT).show());
+                }).addOnFailureListener(e -> {
+                    Toast.makeText(getActivity(), e.toString(), Toast.LENGTH_SHORT).show();
+                });
             });
         });
 
@@ -282,28 +361,27 @@ public class UserFragmentDialog extends DialogFragment {
     private void updateProjects() {
         EmployeeOverview tempEmp = new EmployeeOverview(binding.firstNameEdit.getText().toString(), binding.secondNameEdit.getText().toString(), binding.titleEdit.getText().toString(), employee.getId(), employee.getProjectID(), employee.getProjectID() != null);
         tempEmp.setManagerID(employee.getManagerID());
-        employeeOverviewArrayList.set(currEmpOverviewPos, tempEmp);
         if (employee.getProjectID() == null) {
             updateVacation();
             return;
         }
-        batch.update( PROJECT_COL.document(employee.getProjectID()),"employees",FieldValue.arrayRemove(oldEmployeeOverviewData));
-        if (tempEmp.getManagerID().equals(ADMIN)){
-            batch.update(PROJECT_COL.document(employee.getProjectID()),"managerName", tempEmp.getFirstName() + " " + tempEmp.getLastName(), "employees", FieldValue.arrayUnion(tempEmp));
-        }else{
-            batch.update(  PROJECT_COL.document(employee.getProjectID()),"employees",FieldValue.arrayUnion(tempEmp));
+        // update employee data in project
+        batch.update(PROJECT_COL.document(employee.getProjectID()), "employees", FieldValue.arrayRemove(oldEmployeeOverviewData));
+        if (tempEmp.getManagerID().equals(ADMIN)) {
+            batch.update(PROJECT_COL.document(employee.getProjectID()), "managerName", tempEmp.getFirstName() + " " + tempEmp.getLastName(), "employees", FieldValue.arrayUnion(tempEmp));
+        } else {
+            batch.update(PROJECT_COL.document(employee.getProjectID()), "employees", FieldValue.arrayUnion(tempEmp));
         }
         updateVacation();
 
     }
-
 
     private void updateEmployeeData() {
         oldNetSalary.setAmount(employee.getSalary());
         oldNetSalary.setType(allowancesEnum.NETSALARY.ordinal());
         oldNetSalary.setCurrency(employee.getCurrency());
         oldNetSalary.setName("Net salary");
-        oldEmployeeOverviewData = new EmployeeOverview(employee.getFirstName(), employee.getLastName(), employee.getTitle(), employee.getId(),employee.getProjectID(),employee.getProjectID() != null);
+        oldEmployeeOverviewData = new EmployeeOverview(employee.getFirstName(), employee.getLastName(), employee.getTitle(), employee.getId(), employee.getProjectID(), employee.getProjectID() != null);
         oldEmployeeOverviewData.setManagerID(employee.getManagerID());
         employee.setAdmin(binding.adminCheckbox.isChecked());
         employee.setArea(binding.areaEdit.getText().toString());
@@ -323,8 +401,39 @@ public class UserFragmentDialog extends DialogFragment {
         employee.setStreet(binding.streetEdit.getText().toString());
         employee.setTemporary(binding.temporaryCheckbox.isChecked());
         employee.setTitle(binding.titleEdit.getText().toString());
+        batch.set(EMPLOYEE_COL.document(employee.getId()), employee, SetOptions.merge());
     }
 
+    // delete
+    private void deleteEmployee() {
+        batch = db.batch();
+        // employee
+        batch.delete(EMPLOYEE_COL.document(employee.getId()));
+
+        // employeeOverview
+        batch.update(EMPLOYEE_OVERVIEW_REF, employee.getId(), FieldValue.delete());
+
+        if (employee.getProjectID() != null)
+            batch.update(PROJECT_COL.document(employee.getProjectID()), "employees", FieldValue.arrayRemove(oldEmployeeOverviewData));
+
+        VACATION_COL.whereEqualTo("employee.id", employee.getId()).whereEqualTo("vacationStatus", 0).get().addOnSuccessListener(documentQuery -> {
+            for (QueryDocumentSnapshot d : documentQuery) {
+                batch.delete(VACATION_COL.document(d.getId()));
+            }
+            batch.commit().addOnSuccessListener(unused -> {
+                Toast.makeText(getActivity(), "Deleted", Toast.LENGTH_SHORT).show();
+                binding.deleteButton.setEnabled(true);
+                dismiss();
+            }).addOnFailureListener(e -> {
+                Toast.makeText(getActivity(), e.toString(), Toast.LENGTH_SHORT).show();
+            });
+        });
+
+
+    }
+
+
+    // helper functions
     private String encryptedPassword() {
         try {
             return Base64.getEncoder().encodeToString(encrypt(binding.passwordEdit.getText().toString()));
@@ -341,91 +450,9 @@ public class UserFragmentDialog extends DialogFragment {
         return simpleDateFormat.format(calendar.getTime());
     }
 
-    private void updateDate() {
-        Calendar calendar = Calendar.getInstance();
-        year = String.valueOf(calendar.get(Calendar.YEAR));
-        month = String.format("%02d", calendar.get(Calendar.MONTH) + 1);
-        day = String.format("%02d", calendar.get(Calendar.DAY_OF_MONTH));
-        if (Integer.parseInt(day) > 25) {
-            if (Integer.parseInt(month) + 1 == 13) {
-                month = "01";
-                year = String.format("%d", Integer.parseInt(year) + 1);
-            } else {
-                month = String.format("%02d", Integer.parseInt(month) + 1);
-            }
-        }
-    }
-
-
-    private void deleteEmployee() {
-        EMPLOYEE_COL.document(employee.getId()).delete().addOnSuccessListener(unused -> {
-            EMPLOYEE_OVERVIEW_REF.update(employee.getId(), FieldValue.delete()).addOnSuccessListener(unused1 -> {
-                if (employee.getProjectID() == null) {
-                    Toast.makeText(getActivity(), "Deleted", Toast.LENGTH_SHORT).show();
-                    binding.deleteButton.setEnabled(true);
-                    dismiss();
-                    return;
-                }
-                EmployeeOverview tEmp = new EmployeeOverview(employee.getFirstName(), employee.getLastName(), employee.getTitle(), employee.getId());
-                tEmp.setManagerID(employee.getManagerID());
-                tEmp.setProjectId(employee.getProjectID());
-                PROJECT_COL.document(employee.getProjectID()).update("employees", FieldValue.arrayRemove(tEmp))
-                        .addOnSuccessListener(documentSnapshot -> {
-                            VACATION_COL.whereEqualTo("employee.id", employee.getId()).whereEqualTo("vacationStatus", 0).get().addOnSuccessListener(documentQuery -> {
-                                for (QueryDocumentSnapshot d : documentQuery) {
-                                    VACATION_COL.document(d.getId()).delete();
-                                }
-                                Toast.makeText(getActivity(), "Deleted", Toast.LENGTH_SHORT).show();
-                                binding.deleteButton.setEnabled(true);
-                                dismiss();
-                            });
-                        });
-
-            });
-
-        });
-    }
-
-    private void updateEmployee() {
-        updateDate();
-        EMPLOYEE_COL.whereEqualTo("email", binding.emailEdit.getText().toString().trim())
-                .whereNotEqualTo("id", employee.getId())
-                .get().addOnSuccessListener(documents -> {
-                    if (documents.getDocuments().size() != 0) {
-                        binding.emailLayout.setError("This Email already exists");
-                        binding.updateButton.setEnabled(true);
-                        return;
-                    }
-                    Map<String, Object> updatedEmpOverviewMap = new HashMap<>();
-                    ArrayList<String> empInfo = new ArrayList<>();
-                    empInfo.add((binding.firstNameEdit.getText()).toString());
-                    empInfo.add((binding.secondNameEdit.getText()).toString());
-                    empInfo.add((binding.titleEdit.getText()).toString());
-                    empInfo.add((employee.getManagerID()));
-                    empInfo.add((employee.getProjectID()));
-                    empInfo.add((employee.getManagerID() == null) ? "0" : "1");
-                    updatedEmpOverviewMap.put(employee.getId(), empInfo);
-                    updateEmployeeData();
-                    batch.set(EMPLOYEE_COL.document(employee.getId()),employee,SetOptions.merge());
-                    if (oldNetSalary.getAmount() != Double.parseDouble(binding.salaryEdit.getText().toString())
-                            || oldNetSalary.getCurrency()==null //for current data as some employees don't have currency
-                            || !oldNetSalary.getCurrency().equals(binding.currencyAuto.getText().toString())) {
-                        batch.update( EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()),"allTypes",FieldValue.arrayRemove(oldNetSalary));
-                        batch.update(EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()).collection(year).document(month),"allTypes",FieldValue.arrayRemove(oldNetSalary));
-                        oldNetSalary.setCurrency(binding.currencyAuto.getText().toString());
-                        oldNetSalary.setAmount(Double.parseDouble(binding.salaryEdit.getText().toString()));
-                        batch.update(EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()),"allTypes",FieldValue.arrayUnion(oldNetSalary));
-                        batch.update( EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()).collection(year).document(month),"allTypes",FieldValue.arrayUnion(oldNetSalary));
-                    }
-                    updateEmployeeOverview(updatedEmpOverviewMap);
-                });
-    }
-
     // Listeners
     private View.OnClickListener clUpdate = v -> {
-        if (!validateInputs()) {
-            return;
-        }
+        if (!validateInputs()) return;
         binding.updateButton.setEnabled(false);
         updateEmployee();
 

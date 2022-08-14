@@ -14,7 +14,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -22,6 +21,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.google.firebase.firestore.SetOptions;
 import com.igec.admin.R;
 import com.igec.admin.databinding.FragmentAddUserBinding;
 import com.igec.common.firebase.Allowance;
@@ -29,14 +29,10 @@ import com.igec.common.firebase.Employee;
 import com.igec.common.firebase.EmployeesGrossSalary;
 import com.igec.common.utilities.allowancesEnum;
 import com.github.javafaker.Faker;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.WriteBatch;
 
@@ -64,10 +60,11 @@ public class AddUserFragment extends Fragment {
     private WriteBatch batch = FirebaseFirestore.getInstance().batch();
 
     private FragmentAddUserBinding binding;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        binding = FragmentAddUserBinding.inflate(inflater,container,false);
+        binding = FragmentAddUserBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 
@@ -84,11 +81,11 @@ public class AddUserFragment extends Fragment {
         // Listeners
         binding.emailEdit.addTextChangedListener(twEmail);
         binding.hireDateLayout.setEndIconOnClickListener(oclHireDate);
+        binding.hireDateLayout.setErrorIconDrawable(R.drawable.ic_baseline_calendar_month_24);
         binding.hireDateLayout.setErrorIconOnClickListener(oclHireDate);
         binding.registerButton.setOnClickListener(clRegister);
         vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);
         binding.adminCheckbox.setOnClickListener(oclAdmin);
-        binding.hireDateLayout.setErrorIconDrawable(R.drawable.ic_baseline_calendar_month_24);
         for (Pair<TextInputLayout, EditText> v : views) {
             if (v.first != binding.emailLayout)
                 v.second.addTextChangedListener(new TextWatcher() {
@@ -163,12 +160,8 @@ public class AddUserFragment extends Fragment {
                 return;
             }
 
+            // employeeOverview
             String id = db.collection("EmployeeOverview").document().getId().substring(0, 5);
-            EmployeesGrossSalary employeesGrossSalary = new EmployeesGrossSalary();
-            ArrayList<Allowance> allTypes = new ArrayList<>();
-            allTypes.add(new Allowance("Net salary", Double.parseDouble(binding.salaryEdit.getText().toString()), allowancesEnum.NETSALARY.ordinal(), binding.currencyAuto.getText().toString()));
-            employeesGrossSalary.setEmployeeId(id);
-            employeesGrossSalary.setAllTypes(allTypes);
             ArrayList<String> empInfo = new ArrayList<>();
             empInfo.add((binding.firstNameEdit.getText()).toString());
             empInfo.add((binding.secondNameEdit.getText()).toString());
@@ -178,15 +171,23 @@ public class AddUserFragment extends Fragment {
             empInfo.add("0"); // isSelected
             Map<String, Object> empInfoMap = new HashMap<>();
             empInfoMap.put(id, empInfo);
-            EMPLOYEE_OVERVIEW_REF.update(empInfoMap).addOnFailureListener(e -> EMPLOYEE_OVERVIEW_REF.set(empInfoMap));
+            batch.set(EMPLOYEE_OVERVIEW_REF, empInfoMap, SetOptions.merge());
+
+            // employees
             Employee newEmployee = fillEmployeeData();
             newEmployee.setId(id);
-            //get year from hire date
-            String year = binding.hireDateEdit.getText().toString().substring(6, 10);
-            String month = binding.hireDateEdit.getText().toString().substring(3, 5);
             batch.set(EMPLOYEE_COL.document(id), newEmployee);
-            //batch.set(db.collection("EmployeesGrossSalary").document(id).collection(year).document(month), employeesGrossSalary);
+
+
+            // grossSalary
+            EmployeesGrossSalary employeesGrossSalary = new EmployeesGrossSalary();
+            ArrayList<Allowance> allTypes = new ArrayList<>();
+            allTypes.add(new Allowance("Net salary", Double.parseDouble(binding.salaryEdit.getText().toString()), allowancesEnum.NETSALARY.ordinal(), binding.currencyAuto.getText().toString()));
+            employeesGrossSalary.setEmployeeId(id);
+            employeesGrossSalary.setAllTypes(allTypes);
             batch.set(EMPLOYEE_GROSS_SALARY_COL.document(id), employeesGrossSalary);
+
+
             batch.commit().addOnSuccessListener(unused -> {
                 clearInputs();
                 fakeData();
@@ -257,7 +258,9 @@ public class AddUserFragment extends Fragment {
         binding.passwordEdit.setText("1");
         binding.phoneEdit.setText(faker.phoneNumber().phoneNumber());
         binding.titleEdit.setText("eng");
-        binding.salaryEdit.setText(faker.numerify("#####"));
+        binding.adminCheckbox.setChecked(faker.bool().bool());
+        binding.salaryEdit.setText(faker.numerify("####"));
+        binding.currencyAuto.setText("EGP");
         binding.insuranceNumberEdit.setText(faker.numerify("#####"));
         binding.insuranceAmountEdit.setText(faker.numerify("#####"));
         binding.temporaryCheckbox.setChecked(faker.bool().bool());
@@ -275,10 +278,12 @@ public class AddUserFragment extends Fragment {
 
     private boolean generateError() {
         for (Pair<TextInputLayout, EditText> view : views) {
+            // if field is empty
             if (view.second.getText().toString().trim().isEmpty()) {
                 view.first.setError("Missing");
                 return true;
             }
+            // if field has invalid data
             if (view.first.getError() != null) {
                 return true;
             }
@@ -290,7 +295,6 @@ public class AddUserFragment extends Fragment {
         }
         return false;
     }
-
 
     boolean validateInputs() {
         return !generateError();

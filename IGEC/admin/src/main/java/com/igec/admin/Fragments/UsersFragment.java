@@ -28,23 +28,25 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
 public class UsersFragment extends Fragment {
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private ArrayList<EmployeeOverview> employees = new ArrayList<>();
     private EmployeeAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
 
 
     private FragmentUsersBinding binding;
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        binding = FragmentUsersBinding.inflate(inflater,container,false);
+        binding = FragmentUsersBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -58,26 +60,27 @@ public class UsersFragment extends Fragment {
         adapter.setOnItemClickListener(itclEmployeeAdapter);
     }
 
-    void initialize(){
+    void initialize() {
         binding.recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
-        adapter = new EmployeeAdapter(employees,false);
+        adapter = new EmployeeAdapter(employees, false);
         binding.recyclerView.setLayoutManager(layoutManager);
         binding.recyclerView.setAdapter(adapter);
         getEmployees();
 
     }
-    void getEmployees(){
+
+    void getEmployees() {
         EMPLOYEE_OVERVIEW_REF.addSnapshotListener((documentSnapshot, e) -> {
             HashMap empMap;
             if (e != null) {
                 Log.w(TAG, "Listen failed.", e);
                 return;
             }
-            if(documentSnapshot != null && documentSnapshot.exists()){
-                empMap = (HashMap)documentSnapshot.getData();
+            if (documentSnapshot != null && documentSnapshot.exists()) {
+                empMap = (HashMap) documentSnapshot.getData();
                 retrieveEmployees(empMap);
-            }else{
+            } else {
                 return;
             }
         });
@@ -94,6 +97,7 @@ public class UsersFragment extends Fragment {
             String id = (key);
             employees.add(new EmployeeOverview(firstName, lastName, title, id));
         }
+        employees.sort(Comparator.comparing(EmployeeOverview::getId));
         adapter.setEmployeeOverviewsList(employees);
         adapter.notifyDataSetChanged();
     }
@@ -103,8 +107,8 @@ public class UsersFragment extends Fragment {
         @Override
         public void onItemClick(int position) {
             EMPLOYEE_COL.document(adapter.getEmployeeOverviewsList().get(position).getId()).get().addOnSuccessListener(documentSnapshot -> {
-                UserFragmentDialog userFragmentDialog = new UserFragmentDialog(documentSnapshot.toObject(Employee.class),employees,position);
-                userFragmentDialog.show(getParentFragmentManager(),"");
+                UserFragmentDialog userFragmentDialog = UserFragmentDialog.newInstance(documentSnapshot.toObject(Employee.class));
+                userFragmentDialog.show(getParentFragmentManager(), "");
             });
         }
 

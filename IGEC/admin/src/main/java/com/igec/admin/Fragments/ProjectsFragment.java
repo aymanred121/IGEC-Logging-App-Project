@@ -1,5 +1,7 @@
 package com.igec.admin.Fragments;
 
+import static com.igec.common.CONSTANTS.PROJECT_COL;
+
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -14,10 +16,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.igec.admin.Adapters.ProjectAdapter;
 import com.igec.admin.Dialogs.ProjectFragmentDialog;
-import com.igec.admin.R;
 import com.igec.admin.databinding.FragmentProjectsBinding;
 import com.igec.common.firebase.Project;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -26,7 +26,6 @@ import java.util.ArrayList;
 public class ProjectsFragment extends Fragment {
     //vars
     FirebaseFirestore db = FirebaseFirestore.getInstance();
-    CollectionReference projectRef = db.collection("projects");
     ArrayList<Project>projects = new ArrayList<>();
     ProjectAdapter adapter;
     RecyclerView.LayoutManager layoutManager;
@@ -62,7 +61,7 @@ public class ProjectsFragment extends Fragment {
     }
     @SuppressLint("NotifyDataSetChanged")
     void getProjects() {
-        projectRef.addSnapshotListener((queryDocumentSnapshots, e) -> {
+        PROJECT_COL.addSnapshotListener((queryDocumentSnapshots, e) -> {
             projects.clear();
             assert queryDocumentSnapshots != null;
             for(DocumentSnapshot d : queryDocumentSnapshots){

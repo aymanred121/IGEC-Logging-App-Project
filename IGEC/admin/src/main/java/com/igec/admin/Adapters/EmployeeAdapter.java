@@ -1,5 +1,7 @@
 package com.igec.admin.Adapters;
 
+import static com.igec.common.CONSTANTS.ADMIN;
+
 import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -85,7 +87,7 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
         holder.vName.setText("Name: " + employee.getFirstName() + " " + employee.getLastName());
         holder.vID.setText("ID: " + employee.getId());
         holder.vSelected.setChecked(employee.isSelected);
-        holder.vSelected.setEnabled((employee.getManagerID() == null || !employee.getManagerID().equals("adminID")));
+        holder.vSelected.setEnabled((employee.getManagerID() == null || !employee.getManagerID().equals(ADMIN)));
     }
 
     public ArrayList<EmployeeOverview> getEmployeeOverviewsList() {

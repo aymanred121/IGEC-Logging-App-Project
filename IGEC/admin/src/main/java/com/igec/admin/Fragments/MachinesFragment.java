@@ -1,5 +1,8 @@
 package com.igec.admin.Fragments;
 
+import static com.igec.common.CONSTANTS.MACHINE_COL;
+import static com.igec.common.CONSTANTS.MACHINE_DEFECT_LOG_COL;
+
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -21,11 +24,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.igec.admin.Adapters.MachineAdapter;
 import com.igec.admin.Dialogs.MachineFragmentDialog;
 import com.igec.admin.Dialogs.MachineLogDialog;
-import com.igec.admin.R;
 import com.igec.admin.databinding.FragmentMachinesBinding;
 import com.igec.common.firebase.Machine;
 import com.igec.common.firebase.MachineDefectsLog;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -35,7 +36,6 @@ import java.util.Calendar;
 
 public class MachinesFragment extends Fragment {
     FirebaseFirestore db = FirebaseFirestore.getInstance();
-    CollectionReference machineRef = db.collection("machine");
     ArrayList<Machine> machines = new ArrayList();
     MachineAdapter adapter;
     RecyclerView.LayoutManager layoutManager;
@@ -71,7 +71,7 @@ public class MachinesFragment extends Fragment {
     }
 
     private void getMachines() {
-        machineRef.addSnapshotListener((queryDocumentSnapshots, e) -> {
+        MACHINE_COL.addSnapshotListener((queryDocumentSnapshots, e) -> {
             machines.clear();
             for (DocumentSnapshot d : queryDocumentSnapshots) {
                 machines.add(d.toObject(Machine.class));
@@ -109,7 +109,7 @@ public class MachinesFragment extends Fragment {
             builderSingle.setTitle("Comments: ");
             final ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_selectable_list_item);
             ArrayList<MachineDefectsLog> machineDefectsLogArrayList = new ArrayList<>();
-            db.collection("MachineDefectsLog").whereEqualTo("machineId", machines.get(position).getId()).addSnapshotListener((values, error) -> {
+            MACHINE_DEFECT_LOG_COL.whereEqualTo("machineId", machines.get(position).getId()).addSnapshotListener((values, error) -> {
                 if (values == null || values.size() == 0) {
                     Toast.makeText(getActivity(), "no comments on that machine", Toast.LENGTH_SHORT).show();
                     return;

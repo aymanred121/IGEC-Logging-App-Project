@@ -1,5 +1,7 @@
 package com.igec.admin.Dialogs;
 
+import static com.igec.common.CONSTANTS.MACHINE_EMPLOYEE_COL;
+
 import android.app.Dialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -39,7 +41,7 @@ public class MachineLogDialog extends DialogFragment {
     }
 
     private void retrieveMachineSummary() {
-        db.collection("Machine_Employee").whereEqualTo("machine.id", machine.getId()).get().addOnSuccessListener(queryDocumentSnapshots -> {
+        MACHINE_EMPLOYEE_COL.whereEqualTo("machine.id", machine.getId()).get().addOnSuccessListener(queryDocumentSnapshots -> {
                     if (queryDocumentSnapshots.size() != 0) {
                         machineSummaryData.addAll(queryDocumentSnapshots.toObjects(Machine_Employee.class));
                         adapter.setMachineEmployees(machineSummaryData);

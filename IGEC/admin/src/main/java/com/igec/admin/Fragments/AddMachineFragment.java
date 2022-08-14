@@ -3,6 +3,7 @@ package com.igec.admin.Fragments;
 import static android.app.Activity.RESULT_OK;
 
 import static com.igec.common.CONSTANTS.CAMERA_REQUEST_CODE;
+import static com.igec.common.CONSTANTS.MACHINE_COL;
 
 import android.Manifest;
 import android.content.Intent;
@@ -45,7 +46,6 @@ import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClic
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -82,7 +82,6 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
     private long purchaseDate;
     private QRGEncoder qrgEncoder;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private final CollectionReference machineCol = db.collection("machine");
     private MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vDatePicker;
     private final FirebaseStorage storage = FirebaseStorage.getInstance();
@@ -338,7 +337,7 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
                 newMachine.setSupplementsNames(new ArrayList<>());
                 IntStream.range(0, supplements.size()).forEach(i -> newMachine.getSupplementsNames().add(supplements.get(i).getName()));
                 machineCover.saveToCloudStorage(FirebaseStorage.getInstance().getReference(), binding.idEdit.getText().toString()).addOnSuccessListener(unused -> {
-                    machineCol.document(binding.idEdit.getText().toString()).set(newMachine).addOnSuccessListener(unused1 -> {
+                    MACHINE_COL.document(binding.idEdit.getText().toString()).set(newMachine).addOnSuccessListener(unused1 -> {
                         Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
                         clearInput();
                     });
@@ -349,7 +348,7 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
     private final View.OnClickListener oclMachineID = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            binding.idEdit.setText(machineCol.document().getId().substring(0, 5));
+            binding.idEdit.setText(MACHINE_COL.document().getId().substring(0, 5));
         }
     };
     private final View.OnClickListener oclAddSupplement = new View.OnClickListener() {

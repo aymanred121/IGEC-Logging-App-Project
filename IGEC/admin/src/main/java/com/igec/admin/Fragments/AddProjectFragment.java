@@ -2,6 +2,12 @@ package com.igec.admin.Fragments;
 
 import static android.content.ContentValues.TAG;
 
+import static com.igec.common.CONSTANTS.ADMIN;
+import static com.igec.common.CONSTANTS.EMPLOYEE_GROSS_SALARY_COL;
+import static com.igec.common.CONSTANTS.EMPLOYEE_OVERVIEW_REF;
+import static com.igec.common.CONSTANTS.EMPLOYEE_COL;
+import static com.igec.common.CONSTANTS.PROJECT_COL;
+
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.text.Editable;
@@ -12,7 +18,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -36,14 +41,9 @@ import com.igec.common.firebase.EmployeesGrossSalary;
 import com.igec.common.firebase.Project;
 import com.igec.common.utilities.allowancesEnum;
 import com.github.javafaker.Faker;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
-import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.WriteBatch;
@@ -51,6 +51,7 @@ import com.google.firebase.firestore.WriteBatch;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -75,9 +76,6 @@ public class AddProjectFragment extends Fragment {
     private static ArrayList<String> TeamID = new ArrayList<>();
     private static ArrayList<EmployeeOverview> Team = new ArrayList<>();
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private final DocumentReference employeeOverviewRef = db.collection("EmployeeOverview")
-            .document("emp");
-    private final CollectionReference employeeCol = db.collection("employees");
     private WriteBatch batch = FirebaseFirestore.getInstance().batch();
 
     public static void clearTeam() {
@@ -93,8 +91,7 @@ public class AddProjectFragment extends Fragment {
             empInfo.add("0");
             Map<String, Object> empInfoMap = new HashMap<>();
             empInfoMap.put(emp.getId(), empInfo);
-            batch.update(db.collection("EmployeeOverview")
-                    .document("emp"), empInfoMap);
+            batch.update(EMPLOYEE_OVERVIEW_REF, empInfoMap);
         }
         Team.clear();
         TeamID.clear();
@@ -220,7 +217,7 @@ public class AddProjectFragment extends Fragment {
         adapter.setOnItemClickListener(itclEmployeeAdapter);
         binding.recyclerView.setLayoutManager(layoutManager);
         binding.recyclerView.setAdapter(adapter);
-        projectID = db.collection("projects").document().getId().substring(0, 5);
+        projectID = PROJECT_COL.document().getId().substring(0, 5);
         binding.clientButton.setEnabled(!binding.officeWorkCheckbox.isChecked());
         getEmployees();
         setUpContractType();
@@ -254,8 +251,7 @@ public class AddProjectFragment extends Fragment {
             empInfo.add("1");
             Map<String, Object> empInfoMap = new HashMap<>();
             empInfoMap.put(employees.get(position).getId(), empInfo);
-            batch.update(db.collection("EmployeeOverview")
-                    .document("emp"), empInfoMap);
+            batch.update(EMPLOYEE_OVERVIEW_REF, empInfoMap);
 
         } else {
 
@@ -268,8 +264,7 @@ public class AddProjectFragment extends Fragment {
             empInfo.add("0");
             Map<String, Object> empInfoMap = new HashMap<>();
             empInfoMap.put(employees.get(position).getId(), empInfo);
-            batch.update(db.collection("EmployeeOverview")
-                    .document("emp"), empInfoMap);
+            batch.update(EMPLOYEE_OVERVIEW_REF, empInfoMap);
         }
         batch.commit();
         binding.managerIdLayout.setEnabled(Team.size() > 0);
@@ -281,7 +276,7 @@ public class AddProjectFragment extends Fragment {
     void getEmployees() {
 //        TeamID.clear();
 //        Team.clear();
-        employeeOverviewRef
+        EMPLOYEE_OVERVIEW_REF
                 .addSnapshotListener((documentSnapshot, e) -> {
                     binding.managerIdAuto.setText(null);
                     binding.managerNameEdit.setText(null);
@@ -326,18 +321,18 @@ public class AddProjectFragment extends Fragment {
             empInfo.add(emp.isSelected ? "1" : "0");
             Map<String, Object> empInfoMap = new HashMap<>();
             empInfoMap.put(emp.getId(), empInfo);
-            batch.update(employeeOverviewRef, empInfoMap);
-            batch.update(employeeCol.document(emp.getId()), "managerID", emp.getManagerID(), "projectID", projectID);
-            db.collection("EmployeesGrossSalary").document(emp.getId()).get().addOnSuccessListener((value) -> {
+            batch.update(EMPLOYEE_OVERVIEW_REF, empInfoMap);
+            batch.update(EMPLOYEE_COL.document(emp.getId()), "managerID", emp.getManagerID(), "projectID", projectID);
+            EMPLOYEE_GROSS_SALARY_COL.document(emp.getId()).get().addOnSuccessListener((value) -> {
                 if (!value.exists())
                     return;
                 EmployeesGrossSalary employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
                 if (allowances.size() != 0) {
                     employeesGrossSalary.getAllTypes().addAll(allowances);
                 }
-                batch.update(db.collection("EmployeesGrossSalary").document(emp.getId()), "allTypes", employeesGrossSalary.getAllTypes());
+                batch.update(EMPLOYEE_GROSS_SALARY_COL.document(emp.getId()), "allTypes", employeesGrossSalary.getAllTypes());
 
-                db.collection("EmployeesGrossSalary").document(emp.getId()).collection(finalYear).document(finalMonth).get().addOnSuccessListener(documentSnapshot -> {
+                EMPLOYEE_GROSS_SALARY_COL.document(emp.getId()).collection(finalYear).document(finalMonth).get().addOnSuccessListener(documentSnapshot -> {
                     if (!documentSnapshot.exists()) {
 //                        employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() == allowancesEnum.PROJECT.ordinal());
 //                        employeesGrossSalary.setBaseAllowances(allowances);
@@ -402,9 +397,9 @@ public class AddProjectFragment extends Fragment {
         newProject.getAllowancesList().addAll(allowances);
         allowances = newProject.getAllowancesList();
         batch = FirebaseFirestore.getInstance().batch();
-        batch.set(db.collection("projects").document(projectID), newProject);
+        batch.set(PROJECT_COL.document(projectID), newProject);
         updateEmployeesDetails(projectID);
-        projectID = db.collection("projects").document().getId().substring(0, 5);
+        projectID = PROJECT_COL.document().getId().substring(0, 5);
 
 
     }
@@ -443,6 +438,7 @@ public class AddProjectFragment extends Fragment {
                 employees.add(new EmployeeOverview(firstName, lastName, title, id, projectID, isSelected));
 
         }
+        employees.sort(Comparator.comparing(EmployeeOverview::getId));
         adapter.setEmployeeOverviewsList(employees);
         adapter.notifyDataSetChanged();
 
@@ -624,7 +620,7 @@ public class AddProjectFragment extends Fragment {
                 if (!emp.getId().equals(binding.managerIdAuto.getText().toString())) {
                     emp.setManagerID(!binding.managerIdAuto.getText().toString().equals("") ? binding.managerIdAuto.getText().toString() : null);
                 } else {
-                    emp.setManagerID("adminID");
+                    emp.setManagerID(ADMIN);
                 }
             }
             hideError(binding.managerIdLayout);

@@ -2,6 +2,9 @@ package com.igec.common.Fragments;
 
 import static android.content.ContentValues.TAG;
 
+import static com.igec.common.CONSTANTS.ADMIN;
+import static com.igec.common.CONSTANTS.VACATION_COL;
+
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -73,8 +76,8 @@ public class VacationsLogFragment extends Fragment {
         binding.recyclerView.setAdapter(adapter);
 
         if (user == null)// admin
-            loadVacations("employee.managerID", "adminID");
-        else if (user.getManagerID().equals("adminID")) // manager
+            loadVacations("employee.managerID", ADMIN);
+        else if (user.getManagerID().equals(ADMIN)) // manager
         {
             loadOwn = true;
             loadVacations("manager.id", user.getId());
@@ -86,7 +89,7 @@ public class VacationsLogFragment extends Fragment {
 
 
     private void loadVacations(String who, String id) {
-        db.collection("Vacation")
+        VACATION_COL
                 .whereEqualTo(who, id)
                 .orderBy("requestDate", Query.Direction.DESCENDING)
                 .addSnapshotListener((queryDocumentSnapshots, e) -> {
@@ -108,7 +111,7 @@ public class VacationsLogFragment extends Fragment {
 
     // to avoid recursion
     private void loadOwnVacations() {
-        db.collection("Vacation")
+        VACATION_COL
                 .whereEqualTo("employee.id", user.getId())
                 .orderBy("requestDate", Query.Direction.DESCENDING)
                 .addSnapshotListener((queryDocumentSnapshots, e) -> {

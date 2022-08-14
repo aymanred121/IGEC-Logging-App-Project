@@ -2,6 +2,12 @@ package com.igec.admin.Fragments;
 
 import static android.content.ContentValues.TAG;
 
+import static com.igec.common.CONSTANTS.EMPLOYEE_COL;
+import static com.igec.common.CONSTANTS.EMPLOYEE_GROSS_SALARY_COL;
+import static com.igec.common.CONSTANTS.EMPLOYEE_OVERVIEW_REF;
+import static com.igec.common.CONSTANTS.PROJECT_COL;
+import static com.igec.common.CONSTANTS.SUMMARY_COL;
+
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 
@@ -30,8 +36,6 @@ import com.igec.common.utilities.CsvWriter;
 import com.igec.common.utilities.LocationDetails;
 import com.igec.common.utilities.WorkingDay;
 import com.igec.common.utilities.allowancesEnum;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -50,10 +54,9 @@ public class SummaryFragment extends Fragment {
     private RecyclerView.LayoutManager layoutManager;
     private String year, month, prevMonth, prevYear;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private DocumentReference employeeOverviewRef = db.collection("EmployeeOverview").document("emp");
     ArrayList<EmployeeOverview> employees = new ArrayList();
     ArrayList<Project> projects = new ArrayList();
-    CollectionReference projectRef = db.collection("projects");
+
 
     private FragmentSummaryBinding binding;
 
@@ -93,7 +96,7 @@ public class SummaryFragment extends Fragment {
     }
 
     void getProjects() {
-        projectRef.addSnapshotListener((queryDocumentSnapshots, e) -> {
+        PROJECT_COL.addSnapshotListener((queryDocumentSnapshots, e) -> {
             projects.clear();
             for (DocumentSnapshot d : queryDocumentSnapshots) {
                 projects.add(d.toObject(Project.class));
@@ -102,7 +105,7 @@ public class SummaryFragment extends Fragment {
     }
 
     void getEmployees() {
-        employeeOverviewRef.addSnapshotListener((documentSnapshot, e) -> {
+        EMPLOYEE_OVERVIEW_REF.addSnapshotListener((documentSnapshot, e) -> {
             HashMap empMap;
             if (e != null) {
                 Log.w(TAG, "Listen failed.", e);
@@ -172,7 +175,7 @@ public class SummaryFragment extends Fragment {
             binding.monthLayout.setError("Please select a month");
         } else {
             String[] selectedDate = binding.monthEdit.getText().toString().split("/");
-            db.collection("employees")
+            EMPLOYEE_COL
                     .get()
                     .addOnSuccessListener(queryDocumentSnapshots -> {
                         String[] header = {"Name", "Basic", "over time", "Cuts", "Transportation", "accommodation", "site", "remote", "food", "other", "personal", "Next month", "current month", "previous month"};
@@ -180,8 +183,8 @@ public class SummaryFragment extends Fragment {
                         final int[] counter = new int[1];
                         for (QueryDocumentSnapshot queryDocumentSnapshot : queryDocumentSnapshots) {
                             month = String.format("%02d", Integer.parseInt(month));
-                            db.collection("EmployeesGrossSalary").document(queryDocumentSnapshot.getId()).collection(prevYear).document(prevMonth).get().addOnSuccessListener(doc -> {
-                                db.collection("EmployeesGrossSalary").document(queryDocumentSnapshot.getId()).collection(year).document(month).get().addOnSuccessListener(documentSnapshot1 -> {
+                            EMPLOYEE_GROSS_SALARY_COL.document(queryDocumentSnapshot.getId()).collection(prevYear).document(prevMonth).get().addOnSuccessListener(doc -> {
+                                EMPLOYEE_GROSS_SALARY_COL.document(queryDocumentSnapshot.getId()).collection(year).document(month).get().addOnSuccessListener(documentSnapshot1 -> {
                                     if (!documentSnapshot1.exists()) {
                                         if (counter[0] == queryDocumentSnapshots.size() - 1) {
                                             try {
@@ -292,14 +295,14 @@ public class SummaryFragment extends Fragment {
                         ArrayList<WorkingDay> workingDays = new ArrayList<>();
                         EmployeeOverview employee = employees.get(position);
                         String empName = employee.getFirstName() + " " + employee.getLastName();
-                        db.collection("summary").document(employee.getId()).collection(year + "-" + month)
+                        SUMMARY_COL.document(employee.getId()).collection(year + "-" + month)
                                 .get().addOnSuccessListener(queryDocumentSnapshots -> {
                                     if (queryDocumentSnapshots.size() == 0)
                                         return;
                                     for (QueryDocumentSnapshot q : queryDocumentSnapshots) {
                                         if (q.getData().get("checkOut") == null)
                                             continue;
-                                        db.collection("projects").document((String) q.get("projectId")).get().addOnSuccessListener(doc -> {
+                                        PROJECT_COL.document((String) q.get("projectId")).get().addOnSuccessListener(doc -> {
                                             if (!doc.exists())
                                                 return;
                                             Project project = doc.toObject(Project.class);
@@ -340,7 +343,7 @@ public class SummaryFragment extends Fragment {
                 ArrayList<WorkingDay> workingDays = new ArrayList<>();
                 EmployeeOverview employee = employees.get(position);
                 String empName = employee.getFirstName() + " " + employee.getLastName();
-                db.collection("summary").document(employee.getId()).collection(year + "-" + month)
+                SUMMARY_COL.document(employee.getId()).collection(year + "-" + month)
                         //.whereEqualTo("projectId", employee.getProjectId())
                         .get().addOnSuccessListener(queryDocumentSnapshots -> {
                             if (queryDocumentSnapshots.size() == 0)
@@ -348,7 +351,7 @@ public class SummaryFragment extends Fragment {
                             for (QueryDocumentSnapshot q : queryDocumentSnapshots) {
                                 if (q.getData().get("checkOut") == null)
                                     continue;
-                                db.collection("projects").document((String) q.get("projectId")).get().addOnSuccessListener(doc -> {
+                                PROJECT_COL.document((String) q.get("projectId")).get().addOnSuccessListener(doc -> {
                                     if (!doc.exists())
                                         return;
                                     Project project = doc.toObject(Project.class);

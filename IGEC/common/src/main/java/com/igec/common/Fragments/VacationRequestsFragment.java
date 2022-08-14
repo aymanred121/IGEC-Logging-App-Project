@@ -2,6 +2,9 @@ package com.igec.common.Fragments;
 
 import static android.content.ContentValues.TAG;
 
+import static com.igec.common.CONSTANTS.ADMIN;
+import static com.igec.common.CONSTANTS.VACATION_COL;
+
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.util.Log;
@@ -87,7 +90,7 @@ public class VacationRequestsFragment extends Fragment {
 
     private void loadVacations() {
         if (currManager != null) {
-            db.collection("Vacation")
+            VACATION_COL
                     .whereEqualTo("manager.id", currManager.getId())
                     .whereEqualTo("vacationStatus", 0)
                     .addSnapshotListener((queryDocumentSnapshots, e) -> {
@@ -103,8 +106,8 @@ public class VacationRequestsFragment extends Fragment {
                         adapter.notifyDataSetChanged();
                     });
         } else {
-            db.collection("Vacation")
-                    .whereEqualTo("employee.managerID", "adminID")
+            VACATION_COL
+                    .whereEqualTo("employee.managerID", ADMIN)
                     .whereEqualTo("vacationStatus", 0)
                     .addSnapshotListener((queryDocumentSnapshots, e) -> {
                         if (e != null) {

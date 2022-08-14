@@ -1,5 +1,6 @@
 package com.igec.user.Fragments;
 
+import static com.igec.common.CONSTANTS.EMPLOYEE_COL;
 import static com.igec.common.cryptography.RSAUtil.encrypt;
 
 import android.os.Bundle;
@@ -124,7 +125,7 @@ public class ChangePasswordFragment extends Fragment {
                     })
                     .setPositiveButton(getString(R.string.accept), (dialogInterface, i) -> {
                         user.setPassword(binding.newPasswordEdit.getText().toString());
-                        db.collection("employees").document(user.getId()).update("password", encryptedPassword()).addOnSuccessListener(unused -> {
+                        EMPLOYEE_COL.document(user.getId()).update("password", encryptedPassword()).addOnSuccessListener(unused -> {
                             Toast.makeText(getActivity(), "Password Changed Successfully", Toast.LENGTH_SHORT).show();
                             clearInput();
                         });

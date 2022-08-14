@@ -1,6 +1,7 @@
 package com.igec.admin.Activities;
 
 
+import static com.igec.common.CONSTANTS.EMPLOYEE_COL;
 import static com.igec.common.CONSTANTS.ID;
 import static com.igec.common.CONSTANTS.IGEC;
 
@@ -25,7 +26,7 @@ public class LauncherActivity extends Activity {
             public void run() {
                 SharedPreferences preferences = getSharedPreferences(IGEC, MODE_PRIVATE);
                 if (preferences.getString(ID, "").equals("")) {
-                    db.collection("employees").whereEqualTo("admin", true).limit(1).get().addOnSuccessListener(docs -> {
+                    EMPLOYEE_COL.whereEqualTo("admin", true).limit(1).get().addOnSuccessListener(docs -> {
                         if (docs.size() != 0) {
                             Intent intent = new Intent(LauncherActivity.this, com.igec.admin.Activities.LoginActivity.class);
                             startActivity(intent);

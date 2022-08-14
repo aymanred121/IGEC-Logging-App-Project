@@ -1,5 +1,8 @@
 package com.igec.admin.Fragments;
 
+import static com.igec.common.CONSTANTS.EMPLOYEE_COL;
+import static com.igec.common.CONSTANTS.EMPLOYEE_GROSS_SALARY_COL;
+import static com.igec.common.CONSTANTS.EMPLOYEE_OVERVIEW_REF;
 import static com.igec.common.cryptography.RSAUtil.encrypt;
 
 import android.os.Bundle;
@@ -58,7 +61,6 @@ public class AddUserFragment extends Fragment {
     // Vars
     long hireDate;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private final DocumentReference employeeOverviewRef = db.collection("EmployeeOverview").document("emp");
     private WriteBatch batch = FirebaseFirestore.getInstance().batch();
 
     private FragmentAddUserBinding binding;
@@ -154,7 +156,7 @@ public class AddUserFragment extends Fragment {
     }
 
     void addEmployee() {
-        db.collection("employees").whereEqualTo("email", binding.emailEdit.getText().toString().trim()).get().addOnSuccessListener(documents -> {
+        EMPLOYEE_COL.whereEqualTo("email", binding.emailEdit.getText().toString().trim()).get().addOnSuccessListener(documents -> {
             if (documents.getDocuments().size() != 0) {
                 Toast.makeText(getActivity(), "this Email already exist", Toast.LENGTH_SHORT).show();
                 binding.registerButton.setEnabled(true);
@@ -176,15 +178,15 @@ public class AddUserFragment extends Fragment {
             empInfo.add("0"); // isSelected
             Map<String, Object> empInfoMap = new HashMap<>();
             empInfoMap.put(id, empInfo);
-            employeeOverviewRef.update(empInfoMap).addOnFailureListener(e -> employeeOverviewRef.set(empInfoMap));
+            EMPLOYEE_OVERVIEW_REF.update(empInfoMap).addOnFailureListener(e -> EMPLOYEE_OVERVIEW_REF.set(empInfoMap));
             Employee newEmployee = fillEmployeeData();
             newEmployee.setId(id);
             //get year from hire date
             String year = binding.hireDateEdit.getText().toString().substring(6, 10);
             String month = binding.hireDateEdit.getText().toString().substring(3, 5);
-            batch.set(db.collection("employees").document(id), newEmployee);
+            batch.set(EMPLOYEE_COL.document(id), newEmployee);
             //batch.set(db.collection("EmployeesGrossSalary").document(id).collection(year).document(month), employeesGrossSalary);
-            batch.set(db.collection("EmployeesGrossSalary").document(id), employeesGrossSalary);
+            batch.set(EMPLOYEE_GROSS_SALARY_COL.document(id), employeesGrossSalary);
             batch.commit().addOnSuccessListener(unused -> {
                 clearInputs();
                 fakeData();

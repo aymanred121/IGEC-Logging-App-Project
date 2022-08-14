@@ -1,7 +1,9 @@
 package com.igec.user.Activities;
 
 
+import static com.igec.common.CONSTANTS.ADMIN;
 import static com.igec.common.CONSTANTS.CAMERA_REQUEST_CODE;
+import static com.igec.common.CONSTANTS.EMPLOYEE_COL;
 import static com.igec.common.CONSTANTS.ID;
 import static com.igec.common.CONSTANTS.IGEC;
 import static com.igec.common.CONSTANTS.LOCATION_REQUEST_CODE;
@@ -166,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             FirebaseFirestore db = FirebaseFirestore.getInstance();
-            db.collection("employees")
+            EMPLOYEE_COL
                     .whereEqualTo("email", (binding.emailEdit.getText() != null) ? binding.emailEdit.getText().toString() : "")
                     .limit(1)
                     .get().addOnSuccessListener(queryDocumentSnapshots -> {
@@ -185,12 +187,12 @@ public class MainActivity extends AppCompatActivity {
                                 return;
                             }
                             currEmployee.setLocked(true);
-                            db.collection("employees").document(currEmployee.getId()).set(currEmployee, SetOptions.merge()).addOnSuccessListener(unused -> {
+                            EMPLOYEE_COL.document(currEmployee.getId()).set(currEmployee, SetOptions.merge()).addOnSuccessListener(unused -> {
                                 Intent intent;
                                 if (currEmployee != null && currEmployee.getManagerID() == null) {
                                     Toast.makeText(MainActivity.this, "you are not assigned to any project", Toast.LENGTH_SHORT).show();
                                     return;
-                                } else if (currEmployee != null && currEmployee.getManagerID().equals("adminID")) {
+                                } else if (currEmployee != null && currEmployee.getManagerID().equals(ADMIN)) {
                                     intent = new Intent(MainActivity.this, MDashboard.class);
                                 } else {
                                     intent = new Intent(MainActivity.this, EDashboard.class);

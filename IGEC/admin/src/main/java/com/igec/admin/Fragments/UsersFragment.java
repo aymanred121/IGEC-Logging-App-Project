@@ -2,6 +2,9 @@ package com.igec.admin.Fragments;
 
 import static android.content.ContentValues.TAG;
 
+import static com.igec.common.CONSTANTS.EMPLOYEE_COL;
+import static com.igec.common.CONSTANTS.EMPLOYEE_OVERVIEW_REF;
+
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
@@ -30,7 +33,6 @@ import java.util.Map;
 
 public class UsersFragment extends Fragment {
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private DocumentReference employeeOverviewRef = db.collection("EmployeeOverview").document("emp");
     private ArrayList<EmployeeOverview> employees = new ArrayList<>();
     private EmployeeAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
@@ -66,7 +68,7 @@ public class UsersFragment extends Fragment {
 
     }
     void getEmployees(){
-        employeeOverviewRef.addSnapshotListener((documentSnapshot, e) -> {
+        EMPLOYEE_OVERVIEW_REF.addSnapshotListener((documentSnapshot, e) -> {
             HashMap empMap;
             if (e != null) {
                 Log.w(TAG, "Listen failed.", e);
@@ -100,7 +102,7 @@ public class UsersFragment extends Fragment {
     private final EmployeeAdapter.OnItemClickListener itclEmployeeAdapter = new EmployeeAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position) {
-            db.collection("employees").document(adapter.getEmployeeOverviewsList().get(position).getId()).get().addOnSuccessListener(documentSnapshot -> {
+            EMPLOYEE_COL.document(adapter.getEmployeeOverviewsList().get(position).getId()).get().addOnSuccessListener(documentSnapshot -> {
                 UserFragmentDialog userFragmentDialog = new UserFragmentDialog(documentSnapshot.toObject(Employee.class),employees,position);
                 userFragmentDialog.show(getParentFragmentManager(),"");
             });

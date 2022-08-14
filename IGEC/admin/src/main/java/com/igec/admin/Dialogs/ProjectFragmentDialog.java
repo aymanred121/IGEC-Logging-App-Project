@@ -2,6 +2,12 @@ package com.igec.admin.Dialogs;
 
 import static android.content.ContentValues.TAG;
 
+import static com.igec.common.CONSTANTS.ADMIN;
+import static com.igec.common.CONSTANTS.EMPLOYEE_COL;
+import static com.igec.common.CONSTANTS.EMPLOYEE_GROSS_SALARY_COL;
+import static com.igec.common.CONSTANTS.EMPLOYEE_OVERVIEW_REF;
+import static com.igec.common.CONSTANTS.PROJECT_COL;
+
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -16,7 +22,6 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -36,21 +41,17 @@ import com.igec.common.firebase.EmployeeOverview;
 import com.igec.common.firebase.EmployeesGrossSalary;
 import com.igec.common.firebase.Project;
 import com.igec.common.utilities.allowancesEnum;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.WriteBatch;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -74,9 +75,6 @@ public class ProjectFragmentDialog extends DialogFragment {
     private static ArrayList<String> TeamID = new ArrayList<>();
     private static ArrayList<EmployeeOverview> Team = new ArrayList<>();
     FirebaseFirestore db = FirebaseFirestore.getInstance();
-    DocumentReference employeeOverviewRef = db.collection("EmployeeOverview")
-            .document("emp");
-    CollectionReference employeeCol = db.collection("employees");
     Project project;
     private EmployeeOverview selectedManager;
     private Boolean isDeleted = false;
@@ -117,8 +115,7 @@ public class ProjectFragmentDialog extends DialogFragment {
                 empInfo.add("0");
                 Map<String, Object> empInfoMap = new HashMap<>();
                 empInfoMap.put(emp.getId(), empInfo);
-                batch.update(db.collection("EmployeeOverview")
-                        .document("emp"), empInfoMap);
+                batch.update(EMPLOYEE_OVERVIEW_REF, empInfoMap);
             }
         }
         Team.clear();
@@ -173,10 +170,11 @@ public class ProjectFragmentDialog extends DialogFragment {
     }
 
     private FragmentAddProjectBinding binding;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        binding  = FragmentAddProjectBinding.inflate(inflater, container, false);
+        binding = FragmentAddProjectBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 
@@ -305,8 +303,7 @@ public class ProjectFragmentDialog extends DialogFragment {
             Map<String, Object> empInfoMap = new HashMap<>();
             empInfoMap.put(employees.get(position).getId(), empInfo);
             if (employees.get(position).getManagerID() == null)
-                batch.update(db.collection("EmployeeOverview")
-                        .document("emp"), empInfoMap);
+                batch.update(EMPLOYEE_OVERVIEW_REF, empInfoMap);
 
         } else {
 
@@ -320,8 +317,7 @@ public class ProjectFragmentDialog extends DialogFragment {
             Map<String, Object> empInfoMap = new HashMap<>();
             empInfoMap.put(employees.get(position).getId(), empInfo);
             if (employees.get(position).getManagerID() == null) {
-                batch.update(db.collection("EmployeeOverview")
-                        .document("emp"), empInfoMap);
+                batch.update(EMPLOYEE_OVERVIEW_REF, empInfoMap);
             }
         }
         batch.commit();
@@ -336,8 +332,7 @@ public class ProjectFragmentDialog extends DialogFragment {
     }
 
     void getEmployees() {
-        db.collection("EmployeeOverview")
-                .document("emp")
+        EMPLOYEE_OVERVIEW_REF
                 .addSnapshotListener((documentSnapshot, e) -> {
                     if (e != null) {
                         Log.w(TAG, "Listen failed.", e);
@@ -363,18 +358,18 @@ public class ProjectFragmentDialog extends DialogFragment {
                 empOverview.setManagerID(null);
                 empOverview.setProjectId(null);
                 empOverview.isSelected = false;
-                db.collection("EmployeesGrossSalary").document(empOverview.getId()).get().addOnSuccessListener(doc -> {
+                EMPLOYEE_GROSS_SALARY_COL.document(empOverview.getId()).get().addOnSuccessListener(doc -> {
                     if (!doc.exists())
                         return;
                     EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
                     employeesGrossSalary.getAllTypes().removeIf(x -> x.getProjectId().equals(currProjectID));
                     db.document(doc.getReference().getPath()).update("allTypes", employeesGrossSalary.getAllTypes());
                 });
-                db.collection("EmployeesGrossSalary").document(empOverview.getId()).collection(year).document(month).update("baseAllowances", null);
+                EMPLOYEE_GROSS_SALARY_COL.document(empOverview.getId()).collection(year).document(month).update("baseAllowances", null);
                 Team.remove(empOverview);
             }
             if (empOverview.getId().equals(binding.managerIdAuto.getText().toString()) && !isDeleted) {
-                empOverview.setManagerID("adminID");
+                empOverview.setManagerID(ADMIN);
             } else if (empOverview.getProjectId() != null && empOverview.getProjectId().equals(projectID) && !isDeleted) {
                 empOverview.setManagerID(binding.managerIdAuto.getText().toString());
             }
@@ -386,9 +381,8 @@ public class ProjectFragmentDialog extends DialogFragment {
             empInfo.add(empOverview.isSelected ? "1" : "0");
             Map<String, Object> empInfoMap = new HashMap<>();
             empInfoMap.put(empOverview.getId(), empInfo);
-            batch.update(db.collection("EmployeeOverview")
-                    .document("emp"), empInfoMap);
-            batch.update(employeeCol.document(empOverview.getId()), "managerID", empOverview.getManagerID(), "projectID", empOverview.getProjectId());
+            batch.update(EMPLOYEE_OVERVIEW_REF, empInfoMap);
+            batch.update(EMPLOYEE_COL.document(empOverview.getId()), "managerID", empOverview.getManagerID(), "projectID", empOverview.getProjectId());
         }
 
     }
@@ -413,7 +407,7 @@ public class ProjectFragmentDialog extends DialogFragment {
                 if (id.equals(currProjectID))
                     selectedManager = newEmp;
                 if (managerID != null)
-                    newEmp.setManagerID(id.equals(project.getManagerID()) ? "adminID" : binding.managerIdAuto.getText().toString());
+                    newEmp.setManagerID(id.equals(project.getManagerID()) ? ADMIN : binding.managerIdAuto.getText().toString());
                 Team.add(newEmp);
                 TeamID.add(newEmp.getId());
             }
@@ -421,21 +415,21 @@ public class ProjectFragmentDialog extends DialogFragment {
                 employees.add(newEmp);
 
 
-            /*
-             *
-             *
-             * show if d == l && (manager == null || projectID = emp.project)
-             *
-             * d l m
-             * 1 0 0
-             * 1 0 1
-             * 1 1 0
-             * 1 1 1 = show to me
-             * */
-            adapter.setEmployeeOverviewsList(employees);
-            adapter.notifyDataSetChanged();
-
         }
+        /*
+         *
+         *
+         * show if d == l && (manager == null || projectID = emp.project)
+         *
+         * d l m
+         * 1 0 0
+         * 1 0 1
+         * 1 1 0
+         * 1 1 1 = show to me
+         * */
+        employees.sort(Comparator.comparing(EmployeeOverview::getId));
+        adapter.setEmployeeOverviewsList(employees);
+        adapter.notifyDataSetChanged();
     }
 
     private boolean generateError() {
@@ -490,7 +484,7 @@ public class ProjectFragmentDialog extends DialogFragment {
         }).collect(Collectors.toList());
         newProject.getAllowancesList().addAll(allowances);
         allowances = newProject.getAllowancesList();
-        batch.set(db.collection("projects").document(project.getId()), newProject);
+        batch.set(PROJECT_COL.document(project.getId()), newProject);
         final int[] counter = {0};
         newProject.getEmployees().forEach(emp -> {
             String currentDateAndTime = sdf.format(new Date());
@@ -511,7 +505,7 @@ public class ProjectFragmentDialog extends DialogFragment {
             }
             final String finalMonth = month;
             final String finalYear = year;
-            db.collection("EmployeesGrossSalary").document(emp.getId()).get().addOnSuccessListener((value) -> {
+            EMPLOYEE_GROSS_SALARY_COL.document(emp.getId()).get().addOnSuccessListener((value) -> {
                 if (!value.exists())
                     return;
                 EmployeesGrossSalary employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
@@ -519,8 +513,8 @@ public class ProjectFragmentDialog extends DialogFragment {
                     employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() == allowancesEnum.PROJECT.ordinal());
                     employeesGrossSalary.getAllTypes().addAll(allowances);
                 }
-                batch.update(db.collection("EmployeesGrossSalary").document(emp.getId()), "allTypes", employeesGrossSalary.getAllTypes());
-                db.collection("EmployeesGrossSalary").document(emp.getId()).collection(finalYear).document(finalMonth)
+                batch.update(EMPLOYEE_GROSS_SALARY_COL.document(emp.getId()), "allTypes", employeesGrossSalary.getAllTypes());
+                EMPLOYEE_GROSS_SALARY_COL.document(emp.getId()).collection(finalYear).document(finalMonth)
                         .get().addOnSuccessListener(documentSnapshot -> {
                             if (!documentSnapshot.exists()) {
                                 //new month
@@ -575,7 +569,7 @@ public class ProjectFragmentDialog extends DialogFragment {
 
     void deleteProject() {
         currProjectID = project.getId();
-        batch.delete(db.collection("projects").document(project.getId()));
+        batch.delete(PROJECT_COL.document(project.getId()));
         isDeleted = true;
         batch.commit().addOnSuccessListener(unused -> {
             updateEmployeesDetails(currProjectID);
@@ -670,7 +664,7 @@ public class ProjectFragmentDialog extends DialogFragment {
                 if (!emp.getId().equals(binding.managerIdAuto.getText().toString())) {
                     emp.setManagerID(!binding.managerIdAuto.getText().toString().equals("") ? binding.managerIdAuto.getText().toString() : null);
                 } else {
-                    emp.setManagerID("adminID");
+                    emp.setManagerID(ADMIN);
                 }
             }
             hideError(binding.managerIdLayout);

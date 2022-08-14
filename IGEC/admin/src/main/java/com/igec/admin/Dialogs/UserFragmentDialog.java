@@ -1,5 +1,12 @@
 package com.igec.admin.Dialogs;
 
+import static com.igec.common.CONSTANTS.ADMIN;
+import static com.igec.common.CONSTANTS.EMPLOYEE_COL;
+import static com.igec.common.CONSTANTS.EMPLOYEE_GROSS_SALARY_COL;
+import static com.igec.common.CONSTANTS.EMPLOYEE_OVERVIEW_REF;
+import static com.igec.common.CONSTANTS.MACHINE_EMPLOYEE_COL;
+import static com.igec.common.CONSTANTS.PROJECT_COL;
+import static com.igec.common.CONSTANTS.VACATION_COL;
 import static com.igec.common.cryptography.RSAUtil.encrypt;
 import static com.google.android.material.textfield.TextInputLayout.END_ICON_CUSTOM;
 
@@ -34,8 +41,6 @@ import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -67,10 +72,6 @@ public class UserFragmentDialog extends DialogFragment {
 
     //Var
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private final CollectionReference machineEmployeeCol = db.collection("Machine_Employee");
-    private final CollectionReference vacationCol = db.collection("Vacation");
-    private final CollectionReference projectCol = db.collection("projects");
-    private final DocumentReference employeeOverviewRef = db.collection("EmployeeOverview").document("emp");
     private Employee employee;
     private EmployeeOverview oldEmployeeOverviewData;
     private Allowance oldNetSalary = new Allowance();
@@ -209,8 +210,8 @@ public class UserFragmentDialog extends DialogFragment {
         binding.passwordLayout.setEndIconMode(END_ICON_CUSTOM);
         binding.passwordLayout.setEndIconDrawable(R.drawable.ic_baseline_autorenew_24);
         binding.passwordEdit.setEnabled(false);
-        binding.deleteButton.setEnabled(employee.getManagerID() == null || !employee.getManagerID().equals("adminID"));
-        db.collection("Machine_Employee").whereEqualTo("employee.id", employee.getId()).addSnapshotListener((docs, e) -> {
+        binding.deleteButton.setEnabled(employee.getManagerID() == null || !employee.getManagerID().equals(ADMIN));
+        MACHINE_EMPLOYEE_COL.whereEqualTo("employee.id", employee.getId()).addSnapshotListener((docs, e) -> {
             // no machines found = enabled X
             // a machine without a check-out = disabled
             // all machines have been checked-out = enabled
@@ -247,27 +248,27 @@ public class UserFragmentDialog extends DialogFragment {
     }
 
     private void updateEmployeeOverview(Map<String, Object> updatedEmpOverviewMap) {
-        batch.update(employeeOverviewRef,updatedEmpOverviewMap);
+        batch.update(EMPLOYEE_OVERVIEW_REF,updatedEmpOverviewMap);
         updateMachineEmployee();
     }
 
     private void updateMachineEmployee() {
-        machineEmployeeCol.whereEqualTo("employee.id", employee.getId()).get().addOnSuccessListener(queryDocumentSnapshots -> {
+        MACHINE_EMPLOYEE_COL.whereEqualTo("employee.id", employee.getId()).get().addOnSuccessListener(queryDocumentSnapshots -> {
             for (QueryDocumentSnapshot d : queryDocumentSnapshots) {
-                batch.update( machineEmployeeCol.document(d.getId()),"employee", employee);
+                batch.update( MACHINE_EMPLOYEE_COL.document(d.getId()),"employee", employee);
             }
             updateProjects();
         });
     }
 
     private void updateVacation() {
-        vacationCol.whereEqualTo("employee.id", employee.getId()).get().addOnSuccessListener(queryDocumentSnapshots -> {
+        VACATION_COL.whereEqualTo("employee.id", employee.getId()).get().addOnSuccessListener(queryDocumentSnapshots -> {
             for (QueryDocumentSnapshot d : queryDocumentSnapshots) {
-                batch.update( vacationCol.document(d.getId()),"employee", employee);
+                batch.update( VACATION_COL.document(d.getId()),"employee", employee);
             }
-            vacationCol.whereEqualTo("manager.id", employee.getId()).get().addOnSuccessListener(queryDocumentSnapshot -> {
+            VACATION_COL.whereEqualTo("manager.id", employee.getId()).get().addOnSuccessListener(queryDocumentSnapshot -> {
                 for (QueryDocumentSnapshot d : queryDocumentSnapshot) {
-                    batch.update(vacationCol.document(d.getId()),"manager", employee);
+                    batch.update(VACATION_COL.document(d.getId()),"manager", employee);
                 }
                 batch.commit().addOnSuccessListener(unused1 -> {
                     binding.updateButton.setEnabled(true);
@@ -286,11 +287,11 @@ public class UserFragmentDialog extends DialogFragment {
             updateVacation();
             return;
         }
-        batch.update( projectCol.document(employee.getProjectID()),"employees",FieldValue.arrayRemove(oldEmployeeOverviewData));
-        if (tempEmp.getManagerID().equals("adminID")){
-            batch.update(projectCol.document(employee.getProjectID()),"managerName", tempEmp.getFirstName() + " " + tempEmp.getLastName(), "employees", FieldValue.arrayUnion(tempEmp));
+        batch.update( PROJECT_COL.document(employee.getProjectID()),"employees",FieldValue.arrayRemove(oldEmployeeOverviewData));
+        if (tempEmp.getManagerID().equals(ADMIN)){
+            batch.update(PROJECT_COL.document(employee.getProjectID()),"managerName", tempEmp.getFirstName() + " " + tempEmp.getLastName(), "employees", FieldValue.arrayUnion(tempEmp));
         }else{
-            batch.update(  projectCol.document(employee.getProjectID()),"employees",FieldValue.arrayUnion(tempEmp));
+            batch.update(  PROJECT_COL.document(employee.getProjectID()),"employees",FieldValue.arrayUnion(tempEmp));
         }
         updateVacation();
 
@@ -357,8 +358,8 @@ public class UserFragmentDialog extends DialogFragment {
 
 
     private void deleteEmployee() {
-        db.collection("employees").document(employee.getId()).delete().addOnSuccessListener(unused -> {
-            employeeOverviewRef.update(employee.getId(), FieldValue.delete()).addOnSuccessListener(unused1 -> {
+        EMPLOYEE_COL.document(employee.getId()).delete().addOnSuccessListener(unused -> {
+            EMPLOYEE_OVERVIEW_REF.update(employee.getId(), FieldValue.delete()).addOnSuccessListener(unused1 -> {
                 if (employee.getProjectID() == null) {
                     Toast.makeText(getActivity(), "Deleted", Toast.LENGTH_SHORT).show();
                     binding.deleteButton.setEnabled(true);
@@ -368,11 +369,11 @@ public class UserFragmentDialog extends DialogFragment {
                 EmployeeOverview tEmp = new EmployeeOverview(employee.getFirstName(), employee.getLastName(), employee.getTitle(), employee.getId());
                 tEmp.setManagerID(employee.getManagerID());
                 tEmp.setProjectId(employee.getProjectID());
-                projectCol.document(employee.getProjectID()).update("employees", FieldValue.arrayRemove(tEmp))
+                PROJECT_COL.document(employee.getProjectID()).update("employees", FieldValue.arrayRemove(tEmp))
                         .addOnSuccessListener(documentSnapshot -> {
-                            vacationCol.whereEqualTo("employee.id", employee.getId()).whereEqualTo("vacationStatus", 0).get().addOnSuccessListener(documentQuery -> {
+                            VACATION_COL.whereEqualTo("employee.id", employee.getId()).whereEqualTo("vacationStatus", 0).get().addOnSuccessListener(documentQuery -> {
                                 for (QueryDocumentSnapshot d : documentQuery) {
-                                    vacationCol.document(d.getId()).delete();
+                                    VACATION_COL.document(d.getId()).delete();
                                 }
                                 Toast.makeText(getActivity(), "Deleted", Toast.LENGTH_SHORT).show();
                                 binding.deleteButton.setEnabled(true);
@@ -387,7 +388,7 @@ public class UserFragmentDialog extends DialogFragment {
 
     private void updateEmployee() {
         updateDate();
-        db.collection("employees").whereEqualTo("email", binding.emailEdit.getText().toString().trim())
+        EMPLOYEE_COL.whereEqualTo("email", binding.emailEdit.getText().toString().trim())
                 .whereNotEqualTo("id", employee.getId())
                 .get().addOnSuccessListener(documents -> {
                     if (documents.getDocuments().size() != 0) {
@@ -405,16 +406,16 @@ public class UserFragmentDialog extends DialogFragment {
                     empInfo.add((employee.getManagerID() == null) ? "0" : "1");
                     updatedEmpOverviewMap.put(employee.getId(), empInfo);
                     updateEmployeeData();
-                    batch.set(db.collection("employees").document(employee.getId()),employee,SetOptions.merge());
+                    batch.set(EMPLOYEE_COL.document(employee.getId()),employee,SetOptions.merge());
                     if (oldNetSalary.getAmount() != Double.parseDouble(binding.salaryEdit.getText().toString())
                             || oldNetSalary.getCurrency()==null //for current data as some employees don't have currency
                             || !oldNetSalary.getCurrency().equals(binding.currencyAuto.getText().toString())) {
-                        batch.update( db.collection("EmployeesGrossSalary").document(employee.getId()),"allTypes",FieldValue.arrayRemove(oldNetSalary));
-                        batch.update(db.collection("EmployeesGrossSalary").document(employee.getId()).collection(year).document(month),"allTypes",FieldValue.arrayRemove(oldNetSalary));
+                        batch.update( EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()),"allTypes",FieldValue.arrayRemove(oldNetSalary));
+                        batch.update(EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()).collection(year).document(month),"allTypes",FieldValue.arrayRemove(oldNetSalary));
                         oldNetSalary.setCurrency(binding.currencyAuto.getText().toString());
                         oldNetSalary.setAmount(Double.parseDouble(binding.salaryEdit.getText().toString()));
-                        batch.update(db.collection("EmployeesGrossSalary").document(employee.getId()),"allTypes",FieldValue.arrayUnion(oldNetSalary));
-                        batch.update( db.collection("EmployeesGrossSalary").document(employee.getId()).collection(year).document(month),"allTypes",FieldValue.arrayUnion(oldNetSalary));
+                        batch.update(EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()),"allTypes",FieldValue.arrayUnion(oldNetSalary));
+                        batch.update( EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()).collection(year).document(month),"allTypes",FieldValue.arrayUnion(oldNetSalary));
                     }
                     updateEmployeeOverview(updatedEmpOverviewMap);
                 });
@@ -446,7 +447,7 @@ public class UserFragmentDialog extends DialogFragment {
     };
     private View.OnClickListener clUnlock = v -> {
         employee.setLocked(false);
-        db.collection("employees").document(employee.getId()).set(employee, SetOptions.mergeFields("locked"));
+        EMPLOYEE_COL.document(employee.getId()).set(employee, SetOptions.mergeFields("locked"));
     };
 
     private View.OnClickListener oclHireDate = new View.OnClickListener() {

@@ -1,5 +1,7 @@
 package com.igec.user.Fragments;
 
+import static com.igec.common.CONSTANTS.PROJECT_COL;
+
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -71,7 +73,7 @@ public class ProjectSummaryFragment extends Fragment {
     // Functions
     private void initialize() {
         manager = (Employee) getArguments().getSerializable("manager");
-        db.collection("projects").document(manager.getProjectID()).addSnapshotListener((documentSnapshot, error) -> {
+        PROJECT_COL.document(manager.getProjectID()).addSnapshotListener((documentSnapshot, error) -> {
             if (!documentSnapshot.exists())
                 return;
             project = documentSnapshot.toObject(Project.class);

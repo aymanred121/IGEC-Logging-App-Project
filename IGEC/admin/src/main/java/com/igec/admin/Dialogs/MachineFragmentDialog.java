@@ -2,6 +2,9 @@ package com.igec.admin.Dialogs;
 
 import static android.app.Activity.RESULT_OK;
 
+import static com.igec.common.CONSTANTS.MACHINE_COL;
+import static com.igec.common.CONSTANTS.MACHINE_EMPLOYEE_COL;
+
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Intent;
@@ -45,7 +48,6 @@ import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClic
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
@@ -72,7 +74,6 @@ public class MachineFragmentDialog extends DialogFragment {
     private long purchaseDate;
     private QRGEncoder qrgEncoder;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private final CollectionReference machineCol = db.collection("machine");
     private final MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vDatePicker;
     private final Machine machine;
@@ -240,7 +241,7 @@ public class MachineFragmentDialog extends DialogFragment {
             });
         }
         storageRef.child("imgs/" + binding.idEdit.getText().toString() + "/" + "cover" + ".jpg").delete();
-        machineCol.document(machine.getId()).delete().addOnSuccessListener(unused -> {
+        MACHINE_COL.document(machine.getId()).delete().addOnSuccessListener(unused -> {
             Toast.makeText(getActivity(), "Deleted", Toast.LENGTH_SHORT).show();
             binding.deleteButton.setEnabled(true);
             dismiss();
@@ -294,10 +295,10 @@ public class MachineFragmentDialog extends DialogFragment {
         machine.setWeeklyRentPrice(Double.parseDouble(binding.weekEdit.getText().toString()));
         machine.setMonthlyRentPrice(Double.parseDouble(binding.monthEdit.getText().toString()));
         machineCover.saveToCloudStorage(storageRef, machine.getId()).addOnSuccessListener(uv -> {
-            machineCol.document(machine.getId()).set(machine).addOnSuccessListener(unused -> {
-                db.collection("Machine_Employee").whereEqualTo("machine.id", machine.getId()).get().addOnSuccessListener(queryDocumentSnapshots -> {
+            MACHINE_COL.document(machine.getId()).set(machine).addOnSuccessListener(unused -> {
+                MACHINE_EMPLOYEE_COL.whereEqualTo("machine.id", machine.getId()).get().addOnSuccessListener(queryDocumentSnapshots -> {
                     for (DocumentSnapshot d : queryDocumentSnapshots) {
-                        db.collection("Machine_Employee")
+                        MACHINE_EMPLOYEE_COL
                                 .document(d.getId())
                                 .update("machine", machine);
                     }

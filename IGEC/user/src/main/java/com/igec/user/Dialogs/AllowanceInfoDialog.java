@@ -1,5 +1,7 @@
 package com.igec.user.Dialogs;
 
+import static com.igec.common.CONSTANTS.EMPLOYEE_COL;
+
 import android.app.Dialog;
 import android.os.Bundle;
 import android.text.Editable;
@@ -207,7 +209,7 @@ public class AllowanceInfoDialog extends DialogFragment {
                     dismiss();
 
                 } else {
-                    db.collection("employees").document(EmployeeID).get().addOnSuccessListener(value -> {
+                    EMPLOYEE_COL.document(EmployeeID).get().addOnSuccessListener(value -> {
                         if (!value.exists()) return;
                         Employee employee = value.toObject(Employee.class);
                         if (binding.typeAuto.getText().toString().equals("Retention by Days") || binding.typeAuto.getText().toString().equals("Retention by Amount")) {

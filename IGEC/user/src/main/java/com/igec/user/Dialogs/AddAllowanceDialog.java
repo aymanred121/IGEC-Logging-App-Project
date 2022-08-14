@@ -1,5 +1,8 @@
 package com.igec.user.Dialogs;
 
+import static com.igec.common.CONSTANTS.EMPLOYEE_GROSS_SALARY_COL;
+import static com.igec.common.CONSTANTS.PROJECT_COL;
+
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.os.Bundle;
@@ -155,7 +158,7 @@ public class AddAllowanceDialog extends DialogFragment {
         if (isProject) {
             adapter.setAllowances(allowances);
         } else {
-            db.collection("EmployeesGrossSalary").document(employee.getId()).collection(year).document(month).addSnapshotListener((value, error) -> {
+            EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()).collection(year).document(month).addSnapshotListener((value, error) -> {
                 allowances = new ArrayList<>();
                 adapter.setAllowances(allowances);
                 if (!value.exists())
@@ -186,7 +189,7 @@ public class AddAllowanceDialog extends DialogFragment {
             ArrayList<Allowance> oneTimeAllowances = new ArrayList<>();
             ArrayList<Allowance> permanentAllowances = new ArrayList<>();
             if (!isProject) {
-                db.collection("EmployeesGrossSalary").document(employee.getId()).get().addOnSuccessListener((value) -> {
+                EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()).get().addOnSuccessListener((value) -> {
                     if (!value.exists())
                         return;
                     for (Allowance allowance : allowances) {
@@ -199,8 +202,8 @@ public class AddAllowanceDialog extends DialogFragment {
                     EmployeesGrossSalary employeesGrossSalary1 = value.toObject(EmployeesGrossSalary.class);
                     employeesGrossSalary1.getAllTypes().removeIf(allowance -> allowance.getType() != allowancesEnum.NETSALARY.ordinal() && allowance.getType() != allowancesEnum.PROJECT.ordinal());
                     employeesGrossSalary1.getAllTypes().addAll(permanentAllowances);
-                    db.collection("EmployeesGrossSalary").document(employee.getId()).update("allTypes", employeesGrossSalary1.getAllTypes());
-                    db.collection("EmployeesGrossSalary").document(employee.getId()).collection(year).document(month).get().addOnSuccessListener(doc -> {
+                    EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()).update("allTypes", employeesGrossSalary1.getAllTypes());
+                    EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()).collection(year).document(month).get().addOnSuccessListener(doc -> {
                         if (!doc.exists()) {
                             //new month
                             //add project allowances
@@ -230,22 +233,22 @@ public class AddAllowanceDialog extends DialogFragment {
                     allowance.setProjectId(manager.getProjectID());
                     allowance.setType(allowancesEnum.PROJECT.ordinal());
                 });
-                db.collection("projects").document(manager.getProjectID()).get().addOnSuccessListener(documentSnapshot -> {
+                PROJECT_COL.document(manager.getProjectID()).get().addOnSuccessListener(documentSnapshot -> {
                     if (!documentSnapshot.exists())
                         return;
                     project = documentSnapshot.toObject(Project.class);
                     ArrayList<Allowance> projectAllowances = allowances;
                     project.setAllowancesList(projectAllowances);
-                    db.collection("projects").document(manager.getProjectID()).update("allowancesList", project.getAllowancesList());
+                    PROJECT_COL.document(manager.getProjectID()).update("allowancesList", project.getAllowancesList());
                     for (EmployeeOverview employee : project.getEmployees()) {
-                        db.collection("EmployeesGrossSalary").document(employee.getId()).get().addOnSuccessListener((value) -> {
+                        EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()).get().addOnSuccessListener((value) -> {
                             if (!value.exists())
                                 return;
                             EmployeesGrossSalary employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
                             employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() == allowancesEnum.PROJECT.ordinal() && allowance.getProjectId().equals(project.getId()));
                             employeesGrossSalary.getAllTypes().addAll(projectAllowances);
-                            db.collection("EmployeesGrossSalary").document(employee.getId()).update("allTypes", employeesGrossSalary.getAllTypes());
-                            db.collection("EmployeesGrossSalary").document(employee.getId()).collection(year).document(month).get().addOnSuccessListener(doc -> {
+                            EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()).update("allTypes", employeesGrossSalary.getAllTypes());
+                            EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()).collection(year).document(month).get().addOnSuccessListener(doc -> {
                                 if (!doc.exists() || doc.getData().size() == 0) {
                                     //new month
 //                                    ArrayList<Allowance> allowanceArrayList = new ArrayList<>();
@@ -257,7 +260,7 @@ public class AddAllowanceDialog extends DialogFragment {
 //                                    employeesGrossSalary.setBaseAllowances(allowanceArrayList);
                                     employeesGrossSalary.getBaseAllowances().addAll(projectAllowances);
                                     employeesGrossSalary.getAllTypes().removeIf(x -> x.getType() == allowancesEnum.PROJECT.ordinal());
-                                    db.collection("EmployeesGrossSalary").document(employee.getId()).collection(year).document(month).set(employeesGrossSalary, SetOptions.mergeFields("allTypes", "baseAllowances"));
+                                    EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()).collection(year).document(month).set(employeesGrossSalary, SetOptions.mergeFields("allTypes", "baseAllowances"));
                                     return;
                                 }
                                 EmployeesGrossSalary employeesGrossSalary1 = doc.toObject(EmployeesGrossSalary.class);

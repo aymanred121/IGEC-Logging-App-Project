@@ -1,6 +1,7 @@
 package com.igec.admin.Activities;
 
 
+import static com.igec.common.CONSTANTS.EMPLOYEE_COL;
 import static com.igec.common.CONSTANTS.ID;
 import static com.igec.common.CONSTANTS.IGEC;
 import static com.igec.common.cryptography.RSAUtil.decrypt;
@@ -171,7 +172,7 @@ public class LoginActivity extends AppCompatActivity {
             if (!validateInput()) return;
             binding.signInButton.setEnabled(false);
             FirebaseFirestore db = FirebaseFirestore.getInstance();
-            db.collection("employees")
+            EMPLOYEE_COL
                     .whereEqualTo("email", (binding.emailEdit.getText() != null) ? binding.emailEdit.getText().toString() : "")
                     .limit(1)
                     .get().addOnSuccessListener(queryDocumentSnapshots -> {

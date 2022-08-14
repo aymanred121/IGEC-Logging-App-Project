@@ -1,5 +1,9 @@
 package com.igec.common.Dialogs;
 
+import static com.igec.common.CONSTANTS.EMPLOYEE_COL;
+import static com.igec.common.CONSTANTS.EMPLOYEE_GROSS_SALARY_COL;
+import static com.igec.common.CONSTANTS.VACATION_COL;
+
 import android.app.Dialog;
 import android.os.Bundle;
 import android.text.Editable;
@@ -31,8 +35,8 @@ import java.util.Date;
 import java.util.Locale;
 
 public class VacationDialog extends DialogFragment {
-    private VacationRequest vacationRequest;
-    private String vacationNote;
+    private final VacationRequest vacationRequest;
+    private final String vacationNote;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
 
@@ -142,15 +146,15 @@ public class VacationDialog extends DialogFragment {
         Date newEndDate = calendar.getTime();
         vacationRequest.setEndDate(newEndDate);
         vacationRequest.setVacationStatus(1);
-        db.collection("Vacation").document(vacationRequest.getId())
+        VACATION_COL.document(vacationRequest.getId())
                 .set(vacationRequest, SetOptions.merge());
-        db.collection("employees").document(vacationRequest.getEmployee().getId())
+        EMPLOYEE_COL.document(vacationRequest.getEmployee().getId())
                 .update("totalNumberOfVacationDays", FieldValue.increment(-vacationDays));
         if(unPaidDays==0)
             return;
-        db.collection("EmployeesGrossSalary").document(vacationRequest.getEmployee().getId()).collection(year).document(month).get().addOnSuccessListener(documentSnapshot -> {
+        EMPLOYEE_GROSS_SALARY_COL.document(vacationRequest.getEmployee().getId()).collection(year).document(month).get().addOnSuccessListener(documentSnapshot -> {
             if (!documentSnapshot.exists()) {
-                db.collection("EmployeesGrossSalary").document(vacationRequest.getEmployee().getId()).get().addOnSuccessListener(doc->{
+                EMPLOYEE_GROSS_SALARY_COL.document(vacationRequest.getEmployee().getId()).get().addOnSuccessListener(doc->{
                     if(!doc.exists())
                         return;
                     EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
@@ -183,7 +187,7 @@ public class VacationDialog extends DialogFragment {
     }
 
 
-    private TextWatcher twAcceptedAmount = new TextWatcher() {
+    private final TextWatcher twAcceptedAmount = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -238,7 +242,7 @@ public class VacationDialog extends DialogFragment {
             }
         }
     };
-    private TextWatcher twUnpaid = new TextWatcher() {
+    private final TextWatcher twUnpaid = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -270,7 +274,7 @@ public class VacationDialog extends DialogFragment {
             }
         }
     };
-    private View.OnClickListener oclAccept = new View.OnClickListener() {
+    private final View.OnClickListener oclAccept = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
 
@@ -282,10 +286,10 @@ public class VacationDialog extends DialogFragment {
             }
         }
     };
-    private View.OnClickListener oclReject = new View.OnClickListener() {
+    private final View.OnClickListener oclReject = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            db.collection("Vacation")
+            VACATION_COL
                     .document(vacationRequest.getId())
                     .update("vacationStatus", -1).addOnSuccessListener(v -> dismiss());
         }

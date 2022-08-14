@@ -1,5 +1,8 @@
 package com.igec.user.Fragments;
 
+import static com.igec.common.CONSTANTS.PROJECT_COL;
+import static com.igec.common.CONSTANTS.TRANSFER_REQUESTS_COL;
+
 import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
@@ -91,7 +94,7 @@ public class SendTransferRequest extends Fragment {
     }
 
     private Task<Void> sendRequest(EmployeeOverview employee) {
-        String transferId = db.collection("TransferRequests").document().getId();
+        String transferId = TRANSFER_REQUESTS_COL.document().getId();
         TransferRequests request = new TransferRequests();
         request.setTransferId(transferId);
         request.setEmployee(employee);
@@ -102,11 +105,11 @@ public class SendTransferRequest extends Fragment {
         request.setOldProjectName(chosenProject.getName());
         request.setOldProjectReference(chosenProject.getReference());
         request.setNote(binding.noteEdit.getText().toString());
-        return db.collection("TransferRequests").document(transferId).set(request);
+        return TRANSFER_REQUESTS_COL.document(transferId).set(request);
     }
 
     private void getProject() {
-        db.collection("projects").document(manager.getProjectID()).get().addOnSuccessListener(documentSnapshot -> {
+        PROJECT_COL.document(manager.getProjectID()).get().addOnSuccessListener(documentSnapshot -> {
             if (!documentSnapshot.exists())
                 return;
             thisProject = documentSnapshot.toObject(Project.class);
@@ -125,7 +128,7 @@ public class SendTransferRequest extends Fragment {
     }
 
     private void getAllProjects(String projectId) {
-        db.collection("projects").whereNotEqualTo("id", projectId).addSnapshotListener((queryDocumentSnapshots, error) -> {
+        PROJECT_COL.whereNotEqualTo("id", projectId).addSnapshotListener((queryDocumentSnapshots, error) -> {
 
             if (queryDocumentSnapshots.size() == 0) {
                 freezeViews(true);

@@ -1,5 +1,7 @@
 package com.igec.user.Fragments;
 
+import static com.igec.common.CONSTANTS.EMPLOYEE_GROSS_SALARY_COL;
+
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -92,7 +94,7 @@ public class GrossSalaryFragment extends Fragment {
     }
 
     private void getGrossSalary() {
-        db.collection("EmployeesGrossSalary").document(employeeId).collection(year).document(month).addSnapshotListener((value, error) -> {
+        EMPLOYEE_GROSS_SALARY_COL.document(employeeId).collection(year).document(month).addSnapshotListener((value, error) -> {
             if (!value.exists())
                 return;
             salarySummaries.clear();

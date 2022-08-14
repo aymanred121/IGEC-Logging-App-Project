@@ -1,7 +1,13 @@
 package com.igec.user.Fragments;
 
 import static com.igec.common.CONSTANTS.CAMERA_REQUEST_CODE;
+import static com.igec.common.CONSTANTS.EMPLOYEE_GROSS_SALARY_COL;
 import static com.igec.common.CONSTANTS.LOCATION_REQUEST_CODE;
+import static com.igec.common.CONSTANTS.MACHINE_COL;
+import static com.igec.common.CONSTANTS.MACHINE_DEFECT_LOG_COL;
+import static com.igec.common.CONSTANTS.MACHINE_EMPLOYEE_COL;
+import static com.igec.common.CONSTANTS.PROJECT_COL;
+import static com.igec.common.CONSTANTS.SUMMARY_COL;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -41,7 +47,6 @@ import com.igec.common.utilities.allowancesEnum;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.Timestamp;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
@@ -73,8 +78,6 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     private String machineEmpId;
     private String year,month,day;
     private FusedLocationProviderClient fusedLocationClient;
-    private final CollectionReference machineEmployee = db.collection("Machine_Employee");
-    private final CollectionReference machineCol = db.collection("machine");
     @SuppressLint("SimpleDateFormat")
     private final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
     private final double LAT = 30.103168;
@@ -163,7 +166,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
 
     private void setCheckInOutBtn() {
         updateDate();
-        db.collection("summary").document(id)
+        SUMMARY_COL.document(id)
                 .collection(year + "-" + month)
                 .document(day)
                 .get().addOnSuccessListener((value) -> {
@@ -243,7 +246,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                     binding.checkInOutFab.setEnabled(true);
                 })
                 .setPositiveButton(getString(R.string.Yes), (dialogInterface, i) -> {
-                    db.collection("projects").document(currEmployee.getProjectID()).get().addOnSuccessListener(doc -> {
+                    PROJECT_COL.document(currEmployee.getProjectID()).get().addOnSuccessListener(doc -> {
                         if (!doc.exists())
                             return;
                         Project project = doc.toObject(Project.class);
@@ -281,7 +284,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                             Summary summary = new Summary(latitude, longitude);
                             HashMap<String, Object> checkOutDetails = new HashMap<>(summary.getGeoMap());
                             checkOutDetails.put("Time", Timestamp.now());
-                            db.collection("summary").document(id)
+                            SUMMARY_COL.document(id)
                                     .collection(year + "-" + month).document(day)
                                     .get().addOnSuccessListener(documentSnapshot -> {
                                         if (!documentSnapshot.exists() || documentSnapshot.getData().size() == 0) {
@@ -331,10 +334,10 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         //check if working time is greater than 8 hrs
         summary.setCheckOut(checkOut);
         summary.setWorkedTime(FieldValue.increment(workingTime));
-        db.collection("summary").document(id).collection(year + "-" + month).document(day)
+        SUMMARY_COL.document(id).collection(year + "-" + month).document(day)
                 .update("checkOut", checkOut, "workingTime", FieldValue.increment(workingTime))
                 .addOnSuccessListener(unused -> {
-                    db.collection("summary")
+                    SUMMARY_COL
                             .document(id)
                             .collection(year + "-" + month)
                             .document(day)
@@ -361,19 +364,19 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                 overTimeAllowance.setNote(prevDay);
                                 overTimeAllowance.setType(allowancesEnum.OVERTIME.ordinal());
                                 overTimeAllowance.setProjectId(currEmployee.getProjectID());
-                                db.collection("EmployeesGrossSalary").document(id).collection(year).document(month).get().addOnSuccessListener(doc1 -> {
+                                EMPLOYEE_GROSS_SALARY_COL.document(id).collection(year).document(month).get().addOnSuccessListener(doc1 -> {
                                     EmployeesGrossSalary emp = doc1.toObject(EmployeesGrossSalary.class);
                                     ArrayList<Allowance> allowanceArrayList = emp.getAllTypes();
                                     if (allowanceArrayList != null) {
                                         allowanceArrayList.removeIf(x -> x.getName().equals("overTime") && x.getNote().trim().equals(day));
                                     }
                                     allowanceArrayList.add(overTimeAllowance);
-                                    db.collection("EmployeesGrossSalary").document(id).collection(year).document(month).update("allTypes", allowanceArrayList);
+                                    EMPLOYEE_GROSS_SALARY_COL.document(id).collection(year).document(month).update("allTypes", allowanceArrayList);
                                 });
                             });
 
                     binding.checkInOutFab.setEnabled(true);
-                    db.collection("projects").document(currEmployee.getProjectID())
+                    PROJECT_COL.document(currEmployee.getProjectID())
                             .update("employeeWorkedTime." + currEmployee.getId(), FieldValue.increment(workingTime));
 
                 });
@@ -389,11 +392,11 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         checkIn.put("checkIn", checkInDetails);
         checkIn.put("projectId", currEmployee.getProjectID());
         checkIn.put("lastCheckInTime", summary.getLastCheckInTime());
-        db.collection("summary").document(id).collection(year + "-" + month).document(day).set(checkIn);
-        db.collection("EmployeesGrossSalary").document(currEmployee.getId()).collection(year).document(month).get().addOnSuccessListener(doc -> {
+        SUMMARY_COL.document(id).collection(year + "-" + month).document(day).set(checkIn);
+        EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId()).collection(year).document(month).get().addOnSuccessListener(doc -> {
             if (!doc.exists()) {
                 //new month
-                db.collection("EmployeesGrossSalary").document(currEmployee.getId()).get().addOnSuccessListener(documentSnapshot -> {
+                EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId()).get().addOnSuccessListener(documentSnapshot -> {
                     if (!documentSnapshot.exists()) return;
                     EmployeesGrossSalary employeesGrossSalary = documentSnapshot.toObject(EmployeesGrossSalary.class);
                     ArrayList<Allowance> allowances = employeesGrossSalary.getAllTypes().stream().filter(allowance -> allowance.getType() != allowancesEnum.NETSALARY.ordinal()).collect(Collectors.toCollection(ArrayList::new));
@@ -417,7 +420,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                     employeesGrossSalary.getAllTypes().add(allowance);
                 }
             }
-            db.collection("EmployeesGrossSalary").document(currEmployee.getId()).collection(year).document(month).set(employeesGrossSalary, SetOptions.merge());
+            EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId()).collection(year).document(month).set(employeesGrossSalary, SetOptions.merge());
 
         });
     }
@@ -441,7 +444,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     };
 
     private void machineCheckInOut(Client client, String note) {
-        machineEmployee.document(machineEmpId).get().addOnSuccessListener(documentSnapshot -> {
+        MACHINE_EMPLOYEE_COL.document(machineEmpId).get().addOnSuccessListener(documentSnapshot -> {
             if (!documentSnapshot.exists()) {
                 machineCheckIn(client);
             } else {
@@ -450,7 +453,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
             }
             if (!note.trim().isEmpty()) {
                 MachineDefectsLog machineDefectsLog = new MachineDefectsLog(note.trim(), currMachine.getReference(), currMachine.getId(), currEmployee.getId(), currEmployee.getFirstName(), new Date());
-                db.collection("MachineDefectsLog").add(machineDefectsLog).addOnFailureListener(unused -> {
+                MACHINE_DEFECT_LOG_COL.add(machineDefectsLog).addOnFailureListener(unused -> {
                     Toast.makeText(getActivity(), "error uploading comment", Toast.LENGTH_SHORT).show();
                 });
             }
@@ -480,12 +483,12 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         currMachineEmployee.setWorkedTime(workingTime);
         currMachineEmployee.setCheckOut(checkOutDetails);
         currMachineEmployee.setCost(monthlyCost + weeklyCost + dailyCost);
-        db.collection("projects").document(currEmployee.getProjectID())
+        PROJECT_COL.document(currEmployee.getProjectID())
                 .update("machineWorkedTime." + currMachine.getReference(), FieldValue.increment(workingTime));
-        machineEmployee.document(machineEmpId).set(currMachineEmployee)
+        MACHINE_EMPLOYEE_COL.document(machineEmpId).set(currMachineEmployee)
                 .addOnSuccessListener(unused -> {
                     currMachine.removeEmployeeDependency();
-                    machineCol.document(currMachine.getId()).update("isUsed", false, "employeeFirstName", "", "employeeId", "", "machineEmployeeID", "").addOnSuccessListener(vu -> {
+                    MACHINE_COL.document(currMachine.getId()).update("isUsed", false, "employeeFirstName", "", "employeeId", "", "machineEmployeeID", "").addOnSuccessListener(vu -> {
 
                         Toast.makeText(getContext(), "Machine: " + currMachine.getReference() + " checked Out successfully", Toast.LENGTH_SHORT).show();
 
@@ -506,9 +509,9 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         currMachine.setMachineEmployeeID(machineEmpId);
         currMachine.setEmployeeId(currEmployee.getId());
         //NOTE don't use set()
-        machineCol.document(currMachine.getId()).update("isUsed", true, "employeeFirstName", currEmployee.getFirstName(), "employeeId", currEmployee.getId(), "machineEmployeeID", machineEmpId)
+        MACHINE_COL.document(currMachine.getId()).update("isUsed", true, "employeeFirstName", currEmployee.getFirstName(), "employeeId", currEmployee.getId(), "machineEmployeeID", machineEmpId)
                 .addOnSuccessListener(unused1 -> {
-                    machineEmployee.document(machineEmpId).set(machine_employee).addOnSuccessListener(unused -> Toast.makeText(getContext(), "Machine: " + currMachine.getReference() + " checked In successfully", Toast.LENGTH_SHORT).show());
+                    MACHINE_EMPLOYEE_COL.document(machineEmpId).set(machine_employee).addOnSuccessListener(unused -> Toast.makeText(getContext(), "Machine: " + currMachine.getReference() + " checked In successfully", Toast.LENGTH_SHORT).show());
                 });
 //        ArrayList<Allowance> allTypes = new ArrayList<>();
 //        db.collection("EmployeesGrossSalary").document(currEmployee.getId()).get().addOnSuccessListener((value) -> {
@@ -536,16 +539,16 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
 
                 // validate machine ID
                 try {
-                    machineCol.document(machineID).get().addOnSuccessListener((value) -> {
+                    MACHINE_COL.document(machineID).get().addOnSuccessListener((value) -> {
                         if (!value.exists()) {
                             Toast.makeText(getActivity(), "Invalid Machine ID", Toast.LENGTH_SHORT).show();
                             return;
                         }
                         currMachine = value.toObject(Machine.class);
                         // Generate machineEmpID if not found
-                        machineEmpId = !currMachine.getEmployeeId().equals(currEmployee.getId()) ? machineEmployee.document().getId() : currMachine.getMachineEmployeeID();
+                        machineEmpId = !currMachine.getEmployeeId().equals(currEmployee.getId()) ? MACHINE_EMPLOYEE_COL.document().getId() : currMachine.getMachineEmployeeID();
                         // if machineEmpID found check if the check-in agent and checkout agent are the same (user or company)
-                        machineEmployee.document(machineEmpId).get().addOnSuccessListener(documentSnapshot -> {
+                        MACHINE_EMPLOYEE_COL.document(machineEmpId).get().addOnSuccessListener(documentSnapshot -> {
                             if (documentSnapshot.exists()) {
                                 // check-out
                                 if (isItAUser != ((documentSnapshot.toObject(Machine_Employee.class)).getClient() == null)) {
@@ -594,7 +597,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                 // if not
                 else {
                     // only open when client is null in Machine_Employee ie when checking in only
-                    machineEmployee.document(machineEmpId).get().addOnSuccessListener(documentSnapshot -> {
+                    MACHINE_EMPLOYEE_COL.document(machineEmpId).get().addOnSuccessListener(documentSnapshot -> {
                         if (documentSnapshot.exists()) {
                             Machine_Employee machine_employee = documentSnapshot.toObject(Machine_Employee.class);
                             machineCheckInOut(machine_employee.getClient(), note);

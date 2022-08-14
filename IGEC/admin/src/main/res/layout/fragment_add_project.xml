@@ -1,381 +1,388 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".Fragments.AddProjectFragment">
 
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/name_layout"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginStart="@dimen/vhigh"
-        android:layout_marginTop="@dimen/mid"
-        android:layout_marginEnd="@dimen/vhigh"
-        app:helperTextEnabled="true"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_height="wrap_content">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/name_edit"
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/name_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginStart="@dimen/vhigh"
+            android:layout_marginTop="@dimen/mid"
+            android:layout_marginEnd="@dimen/vhigh"
+            app:helperTextEnabled="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/name_edit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/name"
+                android:inputType="textPersonName"
+                android:padding="14dp"
+                android:singleLine="true" />
+
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/reference_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:hint="@string/name"
-            android:inputType="textPersonName"
-            android:padding="14dp"
-            android:singleLine="true" />
+            android:layout_marginStart="@dimen/vhigh"
+            android:layout_marginTop="@dimen/mid"
+            android:layout_marginEnd="@dimen/high"
+            app:helperTextEnabled="true"
+            app:layout_constraintEnd_toStartOf="@id/office_work_checkbox"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/name_layout"
+            app:prefixText="IGEC">
 
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/reference_edit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:digits="0123456789-"
+                android:hint="@string/reference"
+                android:inputType="number"
+                android:maxLength="6"
+                android:padding="14dp"
+                android:singleLine="true" />
 
-    </com.google.android.material.textfield.TextInputLayout>
+        </com.google.android.material.textfield.TextInputLayout>
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/reference_layout"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/vhigh"
-        android:layout_marginTop="@dimen/mid"
-        android:layout_marginEnd="@dimen/high"
-        app:helperTextEnabled="true"
-        app:layout_constraintEnd_toStartOf="@id/office_work_checkbox"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/name_layout"
-        app:prefixText="IGEC">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/reference_edit"
-            android:layout_width="match_parent"
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/office_work_checkbox"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:digits="0123456789-"
-            android:hint="@string/reference"
-            android:inputType="number"
-            android:maxLength="6"
-            android:padding="14dp"
-            android:singleLine="true" />
+            android:layout_marginEnd="@dimen/vhigh"
+            android:text="@string/office_work"
+            app:layout_constraintBottom_toBottomOf="@+id/reference_layout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/reference_layout" />
 
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <com.google.android.material.checkbox.MaterialCheckBox
-        android:id="@+id/office_work_checkbox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/vhigh"
-        android:text="@string/office_work"
-        app:layout_constraintBottom_toBottomOf="@+id/reference_layout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/reference_layout" />
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/area_layout"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/vhigh"
-        android:layout_marginTop="@dimen/mid"
-        android:layout_marginEnd="@dimen/mid"
-        app:boxBackgroundMode="outline"
-        app:helperTextEnabled="true"
-        app:layout_constraintEnd_toStartOf="@+id/city_layout"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/reference_layout">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/area_edit"
-            android:layout_width="match_parent"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/area_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:hint="@string/area"
-            android:inputType="text"
-            android:padding="14dp"
-            android:singleLine="true" />
+            android:layout_marginStart="@dimen/vhigh"
+            android:layout_marginTop="@dimen/mid"
+            android:layout_marginEnd="@dimen/mid"
+            app:boxBackgroundMode="outline"
+            app:helperTextEnabled="true"
+            app:layout_constraintEnd_toStartOf="@+id/city_layout"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/reference_layout">
 
-    </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/area_edit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/area"
+                android:inputType="text"
+                android:padding="14dp"
+                android:singleLine="true" />
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/city_layout"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/mid"
-        android:layout_marginTop="@dimen/mid"
-        android:layout_marginEnd="@dimen/mid"
-        app:boxBackgroundMode="outline"
-        app:helperTextEnabled="true"
-        app:layout_constraintEnd_toStartOf="@+id/street_layout"
-        app:layout_constraintStart_toEndOf="@+id/area_layout"
-        app:layout_constraintTop_toBottomOf="@+id/reference_layout">
+        </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/city_edit"
-            android:layout_width="match_parent"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/city_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:hint="@string/city"
-            android:inputType="text"
-            android:padding="14dp"
-            android:singleLine="true" />
+            android:layout_marginStart="@dimen/mid"
+            android:layout_marginTop="@dimen/mid"
+            android:layout_marginEnd="@dimen/mid"
+            app:boxBackgroundMode="outline"
+            app:helperTextEnabled="true"
+            app:layout_constraintEnd_toStartOf="@+id/street_layout"
+            app:layout_constraintStart_toEndOf="@+id/area_layout"
+            app:layout_constraintTop_toBottomOf="@+id/reference_layout">
 
-    </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/city_edit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/city"
+                android:inputType="text"
+                android:padding="14dp"
+                android:singleLine="true" />
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/street_layout"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/mid"
-        android:layout_marginTop="@dimen/mid"
-        android:layout_marginEnd="@dimen/vhigh"
-        app:boxBackgroundMode="outline"
-        app:helperTextEnabled="true"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/city_layout"
-        app:layout_constraintTop_toBottomOf="@+id/reference_layout">
+        </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/street_edit"
-            android:layout_width="match_parent"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/street_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:hint="@string/street"
-            android:inputType="text"
-            android:padding="14dp"
-            android:singleLine="true" />
+            android:layout_marginStart="@dimen/mid"
+            android:layout_marginTop="@dimen/mid"
+            android:layout_marginEnd="@dimen/vhigh"
+            app:boxBackgroundMode="outline"
+            app:helperTextEnabled="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/city_layout"
+            app:layout_constraintTop_toBottomOf="@+id/reference_layout">
 
-    </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/street_edit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/street"
+                android:inputType="text"
+                android:padding="14dp"
+                android:singleLine="true" />
 
-
-
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/project_area_layout"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/vhigh"
-        android:layout_marginTop="@dimen/mid"
-        android:layout_marginEnd="@dimen/high"
-        app:helperTextEnabled="true"
-        app:layout_constraintEnd_toStartOf="@id/locate_button"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/area_layout">
-
-    <com.google.android.material.textfield.TextInputEditText
-        android:id="@+id/project_area_edit"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:digits="0123456789-"
-        android:hint="@string/diameter"
-        android:inputType="number"
-        android:maxLength="6"
-        android:padding="14dp"
-        android:singleLine="true" />
-
-    </com.google.android.material.textfield.TextInputLayout>
+        </com.google.android.material.textfield.TextInputLayout>
 
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/locate_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/vhigh"
-        android:layout_marginTop="@dimen/mid"
-        android:textAllCaps= "false"
-        android:visibility="visible"
-        android:minWidth="0dp"
-        app:iconPadding="0dp"
-        android:gravity="center"
-        app:icon="@drawable/ic_baseline_location_on_24"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/project_area_layout"
-        app:layout_constraintTop_toTopOf="@id/project_area_layout"
-        app:layout_constraintBottom_toBottomOf="@id/project_area_layout" />
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/contract_type_layout"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/vhigh"
-        android:layout_marginTop="@dimen/mid"
-        android:layout_marginEnd="@dimen/vhigh"
-        android:enabled="true"
-        app:boxBackgroundMode="outline"
-        app:endIconMode="dropdown_menu"
-        app:helperTextEnabled="true"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/date_layout">
-
-        <AutoCompleteTextView
-            android:id="@+id/contract_type_auto"
-            android:layout_width="match_parent"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/project_area_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:hint="@string/contractType"
-            android:inputType="none"
-            android:padding="14dp"
-            android:singleLine="true" />
+            android:layout_marginStart="@dimen/vhigh"
+            android:layout_marginTop="@dimen/mid"
+            android:layout_marginEnd="@dimen/high"
+            app:helperTextEnabled="true"
+            app:layout_constraintEnd_toStartOf="@id/locate_button"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/area_layout">
 
-    </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/project_area_edit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:digits="0123456789-"
+                android:hint="@string/diameter"
+                android:inputType="number"
+                android:maxLength="6"
+                android:padding="14dp"
+                android:singleLine="true" />
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/date_layout"
-        style="@style/DatePicker"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/vhigh"
-        android:layout_marginTop="@dimen/mid"
-        android:layout_marginEnd="@dimen/vhigh"
-        app:boxBackgroundMode="outline"
-        app:helperTextEnabled="true"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/project_area_layout">
+        </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/date_edit"
-            android:layout_width="match_parent"
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/locate_button"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/mid"
+            android:layout_marginEnd="@dimen/vhigh"
+            android:gravity="center"
+            android:minWidth="0dp"
+            android:textAllCaps="false"
+            android:visibility="visible"
+            app:icon="@drawable/ic_baseline_location_on_24"
+            app:iconPadding="0dp"
+            app:layout_constraintBottom_toBottomOf="@id/project_area_layout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/project_area_layout"
+            app:layout_constraintTop_toTopOf="@id/project_area_layout" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/contract_type_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/vhigh"
+            android:layout_marginTop="@dimen/mid"
+            android:layout_marginEnd="@dimen/vhigh"
+            android:enabled="true"
+            app:boxBackgroundMode="outline"
+            app:endIconMode="dropdown_menu"
+            app:helperTextEnabled="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/date_layout">
+
+            <AutoCompleteTextView
+                android:id="@+id/contract_type_auto"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/contractType"
+                android:inputType="none"
+                android:padding="14dp"
+                android:singleLine="true" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/date_layout"
+            style="@style/DatePicker"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/vhigh"
+            android:layout_marginTop="@dimen/mid"
+            android:layout_marginEnd="@dimen/vhigh"
+            app:boxBackgroundMode="outline"
+            app:helperTextEnabled="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/project_area_layout">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/date_edit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:hint="@string/start_time"
+                android:inputType="date"
+                android:padding="14dp"
+                android:singleLine="true" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/manager_id_Layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/vhigh"
+            android:layout_marginTop="@dimen/mid"
+            android:layout_marginEnd="@dimen/mid"
             android:enabled="false"
-            android:hint="@string/start_time"
-            android:inputType="date"
-            android:padding="14dp"
-            android:singleLine="true" />
+            app:boxBackgroundMode="outline"
+            app:endIconMode="dropdown_menu"
+            app:helperTextEnabled="true"
+            app:layout_constraintEnd_toStartOf="@+id/manager_name_layout"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/contract_type_layout">
 
-    </com.google.android.material.textfield.TextInputLayout>
+            <AutoCompleteTextView
+                android:id="@+id/manager_id_auto"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/manager_id"
+                android:inputType="none"
+                android:padding="14dp"
+                android:singleLine="true" />
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/manager_id_Layout"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/vhigh"
-        android:layout_marginTop="@dimen/mid"
-        android:layout_marginEnd="@dimen/mid"
-        app:boxBackgroundMode="outline"
-        app:endIconMode="dropdown_menu"
-        android:enabled="false"
-        app:helperTextEnabled="true"
-        app:layout_constraintEnd_toStartOf="@+id/manager_name_layout"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/contract_type_layout">
+        </com.google.android.material.textfield.TextInputLayout>
 
-        <AutoCompleteTextView
-            android:id="@+id/manager_id_auto"
-            android:layout_width="match_parent"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/manager_name_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:hint="@string/manager_id"
-            android:inputType="none"
-            android:padding="14dp"
-            android:singleLine="true" />
+            android:layout_marginStart="@dimen/mid"
+            android:layout_marginTop="@dimen/mid"
+            android:layout_marginEnd="@dimen/vhigh"
+            app:boxBackgroundMode="outline"
+            app:helperTextEnabled="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/manager_id_Layout"
+            app:layout_constraintTop_toBottomOf="@id/contract_type_layout">
 
-    </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/manager_name_edit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:enabled="false"
+                android:hint="@string/manager_name"
+                android:inputType="none"
+                android:padding="14dp"
+                android:singleLine="true" />
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/manager_name_layout"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/mid"
-        android:layout_marginTop="@dimen/mid"
-        android:layout_marginEnd="@dimen/vhigh"
-        app:boxBackgroundMode="outline"
-        app:helperTextEnabled="true"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/manager_id_Layout"
-        app:layout_constraintTop_toBottomOf="@id/contract_type_layout">
+        </com.google.android.material.textfield.TextInputLayout>
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/manager_name_edit"
-            android:layout_width="match_parent"
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/client_button"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:enabled="false"
-            android:hint="@string/manager_name"
-            android:inputType="none"
-            android:padding="14dp"
-            android:singleLine="true" />
+            android:layout_marginStart="@dimen/vhigh"
+            android:layout_marginTop="@dimen/mid"
+            android:layout_marginEnd="@dimen/mid"
+            android:layout_marginBottom="@dimen/vhigh"
+            android:text="@string/AddClient"
+            android:textAllCaps="false"
+            app:layout_constraintEnd_toStartOf="@id/allowances_button"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/manager_id_Layout" />
 
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/client_button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/vhigh"
-        android:layout_marginTop="@dimen/mid"
-        android:layout_marginEnd="@dimen/mid"
-        android:layout_marginBottom="@dimen/vhigh"
-        android:text="@string/AddClient"
-        android:textAllCaps="false"
-        app:layout_constraintEnd_toStartOf="@id/allowances_button"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/manager_id_Layout" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/allowances_button"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/vhigh"
-        android:layout_marginTop="@dimen/mid"
-        android:layout_marginEnd="@dimen/vhigh"
-        android:layout_marginBottom="@dimen/vhigh"
-        android:text="@string/AddAllowance"
-        android:textAllCaps="false"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/client_button"
-        app:layout_constraintTop_toBottomOf="@id/manager_id_Layout" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/allowances_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/vhigh"
+            android:layout_marginTop="@dimen/mid"
+            android:layout_marginEnd="@dimen/vhigh"
+            android:layout_marginBottom="@dimen/vhigh"
+            android:text="@string/AddAllowance"
+            android:textAllCaps="false"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/client_button"
+            app:layout_constraintTop_toBottomOf="@id/manager_id_Layout" />
 
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginStart="@dimen/vhigh"
-        android:layout_marginTop="@dimen/mid"
-        android:layout_marginEnd="@dimen/vhigh"
-        android:layout_marginBottom="96dp"
-        android:overScrollMode="never"
-        android:scrollbars="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/client_button"
-        tools:listitem="@layout/item_employee" />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="500dp"
+            android:layout_marginStart="@dimen/vhigh"
+            android:layout_marginTop="@dimen/mid"
+            android:layout_marginEnd="@dimen/vhigh"
+            android:overScrollMode="never"
+            android:scrollbars="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/client_button"
+            tools:listitem="@layout/item_employee" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/register_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/vhigh"
-        android:text="@string/register"
-        android:textAllCaps="false"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/register_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/high"
+            android:layout_marginBottom="@dimen/high"
+            android:text="@string/register"
+            android:textAllCaps="false"
+            app:layout_constraintTop_toBottomOf="@id/recycler_view"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/update_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/vhigh"
-        android:layout_marginBottom="@dimen/vhigh"
-        android:text="@string/update"
-        android:textAllCaps="false"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/update_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="@dimen/vhigh"
+            android:layout_marginTop="@dimen/high"
+            android:layout_marginBottom="@dimen/high"
+            android:text="@string/delete"
+            android:textAllCaps="false"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/recycler_view"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/delete_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/vhigh"
-        android:layout_marginBottom="@dimen/vhigh"
-        android:text="@string/delete"
-        android:textAllCaps="false"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/delete_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/vhigh"
+            android:layout_marginTop="@dimen/high"
+            android:layout_marginBottom="@dimen/high"
+            android:text="@string/delete"
+            android:textAllCaps="false"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@id/recycler_view"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
 
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

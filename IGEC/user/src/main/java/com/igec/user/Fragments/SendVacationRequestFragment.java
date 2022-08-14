@@ -1,5 +1,8 @@
 package com.igec.user.Fragments;
 
+import static com.igec.common.CONSTANTS.EMPLOYEE_COL;
+import static com.igec.common.CONSTANTS.VACATION_COL;
+
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 
@@ -139,8 +142,8 @@ public class SendVacationRequestFragment extends Fragment implements DatePickerD
     }
 
     private void uploadVacationRequest() {
-        String vacationID = db.collection("Vacation").document().getId().substring(0, 5);
-        db.collection("employees")
+        String vacationID = VACATION_COL.document().getId().substring(0, 5);
+        EMPLOYEE_COL
                 .document(currEmployee.getManagerID())
                 .addSnapshotListener((value, error) -> {
                     days = ((long) Integer.parseInt(binding.daysEdit.getText().toString()) * 24 * 3600 * 1000) + startDate;
@@ -153,7 +156,7 @@ public class SendVacationRequestFragment extends Fragment implements DatePickerD
                             binding.noteEdit.getText().toString()
                     );
                     vacationRequest.setId(vacationID);
-                    db.collection("Vacation").document(vacationID).set(vacationRequest).addOnSuccessListener(new OnSuccessListener<Void>() {
+                    VACATION_COL.document(vacationID).set(vacationRequest).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void unused) {
                             clearInputs();

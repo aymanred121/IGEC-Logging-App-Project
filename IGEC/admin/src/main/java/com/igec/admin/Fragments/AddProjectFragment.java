@@ -2,8 +2,6 @@ package com.igec.admin.Fragments;
 
 import static android.content.ContentValues.TAG;
 
-import static com.igec.common.CONSTANTS.ADMIN;
-
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.text.Editable;
@@ -25,12 +23,10 @@ import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.material.snackbar.Snackbar;
 import com.igec.admin.Adapters.EmployeeAdapter;
 import com.igec.admin.Dialogs.AddAllowanceDialog;
 import com.igec.admin.Dialogs.AddClientDialog;
 import com.igec.admin.Dialogs.LocationDialog;
-import com.igec.admin.Dialogs.TeamDialog;
 import com.igec.admin.R;
 import com.igec.admin.databinding.FragmentAddProjectBinding;
 import com.igec.common.firebase.Allowance;
@@ -65,7 +61,6 @@ public class AddProjectFragment extends Fragment {
     private EmployeeAdapter adapter;
 
     // Vars
-    private ArrayList<EmployeeOverview> testingTeam;
     private String lat, lng;
     private ArrayList<String> contract = new ArrayList<>();
     private ArrayList<Pair<TextInputLayout, EditText>> views;
@@ -147,22 +142,6 @@ public class AddProjectFragment extends Fragment {
                 lng = result.getString("lng");
             }
         });
-
-        getParentFragmentManager().setFragmentResultListener("team", this, new FragmentResultListener() {
-            @Override
-            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
-                testingTeam = (ArrayList<EmployeeOverview>) result.getSerializable("team");
-                String managerId = result.getString("managerId");
-                for (EmployeeOverview emp : testingTeam) {
-                    if (!emp.getId().equals(managerId))
-                        emp.setManagerID(managerId);
-                    else
-                        emp.setManagerID(ADMIN);
-                    emp.setProjectId(projectID);
-                }
-                Toast.makeText(getActivity(), "Done Parsing Team", Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 
     private FragmentAddProjectBinding binding;
@@ -196,13 +175,7 @@ public class AddProjectFragment extends Fragment {
         binding.dateLayout.setErrorIconOnClickListener(oclTimeDate);
         vTimeDatePicker.addOnPositiveButtonClickListener(pclTimeDatePicker);
         binding.allowancesButton.setOnClickListener(oclAddAllowance);
-        binding.teamButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                TeamDialog teamDialog = TeamDialog.newInstance(projectID);
-                teamDialog.show(getParentFragmentManager(), "");
-            }
-        });
+
 
         for (Pair<TextInputLayout, EditText> v : views) {
             if (v.first != binding.managerIdLayout && v.first != binding.referenceLayout && v.first != binding.projectAreaLayout)
@@ -306,6 +279,8 @@ public class AddProjectFragment extends Fragment {
     }
 
     void getEmployees() {
+//        TeamID.clear();
+//        Team.clear();
         employeeOverviewRef
                 .addSnapshotListener((documentSnapshot, e) -> {
                     binding.managerIdAuto.setText(null);
@@ -649,7 +624,7 @@ public class AddProjectFragment extends Fragment {
                 if (!emp.getId().equals(binding.managerIdAuto.getText().toString())) {
                     emp.setManagerID(!binding.managerIdAuto.getText().toString().equals("") ? binding.managerIdAuto.getText().toString() : null);
                 } else {
-                    emp.setManagerID(ADMIN);
+                    emp.setManagerID("adminID");
                 }
             }
             hideError(binding.managerIdLayout);

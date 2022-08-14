@@ -2,8 +2,6 @@ package com.igec.common.Fragments;
 
 import static android.content.ContentValues.TAG;
 
-import static com.igec.common.CONSTANTS.ADMIN;
-
 import android.app.AlertDialog;
 import android.os.Bundle;
 import android.util.Log;
@@ -106,7 +104,7 @@ public class VacationRequestsFragment extends Fragment {
                     });
         } else {
             db.collection("Vacation")
-                    .whereEqualTo("employee.managerID", ADMIN)
+                    .whereEqualTo("employee.managerID", "adminID")
                     .whereEqualTo("vacationStatus", 0)
                     .addSnapshotListener((queryDocumentSnapshots, e) -> {
                         if (e != null) {

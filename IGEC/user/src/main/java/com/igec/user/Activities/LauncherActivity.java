@@ -1,6 +1,5 @@
 package com.igec.user.Activities;
 
-import static com.igec.common.CONSTANTS.ADMIN;
 import static com.igec.common.CONSTANTS.ID;
 import static com.igec.common.CONSTANTS.IGEC;
 import static com.igec.common.CONSTANTS.LOGGED;
@@ -54,7 +53,7 @@ public class LauncherActivity extends Activity {
                                 intent = new Intent(LauncherActivity.this, MainActivity.class);
                                 Toast.makeText(LauncherActivity.this, "Account is unlocked, login is required", Toast.LENGTH_SHORT).show();
                             } else {
-                                if (employee.getManagerID().equals(ADMIN))
+                                if (employee.getManagerID().equals("adminID"))
                                     intent = new Intent(LauncherActivity.this, MDashboard.class);
                                 else
                                     intent = new Intent(LauncherActivity.this, EDashboard.class);

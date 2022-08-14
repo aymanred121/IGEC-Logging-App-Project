@@ -1,7 +1,6 @@
 package com.igec.user.Activities;
 
 
-import static com.igec.common.CONSTANTS.ADMIN;
 import static com.igec.common.CONSTANTS.CAMERA_REQUEST_CODE;
 import static com.igec.common.CONSTANTS.ID;
 import static com.igec.common.CONSTANTS.IGEC;
@@ -191,7 +190,7 @@ public class MainActivity extends AppCompatActivity {
                                 if (currEmployee != null && currEmployee.getManagerID() == null) {
                                     Toast.makeText(MainActivity.this, "you are not assigned to any project", Toast.LENGTH_SHORT).show();
                                     return;
-                                } else if (currEmployee != null && currEmployee.getManagerID().equals(ADMIN)) {
+                                } else if (currEmployee != null && currEmployee.getManagerID().equals("adminID")) {
                                     intent = new Intent(MainActivity.this, MDashboard.class);
                                 } else {
                                     intent = new Intent(MainActivity.this, EDashboard.class);

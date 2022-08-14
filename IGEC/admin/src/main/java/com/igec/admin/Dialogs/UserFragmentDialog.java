@@ -1,6 +1,5 @@
 package com.igec.admin.Dialogs;
 
-import static com.igec.common.CONSTANTS.ADMIN;
 import static com.igec.common.cryptography.RSAUtil.encrypt;
 import static com.google.android.material.textfield.TextInputLayout.END_ICON_CUSTOM;
 
@@ -210,7 +209,7 @@ public class UserFragmentDialog extends DialogFragment {
         binding.passwordLayout.setEndIconMode(END_ICON_CUSTOM);
         binding.passwordLayout.setEndIconDrawable(R.drawable.ic_baseline_autorenew_24);
         binding.passwordEdit.setEnabled(false);
-        binding.deleteButton.setEnabled(employee.getManagerID() == null || !employee.getManagerID().equals(ADMIN));
+        binding.deleteButton.setEnabled(employee.getManagerID() == null || !employee.getManagerID().equals("adminID"));
         db.collection("Machine_Employee").whereEqualTo("employee.id", employee.getId()).addSnapshotListener((docs, e) -> {
             // no machines found = enabled X
             // a machine without a check-out = disabled
@@ -288,7 +287,7 @@ public class UserFragmentDialog extends DialogFragment {
             return;
         }
         batch.update( projectCol.document(employee.getProjectID()),"employees",FieldValue.arrayRemove(oldEmployeeOverviewData));
-        if (tempEmp.getManagerID().equals(ADMIN)){
+        if (tempEmp.getManagerID().equals("adminID")){
             batch.update(projectCol.document(employee.getProjectID()),"managerName", tempEmp.getFirstName() + " " + tempEmp.getLastName(), "employees", FieldValue.arrayUnion(tempEmp));
         }else{
             batch.update(  projectCol.document(employee.getProjectID()),"employees",FieldValue.arrayUnion(tempEmp));

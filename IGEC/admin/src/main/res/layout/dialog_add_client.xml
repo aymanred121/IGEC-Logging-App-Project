@@ -185,7 +185,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/note_layout"
             android:layout_centerHorizontal="true"
-            android:text="@string/done"
+            android:text="@string/Done"
             android:textAllCaps="false"
             android:textSize="16sp"
             app:cornerRadius="@dimen/mid" />

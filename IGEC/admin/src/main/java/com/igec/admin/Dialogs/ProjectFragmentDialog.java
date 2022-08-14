@@ -2,8 +2,6 @@ package com.igec.admin.Dialogs;
 
 import static android.content.ContentValues.TAG;
 
-import static com.igec.common.CONSTANTS.ADMIN;
-
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -175,11 +173,10 @@ public class ProjectFragmentDialog extends DialogFragment {
     }
 
     private FragmentAddProjectBinding binding;
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        binding = FragmentAddProjectBinding.inflate(inflater, container, false);
+        binding  = FragmentAddProjectBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 
@@ -194,10 +191,6 @@ public class ProjectFragmentDialog extends DialogFragment {
         super.onViewCreated(view, savedInstanceState);
         initialize();
         // listeners
-        binding.teamButton.setOnClickListener(v -> {
-            TeamDialog teamDialog = TeamDialog.newInstance((ArrayList<EmployeeOverview>) project.getEmployees().clone(),currProjectID);
-            teamDialog.show(getParentFragmentManager(), "");
-        });
         binding.referenceEdit.addTextChangedListener(twProjectReference);
         binding.managerIdAuto.addTextChangedListener(twManagerID);
         binding.projectAreaEdit.addTextChangedListener(twArea);
@@ -381,7 +374,7 @@ public class ProjectFragmentDialog extends DialogFragment {
                 Team.remove(empOverview);
             }
             if (empOverview.getId().equals(binding.managerIdAuto.getText().toString()) && !isDeleted) {
-                empOverview.setManagerID(ADMIN);
+                empOverview.setManagerID("adminID");
             } else if (empOverview.getProjectId() != null && empOverview.getProjectId().equals(projectID) && !isDeleted) {
                 empOverview.setManagerID(binding.managerIdAuto.getText().toString());
             }
@@ -420,7 +413,7 @@ public class ProjectFragmentDialog extends DialogFragment {
                 if (id.equals(currProjectID))
                     selectedManager = newEmp;
                 if (managerID != null)
-                    newEmp.setManagerID(id.equals(project.getManagerID()) ? ADMIN : binding.managerIdAuto.getText().toString());
+                    newEmp.setManagerID(id.equals(project.getManagerID()) ? "adminID" : binding.managerIdAuto.getText().toString());
                 Team.add(newEmp);
                 TeamID.add(newEmp.getId());
             }
@@ -677,7 +670,7 @@ public class ProjectFragmentDialog extends DialogFragment {
                 if (!emp.getId().equals(binding.managerIdAuto.getText().toString())) {
                     emp.setManagerID(!binding.managerIdAuto.getText().toString().equals("") ? binding.managerIdAuto.getText().toString() : null);
                 } else {
-                    emp.setManagerID(ADMIN);
+                    emp.setManagerID("adminID");
                 }
             }
             hideError(binding.managerIdLayout);

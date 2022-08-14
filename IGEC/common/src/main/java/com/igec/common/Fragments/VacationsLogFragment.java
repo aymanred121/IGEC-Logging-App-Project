@@ -2,8 +2,6 @@ package com.igec.common.Fragments;
 
 import static android.content.ContentValues.TAG;
 
-import static com.igec.common.CONSTANTS.ADMIN;
-
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -75,8 +73,8 @@ public class VacationsLogFragment extends Fragment {
         binding.recyclerView.setAdapter(adapter);
 
         if (user == null)// admin
-            loadVacations("employee.managerID", ADMIN);
-        else if (user.getManagerID().equals(ADMIN)) // manager
+            loadVacations("employee.managerID", "adminID");
+        else if (user.getManagerID().equals("adminID")) // manager
         {
             loadOwn = true;
             loadVacations("manager.id", user.getId());

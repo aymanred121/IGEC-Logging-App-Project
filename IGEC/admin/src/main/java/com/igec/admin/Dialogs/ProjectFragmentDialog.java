@@ -23,7 +23,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -63,9 +62,9 @@ public class ProjectFragmentDialog extends DialogFragment {
 
     // Views
     private EmployeeAdapter adapter;
-    private RecyclerView.LayoutManager layoutManager;
 
     // Vars
+    private String MID;
     private String lat, lng;
     private ArrayList<Allowance> allowances;
     long startDate;
@@ -77,16 +76,14 @@ public class ProjectFragmentDialog extends DialogFragment {
     private static ArrayList<EmployeeOverview> Team = new ArrayList<>();
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     Project project;
-    private EmployeeOverview selectedManager;
     private Boolean isDeleted = false;
-    private String currProjectID;
     private WriteBatch batch = FirebaseFirestore.getInstance().batch();
     private final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
     private ArrayList<Pair<TextInputLayout, EditText>> views;
 
     public ProjectFragmentDialog(Project project) {
         this.project = project;
-        currProjectID = project.getId();
+        MID = project.getManagerID();
     }
 
     @Override
@@ -191,7 +188,6 @@ public class ProjectFragmentDialog extends DialogFragment {
         initialize();
         // listeners
         binding.referenceEdit.addTextChangedListener(twProjectReference);
-        binding.managerIdAuto.addTextChangedListener(twManagerID);
         binding.projectAreaEdit.addTextChangedListener(twArea);
         binding.updateButton.setOnClickListener(clUpdate);
         binding.deleteButton.setOnClickListener(clDelete);
@@ -202,7 +198,7 @@ public class ProjectFragmentDialog extends DialogFragment {
         binding.clientButton.setOnClickListener(oclAddClient);
         binding.allowancesButton.setOnClickListener(oclAddAllowance);
         for (Pair<TextInputLayout, EditText> v : views) {
-            if (v.first != binding.managerIdLayout && v.first != binding.referenceLayout && v.first != binding.projectAreaLayout)
+            if (v.first != binding.referenceLayout && v.first != binding.projectAreaLayout)
                 v.second.addTextChangedListener(new TextWatcher() {
                     @Override
                     public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -226,6 +222,10 @@ public class ProjectFragmentDialog extends DialogFragment {
 
     // Functions
     private void initialize() {
+        binding.managerNameEdit.setText(project.getManagerName());
+        binding.dateLayout.setErrorIconDrawable(R.drawable.ic_baseline_calendar_month_24);
+        binding.managerNameLayout.setEndIconDrawable(null);
+        binding.managerNameLayout.setErrorIconDrawable(null);
         allowances = new ArrayList<>();
         views = new ArrayList<>();
         views.add(new Pair<>(binding.nameLayout, binding.nameEdit));
@@ -236,21 +236,21 @@ public class ProjectFragmentDialog extends DialogFragment {
         views.add(new Pair<>(binding.projectAreaLayout, binding.projectAreaEdit));
         views.add(new Pair<>(binding.dateLayout, binding.dateEdit));
         views.add(new Pair<>(binding.contractTypeLayout, binding.contractTypeAuto));
-        views.add(new Pair<>(binding.managerIdLayout, binding.managerIdAuto));
+        views.add(new Pair<>(binding.managerNameLayout, binding.managerNameEdit));
 
         binding.registerButton.setVisibility(View.GONE);
         binding.deleteButton.setVisibility(View.VISIBLE);
         binding.updateButton.setVisibility(View.VISIBLE);
         binding.recyclerView.setHasFixedSize(true);
-        layoutManager = new LinearLayoutManager(getActivity());
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
         adapter = new EmployeeAdapter(employees, true);
+        adapter.setMID(MID);
         adapter.setOnItemClickListener(itclEmployeeAdapter);
         binding.recyclerView.setLayoutManager(layoutManager);
         binding.recyclerView.setAdapter(adapter);
         allowances.addAll(project.getAllowancesList());
         client = project.getClient();
         binding.nameEdit.setText(project.getName());
-        binding.managerIdAuto.setText(project.getManagerID());
         binding.managerNameEdit.setText(project.getManagerName());
         binding.projectAreaEdit.setText(String.valueOf((long) project.getArea()));
         binding.contractTypeAuto.setText(project.getContractType());
@@ -269,9 +269,6 @@ public class ProjectFragmentDialog extends DialogFragment {
         lat = String.valueOf(project.getLat());
         lng = String.valueOf(project.getLng());
         getEmployees();
-
-        ArrayAdapter<String> idAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, TeamID);
-        binding.managerIdAuto.setAdapter(idAdapter);
         ArrayList<String> contract = new ArrayList<>();
         contract.add("lump sum");
         contract.add("timesheet");
@@ -288,47 +285,32 @@ public class ProjectFragmentDialog extends DialogFragment {
 
     private void ChangeSelectedTeam(int position) {
 
+        batch = db.batch();
         employees.get(position).isSelected = !employees.get(position).isSelected;
         ArrayList<String> empInfo = new ArrayList<>();
         empInfo.add(employees.get(position).getFirstName());
         empInfo.add(employees.get(position).getLastName());
         empInfo.add(employees.get(position).getTitle());
-        empInfo.add(employees.get(position).getManagerID());
-        batch = FirebaseFirestore.getInstance().batch();
+        empInfo.add(null);
+        empInfo.add(null);
         if (employees.get(position).isSelected) {
-            employees.get(position).setProjectId(project.getId());
             Team.add(employees.get(position));
             TeamID.add(String.valueOf(employees.get(position).getId()));
-            empInfo.add(project.getId());
             empInfo.add("1");
             Map<String, Object> empInfoMap = new HashMap<>();
             empInfoMap.put(employees.get(position).getId(), empInfo);
-            if (employees.get(position).getManagerID() == null)
+            if (employees.get(position).getManagerID() == null && employees.get(position).getProjectId() == null)
                 batch.update(EMPLOYEE_OVERVIEW_REF, empInfoMap);
-
         } else {
-
-            if (!binding.managerIdAuto.getText().toString().isEmpty() && binding.managerIdAuto.getText().toString().equals(employees.get(position).getId()))
-                binding.managerIdAuto.setText("");
-            employees.get(position).setProjectId(null);
             Team.removeIf(employeeOverview -> employeeOverview.getId().equals(employees.get(position).getId()));
             TeamID.remove(String.valueOf(employees.get(position).getId()));
-            empInfo.add(null);
             empInfo.add("0");
             Map<String, Object> empInfoMap = new HashMap<>();
             empInfoMap.put(employees.get(position).getId(), empInfo);
-            if (employees.get(position).getManagerID() == null) {
+            if (employees.get(position).getManagerID() == null && employees.get(position).getProjectId() == null)
                 batch.update(EMPLOYEE_OVERVIEW_REF, empInfoMap);
-            }
         }
         batch.commit();
-        if (!binding.managerIdLayout.isEnabled())
-            binding.managerIdAuto.setText("");
-        if (TeamID.size() > 0) {
-            ArrayAdapter<String> idAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, TeamID);
-            binding.managerIdAuto.setAdapter(idAdapter);
-
-        }
         adapter.notifyItemChanged(position);
     }
 
@@ -353,7 +335,6 @@ public class ProjectFragmentDialog extends DialogFragment {
         String year = currentDateAndTime.substring(6, 10);
         batch = FirebaseFirestore.getInstance().batch();
         for (EmployeeOverview empOverview : employees) {
-            currProjectID = projectID;
             ArrayList<String> empInfo = new ArrayList<>();
             if (isDeleted || empOverview.getProjectId() == null) {
                 empOverview.setManagerID(null);
@@ -363,16 +344,16 @@ public class ProjectFragmentDialog extends DialogFragment {
                     if (!doc.exists())
                         return;
                     EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
-                    employeesGrossSalary.getAllTypes().removeIf(x -> x.getProjectId().equals(currProjectID));
+                    employeesGrossSalary.getAllTypes().removeIf(x -> x.getProjectId().equals(project.getId()));
                     db.document(doc.getReference().getPath()).update("allTypes", employeesGrossSalary.getAllTypes());
                 });
                 EMPLOYEE_GROSS_SALARY_COL.document(empOverview.getId()).collection(year).document(month).update("baseAllowances", null);
                 Team.remove(empOverview);
             }
-            if (empOverview.getId().equals(binding.managerIdAuto.getText().toString()) && !isDeleted) {
+            if (empOverview.getId().equals(MID) && !isDeleted) {
                 empOverview.setManagerID(ADMIN);
             } else if (empOverview.getProjectId() != null && empOverview.getProjectId().equals(projectID) && !isDeleted) {
-                empOverview.setManagerID(binding.managerIdAuto.getText().toString());
+                empOverview.setManagerID(MID);
             }
             empInfo.add(empOverview.getFirstName());
             empInfo.add(empOverview.getLastName());
@@ -403,31 +384,19 @@ public class ProjectFragmentDialog extends DialogFragment {
             boolean isSelected = empMap.get(key).get(5).equals("1");
             String id = (key);
             EmployeeOverview newEmp = new EmployeeOverview(firstName, lastName, title, id, projectID, isSelected);
-            if (currProjectID.equals(projectID)) {
+            if (project.getId().equals(projectID)) {
+                newEmp.setManagerID(id.equals(project.getManagerID()) ? ADMIN : MID);
                 newEmp.isSelected = true;
-                if (id.equals(currProjectID))
-                    selectedManager = newEmp;
-                if (managerID != null)
-                    newEmp.setManagerID(id.equals(project.getManagerID()) ? ADMIN : binding.managerIdAuto.getText().toString());
                 Team.add(newEmp);
                 TeamID.add(newEmp.getId());
             }
-            if (TeamID.contains(id) == isSelected && (managerID == null || currProjectID.equals(projectID)))
+            boolean matchWithDb = TeamID.contains(id) == isSelected;
+            boolean hasNoManager = managerID == null;
+            if (matchWithDb && (hasNoManager|| project.getId().equals(projectID)))
                 employees.add(newEmp);
 
 
         }
-        /*
-         *
-         *
-         * show if d == l && (manager == null || projectID = emp.project)
-         *
-         * d l m
-         * 1 0 0
-         * 1 0 1
-         * 1 1 0
-         * 1 1 1 = show to me
-         * */
         employees.sort(Comparator.comparing(EmployeeOverview::getId));
         adapter.setEmployeeOverviewsList(employees);
         adapter.notifyDataSetChanged();
@@ -436,8 +405,6 @@ public class ProjectFragmentDialog extends DialogFragment {
     private boolean generateError() {
         for (Pair<TextInputLayout, EditText> view : views) {
             if (view.second.getText().toString().trim().isEmpty()) {
-                if (view.first == binding.dateLayout)
-                    view.first.setErrorIconDrawable(R.drawable.ic_baseline_calendar_month_24);
                 view.first.setError("Missing");
                 return true;
             }
@@ -462,8 +429,16 @@ public class ProjectFragmentDialog extends DialogFragment {
 
     void updateProject() {
         updateEmployeesDetails(project.getId());
+        Team.forEach(employeeOverview -> {
+            if (employeeOverview.getId().equals(MID))
+                employeeOverview.setManagerID(ADMIN);
+            else
+                employeeOverview.setManagerID(MID);
+            employeeOverview.setProjectId(project.getId());
+        });
+
         Project newProject = new Project(binding.managerNameEdit.getText().toString()
-                , binding.managerIdAuto.getText().toString()
+                , MID
                 , binding.nameEdit.getText().toString()
                 , new Date(startDate)
                 , Team
@@ -525,8 +500,9 @@ public class ProjectFragmentDialog extends DialogFragment {
                                 if (counter[0] == newProject.getEmployees().size() - 1) {
                                     batch.commit().addOnSuccessListener(unused1 -> {
                                         Snackbar snackbar = Snackbar.make(binding.getRoot(), "Updated", Snackbar.LENGTH_SHORT);
-                                        snackbar.setAction("Dismiss",v->dismiss());
+
                                         snackbar.show();
+                                        dismiss();
                                         binding.updateButton.setEnabled(true);
                                         batch = FirebaseFirestore.getInstance().batch();
                                         project.setEmployees(null);
@@ -549,8 +525,9 @@ public class ProjectFragmentDialog extends DialogFragment {
                             if (counter[0] == newProject.getEmployees().size() - 1) {
                                 batch.commit().addOnSuccessListener(unused1 -> {
                                     Snackbar snackbar = Snackbar.make(binding.getRoot(), "Updated", Snackbar.LENGTH_SHORT);
-                                    snackbar.setAction("Dismiss",v->dismiss());
+
                                     snackbar.show();
+                                    dismiss();
                                     binding.updateButton.setEnabled(true);
                                     batch = FirebaseFirestore.getInstance().batch();
                                     project.setEmployees(null);
@@ -572,11 +549,10 @@ public class ProjectFragmentDialog extends DialogFragment {
     }
 
     void deleteProject() {
-        currProjectID = project.getId();
         batch.delete(PROJECT_COL.document(project.getId()));
         isDeleted = true;
         batch.commit().addOnSuccessListener(unused -> {
-            updateEmployeesDetails(currProjectID);
+            updateEmployeesDetails(project.getId());
             batch.commit().addOnSuccessListener(unused2 -> {
                 batch = FirebaseFirestore.getInstance().batch();
                 Snackbar.make(binding.getRoot(), "Deleted", Snackbar.LENGTH_SHORT).show();
@@ -638,42 +614,6 @@ public class ProjectFragmentDialog extends DialogFragment {
             hideError(binding.referenceLayout);
         }
     };
-    private final TextWatcher twManagerID = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
-            if (binding.managerIdAuto.getText().length() > 0) {
-                if (selectedManager == null || !selectedManager.getId().equals(binding.managerIdAuto.getText().toString())) {
-                    for (int i = 0; i < Team.size(); i++) {
-                        if (String.valueOf(Team.get(i).getId()).equals(s.toString())) {
-                            selectedManager = Team.get(i);
-                        }
-                    }
-                }
-                binding.managerNameEdit.setText(String.format("%s %s", selectedManager.getFirstName(), selectedManager.getLastName()));
-            } else {
-                binding.managerNameEdit.setText(null);
-                selectedManager = null;
-            }
-            for (EmployeeOverview emp : Team) {
-                if (!emp.getId().equals(binding.managerIdAuto.getText().toString())) {
-                    emp.setManagerID(!binding.managerIdAuto.getText().toString().equals("") ? binding.managerIdAuto.getText().toString() : null);
-                } else {
-                    emp.setManagerID(ADMIN);
-                }
-            }
-            hideError(binding.managerIdLayout);
-        }
-    };
     private final MaterialPickerOnPositiveButtonClickListener pclTimeDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
         @Override
         public void onPositiveButtonClick(Object selection) {
@@ -718,7 +658,6 @@ public class ProjectFragmentDialog extends DialogFragment {
                 LocationDialog.newInstance(lat, lng).show(getParentFragmentManager(), "");
         }
     };
-
     private final View.OnClickListener oclAddClient = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -750,6 +689,14 @@ public class ProjectFragmentDialog extends DialogFragment {
         @Override
         public void onCheckboxClick(int position) {
             ChangeSelectedTeam(position);
+        }
+
+        @Override
+        public void onRadioClick(int position) {
+            MID = employees.get(position).getId();
+            binding.managerNameEdit.setText(String.format("%s %s", employees.get(position).getFirstName(), employees.get(position).getLastName()));
+            adapter.setMID(MID);
+            adapter.notifyDataSetChanged();
         }
     };
     private final View.OnClickListener oclAddAllowance = new View.OnClickListener() {

@@ -247,51 +247,28 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/manager_id_Layout"
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/vhigh"
-            android:layout_marginTop="@dimen/mid"
-            android:layout_marginEnd="@dimen/mid"
-            android:enabled="false"
-            app:boxBackgroundMode="outline"
-            app:endIconMode="dropdown_menu"
-            app:helperTextEnabled="true"
-            app:layout_constraintEnd_toStartOf="@+id/manager_name_layout"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/contract_type_layout">
-
-            <AutoCompleteTextView
-                android:id="@+id/manager_id_auto"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/manager_id"
-                android:inputType="none"
-                android:padding="14dp"
-                android:singleLine="true" />
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/manager_name_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/mid"
+            android:layout_marginStart="@dimen/vhigh"
             android:layout_marginTop="@dimen/mid"
             android:layout_marginEnd="@dimen/vhigh"
             app:boxBackgroundMode="outline"
+            app:endIconDrawable="@drawable/ic_round_clear_24"
+            app:errorIconDrawable="@drawable/ic_round_clear_24"
+            app:endIconMode="custom"
+            app:endIconTint="@color/primaryColor"
             app:helperTextEnabled="true"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/manager_id_Layout"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/contract_type_layout">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/manager_name_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:enabled="false"
+                android:focusable="false"
                 android:hint="@string/manager_name"
                 android:inputType="none"
                 android:padding="14dp"
@@ -311,7 +288,7 @@
             android:textAllCaps="false"
             app:layout_constraintEnd_toStartOf="@id/allowances_button"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/manager_id_Layout" />
+            app:layout_constraintTop_toBottomOf="@id/manager_name_layout" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/allowances_button"
@@ -325,7 +302,7 @@
             android:textAllCaps="false"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/client_button"
-            app:layout_constraintTop_toBottomOf="@id/manager_id_Layout" />
+            app:layout_constraintTop_toBottomOf="@id/manager_name_layout" />
 
 
         <androidx.recyclerview.widget.RecyclerView
@@ -350,24 +327,24 @@
             android:layout_marginBottom="@dimen/high"
             android:text="@string/register"
             android:textAllCaps="false"
-            app:layout_constraintTop_toBottomOf="@id/recycler_view"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/recycler_view" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/update_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="@dimen/vhigh"
             android:layout_marginTop="@dimen/high"
+            android:layout_marginEnd="@dimen/vhigh"
             android:layout_marginBottom="@dimen/high"
-            android:text="@string/delete"
+            android:text="@string/update"
             android:textAllCaps="false"
             android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/recycler_view"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/recycler_view" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/delete_button"
@@ -379,9 +356,9 @@
             android:text="@string/delete"
             android:textAllCaps="false"
             android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/recycler_view"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/recycler_view" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

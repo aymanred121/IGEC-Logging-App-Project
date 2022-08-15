@@ -117,6 +117,10 @@ public class UsersFragment extends Fragment {
 
         }
 
+        @Override
+        public void onRadioClick(int position) {
+
+        }
     };
 
 }

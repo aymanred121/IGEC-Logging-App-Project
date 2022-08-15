@@ -11,6 +11,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.radiobutton.MaterialRadioButton;
 import com.igec.admin.R;
 import com.igec.common.firebase.EmployeeOverview;
 import com.google.android.material.checkbox.MaterialCheckBox;
@@ -21,12 +22,19 @@ import java.util.ArrayList;
 public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.EmployeeViewHolder> {
     private ArrayList<EmployeeOverview> employeeOverviewsList;
     private OnItemClickListener listener;
+    private String MID = null;
     private boolean isAdd;
 
     public interface OnItemClickListener {
         void onItemClick(int position);
 
         void onCheckboxClick(int position);
+
+        void onRadioClick(int position);
+    }
+
+    public void setMID(String MID) {
+        this.MID = MID;
     }
 
     public void setOnItemClickListener(OnItemClickListener listener) {
@@ -38,6 +46,7 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
         public TextView vName;
         public TextView vID;
         public MaterialCheckBox vSelected;
+        public MaterialRadioButton vManager;
 
 
         public EmployeeViewHolder(@NonNull View itemView, OnItemClickListener listener, boolean isAdd) {
@@ -45,6 +54,7 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
             vName = itemView.findViewById(R.id.TextView_Name);
             vID = itemView.findViewById(R.id.TextView_ID);
             vSelected = itemView.findViewById(R.id.ImageView_EmployeeSelected);
+            vManager = itemView.findViewById(R.id.manager_radioButton);
             if (!isAdd) {
                 itemView.setOnClickListener(v -> {
                     if (listener != null) {
@@ -56,11 +66,20 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
                 });
             }
             vSelected.setVisibility(isAdd ? View.VISIBLE : View.GONE);
+            vManager.setVisibility(isAdd ? View.VISIBLE : View.GONE);
             vSelected.setOnClickListener(v -> {
                 if (listener != null) {
                     int position = getAdapterPosition();
                     if (position != RecyclerView.NO_POSITION) {
                         listener.onCheckboxClick(position);
+                    }
+                }
+            });
+            vManager.setOnClickListener(v -> {
+                if (listener != null) {
+                    int position = getAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        listener.onRadioClick(position);
                     }
                 }
             });
@@ -87,7 +106,10 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
         holder.vName.setText("Name: " + employee.getFirstName() + " " + employee.getLastName());
         holder.vID.setText("ID: " + employee.getId());
         holder.vSelected.setChecked(employee.isSelected);
-        holder.vSelected.setEnabled((employee.getManagerID() == null || !employee.getManagerID().equals(ADMIN)));
+        holder.vManager.setVisibility(employee.isSelected? View.VISIBLE: View.GONE);
+        boolean isHeTheManager = employee.getId().equals(MID);
+        holder.vManager.setChecked(isHeTheManager);
+        holder.vSelected.setEnabled(!isHeTheManager);
     }
 
     public ArrayList<EmployeeOverview> getEmployeeOverviewsList() {

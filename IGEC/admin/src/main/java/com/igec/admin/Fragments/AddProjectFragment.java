@@ -20,12 +20,10 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -68,8 +66,8 @@ public class AddProjectFragment extends Fragment {
     private ArrayList<Pair<TextInputLayout, EditText>> views;
     private ArrayList<Allowance> allowances = new ArrayList<>();
     private Client client;
-    private EmployeeOverview selectedManager;
-    private String projectID;
+    private String MID = null;
+    private String PID;
     private long startDate;
     private MaterialDatePicker.Builder<Long> vTimeDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vTimeDatePicker;
@@ -101,9 +99,6 @@ public class AddProjectFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        binding.managerIdAuto.setText(null);
-        ArrayAdapter<String> idAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, TeamID);
-        binding.managerIdAuto.setAdapter(idAdapter);
         setUpContractType();
     }
 
@@ -143,9 +138,19 @@ public class AddProjectFragment extends Fragment {
     // Functions
     private void setUpListeners() {
         // listeners
-
+        binding.managerNameLayout.setEndIconOnClickListener(view -> {
+            binding.managerNameEdit.setText(null);
+            MID = null;
+            adapter.setMID(null);
+            adapter.notifyDataSetChanged();
+        });
+        binding.managerNameLayout.setErrorIconOnClickListener(view -> {
+            binding.managerNameEdit.setText(null);
+            MID = null;
+            adapter.setMID(null);
+            adapter.notifyDataSetChanged();
+        });
         binding.referenceEdit.addTextChangedListener(twProjectReference);
-        binding.managerIdAuto.addTextChangedListener(twManagerID);
         binding.projectAreaEdit.addTextChangedListener(twArea);
         binding.officeWorkCheckbox.setOnCheckedChangeListener(oclOfficeWork);
         binding.clientButton.setOnClickListener(oclAddClient);
@@ -158,7 +163,7 @@ public class AddProjectFragment extends Fragment {
 
 
         for (Pair<TextInputLayout, EditText> v : views) {
-            if (v.first != binding.managerIdLayout && v.first != binding.referenceLayout && v.first != binding.projectAreaLayout)
+            if (v.first != binding.referenceLayout && v.first != binding.projectAreaLayout)
                 v.second.addTextChangedListener(new TextWatcher() {
                     @Override
                     public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -191,7 +196,7 @@ public class AddProjectFragment extends Fragment {
         views.add(new Pair<>(binding.projectAreaLayout, binding.projectAreaEdit));
         views.add(new Pair<>(binding.dateLayout, binding.dateEdit));
         views.add(new Pair<>(binding.contractTypeLayout, binding.contractTypeAuto));
-        views.add(new Pair<>(binding.managerIdLayout, binding.managerIdAuto));
+        views.add(new Pair<>(binding.managerNameLayout, binding.managerNameEdit));
         vTimeDatePickerBuilder.setTitleText("Time");
         vTimeDatePicker = vTimeDatePickerBuilder.build();
 
@@ -202,7 +207,7 @@ public class AddProjectFragment extends Fragment {
         adapter.setOnItemClickListener(itclEmployeeAdapter);
         binding.recyclerView.setLayoutManager(layoutManager);
         binding.recyclerView.setAdapter(adapter);
-        projectID = PROJECT_COL.document().getId().substring(0, 5);
+        PID = PROJECT_COL.document().getId().substring(0, 5);
         binding.clientButton.setEnabled(!binding.officeWorkCheckbox.isChecked());
         getEmployees();
         //TODO: remove fakeData() when all testing is finished
@@ -220,6 +225,7 @@ public class AddProjectFragment extends Fragment {
 
     private void changeSelectedTeam(int position) {
 
+        batch = db.batch();
         employees.get(position).isSelected = !employees.get(position).isSelected;
         ArrayList<String> empInfo = new ArrayList<>();
         empInfo.add(employees.get(position).getFirstName());
@@ -227,40 +233,28 @@ public class AddProjectFragment extends Fragment {
         empInfo.add(employees.get(position).getTitle());
         empInfo.add(null);
         empInfo.add(null);
-        batch = FirebaseFirestore.getInstance().batch();
         if (employees.get(position).isSelected) {
-            employees.get(position).setProjectId(projectID);
             Team.add(employees.get(position));
             TeamID.add(String.valueOf(employees.get(position).getId()));
             empInfo.add("1");
             Map<String, Object> empInfoMap = new HashMap<>();
             empInfoMap.put(employees.get(position).getId(), empInfo);
             batch.update(EMPLOYEE_OVERVIEW_REF, empInfoMap);
-
         } else {
-
-            if (!binding.managerIdAuto.getText().toString().isEmpty() && binding.managerIdAuto.getText().toString().equals(employees.get(position).getId()))
-                binding.managerIdAuto.setText("");
             Team.removeIf(employeeOverview -> employeeOverview.getId().equals(employees.get(position).getId()));
             TeamID.remove(String.valueOf(employees.get(position).getId()));
-            employees.get(position).setProjectId(null);
             empInfo.add("0");
             Map<String, Object> empInfoMap = new HashMap<>();
             empInfoMap.put(employees.get(position).getId(), empInfo);
             batch.update(EMPLOYEE_OVERVIEW_REF, empInfoMap);
         }
         batch.commit();
-        binding.managerIdLayout.setEnabled(Team.size() > 0);
-        ArrayAdapter<String> idAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, TeamID);
-        binding.managerIdAuto.setAdapter(idAdapter);
         adapter.notifyItemChanged(position);
     }
 
     void getEmployees() {
         EMPLOYEE_OVERVIEW_REF
                 .addSnapshotListener((documentSnapshot, e) -> {
-                    binding.managerIdAuto.setText(null);
-                    binding.managerNameEdit.setText(null);
                     if (e != null) {
                         Log.w(TAG, "Listen failed.", e);
                         return;
@@ -357,11 +351,17 @@ public class AddProjectFragment extends Fragment {
 
         allowances.forEach(allowance -> {
             allowance.setType(allowancesEnum.PROJECT.ordinal());
-            allowance.setProjectId(projectID);
+            allowance.setProjectId(PID);
         });
-
+        Team.forEach(employeeOverview -> {
+            if (employeeOverview.getId().equals(MID))
+                employeeOverview.setManagerID(ADMIN);
+            else
+                employeeOverview.setManagerID(MID);
+            employeeOverview.setProjectId(PID);
+        });
         Project newProject = new Project(binding.managerNameEdit.getText().toString()
-                , binding.managerIdAuto.getText().toString()
+                , MID
                 , binding.nameEdit.getText().toString()
                 , new Date(startDate)
                 , Team
@@ -374,13 +374,13 @@ public class AddProjectFragment extends Fragment {
                 , binding.contractTypeAuto.getText().toString()
                 , Double.parseDouble(binding.projectAreaEdit.getText().toString()));
 
-        newProject.setId(projectID);
+        newProject.setId(PID);
         newProject.setClient(binding.officeWorkCheckbox.isChecked() ? null : client);
         newProject.getAllowancesList().addAll(allowances);
         batch = db.batch();
-        batch.set(PROJECT_COL.document(projectID), newProject);
-        updateEmployeesDetails(projectID);
-        projectID = PROJECT_COL.document().getId().substring(0, 5);
+        batch.set(PROJECT_COL.document(PID), newProject);
+        updateEmployeesDetails(PID);
+        PID = PROJECT_COL.document().getId().substring(0, 5);
 
 
     }
@@ -426,7 +426,6 @@ public class AddProjectFragment extends Fragment {
         }
         TeamID.clear();
         Team.clear();
-        binding.managerIdAuto.setAdapter(null);
         client = null;
         vTimeDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
         vTimeDatePicker = vTimeDatePickerBuilder.build();
@@ -458,7 +457,7 @@ public class AddProjectFragment extends Fragment {
         boolean isClientMissing = (!binding.officeWorkCheckbox.isChecked() && client == null);
         boolean isLocationMissing = (lat == null && lng == null);
         if (isClientMissing) {
-           Snackbar.make(binding.getRoot(), "client Info Missing", Snackbar.LENGTH_SHORT).show();
+            Snackbar.make(binding.getRoot(), "client Info Missing", Snackbar.LENGTH_SHORT).show();
             return true;
         }
         if (isLocationMissing) {
@@ -494,6 +493,14 @@ public class AddProjectFragment extends Fragment {
         @Override
         public void onCheckboxClick(int position) {
             changeSelectedTeam(position);
+        }
+
+        @Override
+        public void onRadioClick(int position) {
+            MID = employees.get(position).getId();
+            binding.managerNameEdit.setText(String.format("%s %s", employees.get(position).getFirstName(), employees.get(position).getLastName()));
+            adapter.setMID(MID);
+            adapter.notifyDataSetChanged();
         }
     };
     private final View.OnClickListener oclAddClient = v -> {
@@ -542,42 +549,6 @@ public class AddProjectFragment extends Fragment {
                 s.append('-');
             }
             hideError(binding.referenceLayout);
-        }
-    };
-    private final TextWatcher twManagerID = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
-            if (binding.managerIdAuto.getText().length() > 0) {
-                if (selectedManager == null || !selectedManager.getId().equals(binding.managerIdAuto.getText().toString())) {
-                    for (int i = 0; i < Team.size(); i++) {
-                        if (String.valueOf(Team.get(i).getId()).equals(s.toString())) {
-                            selectedManager = Team.get(i);
-                        }
-                    }
-                }
-                binding.managerNameEdit.setText(String.format("%s %s", selectedManager.getFirstName(), selectedManager.getLastName()));
-            } else {
-                binding.managerNameEdit.setText(null);
-                selectedManager = null;
-            }
-            for (EmployeeOverview emp : Team) {
-                if (!emp.getId().equals(binding.managerIdAuto.getText().toString())) {
-                    emp.setManagerID(!binding.managerIdAuto.getText().toString().equals("") ? binding.managerIdAuto.getText().toString() : null);
-                } else {
-                    emp.setManagerID(ADMIN);
-                }
-            }
-            hideError(binding.managerIdLayout);
         }
     };
     private final TextWatcher twArea = new TextWatcher() {

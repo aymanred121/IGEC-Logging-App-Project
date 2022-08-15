@@ -353,11 +353,12 @@ public class UserFragmentDialog extends DialogFragment {
                 batch.commit().addOnSuccessListener(unused1 -> {
                     binding.updateButton.setEnabled(true);
                     Snackbar snackbar = Snackbar.make(binding.getRoot(), "Updated", Snackbar.LENGTH_SHORT);
-                    snackbar.setAction("Dismiss",v->dismiss());
+
                     snackbar.show();
+                    dismiss();
                 }).addOnFailureListener(e -> {
                     Toast.makeText(getActivity(), e.toString(), Toast.LENGTH_SHORT).show();
-                });
+                }).addOnCompleteListener(un -> batch = db.batch());
             });
         });
 

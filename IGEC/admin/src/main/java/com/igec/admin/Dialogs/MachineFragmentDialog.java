@@ -74,7 +74,6 @@ public class MachineFragmentDialog extends DialogFragment {
     private ActivityResultLauncher<Intent> activityResultLauncher;
     private long purchaseDate;
     private QRGEncoder qrgEncoder;
-    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private final MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vDatePicker;
     private final Machine machine;
@@ -130,7 +129,6 @@ public class MachineFragmentDialog extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         binding = FragmentAddMachineBinding.inflate(inflater, container, false);
-        initialize();
         return binding.getRoot();
     }
 
@@ -143,6 +141,7 @@ public class MachineFragmentDialog extends DialogFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        initialize();
         binding.coverImageView.setOnClickListener(oclMachineImg);
         binding.updateButton.setOnClickListener(oclUpdate);
         binding.deleteButton.setOnClickListener(oclDelete);
@@ -216,7 +215,10 @@ public class MachineFragmentDialog extends DialogFragment {
                 binding.coverImageView.setImageBitmap(bitmap);
                 machineCover.setPhoto(bitmap);
                 machineCover.setName("cover");
+                binding.updateButton.setEnabled(true);
             }).addOnFailureListener(e -> {
+                machineCover.setName("bad_cover");
+                binding.updateButton.setEnabled(true);
             });
         } catch (IOException e) {
             e.printStackTrace();
@@ -296,7 +298,24 @@ public class MachineFragmentDialog extends DialogFragment {
         machine.setDailyRentPrice(Double.parseDouble(binding.dayEdit.getText().toString()));
         machine.setWeeklyRentPrice(Double.parseDouble(binding.weekEdit.getText().toString()));
         machine.setMonthlyRentPrice(Double.parseDouble(binding.monthEdit.getText().toString()));
-        machineCover.saveToCloudStorage(storageRef, machine.getId()).addOnSuccessListener(uv -> {
+
+        if (!machineCover.getName().equals("bad_cover"))
+            machineCover.saveToCloudStorage(storageRef, machine.getId()).addOnSuccessListener(uv -> {
+                MACHINE_COL.document(machine.getId()).set(machine).addOnSuccessListener(unused -> {
+                    MACHINE_EMPLOYEE_COL.whereEqualTo("machine.id", machine.getId()).get().addOnSuccessListener(queryDocumentSnapshots -> {
+                        for (DocumentSnapshot d : queryDocumentSnapshots) {
+                            MACHINE_EMPLOYEE_COL
+                                    .document(d.getId())
+                                    .update("machine", machine);
+                        }
+                    });
+                    Snackbar snackbar = Snackbar.make(binding.getRoot(), "Updated", Snackbar.LENGTH_SHORT);
+                    snackbar.show();
+                    binding.updateButton.setEnabled(true);
+                    dismiss();
+                });
+            });
+        else
             MACHINE_COL.document(machine.getId()).set(machine).addOnSuccessListener(unused -> {
                 MACHINE_EMPLOYEE_COL.whereEqualTo("machine.id", machine.getId()).get().addOnSuccessListener(queryDocumentSnapshots -> {
                     for (DocumentSnapshot d : queryDocumentSnapshots) {
@@ -306,11 +325,10 @@ public class MachineFragmentDialog extends DialogFragment {
                     }
                 });
                 Snackbar snackbar = Snackbar.make(binding.getRoot(), "Updated", Snackbar.LENGTH_SHORT);
-                snackbar.setAction("Dismiss",v->dismiss());
                 snackbar.show();
                 binding.updateButton.setEnabled(true);
+                dismiss();
             });
-        });
 
 
     }
@@ -384,7 +402,7 @@ public class MachineFragmentDialog extends DialogFragment {
             if (accessories == null)
                 addAccessoriesDialog = new AddAccessoriesDialog(machine);
             else
-                addAccessoriesDialog = new AddAccessoriesDialog(accessories);
+                addAccessoriesDialog = new AddAccessoriesDialog((ArrayList<Accessory>) accessories.clone());
             addAccessoriesDialog.show(getParentFragmentManager(), "");
         }
     };

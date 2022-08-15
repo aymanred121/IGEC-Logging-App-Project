@@ -1,11 +1,19 @@
 package com.igec.common.firebase;
 
 
-public class EmployeeOverview {
+import androidx.annotation.NonNull;
+
+public class EmployeeOverview implements Cloneable{
     public boolean isSelected = false;
     private String firstName, lastName, title, id, managerID, projectId;
 
     public EmployeeOverview() {
+    }
+
+    @NonNull
+    @Override
+    public EmployeeOverview clone() throws CloneNotSupportedException {
+        return (EmployeeOverview) super.clone();
     }
 
     public EmployeeOverview(String firstName, String lastName, String title, String id) {

@@ -66,7 +66,7 @@ public class Accessory implements Parcelable, Serializable, Cloneable {
     public UploadTask saveToCloudStorage(StorageReference storageRef, String file) {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        photo.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        photo.compress(Bitmap.CompressFormat.JPEG, 40, baos);
         byte[] data = baos.toByteArray();
         StorageReference mountainsRef = storageRef.child("imgs/" + file + "/" + name + ".jpg");
 

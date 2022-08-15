@@ -53,6 +53,8 @@ public class MachineSerialNumberDialog extends DialogFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        binding.scannerView.setFlashButtonVisible(false);
+        binding.scannerView.setAutoFocusButtonVisible(false);
         mCodeScanner = new CodeScanner(getActivity(), binding.scannerView);
         mCodeScanner.setDecodeCallback(result -> getActivity().runOnUiThread(() -> {
             Bundle res = new Bundle();

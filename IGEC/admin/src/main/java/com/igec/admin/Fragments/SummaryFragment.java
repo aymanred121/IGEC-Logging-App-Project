@@ -371,5 +371,10 @@ public class SummaryFragment extends Fragment {
         public void onCheckboxClick(int position) {
 
         }
+
+        @Override
+        public void onRadioClick(int position) {
+
+        }
     };
 }

@@ -153,6 +153,7 @@ public class AddAccessoriesDialog extends DialogFragment {
         if (!saveUpdated) {
             Bundle result = new Bundle();
             result.putSerializable("supplements", accessories);
+            result.putStringArrayList("oldNames", new ArrayList<String>());
             getParentFragmentManager().setFragmentResult("supplements", result);
         }
         super.onDismiss(dialog);
@@ -202,9 +203,10 @@ public class AddAccessoriesDialog extends DialogFragment {
                 final File localFile = File.createTempFile(name, "jpg");
                 ref.getFile(localFile).addOnSuccessListener(taskSnapshot -> {
                     Bitmap bitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
-                    updatedAccessories.add(new com.igec.common.firebase.Accessory(name, bitmap));
+                    updatedAccessories.add(new Accessory(name, bitmap));
+                    accessories.add(new Accessory(name, bitmap));
                     progress[0]++;
-                    if (progress[0] == machine.getSupplementsNames().size()) {
+                    if (progress[0] == machine.getSupplementsNames().size() && binding != null) {
                         binding.progressBar.startAnimation(hide);
                         binding.recyclerView.startAnimation(show);
                         adapter.notifyDataSetChanged();

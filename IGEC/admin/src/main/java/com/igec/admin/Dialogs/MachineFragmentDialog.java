@@ -40,7 +40,7 @@ import androidx.fragment.app.FragmentResultListener;
 import com.igec.admin.R;
 import com.igec.admin.databinding.FragmentAddMachineBinding;
 import com.igec.common.firebase.Machine;
-import com.igec.common.firebase.Supplement;
+import com.igec.common.firebase.Accessory;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.datepicker.MaterialDatePicker;
@@ -77,8 +77,8 @@ public class MachineFragmentDialog extends DialogFragment {
     private final MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vDatePicker;
     private final Machine machine;
-    private ArrayList<Supplement> supplements;
-    private Supplement machineCover = new Supplement();
+    private ArrayList<Accessory> accessories;
+    private Accessory machineCover = new Accessory();
     private final FirebaseStorage storage = FirebaseStorage.getInstance();
     private final StorageReference storageRef = storage.getReference();
     private ArrayList<String> oldNames;
@@ -111,7 +111,7 @@ public class MachineFragmentDialog extends DialogFragment {
         getParentFragmentManager().setFragmentResultListener("supplements", this, new FragmentResultListener() {
             @Override
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
-                supplements = bundle.getParcelableArrayList("supplements");
+                accessories = bundle.getParcelableArrayList("supplements");
                 oldNames = bundle.getStringArrayList("oldNames");
             }
         });
@@ -251,17 +251,17 @@ public class MachineFragmentDialog extends DialogFragment {
     @RequiresApi(api = Build.VERSION_CODES.R)
     private void updateMachine() throws ParseException {
 
-        if (supplements != null) {
-            int size = supplements.size();
+        if (accessories != null) {
+            int size = accessories.size();
             MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
             builder.setTitle("Uploading...")
                     .setMessage("Uploading Data")
                     .setCancelable(false);
             AlertDialog alertDialog = builder.create();
             alertDialog.show();
-            if (supplements.size() > 0) {
+            if (accessories.size() > 0) {
                 machine.getSupplementsNames().clear();
-                IntStream.range(0, supplements.size()).forEach(i -> machine.getSupplementsNames().add(supplements.get(i).getName()));
+                IntStream.range(0, accessories.size()).forEach(i -> machine.getSupplementsNames().add(accessories.get(i).getName()));
             }
             for (String name : oldNames) {
                 storageRef.child("imgs/" + binding.idEdit.getText().toString() + "/" + name + ".jpg").delete().addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -279,7 +279,7 @@ public class MachineFragmentDialog extends DialogFragment {
             for (int i = 0; i < size; i++) {
                 Integer[] finalI = new Integer[1];
                 finalI[0] = i;
-                supplements.get(i).saveToCloudStorage(storageRef, binding.idEdit.getText().toString()).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                accessories.get(i).saveToCloudStorage(storageRef, binding.idEdit.getText().toString()).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                         if (finalI[0] == size - 1) {
@@ -340,8 +340,8 @@ public class MachineFragmentDialog extends DialogFragment {
         if (generateError())
             return false;
 
-        if (supplements != null) {
-            boolean noSupplements = supplements.size() == 0;
+        if (accessories != null) {
+            boolean noSupplements = accessories.size() == 0;
             if (noSupplements)
                 Toast.makeText(getActivity(), "No accessories were added", Toast.LENGTH_SHORT).show();
             return !noSupplements;
@@ -377,10 +377,10 @@ public class MachineFragmentDialog extends DialogFragment {
         @Override
         public void onClick(View v) {
             AddAccessoriesDialog addAccessoriesDialog;
-            if (supplements == null)
+            if (accessories == null)
                 addAccessoriesDialog = new AddAccessoriesDialog(machine);
             else
-                addAccessoriesDialog = new AddAccessoriesDialog(supplements);
+                addAccessoriesDialog = new AddAccessoriesDialog(accessories);
             addAccessoriesDialog.show(getParentFragmentManager(), "");
         }
     };

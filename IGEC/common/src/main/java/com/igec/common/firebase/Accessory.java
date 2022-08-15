@@ -4,38 +4,47 @@ import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.NonNull;
+
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 
-public class Supplement implements Parcelable, Serializable {
-    public static final Creator<Supplement> CREATOR = new Creator<Supplement>() {
+public class Accessory implements Parcelable, Serializable, Cloneable {
+    public static final Creator<Accessory> CREATOR = new Creator<Accessory>() {
         @Override
-        public Supplement createFromParcel(Parcel in) {
-            return new Supplement(in);
+        public Accessory createFromParcel(Parcel in) {
+            return new Accessory(in);
         }
 
         @Override
-        public Supplement[] newArray(int size) {
-            return new Supplement[size];
+        public Accessory[] newArray(int size) {
+            return new Accessory[size];
         }
     };
+
+    @NonNull
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
+
     private String name;
     private Bitmap photo;
 
-    protected Supplement(Parcel in) {
+    protected Accessory(Parcel in) {
         name = in.readString();
         photo = in.readParcelable(Bitmap.class.getClassLoader());
     }
 
-    public Supplement(String name, Bitmap photo) {
+    public Accessory(String name, Bitmap photo) {
         this.name = name;
         this.photo = photo;
     }
 
-    public Supplement() {
+    public Accessory() {
     }
 
     public String getName() {

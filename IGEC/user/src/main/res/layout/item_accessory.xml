@@ -13,7 +13,7 @@
         android:padding="8dp">
 
         <ImageView
-            android:id="@+id/ImageView_supplementImage"
+            android:id="@+id/image_image_view"
             android:layout_width="150dp"
             android:layout_height="150dp"
             android:text="test"
@@ -22,11 +22,11 @@
             tools:tint="@color/black" />
 
         <TextView
-            android:id="@+id/TextView_supplementName"
+            android:id="@+id/name_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
-            android:layout_below="@id/ImageView_supplementImage"
+            android:layout_below="@id/image_image_view"
             android:layout_centerVertical="true"
             android:textSize="20sp"
             tools:text="Supplement Name" />

@@ -18,6 +18,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -28,6 +29,7 @@ import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.igec.admin.Adapters.EmployeeAdapter;
 import com.igec.admin.Dialogs.AddAllowanceDialog;
 import com.igec.admin.Dialogs.AddClientDialog;
@@ -58,10 +60,9 @@ import java.util.Map;
 
 public class AddProjectFragment extends Fragment {
 
-    // Views
-    private EmployeeAdapter adapter;
-
     // Vars
+    private String day, month, year;
+    private EmployeeAdapter adapter;
     private String lat, lng;
     private ArrayList<String> contract = new ArrayList<>();
     private ArrayList<Pair<TextInputLayout, EditText>> views;
@@ -79,7 +80,6 @@ public class AddProjectFragment extends Fragment {
     private WriteBatch batch = FirebaseFirestore.getInstance().batch();
 
     public static void clearTeam() {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
         WriteBatch batch = FirebaseFirestore.getInstance().batch();
         for (EmployeeOverview emp : Team) {
             ArrayList<String> empInfo = new ArrayList<>();
@@ -111,33 +111,16 @@ public class AddProjectFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getParentFragmentManager().setFragmentResultListener("client", this, new FragmentResultListener() {
-            @Override
-            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
-                // We use a String here, but any type that can be put in a Bundle is supported
-                client = (Client) bundle.getSerializable("client");
-                // Do something with the result
+        getParentFragmentManager().setFragmentResultListener("client", this, (requestKey, bundle) -> {
+            client = (Client) bundle.getSerializable("client");
 
-            }
         });
-        getParentFragmentManager().setFragmentResultListener("allowances", this, new FragmentResultListener() {
-            @Override
-            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
-                // We use a String here, but any type that can be put in a Bundle is supported
-                allowances = bundle.getParcelableArrayList("allowances");
-
-                //Added projectId to each allowance that is coming from project and set type to project
-                // Do something with the result
-            }
+        getParentFragmentManager().setFragmentResultListener("allowances", this, (requestKey, bundle) -> {
+            allowances = bundle.getParcelableArrayList("allowances");
         });
-
-        getParentFragmentManager().setFragmentResultListener("location", this, new FragmentResultListener() {
-            @Override
-            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
-
-                lat = result.getString("lat");
-                lng = result.getString("lng");
-            }
+        getParentFragmentManager().setFragmentResultListener("location", this, (requestKey, result) -> {
+            lat = result.getString("lat");
+            lng = result.getString("lng");
         });
     }
 
@@ -164,7 +147,7 @@ public class AddProjectFragment extends Fragment {
         binding.referenceEdit.addTextChangedListener(twProjectReference);
         binding.managerIdAuto.addTextChangedListener(twManagerID);
         binding.projectAreaEdit.addTextChangedListener(twArea);
-        binding.officeWorkCheckbox.setOnClickListener(oclOfficeWork);
+        binding.officeWorkCheckbox.setOnCheckedChangeListener(oclOfficeWork);
         binding.clientButton.setOnClickListener(oclAddClient);
         binding.registerButton.setOnClickListener(clRegister);
         binding.locateButton.setOnClickListener(clLocate);
@@ -196,6 +179,8 @@ public class AddProjectFragment extends Fragment {
     }
 
     private void initialize() {
+
+        binding.dateLayout.setErrorIconDrawable(R.drawable.ic_baseline_calendar_month_24);
         employees = new ArrayList<>();
         views = new ArrayList<>();
         views.add(new Pair<>(binding.nameLayout, binding.nameEdit));
@@ -220,7 +205,6 @@ public class AddProjectFragment extends Fragment {
         projectID = PROJECT_COL.document().getId().substring(0, 5);
         binding.clientButton.setEnabled(!binding.officeWorkCheckbox.isChecked());
         getEmployees();
-        setUpContractType();
         //TODO: remove fakeData() when all testing is finished
         fakeData();
 
@@ -234,7 +218,7 @@ public class AddProjectFragment extends Fragment {
         binding.contractTypeAuto.setAdapter(ContractAdapter);
     }
 
-    private void ChangeSelectedTeam(int position) {
+    private void changeSelectedTeam(int position) {
 
         employees.get(position).isSelected = !employees.get(position).isSelected;
         ArrayList<String> empInfo = new ArrayList<>();
@@ -257,7 +241,6 @@ public class AddProjectFragment extends Fragment {
 
             if (!binding.managerIdAuto.getText().toString().isEmpty() && binding.managerIdAuto.getText().toString().equals(employees.get(position).getId()))
                 binding.managerIdAuto.setText("");
-//            Team.remove(employees.get(position));
             Team.removeIf(employeeOverview -> employeeOverview.getId().equals(employees.get(position).getId()));
             TeamID.remove(String.valueOf(employees.get(position).getId()));
             employees.get(position).setProjectId(null);
@@ -274,8 +257,6 @@ public class AddProjectFragment extends Fragment {
     }
 
     void getEmployees() {
-//        TeamID.clear();
-//        Team.clear();
         EMPLOYEE_OVERVIEW_REF
                 .addSnapshotListener((documentSnapshot, e) -> {
                     binding.managerIdAuto.setText(null);
@@ -292,24 +273,7 @@ public class AddProjectFragment extends Fragment {
                 });
     }
 
-
     private void updateEmployeesDetails(String projectID) {
-        String day = binding.dateEdit.getText().toString().substring(0, 2);
-        String year = binding.dateEdit.getText().toString().substring(6, 10);
-        String month = binding.dateEdit.getText().toString().substring(3, 5);
-        if (Integer.parseInt(day) > 25) {
-            if (Integer.parseInt(month) + 1 == 13) {
-                month = "01";
-                year = Integer.parseInt(year) + 1 + "";
-            } else {
-                month = Integer.parseInt(month) + 1 + "";
-                if (month.length() == 1) {
-                    month = "0" + month;
-                }
-            }
-        }
-        final String finalMonth = month;
-        final String finalYear = year;
         final int[] counter = {0};
         Team.forEach(emp -> {
             ArrayList<String> empInfo = new ArrayList<>();
@@ -321,22 +285,21 @@ public class AddProjectFragment extends Fragment {
             empInfo.add(emp.isSelected ? "1" : "0");
             Map<String, Object> empInfoMap = new HashMap<>();
             empInfoMap.put(emp.getId(), empInfo);
+
             batch.update(EMPLOYEE_OVERVIEW_REF, empInfoMap);
+
             batch.update(EMPLOYEE_COL.document(emp.getId()), "managerID", emp.getManagerID(), "projectID", projectID);
+
             EMPLOYEE_GROSS_SALARY_COL.document(emp.getId()).get().addOnSuccessListener((value) -> {
                 if (!value.exists())
                     return;
                 EmployeesGrossSalary employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
-                if (allowances.size() != 0) {
-                    employeesGrossSalary.getAllTypes().addAll(allowances);
-                }
+                employeesGrossSalary.getAllTypes().addAll(allowances);
                 batch.update(EMPLOYEE_GROSS_SALARY_COL.document(emp.getId()), "allTypes", employeesGrossSalary.getAllTypes());
 
-                EMPLOYEE_GROSS_SALARY_COL.document(emp.getId()).collection(finalYear).document(finalMonth).get().addOnSuccessListener(documentSnapshot -> {
+                updateDate();
+                EMPLOYEE_GROSS_SALARY_COL.document(emp.getId()).collection(year).document(month).get().addOnSuccessListener(documentSnapshot -> {
                     if (!documentSnapshot.exists()) {
-//                        employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() == allowancesEnum.PROJECT.ordinal());
-//                        employeesGrossSalary.setBaseAllowances(allowances);
-//                        batch.set(db.document(documentSnapshot.getReference().getPath()),employeesGrossSalary);
                         if (counter[0] == Team.size() - 1) {
                             batch.commit().addOnSuccessListener(unused -> {
                                 clearInputs();
@@ -373,12 +336,30 @@ public class AddProjectFragment extends Fragment {
 
     }
 
+    private void updateDate() {
+        day = binding.dateEdit.getText().toString().substring(0, 2);
+        year = binding.dateEdit.getText().toString().substring(6, 10);
+        month = binding.dateEdit.getText().toString().substring(3, 5);
+        if (Integer.parseInt(day) > 25) {
+            if (Integer.parseInt(month) + 1 == 13) {
+                month = "01";
+                year = Integer.parseInt(year) + 1 + "";
+            } else {
+                month = Integer.parseInt(month) + 1 + "";
+                if (month.length() == 1) {
+                    month = "0" + month;
+                }
+            }
+        }
+    }
+
     private void addProject() {
 
         allowances.forEach(allowance -> {
             allowance.setType(allowancesEnum.PROJECT.ordinal());
             allowance.setProjectId(projectID);
         });
+
         Project newProject = new Project(binding.managerNameEdit.getText().toString()
                 , binding.managerIdAuto.getText().toString()
                 , binding.nameEdit.getText().toString()
@@ -392,11 +373,11 @@ public class AddProjectFragment extends Fragment {
                 , Double.parseDouble(lng)
                 , binding.contractTypeAuto.getText().toString()
                 , Double.parseDouble(binding.projectAreaEdit.getText().toString()));
+
         newProject.setId(projectID);
         newProject.setClient(binding.officeWorkCheckbox.isChecked() ? null : client);
         newProject.getAllowancesList().addAll(allowances);
-        allowances = newProject.getAllowancesList();
-        batch = FirebaseFirestore.getInstance().batch();
+        batch = db.batch();
         batch.set(PROJECT_COL.document(projectID), newProject);
         updateEmployeesDetails(projectID);
         projectID = PROJECT_COL.document().getId().substring(0, 5);
@@ -426,15 +407,9 @@ public class AddProjectFragment extends Fragment {
             String projectID = empMap.get(key).get(4);
             boolean isSelected = empMap.get(key).get(5).equals("1");
             String id = (key);
-            /*
-            *
-                d l
-                00 => show
-                10 => hide
-                01 => doesn't exist
-                11 => show
-            * */
-            if (TeamID.contains(id) == isSelected && managerID == null)
+            boolean matchDb = TeamID.contains(id) == isSelected;
+            boolean hasNoManager = managerID == null;
+            if (matchDb && hasNoManager)
                 employees.add(new EmployeeOverview(firstName, lastName, title, id, projectID, isSelected));
 
         }
@@ -473,8 +448,6 @@ public class AddProjectFragment extends Fragment {
     private boolean generateError() {
         for (Pair<TextInputLayout, EditText> view : views) {
             if (view.second.getText().toString().trim().isEmpty()) {
-                if (view.first == binding.dateLayout)
-                    view.first.setErrorIconDrawable(R.drawable.ic_baseline_calendar_month_24);
                 view.first.setError("Missing");
                 return true;
             }
@@ -486,11 +459,13 @@ public class AddProjectFragment extends Fragment {
         boolean isLocationMissing = (lat == null && lng == null);
         if (isClientMissing) {
             Toast.makeText(getActivity(), "client Info Missing", Toast.LENGTH_SHORT).show();
+            return true;
         }
         if (isLocationMissing) {
             Toast.makeText(getActivity(), "Location is Missing", Toast.LENGTH_SHORT).show();
+            return true;
         }
-        return isClientMissing || isLocationMissing;
+        return false;
     }
 
     boolean validateInputs() {
@@ -498,18 +473,12 @@ public class AddProjectFragment extends Fragment {
     }
 
     // Listeners
-    private final View.OnClickListener oclTimeDate = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            vTimeDatePicker.show(getFragmentManager(), "DATE_PICKER");
-        }
+    private final View.OnClickListener oclTimeDate = v -> {
+        vTimeDatePicker.show(getFragmentManager(), "DATE_PICKER");
     };
-    private final MaterialPickerOnPositiveButtonClickListener pclTimeDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
-        @Override
-        public void onPositiveButtonClick(Object selection) {
-            startDate = (long) selection;
-            binding.dateEdit.setText(String.format("%s", convertDateToString(startDate)));
-        }
+    private final MaterialPickerOnPositiveButtonClickListener pclTimeDatePicker = selection -> {
+        startDate = (long) selection;
+        binding.dateEdit.setText(String.format("%s", convertDateToString(startDate)));
     };
     private final View.OnClickListener clRegister = v -> {
         if (validateInputs()) {
@@ -524,50 +493,35 @@ public class AddProjectFragment extends Fragment {
 
         @Override
         public void onCheckboxClick(int position) {
-            ChangeSelectedTeam(position);
+            changeSelectedTeam(position);
         }
     };
-    private final View.OnClickListener oclAddClient = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            AddClientDialog addClientDialog;
-            addClientDialog = new AddClientDialog(client);
-            addClientDialog.show(getParentFragmentManager(), "");
+    private final View.OnClickListener oclAddClient = v -> {
+        AddClientDialog addClientDialog;
+        addClientDialog = new AddClientDialog(client);
+        addClientDialog.show(getParentFragmentManager(), "");
+    };
+    private final CompoundButton.OnCheckedChangeListener oclOfficeWork = (v, office) -> {
+        binding.clientButton.setEnabled(!office);
+        binding.referenceEdit.setEnabled(!office);
+        binding.referenceLayout.setEnabled(!office);
+        if (office) {
+            binding.referenceEdit.setText("-99999");
+        } else {
+            binding.referenceEdit.setText(null);
         }
     };
-    private final View.OnClickListener oclOfficeWork = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            binding.clientButton.setEnabled(!binding.officeWorkCheckbox.isChecked());
-            binding.referenceEdit.setEnabled(!binding.officeWorkCheckbox.isChecked());
-            binding.referenceLayout.setEnabled(!binding.officeWorkCheckbox.isChecked());
-            if (binding.officeWorkCheckbox.isChecked()) {
-                binding.referenceEdit.setText("-99999");
-            } else {
-                binding.referenceEdit.setText(null);
-            }
-
-        }
+    private final View.OnClickListener oclAddAllowance = v -> {
+        AddAllowanceDialog addAllowanceDialog = new AddAllowanceDialog((ArrayList<Allowance>) allowances.clone());
+        addAllowanceDialog.show(getParentFragmentManager(), "");
     };
-    private final View.OnClickListener oclAddAllowance = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            AddAllowanceDialog addAllowanceDialog = new AddAllowanceDialog((ArrayList<Allowance>) allowances.clone());
-            addAllowanceDialog.show(getParentFragmentManager(), "");
-        }
-    };
-    private final View.OnClickListener clLocate = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            // first time
-            LocationDialog locationDialog;
-
-            if (lat == null && lng == null)
-                locationDialog = LocationDialog.newInstance();
-            else
-                locationDialog = LocationDialog.newInstance(lat, lng);
-            locationDialog.show(getParentFragmentManager(), "");
-        }
+    private final View.OnClickListener clLocate = v -> {
+        LocationDialog locationDialog;
+        if (lat == null && lng == null)
+            locationDialog = LocationDialog.newInstance();
+        else
+            locationDialog = LocationDialog.newInstance(lat, lng);
+        locationDialog.show(getParentFragmentManager(), "");
     };
     private final TextWatcher twProjectReference = new TextWatcher() {
         boolean removeDash = false;

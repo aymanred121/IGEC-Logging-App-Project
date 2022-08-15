@@ -3,9 +3,11 @@ package com.igec.common.firebase;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.NonNull;
+
 import java.io.Serializable;
 
-public class Allowance  implements Serializable, Parcelable {
+public class Allowance  implements Serializable, Parcelable,Cloneable {
     private String name,projectId="",note;
     private double amount ;
     private int type; // if 0 projectAllowances , if 1 penalties , if 2 bonuses , if 3 personalAllowances , if 4 net salary
@@ -28,6 +30,12 @@ public class Allowance  implements Serializable, Parcelable {
         amount = in.readDouble();
         type = in.readInt();
         projectId = "";
+    }
+
+    @NonNull
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 
     public static final Creator<Allowance> CREATOR = new Creator<Allowance>() {

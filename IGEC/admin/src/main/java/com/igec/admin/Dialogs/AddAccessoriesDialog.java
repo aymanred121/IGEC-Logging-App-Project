@@ -19,38 +19,34 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.igec.admin.Adapters.SupplementAdapter;
+import com.igec.admin.Adapters.AccessoryAdapter;
 import com.igec.admin.R;
 import com.igec.admin.databinding.DialogAddAccessoriesBinding;
+import com.igec.common.firebase.Accessory;
 import com.igec.common.firebase.Machine;
-import com.igec.common.firebase.Supplement;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
 public class AddAccessoriesDialog extends DialogFragment {
 
     private ActivityResultLauncher<Intent> activityResultLauncher;
-    private ArrayList<Supplement> supplements;
-    private ArrayList<Supplement> updatedSupplements;
-    private SupplementAdapter adapter;
+    private ArrayList<com.igec.common.firebase.Accessory> accessories; // should not be modified -> not saved
+    private ArrayList<com.igec.common.firebase.Accessory> updatedAccessories; // all modifications happens here -> saved
+    private AccessoryAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
     private Machine machine;
     private Animation show, hide;
@@ -62,15 +58,21 @@ public class AddAccessoriesDialog extends DialogFragment {
     // for machine dialog
     public AddAccessoriesDialog(Machine machine) {
         this.machine = machine;
-        supplements = new ArrayList<>();
-        updatedSupplements = new ArrayList<>();
+        accessories = new ArrayList<>();
+        updatedAccessories = new ArrayList<>();
     }
 
     // for add machine dialog
-    public AddAccessoriesDialog(ArrayList<Supplement> supplements) {
-        this.supplements = supplements;
-        updatedSupplements = new ArrayList<>();
-        updatedSupplements.addAll(supplements);
+    public AddAccessoriesDialog(ArrayList<Accessory> accessories) {
+        this.accessories = accessories;
+        updatedAccessories = new ArrayList<>();
+        accessories.forEach(accessory -> {
+            try {
+                updatedAccessories.add((Accessory) accessory.clone());
+            } catch (CloneNotSupportedException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @NonNull
@@ -92,37 +94,31 @@ public class AddAccessoriesDialog extends DialogFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setStyle(DialogFragment.STYLE_NORMAL, R.style.FullscreenDialogTheme);
-        getParentFragmentManager().setFragmentResultListener("addSupplement", this, new FragmentResultListener() {
-            @Override
-            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
-                // We use a String here, but any type that can be put in a Bundle is supported
-                updatedSupplements.add((Supplement) bundle.getSerializable("supplement"));
-                // Do something with the result
-                adapter.notifyDataSetChanged();
-            }
+        getParentFragmentManager().setFragmentResultListener("addSupplement", this, (requestKey, bundle) -> {
+            // We use a String here, but any type that can be put in a Bundle is supported
+            updatedAccessories.add((com.igec.common.firebase.Accessory) bundle.getSerializable("supplement"));
+            // Do something with the result
+            adapter.notifyDataSetChanged();
         });
 
-        getParentFragmentManager().setFragmentResultListener("editSupplement", this, new FragmentResultListener() {
-            @Override
-            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
-                // We use a String here, but any type that can be put in a Bundle is supported
-                int position = bundle.getInt("position");
-                Supplement supplement = (Supplement) bundle.getSerializable("supplement");
-                if (!supplement.getName().equals(updatedSupplements.get(position).getName())) {
-                    if (oldNamesIndexes.contains(position)) {
-                        oldNamesIndexes.remove(position);
-                        oldNames.remove(oldNames.get(position));
-                    }
-                    oldNamesIndexes.add(position);
-                    oldNames.add(updatedSupplements.get(position).getName());
-
+        getParentFragmentManager().setFragmentResultListener("editSupplement", this, (requestKey, bundle) -> {
+            // We use a String here, but any type that can be put in a Bundle is supported
+            int position = bundle.getInt("position");
+            com.igec.common.firebase.Accessory accessory = (com.igec.common.firebase.Accessory) bundle.getSerializable("supplement");
+            if (!accessory.getName().equals(updatedAccessories.get(position).getName())) {
+                if (oldNamesIndexes.contains(position)) {
+                    oldNamesIndexes.remove(position);
+                    oldNames.remove(oldNames.get(position));
                 }
+                oldNamesIndexes.add(position);
+                oldNames.add(updatedAccessories.get(position).getName());
 
-                updatedSupplements.get(position).setName(supplement.getName());
-                updatedSupplements.get(position).setPhoto(supplement.getPhoto());
-                // Do something with the result
-                adapter.notifyItemChanged(position);
             }
+
+            updatedAccessories.get(position).setName(accessory.getName());
+            updatedAccessories.get(position).setPhoto(accessory.getPhoto());
+            // Do something with the result
+            adapter.notifyItemChanged(position);
         });
     }
 
@@ -156,7 +152,7 @@ public class AddAccessoriesDialog extends DialogFragment {
 
         if (!saveUpdated) {
             Bundle result = new Bundle();
-            result.putSerializable("supplements", supplements);
+            result.putSerializable("supplements", accessories);
             getParentFragmentManager().setFragmentResult("supplements", result);
         }
         super.onDismiss(dialog);
@@ -166,21 +162,17 @@ public class AddAccessoriesDialog extends DialogFragment {
     private void initialize() {
         binding.recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
-        adapter = new SupplementAdapter(updatedSupplements);
+        adapter = new AccessoryAdapter(updatedAccessories);
         binding.recyclerView.setLayoutManager(layoutManager);
         binding.recyclerView.setAdapter(adapter);
-        activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
-            @Override
-            public void onActivityResult(ActivityResult result) {
-                if (result.getResultCode() == RESULT_OK) {
-                    //Bundle bundle = result.getData().getExtras();
-                    Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath);
-                    Supplement supplement = new Supplement();
-                    supplement.setName("");
-                    supplement.setPhoto(bitmap);
-                    SupplementInfoDialog supplementInfoDialog = new SupplementInfoDialog(-1, supplement, supplements);
-                    supplementInfoDialog.show(getParentFragmentManager(), "");
-                }
+        activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == RESULT_OK) {
+                Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath);
+                com.igec.common.firebase.Accessory accessory = new com.igec.common.firebase.Accessory();
+                accessory.setName("");
+                accessory.setPhoto(bitmap);
+                AccessoryInfoDialog accessoryInfoDialog = new AccessoryInfoDialog(-1, accessory, updatedAccessories);
+                accessoryInfoDialog.show(getParentFragmentManager(), "");
             }
         });
         show = AnimationUtils.loadAnimation(getActivity(), R.anim.show);
@@ -210,8 +202,7 @@ public class AddAccessoriesDialog extends DialogFragment {
                 final File localFile = File.createTempFile(name, "jpg");
                 ref.getFile(localFile).addOnSuccessListener(taskSnapshot -> {
                     Bitmap bitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
-                    updatedSupplements.add(new Supplement(name, bitmap));
-                    supplements.add(new Supplement(name, bitmap));
+                    updatedAccessories.add(new com.igec.common.firebase.Accessory(name, bitmap));
                     progress[0]++;
                     if (progress[0] == machine.getSupplementsNames().size()) {
                         binding.progressBar.startAnimation(hide);
@@ -227,73 +218,41 @@ public class AddAccessoriesDialog extends DialogFragment {
         }
     }
 
-    public void saveToInternalStorage(Bitmap img, String supplementName) {
-        if (new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS) + supplementName + ".jpg").exists())
-            return;
-        Bitmap bitmapImage = img;
-        if (bitmapImage == null)
-            return;
-        File path = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), supplementName + ".jpg");
-        FileOutputStream fos = null;
+    private final View.OnClickListener oclDone = v -> {
+        binding.doneFab.setEnabled(false);
+        Bundle result = new Bundle();
+        result.putSerializable("supplements", updatedAccessories);
+        result.putStringArrayList("oldNames", oldNames);
+        getParentFragmentManager().setFragmentResult("supplements", result);
+        saveUpdated = true;
+        binding.doneFab.setEnabled(true);
+        dismiss();
+
+    };
+    private final View.OnClickListener oclAddPhoto = v -> {
+
+        String fileName = "photo";
+        File storageDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+
         try {
-            path.createNewFile();
-            fos = new FileOutputStream(path.getAbsoluteFile());
-            bitmapImage.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-        } catch (Exception e) {
+            File imageFile = File.createTempFile(fileName, ".jpg", storageDirectory);
+            currentPhotoPath = imageFile.getAbsolutePath();
+
+            Uri imageUri = FileProvider.getUriForFile(getActivity(), "com.igec.admin.fileprovider", imageFile);
+
+            Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            takePicture.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+            activityResultLauncher.launch(takePicture);
+        } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                fos.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
-        return;
-    }
 
-    private final View.OnClickListener oclDone = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            binding.doneFab.setEnabled(false);
-            Bundle result = new Bundle();
-            result.putSerializable("supplements", updatedSupplements);
-            result.putStringArrayList("oldNames", oldNames);
-            getParentFragmentManager().setFragmentResult("supplements", result);
-            saveUpdated = true;
-            binding.doneFab.setEnabled(true);
-            dismiss();
-        }
     };
-    private final View.OnClickListener oclAddPhoto = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-
-            String fileName = "photo";
-            File storageDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-
-            try {
-                File imageFile = File.createTempFile(fileName, ".jpg", storageDirectory);
-                currentPhotoPath = imageFile.getAbsolutePath();
-
-                Uri imageUri = FileProvider.getUriForFile(getActivity(), "com.igec.admin.fileprovider", imageFile);
-
-                Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                takePicture.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
-                activityResultLauncher.launch(takePicture);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-
-//
-
-        }
-    };
-    private final SupplementAdapter.OnItemClickListener oclItemClickListener = new SupplementAdapter.OnItemClickListener() {
+    private final AccessoryAdapter.OnItemClickListener oclItemClickListener = new AccessoryAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position) {
-            SupplementInfoDialog supplementInfoDialog = new SupplementInfoDialog(position, updatedSupplements.get(position), updatedSupplements);
-            supplementInfoDialog.show(getParentFragmentManager(), "");
+            AccessoryInfoDialog accessoryInfoDialog = new AccessoryInfoDialog(position, updatedAccessories.get(position), updatedAccessories);
+            accessoryInfoDialog.show(getParentFragmentManager(), "");
         }
 
         @Override
@@ -305,8 +264,8 @@ public class AddAccessoriesDialog extends DialogFragment {
                     .setNegativeButton(getString(R.string.cancel), (dialogInterface, i) -> {
                     })
                     .setPositiveButton(getString(R.string.accept), (dialogInterface, i) -> {
-                        oldNames.add(updatedSupplements.get(position).getName());
-                        updatedSupplements.remove(position);
+                        oldNames.add(updatedAccessories.get(position).getName());
+                        updatedAccessories.remove(position);
                         adapter.notifyItemRemoved(position);
                     })
                     .show();

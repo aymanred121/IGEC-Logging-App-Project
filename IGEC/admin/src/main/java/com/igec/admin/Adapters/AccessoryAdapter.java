@@ -10,37 +10,36 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.igec.admin.R;
-import com.igec.common.firebase.Supplement;
 import com.google.android.material.button.MaterialButton;
 
 import java.util.ArrayList;
 
-public class SupplementAdapter extends RecyclerView.Adapter<SupplementAdapter.SupplementViewHolder> {
-    private ArrayList<Supplement> supplements;
+public class AccessoryAdapter extends RecyclerView.Adapter<AccessoryAdapter.AccessoryViewHolder> {
+    private ArrayList<com.igec.common.firebase.Accessory> accessories;
     private OnItemClickListener listener;
 
-    public SupplementAdapter(ArrayList<Supplement> supplements) {
-        this.supplements = supplements;
+    public AccessoryAdapter(ArrayList<com.igec.common.firebase.Accessory> accessories) {
+        this.accessories = accessories;
     }
 
     @NonNull
     @Override
-    public SupplementViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.item_supplement,parent,false);
-        return new SupplementViewHolder(v,listener);
+    public AccessoryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.item_accessory,parent,false);
+        return new AccessoryViewHolder(v,listener);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull SupplementViewHolder holder, int position) {
-        Supplement supplement = supplements.get(position);
-        holder.vName.setText(supplement.getName());
-        holder.vImg.setImageBitmap(supplement.getPhoto());
+    public void onBindViewHolder(@NonNull AccessoryViewHolder holder, int position) {
+        com.igec.common.firebase.Accessory accessory = accessories.get(position);
+        holder.vName.setText(accessory.getName());
+        holder.vImg.setImageBitmap(accessory.getPhoto());
 
     }
 
     @Override
     public int getItemCount() {
-        return supplements.size();
+        return accessories.size();
     }
 
     public interface OnItemClickListener{
@@ -51,12 +50,12 @@ public class SupplementAdapter extends RecyclerView.Adapter<SupplementAdapter.Su
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.listener = listener;
     }
-    public ArrayList<Supplement> getSupplements() {
-        return supplements;
+    public ArrayList<com.igec.common.firebase.Accessory> getSupplements() {
+        return accessories;
     }
 
-    public void setSupplements(ArrayList<Supplement> supplements) {
-        this.supplements = supplements;
+    public void setSupplements(ArrayList<com.igec.common.firebase.Accessory> accessories) {
+        this.accessories = accessories;
     }
 
     public OnItemClickListener getListener() {
@@ -66,16 +65,16 @@ public class SupplementAdapter extends RecyclerView.Adapter<SupplementAdapter.Su
     public void setListener(OnItemClickListener listener) {
         this.listener = listener;
     }
-    public static class SupplementViewHolder extends RecyclerView.ViewHolder{
+    public static class AccessoryViewHolder extends RecyclerView.ViewHolder{
         public TextView vName;
         public ImageView vImg;
         public MaterialButton vDelete;
 
-        public SupplementViewHolder(@NonNull View itemView, OnItemClickListener listener) {
+        public AccessoryViewHolder(@NonNull View itemView, OnItemClickListener listener) {
             super(itemView);
 
-            vName = itemView.findViewById(R.id.TextView_SupplementName);
-            vImg = itemView.findViewById(R.id.TextView_SupplementIMG);
+            vName = itemView.findViewById(R.id.name_text);
+            vImg = itemView.findViewById(R.id.image_image_view);
             vDelete = itemView.findViewById(R.id.delete_button);
 
             itemView.setOnClickListener(v -> {

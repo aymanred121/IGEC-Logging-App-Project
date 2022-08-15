@@ -13,7 +13,7 @@
         android:padding="12dp">
 
         <ImageView
-            android:id="@+id/TextView_SupplementIMG"
+            android:id="@+id/image_image_view"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:text="test"
@@ -21,9 +21,9 @@
             tools:tint="@color/black" />
 
         <TextView
-            android:id="@+id/TextView_SupplementName"
+            android:id="@+id/name_text"
             android:layout_width="wrap_content"
-            android:layout_toRightOf="@id/TextView_SupplementIMG"
+            android:layout_toRightOf="@id/image_image_view"
             android:layout_centerVertical="true"
             tools:text="Supplement Name"
             android:textSize="20sp"

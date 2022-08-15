@@ -68,9 +68,9 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
         }
     }
 
-    public EmployeeAdapter(ArrayList<EmployeeOverview> employeeOverviewsList, boolean isAdd) {
+    public EmployeeAdapter(ArrayList<EmployeeOverview> employeeOverviewsList, boolean isCheckable) {
         this.employeeOverviewsList = employeeOverviewsList;
-        this.isAdd = isAdd;
+        this.isAdd = isCheckable;
     }
 
     @NonNull

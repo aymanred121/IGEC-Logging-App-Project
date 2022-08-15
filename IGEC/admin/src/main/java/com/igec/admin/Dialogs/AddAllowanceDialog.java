@@ -32,7 +32,15 @@ public class AddAllowanceDialog extends DialogFragment {
     private RecyclerView.LayoutManager layoutManager;
 
     public AddAllowanceDialog(ArrayList<Allowance> allowances) {
-        this.allowances = allowances;
+        this.allowances = new ArrayList<>();
+        allowances.forEach(allowance -> {
+            try {
+                this.allowances.add((Allowance) allowance.clone());
+            } catch (CloneNotSupportedException e) {
+                e.printStackTrace();
+            }
+        });
+
     }
 
     @NonNull
@@ -54,28 +62,22 @@ public class AddAllowanceDialog extends DialogFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setStyle(DialogFragment.STYLE_NORMAL, R.style.FullscreenDialogTheme);
-        getParentFragmentManager().setFragmentResultListener("addAllowance", this, new FragmentResultListener() {
-            @Override
-            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
-                // We use a String here, but any type that can be put in a Bundle is supported
-                allowances.add((Allowance) bundle.getSerializable("allowance"));
-                // Do something with the result
-                adapter.notifyDataSetChanged();
-            }
+        getParentFragmentManager().setFragmentResultListener("addAllowance", this, (requestKey, bundle) -> {
+            // We use a String here, but any type that can be put in a Bundle is supported
+            allowances.add((Allowance) bundle.getSerializable("allowance"));
+            // Do something with the result
+            adapter.notifyDataSetChanged();
         });
 
-        getParentFragmentManager().setFragmentResultListener("editAllowance", this, new FragmentResultListener() {
-            @Override
-            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
-                // We use a String here, but any type that can be put in a Bundle is supported
-                int position = bundle.getInt("position");
-                Allowance allowance = (Allowance) bundle.getSerializable("allowance");
+        getParentFragmentManager().setFragmentResultListener("editAllowance", this, (requestKey, bundle) -> {
+            // We use a String here, but any type that can be put in a Bundle is supported
+            int position = bundle.getInt("position");
+            Allowance allowance = (Allowance) bundle.getSerializable("allowance");
 
-                allowances.get(position).setName(allowance.getName());
-                allowances.get(position).setAmount(allowance.getAmount());
-                allowances.get(position).setCurrency(allowance.getCurrency());
-                adapter.notifyItemChanged(position);
-            }
+            allowances.get(position).setName(allowance.getName());
+            allowances.get(position).setAmount(allowance.getAmount());
+            allowances.get(position).setCurrency(allowance.getCurrency());
+            adapter.notifyItemChanged(position);
         });
     }
 
@@ -107,7 +109,7 @@ public class AddAllowanceDialog extends DialogFragment {
     private void initialize() {
         binding.recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
-        adapter = new AllowanceAdapter(allowances, true,true);
+        adapter = new AllowanceAdapter(allowances, true, true);
         binding.recyclerView.setLayoutManager(layoutManager);
         binding.recyclerView.setAdapter(adapter);
     }
@@ -123,12 +125,9 @@ public class AddAllowanceDialog extends DialogFragment {
             dismiss();
         }
     };
-    private View.OnClickListener oclAddAllowance = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            AllowanceInfoDialog allowanceInfoDialog = new AllowanceInfoDialog(-1);
-            allowanceInfoDialog.show(getParentFragmentManager(), "");
-        }
+    private View.OnClickListener oclAddAllowance = v -> {
+        AllowanceInfoDialog allowanceInfoDialog = new AllowanceInfoDialog(-1);
+        allowanceInfoDialog.show(getParentFragmentManager(), "");
     };
     private AllowanceAdapter.OnItemClickListener oclItemClickListener = new AllowanceAdapter.OnItemClickListener() {
         @Override

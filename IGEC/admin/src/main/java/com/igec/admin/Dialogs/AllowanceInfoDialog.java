@@ -31,10 +31,12 @@ public class AllowanceInfoDialog extends DialogFragment {
     private ArrayList<String> allowancesList = new ArrayList<>();
     private ArrayList<String> types = new ArrayList<>();
 
+    // edit
     public AllowanceInfoDialog(int position) {
         this.position = position;
     }
 
+    // add
     public AllowanceInfoDialog(int position, Allowance allowance) {
         this.position = position;
         this.allowance = allowance;

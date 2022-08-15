@@ -18,11 +18,11 @@ import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.igec.user.Adapters.SupplementsAdapter;
+import com.igec.user.Adapters.AccessoryAdapter;
 import com.igec.user.R;
 import com.igec.common.firebase.Employee;
 import com.igec.common.firebase.Machine;
-import com.igec.common.firebase.Supplement;
+import com.igec.common.firebase.Accessory;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -39,14 +39,14 @@ public class AccessoriesDialog extends DialogFragment {
 
     private Machine machine;
     private Employee employee;
-    private ArrayList<Supplement> supplements;
+    private ArrayList<Accessory> accessories;
     private boolean isItAUser;
-    private Supplement machineCover = new Supplement();
+    private Accessory machineCover = new Accessory();
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     //Views
     private Animation show, hide;
-    private SupplementsAdapter adapter;
+    private AccessoryAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
 
 
@@ -101,12 +101,12 @@ public class AccessoriesDialog extends DialogFragment {
 
     // Functions
     private void initialize() {
-        supplements = new ArrayList<>();
+        accessories = new ArrayList<>();
         show = AnimationUtils.loadAnimation(getActivity(), R.anim.show);
         hide = AnimationUtils.loadAnimation(getActivity(), R.anim.hide);
         binding.recyclerView.setHasFixedSize(true);
         layoutManager = new GridLayoutManager(getActivity(), 3);
-        adapter = new SupplementsAdapter(supplements);
+        adapter = new AccessoryAdapter(accessories);
         binding.recyclerView.setLayoutManager(layoutManager);
         binding.recyclerView.setAdapter(adapter);
         if (machine.getSupplementsNames().size() != 0) {
@@ -148,7 +148,7 @@ public class AccessoriesDialog extends DialogFragment {
                     @Override
                     public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                         Bitmap bitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
-                        supplements.add(new Supplement(name, bitmap));
+                        accessories.add(new Accessory(name, bitmap));
                         progress[0]++;
                         if (progress[0] == machine.getSupplementsNames().size()) {
                             getMachineCover();

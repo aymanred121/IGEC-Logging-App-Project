@@ -11,7 +11,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -23,33 +22,29 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentResultListener;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.igec.admin.Dialogs.AddAccessoriesDialog;
 import com.igec.admin.Dialogs.MachineSerialNumberDialog;
 import com.igec.admin.R;
 import com.igec.admin.databinding.FragmentAddMachineBinding;
 import com.igec.common.firebase.Machine;
-import com.igec.common.firebase.Supplement;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.zxing.WriterException;
+import com.igec.common.firebase.Accessory;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -70,24 +65,17 @@ import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
 
 public class AddMachineFragment extends Fragment implements EasyPermissions.PermissionCallbacks {
-
-    private final int PROJECT = 0;
-    private final int NETSALARY = 1;
-    private final int ALLOWANCE = 2;
-    private final int BONUS = 3;
-    private final int PENALTY = 4;
     // Vars
     private String currentPhotoPath;
     private ActivityResultLauncher<Intent> activityResultLauncher;
     private long purchaseDate;
     private QRGEncoder qrgEncoder;
-    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private MaterialDatePicker.Builder<Long> vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vDatePicker;
     private final FirebaseStorage storage = FirebaseStorage.getInstance();
     private final StorageReference storageRef = storage.getReference();
-    private ArrayList<Supplement> supplements = new ArrayList<>();
-    private Supplement machineCover;
+    private ArrayList<Accessory> accessories;
+    private Accessory machineCover;
     private ArrayList<Pair<TextInputLayout, TextInputEditText>> views;
 
 
@@ -141,27 +129,21 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getParentFragmentManager().setFragmentResultListener("supplements", this, new FragmentResultListener() {
-            @Override
-            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
-                supplements = bundle.getParcelableArrayList("supplements");
-            }
-        });
-        getParentFragmentManager().setFragmentResultListener("machine", this, new FragmentResultListener() {
-            @Override
-            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
-                String serialNumber = result.getString("SerialNumber");
-                Pattern mPattern = Pattern.compile("[0-9]+");
-                if (mPattern.matcher(serialNumber).matches())
-                    binding.serialNumberEdit.setText(serialNumber);
-                else
-                    Toast.makeText(getActivity(), "Invalid Serial Number", Toast.LENGTH_SHORT).show();
-            }
+        getParentFragmentManager().setFragmentResultListener("supplements", this, (requestKey, bundle) -> accessories = bundle.getParcelableArrayList("supplements"));
+
+        getParentFragmentManager().setFragmentResultListener("machine", this, (requestKey, result) -> {
+            String serialNumber = result.getString("SerialNumber");
+            Pattern mPattern = Pattern.compile("[0-9]+");
+            if (mPattern.matcher(serialNumber).matches())
+                binding.serialNumberEdit.setText(serialNumber);
+            else
+                Toast.makeText(getActivity(), "Invalid Serial Number", Toast.LENGTH_SHORT).show();
         });
     }
 
 
     private FragmentAddMachineBinding binding;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -188,20 +170,36 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
         binding.purchaseDateLayout.setErrorIconOnClickListener(oclDate);
         binding.serialNumberLayout.setErrorIconOnClickListener(oclSerialNumber);
         vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);
-        binding.addButton.setOnClickListener(oclAddSupplement);
-
-        binding.idEdit.addTextChangedListener(twId);
+        binding.addButton.setOnClickListener(oclAddAccessories);
         binding.coverImageView.setOnClickListener(oclMachineImg);
-        binding.serialNumberEdit.addTextChangedListener(twSerialNumber);
-        binding.purchaseDateEdit.addTextChangedListener(twPurchaseDate);
-        binding.dayEdit.addTextChangedListener(twByDay);
-        binding.weekEdit.addTextChangedListener(twByWeek);
-        binding.monthEdit.addTextChangedListener(twByMonth);
+        binding.idEdit.addTextChangedListener(twId);
+        views.stream().filter(v -> v.first != binding.idLayout).forEach(v -> {
+
+            v.second.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable editable) {
+                    v.first.setError(null);
+                    v.first.setErrorEnabled(false);
+                }
+            });
+
+        });
     }
 
     // Functions
 
     private void initialize() {
+        accessories = new ArrayList<>();
         vDatePickerBuilder.setTitleText("Purchase Date");
         vDatePicker = vDatePickerBuilder.build();
         views = new ArrayList<>();
@@ -211,20 +209,20 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
         views.add(new Pair<>(binding.dayLayout, binding.dayEdit));
         views.add(new Pair<>(binding.weekLayout, binding.weekEdit));
         views.add(new Pair<>(binding.monthLayout, binding.monthEdit));
-        activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
-            @Override
-            public void onActivityResult(ActivityResult result) {
-                if (result.getResultCode() == RESULT_OK) {
-                    //Bundle bundle = result.getData().getExtras();
-                    Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath);
-                    binding.coverImageView.setImageBitmap(bitmap);
-                    binding.coverImageView.setBorderWidth(2);
-                    machineCover = new Supplement();
-                    machineCover.setName("cover");
-                    machineCover.setPhoto(bitmap);
-                }
+        activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+            if (result.getResultCode() == RESULT_OK) {
+                Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath);
+                binding.coverImageView.setImageBitmap(bitmap);
+                binding.coverImageView.setBorderWidth(2);
+                machineCover = new Accessory();
+                machineCover.setName("cover");
+                machineCover.setPhoto(bitmap);
             }
         });
+
+        binding.idLayout.setErrorIconDrawable(R.drawable.ic_baseline_autorenew_24);
+        binding.serialNumberLayout.setErrorIconDrawable(R.drawable.ic_barcode);
+        binding.purchaseDateLayout.setErrorIconDrawable(R.drawable.ic_baseline_calendar_month_24);
     }
 
     private void clearInput() {
@@ -239,7 +237,7 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
         machineCover = null;
         binding.coverImageView.setImageResource(R.drawable.ic_baseline_image_200);
         binding.coverImageView.setBorderWidth(0);
-        supplements.clear();
+        accessories.clear();
         vDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
         vDatePicker = vDatePickerBuilder.build();
         vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);
@@ -248,14 +246,6 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
     private boolean generateError() {
         for (Pair<TextInputLayout, TextInputEditText> view : views) {
             if (view.second.getText().toString().trim().isEmpty()) {
-                if (view.first == binding.idLayout)
-                    view.first.setErrorIconDrawable(R.drawable.ic_baseline_autorenew_24);
-                else if (view.first == binding.serialNumberLayout)
-                    view.first.setErrorIconDrawable(R.drawable.ic_barcode);
-                else if (view.first == binding.purchaseDateLayout)
-                    view.first.setErrorIconDrawable(R.drawable.ic_baseline_calendar_month_24);
-
-
                 view.first.setError("Missing");
                 return true;
             }
@@ -263,20 +253,22 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
                 return true;
             }
         }
-        if (machineCover == null) {
+        boolean noSupplements = accessories.size() == 0;
+        boolean noCover = machineCover == null;
+
+        if (noCover) {
             Toast.makeText(getActivity(), "Machine Image Missing", Toast.LENGTH_SHORT).show();
+            return true;
+        }
+        if (noSupplements) {
+            Toast.makeText(getActivity(), "Accessories Missing", Toast.LENGTH_SHORT).show();
             return true;
         }
         return false;
     }
 
     private boolean validateInput() {
-        if (generateError())
-            return false;
-        boolean noSupplements = supplements.size() == 0;
-        if (noSupplements)
-            Toast.makeText(getActivity(), "Accessories Missing", Toast.LENGTH_SHORT).show();
-        return !noSupplements;
+        return !generateError();
     }
 
     private String convertDateToString(long selection) {
@@ -287,103 +279,82 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
     }
 
     // Listeners
-    private final View.OnClickListener oclDate = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            vDatePicker.show(getFragmentManager(), "DATE_PICKER");
-        }
+    private final View.OnClickListener oclDate = v -> {
+        vDatePicker.show(getFragmentManager(), "DATE_PICKER");
     };
-    private final View.OnClickListener oclSerialNumber = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (getCameraPermission()) {
-                MachineSerialNumberDialog machineSerialNumberDialog = new MachineSerialNumberDialog();
-                machineSerialNumberDialog.show(getParentFragmentManager(), "");
-            }
-
+    private final View.OnClickListener oclSerialNumber = v -> {
+        if (getCameraPermission()) {
+            MachineSerialNumberDialog machineSerialNumberDialog = new MachineSerialNumberDialog();
+            machineSerialNumberDialog.show(getParentFragmentManager(), "");
         }
-    };
-    private final View.OnClickListener oclRegister = new View.OnClickListener() {
-        @RequiresApi(api = Build.VERSION_CODES.R)
-        @Override
-        public void onClick(View v) {
-            if (validateInput()) {
-                binding.registerButton.setEnabled(false);
-                int size = supplements.size();
-                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
-                builder.setTitle("Uploading...")
-                        .setMessage("Uploading Data")
-                        .setCancelable(false);
-                AlertDialog alertDialog = builder.create();
-                alertDialog.show();
-                for (int i = 0; i < size; i++) {
-                    Integer[] finalI = new Integer[1];
-                    finalI[0] = i;
-                    supplements.get(i).saveToCloudStorage(storageRef, binding.idEdit.getText().toString()).addOnSuccessListener(taskSnapshot -> {
-                        if (finalI[0] == size - 1) {
-                            alertDialog.dismiss();
-                        }
 
-                    }).addOnFailureListener(e -> {
-                        alertDialog.dismiss();
-                        Toast.makeText(getActivity(), "Failed to upload, check your internet", Toast.LENGTH_SHORT).show();
-                    });
-                }
-                saveToInternalStorage();
-                Machine newMachine = new Machine(binding.idEdit.getText().toString(), binding.serialNumberEdit.getText().toString(), new Date(purchaseDate));
-                newMachine.setDailyRentPrice(Double.parseDouble(binding.dayEdit.getText().toString()));
-                newMachine.setWeeklyRentPrice(Double.parseDouble(binding.weekEdit.getText().toString()));
-                newMachine.setMonthlyRentPrice(Double.parseDouble(binding.monthEdit.getText().toString()));
-                newMachine.setSupplementsNames(new ArrayList<>());
-                IntStream.range(0, supplements.size()).forEach(i -> newMachine.getSupplementsNames().add(supplements.get(i).getName()));
-                machineCover.saveToCloudStorage(FirebaseStorage.getInstance().getReference(), binding.idEdit.getText().toString()).addOnSuccessListener(unused -> {
-                    MACHINE_COL.document(binding.idEdit.getText().toString()).set(newMachine).addOnSuccessListener(unused1 -> {
-                        Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
-                        clearInput();
-                    });
+    };
+    private final View.OnClickListener oclRegister = v -> {
+        if (!validateInput()) return;
+
+        binding.registerButton.setEnabled(false);
+        int size = accessories.size();
+        if (size != 0) {
+            MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
+            builder.setTitle("Uploading...")
+                    .setMessage("Uploading Data")
+                    .setCancelable(false);
+            AlertDialog alertDialog = builder.create();
+            alertDialog.show();
+            for (int i = 0; i < size; i++) {
+                Integer[] finalI = new Integer[1];
+                finalI[0] = i;
+                accessories.get(i).saveToCloudStorage(storageRef, binding.idEdit.getText().toString()).addOnSuccessListener(taskSnapshot -> {
+                    if (finalI[0] == size - 1) {
+                        saveToInternalStorage();
+                        Machine newMachine = new Machine(binding.idEdit.getText().toString(), binding.serialNumberEdit.getText().toString(), new Date(purchaseDate));
+                        newMachine.setDailyRentPrice(Double.parseDouble(binding.dayEdit.getText().toString()));
+                        newMachine.setWeeklyRentPrice(Double.parseDouble(binding.weekEdit.getText().toString()));
+                        newMachine.setMonthlyRentPrice(Double.parseDouble(binding.monthEdit.getText().toString()));
+                        newMachine.setSupplementsNames(new ArrayList<>());
+                        IntStream.range(0, accessories.size()).forEach(x -> newMachine.getSupplementsNames().add(accessories.get(x).getName()));
+                        machineCover.saveToCloudStorage(FirebaseStorage.getInstance().getReference(), binding.idEdit.getText().toString()).addOnSuccessListener(unused -> {
+                            MACHINE_COL.document(binding.idEdit.getText().toString()).set(newMachine).addOnSuccessListener(unused1 -> {
+                                Snackbar.make(v, "Registered", Snackbar.LENGTH_SHORT).show();
+                                clearInput();
+                                alertDialog.dismiss();
+                            });
+                        });
+                    }
+
+                }).addOnFailureListener(e -> {
+                    alertDialog.dismiss();
+                    Toast.makeText(getActivity(), "Failed to upload, check your internet", Toast.LENGTH_SHORT).show();
                 });
             }
         }
-    };
-    private final View.OnClickListener oclMachineID = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            binding.idEdit.setText(MACHINE_COL.document().getId().substring(0, 5));
-        }
-    };
-    private final View.OnClickListener oclAddSupplement = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            AddAccessoriesDialog addAccessoriesDialog = new AddAccessoriesDialog(supplements);
-            addAccessoriesDialog.show(getParentFragmentManager(), "");
-        }
-    };
-    private View.OnClickListener oclMachineImg = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            String fileName = "photo";
-            File storageDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
 
-            try {
-                File imageFile = File.createTempFile(fileName, ".jpg", storageDirectory);
-                currentPhotoPath = imageFile.getAbsolutePath();
+    };
+    private final View.OnClickListener oclMachineID = v -> {
+        binding.idEdit.setText(MACHINE_COL.document().getId().substring(0, 5));
+    };
+    private final View.OnClickListener oclAddAccessories = v -> {
+        AddAccessoriesDialog addAccessoriesDialog = new AddAccessoriesDialog((ArrayList<Accessory>) accessories.clone());
+        addAccessoriesDialog.show(getParentFragmentManager(), "");
+    };
+    private View.OnClickListener oclMachineImg = view -> {
+        String fileName = "photo";
+        File storageDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
 
-                Uri imageUri = FileProvider.getUriForFile(getActivity(), "com.igec.admin.fileprovider", imageFile);
-
-                Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                takePicture.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
-                activityResultLauncher.launch(takePicture);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        try {
+            File imageFile = File.createTempFile(fileName, ".jpg", storageDirectory);
+            currentPhotoPath = imageFile.getAbsolutePath();
+            Uri imageUri = FileProvider.getUriForFile(getActivity(), "com.igec.admin.fileprovider", imageFile);
+            Intent takePicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            takePicture.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+            activityResultLauncher.launch(takePicture);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     };
-    private final MaterialPickerOnPositiveButtonClickListener pclDatePicker = new MaterialPickerOnPositiveButtonClickListener() {
-        @Override
-        public void onPositiveButtonClick(Object selection) {
-            binding.purchaseDateEdit.setText(convertDateToString((long) selection));
-            purchaseDate = (long) selection;
-        }
+    private final MaterialPickerOnPositiveButtonClickListener pclDatePicker = selection -> {
+        binding.purchaseDateEdit.setText(convertDateToString((long) selection));
+        purchaseDate = (long) selection;
     };
     private final TextWatcher twId = new TextWatcher() {
         @Override
@@ -406,91 +377,6 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
             }
             binding.idLayout.setError(null);
             binding.idLayout.setErrorEnabled(false);
-        }
-    };
-    private final TextWatcher twSerialNumber = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void afterTextChanged(Editable editable) {
-            binding.serialNumberLayout.setError(null);
-            binding.serialNumberLayout.setErrorEnabled(false);
-        }
-    };
-    private final TextWatcher twPurchaseDate = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void afterTextChanged(Editable editable) {
-            binding.purchaseDateLayout.setError(null);
-            binding.purchaseDateLayout.setErrorEnabled(false);
-        }
-    };
-    private final TextWatcher twByDay = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void afterTextChanged(Editable editable) {
-            binding.dayLayout.setError(null);
-            binding.dayLayout.setErrorEnabled(false);
-        }
-    };
-    private final TextWatcher twByWeek = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void afterTextChanged(Editable editable) {
-            binding.weekLayout.setError(null);
-            binding.weekLayout.setErrorEnabled(false);
-        }
-    };
-    private final TextWatcher twByMonth = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void afterTextChanged(Editable editable) {
-            binding.monthLayout.setError(null);
-            binding.monthLayout.setErrorEnabled(false);
         }
     };
 

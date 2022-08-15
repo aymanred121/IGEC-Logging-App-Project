@@ -30,6 +30,7 @@ import androidx.fragment.app.FragmentResultListener;
 
 import com.birjuvachhani.locus.Locus;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.material.snackbar.Snackbar;
 import com.igec.user.Dialogs.ClientInfoDialog;
 import com.igec.user.Dialogs.MachineCheckInOutDialog;
 import com.igec.user.Dialogs.AccessoriesDialog;
@@ -76,7 +77,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     private double latitude, longitude;
     private Machine currMachine;
     private String machineEmpId;
-    private String year,month,day;
+    private String year, month, day;
     private FusedLocationProviderClient fusedLocationClient;
     @SuppressLint("SimpleDateFormat")
     private final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
@@ -252,7 +253,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                         Project project = doc.toObject(Project.class);
                         Locus.INSTANCE.getCurrentLocation(getActivity(), result -> {
                             if (result.getError() != null) {
-                                Toast.makeText(getActivity(), "can't complete the operation.", Toast.LENGTH_SHORT).show();
+                                Snackbar.make(binding.getRoot(), "can't complete the operation.", Snackbar.LENGTH_SHORT).show();
                                 binding.checkInOutFab.setEnabled(true);
                                 return null;
                             }
@@ -275,9 +276,9 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                 distance = results[0];
                                 if (distance < 200 /*TODO Help placeholder for office area*/) {
                                     inProjectArea = false;
-                                    Toast.makeText(getActivity(), "You're in the office", Toast.LENGTH_SHORT).show();
+                                    Snackbar.make(binding.getRoot(), "You're in the office", Snackbar.LENGTH_SHORT).show();
                                 } else {
-                                    Toast.makeText(getActivity(), "You're not in the project area", Toast.LENGTH_SHORT).show();
+                                    Snackbar.make(binding.getRoot(), "You're not in the project area", Snackbar.LENGTH_SHORT).show();
                                     return null;
                                 }
                             }
@@ -296,7 +297,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                             } else {
                                                 summary1.setLastCheckInTime(Timestamp.now());
                                                 db.document(documentSnapshot.getReference().getPath()).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null);
-                                                Toast.makeText(getContext(), "Checked In successfully!", Toast.LENGTH_SHORT).show();
+                                                Snackbar.make(binding.getRoot(), "Checked In successfully!", Toast.LENGTH_SHORT).show();
                                                 binding.checkInOutFab.setEnabled(true);
                                             }
                                         }
@@ -380,7 +381,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                             .update("employeeWorkedTime." + currEmployee.getId(), FieldValue.increment(workingTime));
 
                 });
-        Toast.makeText(getContext(), "Checked Out successfully!", Toast.LENGTH_SHORT).show();
+        Snackbar.make(binding.getRoot(), "Checked Out successfully!", Toast.LENGTH_SHORT).show();
     }
 
     private void employeeCheckIn(Summary summary) {
@@ -428,7 +429,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
 
     private final View.OnClickListener oclInside = view -> {
         if (!getCameraPermission()) {
-            Toast.makeText(getActivity(), "Please, Enable camera permission !", Toast.LENGTH_SHORT).show();
+            Snackbar.make(binding.getRoot(), "Please, Enable camera permission !", Snackbar.LENGTH_SHORT).show();
             return;
         }
         MachineCheckInOutDialog machineCheckInOutDialog = new MachineCheckInOutDialog(true);
@@ -436,7 +437,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     };
     private final View.OnClickListener oclOutside = view -> {
         if (!getCameraPermission()) {
-            Toast.makeText(getActivity(), "Please, Enable camera permission !", Toast.LENGTH_SHORT).show();
+            Snackbar.make(binding.getRoot(), "Please, Enable camera permission !", Snackbar.LENGTH_SHORT).show();
             return;
         }
         MachineCheckInOutDialog machineCheckInOutDialog = new MachineCheckInOutDialog(false);
@@ -454,7 +455,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
             if (!note.trim().isEmpty()) {
                 MachineDefectsLog machineDefectsLog = new MachineDefectsLog(note.trim(), currMachine.getReference(), currMachine.getId(), currEmployee.getId(), currEmployee.getFirstName(), new Date());
                 MACHINE_DEFECT_LOG_COL.add(machineDefectsLog).addOnFailureListener(unused -> {
-                    Toast.makeText(getActivity(), "error uploading comment", Toast.LENGTH_SHORT).show();
+                    Snackbar.make(binding.getRoot(), "error uploading comment", Snackbar.LENGTH_SHORT).show();
                 });
             }
 
@@ -490,7 +491,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                     currMachine.removeEmployeeDependency();
                     MACHINE_COL.document(currMachine.getId()).update("isUsed", false, "employeeFirstName", "", "employeeId", "", "machineEmployeeID", "").addOnSuccessListener(vu -> {
 
-                        Toast.makeText(getContext(), "Machine: " + currMachine.getReference() + " checked Out successfully", Toast.LENGTH_SHORT).show();
+                        Snackbar.make(binding.getRoot(), "Machine: " + currMachine.getReference() + " checked Out successfully", Toast.LENGTH_SHORT).show();
 
                     });
                 });
@@ -511,7 +512,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         //NOTE don't use set()
         MACHINE_COL.document(currMachine.getId()).update("isUsed", true, "employeeFirstName", currEmployee.getFirstName(), "employeeId", currEmployee.getId(), "machineEmployeeID", machineEmpId)
                 .addOnSuccessListener(unused1 -> {
-                    MACHINE_EMPLOYEE_COL.document(machineEmpId).set(machine_employee).addOnSuccessListener(unused -> Toast.makeText(getContext(), "Machine: " + currMachine.getReference() + " checked In successfully", Toast.LENGTH_SHORT).show());
+                    MACHINE_EMPLOYEE_COL.document(machineEmpId).set(machine_employee).addOnSuccessListener(unused -> Snackbar.make(binding.getRoot(), "Machine: " + currMachine.getReference() + " checked In successfully", Toast.LENGTH_SHORT).show());
                 });
 //        ArrayList<Allowance> allTypes = new ArrayList<>();
 //        db.collection("EmployeesGrossSalary").document(currEmployee.getId()).get().addOnSuccessListener((value) -> {
@@ -541,7 +542,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                 try {
                     MACHINE_COL.document(machineID).get().addOnSuccessListener((value) -> {
                         if (!value.exists()) {
-                            Toast.makeText(getActivity(), "Invalid Machine ID", Toast.LENGTH_SHORT).show();
+                            Snackbar.make(binding.getRoot(), "Invalid Machine ID", Snackbar.LENGTH_SHORT).show();
                             return;
                         }
                         currMachine = value.toObject(Machine.class);
@@ -552,14 +553,14 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                             if (documentSnapshot.exists()) {
                                 // check-out
                                 if (isItAUser != ((documentSnapshot.toObject(Machine_Employee.class)).getClient() == null)) {
-                                    Toast.makeText(getActivity(), "Checkout agent doesn't match", Toast.LENGTH_SHORT).show();
+                                    Snackbar.make(binding.getRoot(), "Checkout agent doesn't match", Snackbar.LENGTH_SHORT).show();
                                     return;
                                 }
                             }
                             Locus.INSTANCE.getCurrentLocation(getActivity(), locusResult -> {
                                 Location location = locusResult.getLocation();
                                 if (locusResult.getError() != null) {
-                                    Toast.makeText(getActivity(), "can't complete the operation.", Toast.LENGTH_SHORT).show();
+                                    Snackbar.make(binding.getRoot(), "can't complete the operation.", Snackbar.LENGTH_SHORT).show();
                                     binding.checkInOutFab.setEnabled(true);
                                     return null;
                                 }
@@ -567,7 +568,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                 latitude = location.getLatitude();
                                 // abort if machine is used already by another user
                                 if (currMachine.getIsUsed() && !currMachine.getEmployeeId().equals(currEmployee.getId())) {
-                                    Toast.makeText(getContext(), "this Machine already being used by" + currMachine.getEmployeeFirstName(), Toast.LENGTH_SHORT).show();
+                                    Snackbar.make(binding.getRoot(), "this Machine already being used by" + currMachine.getEmployeeFirstName(), Toast.LENGTH_SHORT).show();
                                     return null;
                                 }
                                 // open supplements dialog if not
@@ -579,7 +580,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                         });
                     });
                 } catch (Exception e) {
-                    Toast.makeText(getActivity(), "invalid Machine ID", Toast.LENGTH_SHORT).show();
+                    Snackbar.make(binding.getRoot(), "Invalid Machine ID", Snackbar.LENGTH_SHORT).show();
                 }
             }
         });

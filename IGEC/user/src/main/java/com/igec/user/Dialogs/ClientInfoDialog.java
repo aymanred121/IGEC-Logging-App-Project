@@ -16,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.igec.user.R;
 import com.igec.common.firebase.Client;
 import com.google.android.material.button.MaterialButton;
@@ -122,7 +123,7 @@ public class ClientInfoDialog extends DialogFragment {
     private final View.OnClickListener oclDone = v -> {
 
         if (!validateInput()) {
-            Toast.makeText(getActivity(), "please, fill client info correctly", Toast.LENGTH_SHORT).show();
+            Snackbar.make(binding.getRoot(), "please, fill client info correctly", Snackbar.LENGTH_SHORT).show();
             return;
         }
         Bundle bundle = new Bundle();

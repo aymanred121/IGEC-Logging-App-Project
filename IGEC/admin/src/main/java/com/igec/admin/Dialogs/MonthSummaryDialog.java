@@ -18,6 +18,7 @@ import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.igec.admin.Adapters.WorkingDayAdapter;
 import com.igec.admin.R;
 import com.igec.admin.databinding.FragmentMonthSummaryBinding;
@@ -170,7 +171,7 @@ public class MonthSummaryDialog extends DialogFragment {
 
         try {
             csvWriter.build(empName + "-" + year + "-" + month);
-            Toast.makeText(getActivity(), "csv Saved!", Toast.LENGTH_SHORT).show();
+            Snackbar.make(binding.getRoot(), "csv Saved!", Snackbar.LENGTH_SHORT).show();
         } catch (IOException e) {
             e.printStackTrace();
         }

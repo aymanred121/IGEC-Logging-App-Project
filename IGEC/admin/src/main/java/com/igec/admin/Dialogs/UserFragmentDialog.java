@@ -32,6 +32,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.firestore.WriteBatch;
 import com.igec.admin.R;
 import com.igec.admin.databinding.FragmentAddUserBinding;
@@ -79,6 +80,7 @@ public class UserFragmentDialog extends DialogFragment {
     private long hireDate;
     private String year, month, day;
     private WriteBatch batch = db.batch();
+
     public static UserFragmentDialog newInstance(Employee employee) {
         Bundle args = new Bundle();
         args.putSerializable("employee", employee);
@@ -297,7 +299,8 @@ public class UserFragmentDialog extends DialogFragment {
                             updateMachineEmployee();
 
                         });
-                    }
+                    } else
+                        updateMachineEmployee();
                 });
     }
 
@@ -349,7 +352,9 @@ public class UserFragmentDialog extends DialogFragment {
                 }
                 batch.commit().addOnSuccessListener(unused1 -> {
                     binding.updateButton.setEnabled(true);
-                    dismiss();
+                    Snackbar snackbar = Snackbar.make(binding.getRoot(), "Updated", Snackbar.LENGTH_SHORT);
+                    snackbar.setAction("Dismiss",v->dismiss());
+                    snackbar.show();
                 }).addOnFailureListener(e -> {
                     Toast.makeText(getActivity(), e.toString(), Toast.LENGTH_SHORT).show();
                 });
@@ -421,7 +426,7 @@ public class UserFragmentDialog extends DialogFragment {
                 batch.delete(VACATION_COL.document(d.getId()));
             }
             batch.commit().addOnSuccessListener(unused -> {
-                Toast.makeText(getActivity(), "Deleted", Toast.LENGTH_SHORT).show();
+                Snackbar.make(binding.getRoot(), "Deleted", Snackbar.LENGTH_SHORT).show();
                 binding.deleteButton.setEnabled(true);
                 dismiss();
             }).addOnFailureListener(e -> {

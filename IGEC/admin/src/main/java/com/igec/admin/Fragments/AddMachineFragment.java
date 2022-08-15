@@ -137,7 +137,7 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
             if (mPattern.matcher(serialNumber).matches())
                 binding.serialNumberEdit.setText(serialNumber);
             else
-                Toast.makeText(getActivity(), "Invalid Serial Number", Toast.LENGTH_SHORT).show();
+               Snackbar.make(binding.getRoot(),"Invalid Serial Number",Snackbar.LENGTH_SHORT).show();
         });
     }
 
@@ -257,11 +257,12 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
         boolean noCover = machineCover == null;
 
         if (noCover) {
-            Toast.makeText(getActivity(), "Machine Image Missing", Toast.LENGTH_SHORT).show();
+            Snackbar.make(binding.getRoot(), "Machine Image Missing", Snackbar.LENGTH_SHORT).show();
+
             return true;
         }
         if (noSupplements) {
-            Toast.makeText(getActivity(), "Accessories Missing", Toast.LENGTH_SHORT).show();
+            Snackbar.make(binding.getRoot(), "Accessories Missing", Snackbar.LENGTH_SHORT).show();
             return true;
         }
         return false;
@@ -324,7 +325,7 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
 
                 }).addOnFailureListener(e -> {
                     alertDialog.dismiss();
-                    Toast.makeText(getActivity(), "Failed to upload, check your internet", Toast.LENGTH_SHORT).show();
+                    Snackbar.make(binding.getRoot(), "Failed to upload, check your internet", Snackbar.LENGTH_SHORT).show();
                 });
             }
         }

@@ -37,6 +37,7 @@ import androidx.core.content.FileProvider;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentResultListener;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.igec.admin.R;
 import com.igec.admin.databinding.FragmentAddMachineBinding;
 import com.igec.common.firebase.Machine;
@@ -124,10 +125,11 @@ public class MachineFragmentDialog extends DialogFragment {
     }
 
     private FragmentAddMachineBinding binding;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        binding =  FragmentAddMachineBinding.inflate(inflater, container, false);
+        binding = FragmentAddMachineBinding.inflate(inflater, container, false);
         initialize();
         return binding.getRoot();
     }
@@ -242,7 +244,7 @@ public class MachineFragmentDialog extends DialogFragment {
         }
         storageRef.child("imgs/" + binding.idEdit.getText().toString() + "/" + "cover" + ".jpg").delete();
         MACHINE_COL.document(machine.getId()).delete().addOnSuccessListener(unused -> {
-            Toast.makeText(getActivity(), "Deleted", Toast.LENGTH_SHORT).show();
+            Snackbar.make(binding.getRoot(), "Deleted", Snackbar.LENGTH_SHORT).show();
             binding.deleteButton.setEnabled(true);
             dismiss();
         });
@@ -303,9 +305,10 @@ public class MachineFragmentDialog extends DialogFragment {
                                 .update("machine", machine);
                     }
                 });
-                Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
+                Snackbar snackbar = Snackbar.make(binding.getRoot(), "Updated", Snackbar.LENGTH_SHORT);
+                snackbar.setAction("Dismiss",v->dismiss());
+                snackbar.show();
                 binding.updateButton.setEnabled(true);
-                dismiss();
             });
         });
 
@@ -330,7 +333,7 @@ public class MachineFragmentDialog extends DialogFragment {
             }
         }
         if (machineCover == null) {
-            Toast.makeText(getActivity(), "Machine Image Missing", Toast.LENGTH_SHORT).show();
+            Snackbar.make(binding.getRoot(), "Machine Image Missing", Snackbar.LENGTH_SHORT).show();
             return true;
         }
         return false;
@@ -342,9 +345,10 @@ public class MachineFragmentDialog extends DialogFragment {
 
         if (accessories != null) {
             boolean noSupplements = accessories.size() == 0;
-            if (noSupplements)
-                Toast.makeText(getActivity(), "No accessories were added", Toast.LENGTH_SHORT).show();
-            return !noSupplements;
+            if (noSupplements) {
+                Snackbar.make(binding.getRoot(), "Accessories Missing", Snackbar.LENGTH_SHORT).show();
+                return false;
+            }
         }
         return true;
     }

@@ -32,6 +32,7 @@ import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.igec.admin.Adapters.EmployeeAdapter;
 import com.igec.admin.R;
 import com.igec.admin.databinding.FragmentAddProjectBinding;
@@ -447,10 +448,10 @@ public class ProjectFragmentDialog extends DialogFragment {
         boolean isClientMissing = (!binding.officeWorkCheckbox.isChecked() && client == null);
         boolean isLocationMissing = (lat == null && lng == null);
         if (isClientMissing) {
-            Toast.makeText(getActivity(), "client Info Missing", Toast.LENGTH_SHORT).show();
+            Snackbar.make(binding.getRoot(), "client Info Missing", Snackbar.LENGTH_SHORT).show();
         }
         if (isLocationMissing) {
-            Toast.makeText(getActivity(), "Location is Missing", Toast.LENGTH_SHORT).show();
+            Snackbar.make(binding.getRoot(), "Location is Missing", Snackbar.LENGTH_SHORT).show();
         }
         return isClientMissing || isLocationMissing;
     }
@@ -523,14 +524,15 @@ public class ProjectFragmentDialog extends DialogFragment {
 //                                        batch.set(db.document(documentSnapshot.getReference().getPath()), employeesGrossSalary);
                                 if (counter[0] == newProject.getEmployees().size() - 1) {
                                     batch.commit().addOnSuccessListener(unused1 -> {
-                                        Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
+                                        Snackbar snackbar = Snackbar.make(binding.getRoot(), "Updated", Snackbar.LENGTH_SHORT);
+                                        snackbar.setAction("Dismiss",v->dismiss());
+                                        snackbar.show();
                                         binding.updateButton.setEnabled(true);
                                         batch = FirebaseFirestore.getInstance().batch();
                                         project.setEmployees(null);
                                         employees.clear();
                                         Team.clear();
                                         TeamID.clear();
-                                        dismiss();
                                     });
                                 }
                                 counter[0]++;
@@ -546,7 +548,9 @@ public class ProjectFragmentDialog extends DialogFragment {
                             batch.update(db.document(documentSnapshot.getReference().getPath()), "baseAllowances", employeesGrossSalary1.getBaseAllowances());
                             if (counter[0] == newProject.getEmployees().size() - 1) {
                                 batch.commit().addOnSuccessListener(unused1 -> {
-                                    Toast.makeText(getActivity(), "Updated", Toast.LENGTH_SHORT).show();
+                                    Snackbar snackbar = Snackbar.make(binding.getRoot(), "Updated", Snackbar.LENGTH_SHORT);
+                                    snackbar.setAction("Dismiss",v->dismiss());
+                                    snackbar.show();
                                     binding.updateButton.setEnabled(true);
                                     batch = FirebaseFirestore.getInstance().batch();
                                     project.setEmployees(null);
@@ -575,7 +579,7 @@ public class ProjectFragmentDialog extends DialogFragment {
             updateEmployeesDetails(currProjectID);
             batch.commit().addOnSuccessListener(unused2 -> {
                 batch = FirebaseFirestore.getInstance().batch();
-                Toast.makeText(getActivity(), "Deleted", Toast.LENGTH_SHORT).show();
+                Snackbar.make(binding.getRoot(), "Deleted", Snackbar.LENGTH_SHORT).show();
                 binding.deleteButton.setEnabled(true);
                 dismiss();
             });

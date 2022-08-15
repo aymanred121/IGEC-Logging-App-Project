@@ -23,6 +23,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.igec.admin.Adapters.EmployeeAdapter;
 import com.igec.admin.Dialogs.MonthSummaryDialog;
 import com.igec.admin.R;
@@ -173,7 +174,8 @@ public class SummaryFragment extends Fragment {
                                         if (counter[0] == queryDocumentSnapshots.size() - 1) {
                                             try {
                                                 csvWriter.build(year + "-" + month);
-                                                Toast.makeText(getActivity(), "CSV file created", Toast.LENGTH_SHORT).show();
+                                                Snackbar.make(binding.getRoot(),"CSV file created",Snackbar.LENGTH_SHORT).show();
+
                                             } catch (IOException e) {
                                                 e.printStackTrace();
                                             }
@@ -243,7 +245,7 @@ public class SummaryFragment extends Fragment {
                                     if (counter[0] == queryDocumentSnapshots.size() - 1) {
                                         try {
                                             csvWriter.build(year + "-" + month);
-                                            Toast.makeText(getActivity(), "CSV file created", Toast.LENGTH_SHORT).show();
+                                            Snackbar.make(binding.getRoot(),"CSV file created",Snackbar.LENGTH_SHORT).show();
                                         } catch (IOException e) {
                                             e.printStackTrace();
                                         }

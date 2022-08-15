@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.igec.user.R;
 import com.igec.common.firebase.Employee;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -126,7 +127,7 @@ public class ChangePasswordFragment extends Fragment {
                     .setPositiveButton(getString(R.string.accept), (dialogInterface, i) -> {
                         user.setPassword(binding.newPasswordEdit.getText().toString());
                         EMPLOYEE_COL.document(user.getId()).update("password", encryptedPassword()).addOnSuccessListener(unused -> {
-                            Toast.makeText(getActivity(), "Password Changed Successfully", Toast.LENGTH_SHORT).show();
+                            Snackbar.make(binding.getRoot(), "Password Changed Successfully", Snackbar.LENGTH_SHORT).show();
                             clearInput();
                         });
                     })

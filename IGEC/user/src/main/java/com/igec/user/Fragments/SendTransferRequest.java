@@ -20,6 +20,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.igec.user.R;
 import com.igec.common.firebase.Employee;
 import com.igec.common.firebase.EmployeeOverview;
@@ -263,7 +264,7 @@ public class SendTransferRequest extends Fragment {
                 sendRequest(selectedEmployee).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void unused) {
-                        Toast.makeText(getActivity(), "Request Sent", Toast.LENGTH_SHORT).show();
+                        Snackbar.make(binding.getRoot(), "Request Sent", Snackbar.LENGTH_SHORT).show();
                         clearInput();
                     }
                 });

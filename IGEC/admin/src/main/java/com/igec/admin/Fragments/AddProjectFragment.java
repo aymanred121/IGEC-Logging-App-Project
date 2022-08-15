@@ -304,7 +304,7 @@ public class AddProjectFragment extends Fragment {
                             batch.commit().addOnSuccessListener(unused -> {
                                 clearInputs();
                                 fakeData();
-                                Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
+                                Snackbar.make(binding.getRoot(), "Registered", Snackbar.LENGTH_SHORT).show();
                                 batch = FirebaseFirestore.getInstance().batch();
                             }).addOnFailureListener(unused -> {
                                 batch = FirebaseFirestore.getInstance().batch();
@@ -323,7 +323,7 @@ public class AddProjectFragment extends Fragment {
                         batch.commit().addOnSuccessListener(unused -> {
                             clearInputs();
                             fakeData();
-                            Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
+                            Snackbar.make(binding.getRoot(), "Registered", Snackbar.LENGTH_SHORT).show();
                             batch = FirebaseFirestore.getInstance().batch();
                         }).addOnFailureListener(unused -> {
                             batch = FirebaseFirestore.getInstance().batch();
@@ -458,11 +458,11 @@ public class AddProjectFragment extends Fragment {
         boolean isClientMissing = (!binding.officeWorkCheckbox.isChecked() && client == null);
         boolean isLocationMissing = (lat == null && lng == null);
         if (isClientMissing) {
-            Toast.makeText(getActivity(), "client Info Missing", Toast.LENGTH_SHORT).show();
+           Snackbar.make(binding.getRoot(), "client Info Missing", Snackbar.LENGTH_SHORT).show();
             return true;
         }
         if (isLocationMissing) {
-            Toast.makeText(getActivity(), "Location is Missing", Toast.LENGTH_SHORT).show();
+            Snackbar.make(binding.getRoot(), "Location is Missing", Snackbar.LENGTH_SHORT).show();
             return true;
         }
         return false;

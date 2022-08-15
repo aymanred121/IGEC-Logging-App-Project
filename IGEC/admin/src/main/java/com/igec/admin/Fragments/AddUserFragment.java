@@ -21,6 +21,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.firestore.SetOptions;
 import com.igec.admin.R;
 import com.igec.admin.databinding.FragmentAddUserBinding;
@@ -155,7 +156,7 @@ public class AddUserFragment extends Fragment {
     void addEmployee() {
         EMPLOYEE_COL.whereEqualTo("email", binding.emailEdit.getText().toString().trim()).get().addOnSuccessListener(documents -> {
             if (documents.getDocuments().size() != 0) {
-                Toast.makeText(getActivity(), "this Email already exist", Toast.LENGTH_SHORT).show();
+                Snackbar.make(binding.getRoot(), "This Email already exist", Snackbar.LENGTH_SHORT).show();
                 binding.registerButton.setEnabled(true);
                 return;
             }
@@ -191,7 +192,7 @@ public class AddUserFragment extends Fragment {
             batch.commit().addOnSuccessListener(unused -> {
                 clearInputs();
                 fakeData();
-                Toast.makeText(getActivity(), "Registered", Toast.LENGTH_SHORT).show();
+                Snackbar.make(binding.getRoot(), "Registered", Snackbar.LENGTH_SHORT).show();
                 batch = FirebaseFirestore.getInstance().batch();
             });
         });

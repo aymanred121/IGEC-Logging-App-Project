@@ -21,6 +21,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.igec.admin.Adapters.MachineAdapter;
 import com.igec.admin.Dialogs.MachineFragmentDialog;
 import com.igec.admin.Dialogs.MachineLogDialog;
@@ -111,7 +112,7 @@ public class MachinesFragment extends Fragment {
             ArrayList<MachineDefectsLog> machineDefectsLogArrayList = new ArrayList<>();
             MACHINE_DEFECT_LOG_COL.whereEqualTo("machineId", machines.get(position).getId()).addSnapshotListener((values, error) -> {
                 if (values == null || values.size() == 0) {
-                    Toast.makeText(getActivity(), "no comments on that machine", Toast.LENGTH_SHORT).show();
+                    Snackbar.make(binding.getRoot(), "no comments on that machine", Snackbar.LENGTH_SHORT).show();
                     return;
                 }
                 machineDefectsLogArrayList.addAll(values.toObjects(MachineDefectsLog.class));

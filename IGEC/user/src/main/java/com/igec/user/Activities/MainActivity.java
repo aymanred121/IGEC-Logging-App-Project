@@ -27,6 +27,7 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 
+import com.google.android.material.snackbar.Snackbar;
 import com.igec.user.R;
 import com.igec.common.firebase.Employee;
 import com.google.android.material.button.MaterialButton;
@@ -120,11 +121,11 @@ public class MainActivity extends AppCompatActivity {
         try {
             String decryptedPassword = decrypt(password, privateKey);
             if (binding.passwordEdit.getText() != null && !binding.passwordEdit.getText().toString().equals(decryptedPassword)) {
-                Toast.makeText(MainActivity.this, "please enter a valid email or password", Toast.LENGTH_SHORT).show();
+                Snackbar.make(binding.getRoot(), "please enter a valid email or password", Snackbar.LENGTH_SHORT).show();
                 return false;
             }
         } catch (Exception e) {
-            Toast.makeText(MainActivity.this, "please enter a valid email or password", Toast.LENGTH_SHORT).show();
+            Snackbar.make(binding.getRoot(), "please enter a valid email or password", Snackbar.LENGTH_SHORT).show();
             return false;
         }
         return true;
@@ -173,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
                     .limit(1)
                     .get().addOnSuccessListener(queryDocumentSnapshots -> {
                         if (queryDocumentSnapshots.size() == 0) {
-                            Toast.makeText(MainActivity.this, "please enter a valid email or password", Toast.LENGTH_SHORT).show();
+                            Snackbar.make(binding.getRoot(), "please enter a valid email or password", Snackbar.LENGTH_SHORT).show();
                             return;
                         }
                         DocumentSnapshot d = queryDocumentSnapshots.getDocuments().get(0);
@@ -182,15 +183,15 @@ public class MainActivity extends AppCompatActivity {
                             if (currEmployee != null && !isPasswordRight(currEmployee.getPassword())) {
                                 return;
                             }
-                            if (currEmployee.isLocked() == true) {
-                                Toast.makeText(MainActivity.this, "This email is already in use", Toast.LENGTH_SHORT).show();
+                            if (currEmployee.isLocked()) {
+                                Snackbar.make(binding.getRoot(), "This email is already in use", Snackbar.LENGTH_SHORT).show();
                                 return;
                             }
                             currEmployee.setLocked(true);
                             EMPLOYEE_COL.document(currEmployee.getId()).set(currEmployee, SetOptions.merge()).addOnSuccessListener(unused -> {
                                 Intent intent;
                                 if (currEmployee != null && currEmployee.getManagerID() == null) {
-                                    Toast.makeText(MainActivity.this, "you are not assigned to any project", Toast.LENGTH_SHORT).show();
+                                    Snackbar.make(binding.getRoot(), "you are not assigned to any project", Snackbar.LENGTH_SHORT).show();
                                     return;
                                 } else if (currEmployee != null && currEmployee.getManagerID().equals(ADMIN)) {
                                     intent = new Intent(MainActivity.this, MDashboard.class);

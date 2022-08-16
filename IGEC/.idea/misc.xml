@@ -64,14 +64,16 @@
         <entry key="..\:/AndroidStudioProjects/IGEC-Logging-App-Project/IGECAdmin/app/src/main/res/menu/main_activity2.xml" value="0.20416666666666666" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/drawable/ic_baseline_comment_bank_24.xml" value="0.196" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/drawable/ic_round_history_24.xml" value="0.196" />
-        <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/activity_internet_connection.xml" value="0.16259057971014493" />
-        <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/activity_login.xml" value="0.15670289855072464" />
+        <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/activity_internet_connection.xml" value="0.22" />
+        <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/activity_login.xml" value="0.5" />
+        <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/activity_main.xml" value="0.20416666666666666" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/activity_splash_screen_internet_connection.xml" value="0.15670289855072464" />
-        <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/dialog_add_accessories.xml" value="0.16893115942028986" />
+        <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/dialog_accessory_info.xml" value="0.75" />
+        <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/dialog_add_accessories.xml" value="0.5" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/dialog_add_allowance.xml" value="0.1" />
-        <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/dialog_add_client.xml" value="0.22" />
+        <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/dialog_add_client.xml" value="0.75" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/dialog_add_supplements.xml" value="0.15670289855072464" />
-        <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/dialog_allowance_info.xml" value="0.1" />
+        <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/dialog_allowance_info.xml" value="0.33" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/dialog_location.xml" value="0.22" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/dialog_machine_log.xml" value="0.15670289855072464" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/dialog_machine_serial_code.xml" value="0.16893115942028986" />
@@ -83,12 +85,17 @@
         <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/fragment_month_summary.xml" value="0.15670289855072464" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/fragment_summary.xml" value="0.25" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/fragment_users.xml" value="0.1" />
+        <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/item_accessory.xml" value="1.0" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/item_allowance.xml" value="0.67" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/item_dropdown.xml" value="0.20416666666666666" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/item_employee.xml" value="0.5" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/item_machine.xml" value="0.5" />
+        <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/item_machine_log.xml" value="0.33" />
+        <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/item_project.xml" value="0.516546762589928" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/item_supplement.xml" value="0.1" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/item_vacation_request.xml" value="0.33" />
+        <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/item_workday.xml" value="0.25" />
+        <entry key="..\:/IGEC-Logging-App-Project/IGEC/admin/src/main/res/layout/nav_header_main.xml" value="0.20416666666666666" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC/common/src/main/res/drawable/ic_baseline_circle_24.xml" value="0.111" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC/common/src/main/res/drawable/ic_baseline_close_24.xml" value="0.1325" />
         <entry key="..\:/IGEC-Logging-App-Project/IGEC/common/src/main/res/drawable/ic_round_trending_down_24.xml" value="0.1325" />

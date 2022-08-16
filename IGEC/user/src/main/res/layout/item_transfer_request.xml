@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_margin="8dp"
     app:cardCornerRadius="5dp">
 
@@ -15,7 +16,7 @@
             android:id="@+id/TextView_TransferredEmployeeId"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="ID:"
+            tools:text="ID:"
             android:textColor="@color/black" />
 
         <TextView
@@ -24,7 +25,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/TextView_TransferredEmployeeId"
             android:layout_marginTop="@dimen/mid"
-            android:text="Name:"
+            tools:text="Name:"
             android:textColor="@color/black" />
 
         <TextView
@@ -33,7 +34,7 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/TextView_TransferredEmployeeName"
             android:layout_marginTop="@dimen/mid"
-            android:text="From:"
+            tools:text="From:"
             android:textColor="@color/black" />
 
     </RelativeLayout>

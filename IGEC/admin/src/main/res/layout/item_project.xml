@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_margin="@dimen/mid"
     app:cardCornerRadius="5dp">
 
@@ -15,7 +16,7 @@
             android:id="@+id/TextView_ProjectName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Project Name"
+            tools:text="Project Name"
             android:textColor="@color/black"
             android:textSize="16sp" />
 
@@ -26,7 +27,7 @@
             android:layout_below="@id/TextView_ProjectName"
             android:layout_marginTop="@dimen/mid"
             android:layout_marginEnd="@dimen/vhigh"
-            android:text="# Employee" />
+            tools:text="# Employee" />
 
         <TextView
             android:id="@+id/TextView_nHourEmployee"
@@ -34,8 +35,8 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/TextView_ProjectName"
             android:layout_marginTop="@dimen/mid"
-            android:layout_toRightOf="@id/TextView_nEmployee"
-            android:text="# Hours by Employee" />
+            android:layout_toEndOf="@id/TextView_nEmployee"
+            tools:text="# Hours by Employee" />
 
         <TextView
             android:id="@+id/TextView_nMachine"
@@ -44,7 +45,7 @@
             android:layout_below="@id/TextView_nEmployee"
             android:layout_marginTop="@dimen/mid"
             android:layout_marginEnd="@dimen/vhigh"
-            android:text="# Machine" />
+            tools:text="# Machine" />
 
         <TextView
             android:id="@+id/TextView_nHourMachine"
@@ -52,8 +53,8 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/TextView_nEmployee"
             android:layout_marginTop="@dimen/mid"
-            android:layout_toRightOf="@id/TextView_nMachine"
-            android:text="# Hours by Machine " />
+            android:layout_toEndOf="@id/TextView_nMachine"
+            tools:text="# Hours by Machine " />
 
 
     </RelativeLayout>

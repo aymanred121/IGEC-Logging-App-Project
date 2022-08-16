@@ -16,7 +16,7 @@
             android:id="@+id/TextView_Name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Name :"
+            tools:text="Name :"
             android:textColor="@color/black"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -25,7 +25,7 @@
             android:id="@+id/TextView_ID"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="ID :"
+            tools:text="ID :"
             android:textColor="@color/black"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/TextView_Name" />

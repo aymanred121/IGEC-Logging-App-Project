@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.igec.admin.R;
 import com.google.android.material.button.MaterialButton;
 
@@ -68,7 +69,7 @@ public class AccessoryAdapter extends RecyclerView.Adapter<AccessoryAdapter.Acce
     public static class AccessoryViewHolder extends RecyclerView.ViewHolder{
         public TextView vName;
         public ImageView vImg;
-        public MaterialButton vDelete;
+        public FloatingActionButton vDelete;
 
         public AccessoryViewHolder(@NonNull View itemView, OnItemClickListener listener) {
             super(itemView);

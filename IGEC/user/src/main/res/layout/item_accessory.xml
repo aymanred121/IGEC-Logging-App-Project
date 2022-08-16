@@ -16,7 +16,7 @@
             android:id="@+id/image_image_view"
             android:layout_width="150dp"
             android:layout_height="150dp"
-            android:text="test"
+            tools:text="test"
             android:layout_centerHorizontal="true"
             tools:src="@drawable/ic_launcher_foreground"
             tools:tint="@color/black" />

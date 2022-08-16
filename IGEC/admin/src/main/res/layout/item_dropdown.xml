@@ -5,6 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:padding="@dimen/mid"
-    android:text="ID"
+    tools:text="ID"
     android:textAppearance="?attr/textAppearanceSubtitle1">
 </TextView>

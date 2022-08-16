@@ -5,7 +5,7 @@ import static android.content.ContentValues.TAG;
 import static com.igec.common.CONSTANTS.ADMIN;
 import static com.igec.common.CONSTANTS.VACATION_COL;
 
-import android.app.AlertDialog;
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,7 +19,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.igec.common.Adapters.VacationAdapter;
 import com.igec.common.databinding.FragmentVacationRequestsBinding;
 import com.igec.common.firebase.Employee;
@@ -30,16 +29,9 @@ import java.util.ArrayList;
 
 
 public class VacationRequestsFragment extends Fragment {
-
-    private Employee employee;
-    private int requestedDays;
-    private AlertDialog dialog;
     private VacationAdapter adapter;
-    private RecyclerView.LayoutManager layoutManager;
     private ArrayList<VacationRequest> vacationRequests;
     private Employee currManager;
-    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private int unPaidDays;
 
 
     public static VacationRequestsFragment newInstance(Employee currManager) {
@@ -54,7 +46,7 @@ public class VacationRequestsFragment extends Fragment {
     private FragmentVacationRequestsBinding binding;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         binding = FragmentVacationRequestsBinding.inflate(inflater, container, false);
         return binding.getRoot();
@@ -76,10 +68,11 @@ public class VacationRequestsFragment extends Fragment {
 
     // Functions
     private void initialize() {
+        assert getArguments() != null;
         currManager = (Employee) getArguments().getSerializable("currManager");
         vacationRequests = new ArrayList<>();
         binding.recyclerView.setHasFixedSize(true);
-        layoutManager = new LinearLayoutManager(getActivity());
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
         adapter = new VacationAdapter(vacationRequests,true);
         binding.recyclerView.setLayoutManager(layoutManager);
         binding.recyclerView.setAdapter(adapter);
@@ -88,6 +81,7 @@ public class VacationRequestsFragment extends Fragment {
 
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private void loadVacations() {
         if (currManager != null) {
             VACATION_COL
@@ -99,6 +93,7 @@ public class VacationRequestsFragment extends Fragment {
                             return;
                         }
                         vacationRequests.clear();
+                        assert queryDocumentSnapshots != null;
                         for (DocumentSnapshot vacations : queryDocumentSnapshots) {
                             vacationRequests.add(vacations.toObject(VacationRequest.class));
                         }
@@ -115,6 +110,7 @@ public class VacationRequestsFragment extends Fragment {
                             return;
                         }
                         vacationRequests.clear();
+                        assert queryDocumentSnapshots != null;
                         for (DocumentSnapshot vacations : queryDocumentSnapshots) {
                             vacationRequests.add(vacations.toObject(VacationRequest.class));
                         }

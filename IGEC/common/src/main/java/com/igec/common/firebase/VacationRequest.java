@@ -84,4 +84,10 @@ public class VacationRequest implements Serializable {
     public void setVacationStatus(int vacationStatus) {
         this.vacationStatus = vacationStatus;
     }
+
+    public String getDays() {
+        long days = endDate.getTime() - startDate.getTime();
+        days /= (24 * 3600 * 1000);
+        return String.valueOf(days);
+    }
 }

@@ -5,6 +5,7 @@ import static android.content.ContentValues.TAG;
 import static com.igec.common.CONSTANTS.ADMIN;
 import static com.igec.common.CONSTANTS.VACATION_COL;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,7 +21,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.igec.common.Adapters.VacationAdapter;
 import com.igec.common.databinding.FragmentVacationsLogBinding;
@@ -28,15 +28,13 @@ import com.igec.common.firebase.Employee;
 import com.igec.common.firebase.VacationRequest;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class VacationsLogFragment extends Fragment {
 
     private static VacationAdapter adapter;
-    private RecyclerView.LayoutManager layoutManager;
-
     private ArrayList<VacationRequest> vacations;
     private Employee user;
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private boolean loadOwn;
     private FragmentVacationsLogBinding binding;
 
@@ -50,7 +48,7 @@ public class VacationsLogFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         binding = FragmentVacationsLogBinding.inflate(inflater, container, false);
         return binding.getRoot();
@@ -66,11 +64,12 @@ public class VacationsLogFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         loadOwn = false;
+        assert getArguments() != null;
         user = (Employee) getArguments().getSerializable("user");
         vacations = new ArrayList<>();
 
         binding.recyclerView.setHasFixedSize(true);
-        layoutManager = new LinearLayoutManager(getActivity());
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
         adapter = new VacationAdapter(vacations,false);
         binding.recyclerView.setLayoutManager(layoutManager);
         binding.recyclerView.setAdapter(adapter);
@@ -88,6 +87,7 @@ public class VacationsLogFragment extends Fragment {
     }
 
 
+    @SuppressLint("NotifyDataSetChanged")
     private void loadVacations(String who, String id) {
         VACATION_COL
                 .whereEqualTo(who, id)
@@ -98,8 +98,9 @@ public class VacationsLogFragment extends Fragment {
                         return;
                     }
                     vacations.clear();
+                    assert queryDocumentSnapshots != null;
                     for (DocumentSnapshot doc : queryDocumentSnapshots) {
-                        if (doc.toObject(VacationRequest.class).getVacationStatus() != 0)
+                        if (Objects.requireNonNull(doc.toObject(VacationRequest.class)).getVacationStatus() != 0)
                             vacations.add(doc.toObject(VacationRequest.class));
                     }
                     adapter.notifyDataSetChanged();
@@ -110,6 +111,7 @@ public class VacationsLogFragment extends Fragment {
     }
 
     // to avoid recursion
+    @SuppressLint("NotifyDataSetChanged")
     private void loadOwnVacations() {
         VACATION_COL
                 .whereEqualTo("employee.id", user.getId())
@@ -120,8 +122,9 @@ public class VacationsLogFragment extends Fragment {
                         return;
                     }
                     // loads his employees vacations
+                    assert queryDocumentSnapshots != null;
                     for (DocumentSnapshot doc : queryDocumentSnapshots) {
-                        if (doc.toObject(VacationRequest.class).getVacationStatus() != 0)
+                        if (Objects.requireNonNull(doc.toObject(VacationRequest.class)).getVacationStatus() != 0)
                             vacations.add(doc.toObject(VacationRequest.class));
                     }
                     adapter.notifyDataSetChanged();

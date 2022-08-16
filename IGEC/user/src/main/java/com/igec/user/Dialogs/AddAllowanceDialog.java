@@ -54,9 +54,16 @@ public class AddAllowanceDialog extends DialogFragment {
 
     public AddAllowanceDialog(Employee manager, ArrayList<Allowance> allowances, boolean canGivePenalty, boolean canRemove) {
         this.manager = manager;
-        this.allowances = allowances;
         this.canGivePenalty = canGivePenalty;
         this.canRemove = canRemove;
+        this.allowances = new ArrayList<>();
+        allowances.forEach(allowance -> {
+            try {
+                this.allowances.add((Allowance) allowance.clone());
+            } catch (CloneNotSupportedException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     public AddAllowanceDialog(EmployeeOverview employee, boolean canGivePenalty, boolean canRemove) {

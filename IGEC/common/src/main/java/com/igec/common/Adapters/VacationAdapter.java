@@ -4,7 +4,6 @@ import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -24,7 +23,7 @@ import java.util.Locale;
 public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.VacationViewHolder> {
     private ArrayList<VacationRequest> vacationsList;
     private OnItemClickListener listener;
-    private boolean clickable;
+    private final boolean clickable;
 
     public interface OnItemClickListener {
         void onItemClick(int position);
@@ -64,7 +63,7 @@ public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.Vacati
             default:
                 holder.layout.setCardBackgroundColor(Color.GRAY);
         }
-        holder.vVacationDays.setText(String.format("for : %s days", getDays(vacation)));
+        holder.vVacationDays.setText(String.format("for : %s days", vacation.getDays()));
     }
 
     private String formatDate(Date Date) {
@@ -72,16 +71,6 @@ public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.Vacati
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(Date.getTime());
         return simpleDateFormat.format(calendar.getTime());
-    }
-
-    private String getDays(VacationRequest vacation) {
-        long days = vacation.getEndDate().getTime() - vacation.getStartDate().getTime();
-        days /= (24 * 3600 * 1000);
-        return String.valueOf(days);
-    }
-
-    public ArrayList<VacationRequest> getVacationsList() {
-        return vacationsList;
     }
 
     public void setVacationsList(ArrayList<VacationRequest> vacationsList) {

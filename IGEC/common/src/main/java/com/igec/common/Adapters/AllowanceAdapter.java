@@ -17,11 +17,12 @@ import com.igec.common.utilities.allowancesEnum;
 import com.igec.common.R;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class AllowanceAdapter extends RecyclerView.Adapter<AllowanceAdapter.AllowanceViewHolder> {
-    private ArrayList<Allowance> allowances = new ArrayList<>();
+    private ArrayList<Allowance> allowances;
     private OnItemClickListener listener;
-    private boolean canRemove;
+    private final boolean canRemove;
     private boolean clickable = true;
 
     public AllowanceAdapter(ArrayList<Allowance> supplements, boolean canRemoveItem, boolean clickable) {
@@ -46,7 +47,7 @@ public class AllowanceAdapter extends RecyclerView.Adapter<AllowanceAdapter.Allo
         Allowance allowance = allowances.get(position);
         holder.vName.setText(allowance.getName());
         holder.vNote.setText(allowance.getNote() == null ? "" : String.format("Note: %s", allowance.getNote()));
-        holder.vAmount.setText(String.format("%.2f %s", allowance.getAmount(), allowance.getCurrency()));
+        holder.vAmount.setText(String.format(Locale.getDefault(),"%.2f %s", allowance.getAmount(), allowance.getCurrency()));
         if (allowance.getType() == allowancesEnum.NETSALARY.ordinal()) return;
         if (allowance.getType() != allowancesEnum.RETENTION.ordinal()) {
             holder.vAmount.setTextColor(Color.rgb(0, 153, 0));
@@ -80,10 +81,6 @@ public class AllowanceAdapter extends RecyclerView.Adapter<AllowanceAdapter.Allo
 
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.listener = listener;
-    }
-
-    public ArrayList<Allowance> getAllowances() {
-        return allowances;
     }
 
     public void setAllowances(ArrayList<Allowance> allowances) {

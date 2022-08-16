@@ -38,6 +38,8 @@ import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentResultListener;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.StorageTask;
 import com.igec.admin.R;
 import com.igec.admin.databinding.FragmentAddMachineBinding;
 import com.igec.common.firebase.Machine;
@@ -50,7 +52,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -83,6 +84,7 @@ public class MachineFragmentDialog extends DialogFragment {
     private final StorageReference storageRef = storage.getReference();
     private ArrayList<String> oldNames;
     private ArrayList<Pair<TextInputLayout, TextInputEditText>> views;
+    private boolean loaded = false;
 
     public MachineFragmentDialog(Machine machine) {
         this.machine = machine;
@@ -113,6 +115,7 @@ public class MachineFragmentDialog extends DialogFragment {
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle bundle) {
                 accessories = bundle.getParcelableArrayList("supplements");
                 oldNames = bundle.getStringArrayList("oldNames");
+                loaded = bundle.getBoolean("loaded");
             }
         });
         getParentFragmentManager().setFragmentResultListener("machine", this, new FragmentResultListener() {
@@ -399,10 +402,10 @@ public class MachineFragmentDialog extends DialogFragment {
         @Override
         public void onClick(View v) {
             AddAccessoriesDialog addAccessoriesDialog;
-            if (accessories == null)
+            if (accessories == null || !loaded)
                 addAccessoriesDialog = new AddAccessoriesDialog(machine);
             else
-                addAccessoriesDialog = new AddAccessoriesDialog((ArrayList<Accessory>) accessories.clone());
+                addAccessoriesDialog = new AddAccessoriesDialog((ArrayList<Accessory>) accessories.clone(), loaded);
             addAccessoriesDialog.show(getParentFragmentManager(), "");
         }
     };

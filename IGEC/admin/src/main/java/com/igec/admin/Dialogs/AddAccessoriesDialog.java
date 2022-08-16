@@ -28,6 +28,8 @@ import androidx.fragment.app.DialogFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.storage.FileDownloadTask;
+import com.google.firebase.storage.StorageTask;
 import com.igec.admin.Adapters.AccessoryAdapter;
 import com.igec.admin.R;
 import com.igec.admin.databinding.DialogAddAccessoriesBinding;
@@ -53,7 +55,9 @@ public class AddAccessoriesDialog extends DialogFragment {
     private ArrayList<String> oldNames = new ArrayList<>();
     private ArrayList<Integer> oldNamesIndexes = new ArrayList<>();
     private boolean saveUpdated = false;
+    private ArrayList<StorageTask<FileDownloadTask.TaskSnapshot>> downloadTasks = new ArrayList<>();
     private String currentPhotoPath;
+    private boolean loaded = false;
 
     // for machine dialog
     public AddAccessoriesDialog(Machine machine) {
@@ -65,6 +69,19 @@ public class AddAccessoriesDialog extends DialogFragment {
     // for add machine dialog
     public AddAccessoriesDialog(ArrayList<Accessory> accessories) {
         this.accessories = accessories;
+        updatedAccessories = new ArrayList<>();
+        accessories.forEach(accessory -> {
+            try {
+                updatedAccessories.add((Accessory) accessory.clone());
+            } catch (CloneNotSupportedException e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    public AddAccessoriesDialog(ArrayList<Accessory> accessories, boolean loaded) {
+        this.accessories = accessories;
+        this.loaded = loaded;
         updatedAccessories = new ArrayList<>();
         accessories.forEach(accessory -> {
             try {
@@ -135,6 +152,7 @@ public class AddAccessoriesDialog extends DialogFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        downloadTasks.forEach(StorageTask::cancel);
         binding = null;
     }
 
@@ -154,6 +172,7 @@ public class AddAccessoriesDialog extends DialogFragment {
             Bundle result = new Bundle();
             result.putSerializable("supplements", accessories);
             result.putStringArrayList("oldNames", new ArrayList<String>());
+            result.putBoolean("loaded", loaded);
             getParentFragmentManager().setFragmentResult("supplements", result);
         }
         super.onDismiss(dialog);
@@ -201,19 +220,20 @@ public class AddAccessoriesDialog extends DialogFragment {
             ref = FirebaseStorage.getInstance().getReference().child("/imgs/" + machine.getId() + String.format("/%s.jpg", name));
             try {
                 final File localFile = File.createTempFile(name, "jpg");
-                ref.getFile(localFile).addOnSuccessListener(taskSnapshot -> {
+                downloadTasks.add(ref.getFile(localFile).addOnSuccessListener(taskSnapshot -> {
                     Bitmap bitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
                     updatedAccessories.add(new Accessory(name, bitmap));
                     accessories.add(new Accessory(name, bitmap));
                     progress[0]++;
-                    if (progress[0] == machine.getSupplementsNames().size() && binding != null) {
+                    if (progress[0] == machine.getSupplementsNames().size()) {
                         binding.progressBar.startAnimation(hide);
                         binding.recyclerView.startAnimation(show);
+                        loaded = true;
                         adapter.notifyDataSetChanged();
                     }
                 }).addOnFailureListener(e -> {
 
-                });
+                }));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -225,6 +245,7 @@ public class AddAccessoriesDialog extends DialogFragment {
         Bundle result = new Bundle();
         result.putSerializable("supplements", updatedAccessories);
         result.putStringArrayList("oldNames", oldNames);
+        result.putBoolean("loaded", loaded);
         getParentFragmentManager().setFragmentResult("supplements", result);
         saveUpdated = true;
         binding.doneFab.setEnabled(true);

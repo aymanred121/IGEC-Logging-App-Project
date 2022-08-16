@@ -184,8 +184,6 @@ public class AddProjectFragment extends Fragment {
     }
 
     private void initialize() {
-
-        binding.dateLayout.setErrorIconDrawable(R.drawable.ic_baseline_calendar_month_24);
         employees = new ArrayList<>();
         views = new ArrayList<>();
         views.add(new Pair<>(binding.nameLayout, binding.nameEdit));

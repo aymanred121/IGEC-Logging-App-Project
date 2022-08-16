@@ -83,7 +83,6 @@ public class SummaryFragment extends Fragment {
         initialize();
         binding.monthLayout.setEndIconOnClickListener(oclMonthPicker);
         binding.monthLayout.setErrorIconOnClickListener(oclMonthPicker);
-        binding.monthLayout.setErrorIconDrawable(R.drawable.ic_baseline_calendar_month_24);
         adapter.setOnItemClickListener(oclEmployee);
         binding.createFab.setOnClickListener(oclCSV);
     }

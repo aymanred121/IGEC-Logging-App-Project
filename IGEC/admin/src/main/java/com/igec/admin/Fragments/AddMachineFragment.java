@@ -219,10 +219,6 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
                 machineCover.setPhoto(bitmap);
             }
         });
-
-        binding.idLayout.setErrorIconDrawable(R.drawable.ic_baseline_autorenew_24);
-        binding.serialNumberLayout.setErrorIconDrawable(R.drawable.ic_barcode);
-        binding.purchaseDateLayout.setErrorIconDrawable(R.drawable.ic_baseline_calendar_month_24);
     }
 
     private void clearInput() {

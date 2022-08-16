@@ -350,12 +350,6 @@ public class MachineFragmentDialog extends DialogFragment {
     private boolean generateError() {
         for (Pair<TextInputLayout, TextInputEditText> view : views) {
             if (view.second.getText().toString().trim().isEmpty()) {
-                if (view.first == binding.serialNumberLayout)
-                    view.first.setErrorIconDrawable(R.drawable.ic_barcode);
-                else if (view.first == binding.purchaseDateLayout)
-                    view.first.setErrorIconDrawable(R.drawable.ic_baseline_calendar_month_24);
-
-
                 view.first.setError("Missing");
                 return true;
             }

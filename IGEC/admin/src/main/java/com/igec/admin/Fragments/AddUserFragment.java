@@ -82,7 +82,6 @@ public class AddUserFragment extends Fragment {
         // Listeners
         binding.emailEdit.addTextChangedListener(twEmail);
         binding.hireDateLayout.setEndIconOnClickListener(oclHireDate);
-        binding.hireDateLayout.setErrorIconDrawable(R.drawable.ic_baseline_calendar_month_24);
         binding.hireDateLayout.setErrorIconOnClickListener(oclHireDate);
         binding.registerButton.setOnClickListener(clRegister);
         vDatePicker.addOnPositiveButtonClickListener(pclDatePicker);

@@ -227,7 +227,6 @@ public class ProjectFragmentDialog extends DialogFragment {
     // Functions
     private void initialize() {
         binding.managerNameEdit.setText(project.getManagerName());
-        binding.dateLayout.setErrorIconDrawable(R.drawable.ic_baseline_calendar_month_24);
         binding.managerNameLayout.setEndIconDrawable(null);
         binding.managerNameLayout.setErrorIconDrawable(null);
         allowances = new ArrayList<>();

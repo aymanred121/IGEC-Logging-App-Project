@@ -225,7 +225,6 @@
         android:text="@string/update"
         android:textAllCaps="false"
         android:visibility="gone"
-        android:enabled="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 

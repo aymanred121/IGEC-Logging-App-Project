@@ -79,7 +79,8 @@ public class MachineFragmentDialog extends DialogFragment {
     private MaterialDatePicker vDatePicker;
     private final Machine machine;
     private ArrayList<Accessory> accessories;
-    private Accessory machineCover = new Accessory();
+    private Accessory machineCover;
+    private ArrayList<StorageTask<FileDownloadTask.TaskSnapshot>> downloadTasks = new ArrayList<>();
     private final FirebaseStorage storage = FirebaseStorage.getInstance();
     private final StorageReference storageRef = storage.getReference();
     private ArrayList<String> oldNames;
@@ -138,6 +139,7 @@ public class MachineFragmentDialog extends DialogFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        downloadTasks.forEach(StorageTask::cancel);
         binding = null;
     }
 
@@ -213,16 +215,16 @@ public class MachineFragmentDialog extends DialogFragment {
         StorageReference ref = FirebaseStorage.getInstance().getReference().child("/imgs/" + machine.getId() + String.format("/%s.jpg", cover));
         try {
             final File localFile = File.createTempFile(cover, "jpg");
-            ref.getFile(localFile).addOnSuccessListener(taskSnapshot -> {
+            downloadTasks.add(ref.getFile(localFile).addOnSuccessListener(taskSnapshot -> {
                 Bitmap bitmap = BitmapFactory.decodeFile(localFile.getAbsolutePath());
-                binding.coverImageView.setImageBitmap(bitmap);
+                machineCover = new Accessory();
                 machineCover.setPhoto(bitmap);
                 machineCover.setName("cover");
-                binding.updateButton.setEnabled(true);
+                binding.coverImageView.setImageBitmap(bitmap);
             }).addOnFailureListener(e -> {
+                machineCover = new Accessory();
                 machineCover.setName("bad_cover");
-                binding.updateButton.setEnabled(true);
-            });
+            }));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -302,7 +304,7 @@ public class MachineFragmentDialog extends DialogFragment {
         machine.setWeeklyRentPrice(Double.parseDouble(binding.weekEdit.getText().toString()));
         machine.setMonthlyRentPrice(Double.parseDouble(binding.monthEdit.getText().toString()));
 
-        if (!machineCover.getName().equals("bad_cover"))
+        if (machineCover != null)
             machineCover.saveToCloudStorage(storageRef, machine.getId()).addOnSuccessListener(uv -> {
                 MACHINE_COL.document(machine.getId()).set(machine).addOnSuccessListener(unused -> {
                     MACHINE_EMPLOYEE_COL.whereEqualTo("machine.id", machine.getId()).get().addOnSuccessListener(queryDocumentSnapshots -> {

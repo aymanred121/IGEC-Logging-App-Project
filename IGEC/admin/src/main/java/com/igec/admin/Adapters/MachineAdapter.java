@@ -8,6 +8,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.igec.admin.R;
 import com.igec.common.firebase.Machine;
 import com.google.android.material.button.MaterialButton;
@@ -30,7 +31,7 @@ public class MachineAdapter extends RecyclerView.Adapter<MachineAdapter.MachineV
 
     public static class MachineViewHolder extends RecyclerView.ViewHolder{
         TextView vID, vCodeName;
-        MaterialButton vLog,vComments;
+        FloatingActionButton vLog,vComments;
         public MachineViewHolder(@NonNull View itemView, OnItemClickListener listener) {
             super(itemView);
             vID = itemView.findViewById(R.id.TextView_MachineID);

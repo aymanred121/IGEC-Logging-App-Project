@@ -259,9 +259,12 @@ public class ProjectFragmentDialog extends DialogFragment {
         binding.contractTypeAuto.setText(project.getContractType());
         binding.contractTypeLayout.setEnabled(true);
         binding.contractTypeAuto.setEnabled(false);
+        boolean isOfficeWork = project.getReference().equals("-99999");
         binding.referenceEdit.setText(project.getReference());
-        binding.officeWorkCheckbox.setChecked(project.getReference().equals("-99999"));
-        binding.clientButton.setEnabled(!project.getReference().equals("-99999"));
+        binding.officeWorkCheckbox.setChecked(isOfficeWork);
+        binding.clientButton.setEnabled(!isOfficeWork);
+        binding.referenceLayout.setEnabled(!isOfficeWork);
+        binding.referenceEdit.setEnabled(!isOfficeWork);
         binding.areaEdit.setText(project.getLocationArea());
         binding.cityEdit.setText(project.getLocationCity());
         binding.streetEdit.setText(project.getLocationStreet());

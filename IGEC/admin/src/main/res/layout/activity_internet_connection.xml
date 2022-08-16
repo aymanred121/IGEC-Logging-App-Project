@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Activities.SplashScreen_InternetConnection">
+    tools:context=".activities.InternetConnection">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="wrap_content"
@@ -46,18 +46,6 @@
             app:layout_constraintEnd_toEndOf="@+id/wifi_sign_image_view"
             app:layout_constraintStart_toStartOf="@+id/wifi_sign_image_view"
             app:layout_constraintTop_toTopOf="@+id/wifi_sign_image_view" />
-
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/retry_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/high"
-            android:layout_marginBottom="32dp"
-            android:text="@string/retry"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/wifi_sign_image_view" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

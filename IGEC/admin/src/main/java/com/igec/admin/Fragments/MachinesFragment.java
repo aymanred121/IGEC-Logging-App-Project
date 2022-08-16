@@ -40,6 +40,11 @@ public class MachinesFragment extends Fragment {
     MachineAdapter adapter;
     RecyclerView.LayoutManager layoutManager;
     private FragmentMachinesBinding binding;
+    private boolean opened;
+
+    public void setOpened(boolean opened) {
+        this.opened = opened;
+    }
 
     @Nullable
     @Override
@@ -94,6 +99,8 @@ public class MachinesFragment extends Fragment {
         @RequiresApi(api = Build.VERSION_CODES.R)
         @Override
         public void onItemClick(int position) {
+            if(opened) return;
+            opened = true;
             MachineFragmentDialog machineFragmentDialog = new MachineFragmentDialog(adapter.getMachinesList().get(position));
             machineFragmentDialog.show(getParentFragmentManager(), "");
         }

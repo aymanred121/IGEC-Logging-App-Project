@@ -34,6 +34,7 @@ import androidx.fragment.app.DialogFragment;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.firestore.WriteBatch;
+import com.igec.admin.Fragments.UsersFragment;
 import com.igec.admin.R;
 import com.igec.admin.databinding.FragmentAddUserBinding;
 import com.igec.common.firebase.Allowance;
@@ -150,6 +151,8 @@ public class UserFragmentDialog extends DialogFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        int parent =getParentFragmentManager().getFragments().size()-1;
+        ((UsersFragment)getParentFragmentManager().getFragments().get(parent)).setOpened(false);
         binding = null;
     }
 

@@ -38,36 +38,27 @@ public class MachineAdapter extends RecyclerView.Adapter<MachineAdapter.MachineV
             vLog = itemView.findViewById(R.id.Button_Log);
             vComments = itemView.findViewById(R.id.Button_Comment);
 
-            vLog.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (listener != null) {
-                        int position = getAdapterPosition();
-                        if (position != RecyclerView.NO_POSITION) {
-                            listener.onLogClick(position);
-                        }
+            vLog.setOnClickListener(v -> {
+                if (listener != null) {
+                    int position = getAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        listener.onLogClick(position);
                     }
                 }
             });
-            vComments.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (listener != null) {
-                        int position = getAdapterPosition();
-                        if (position != RecyclerView.NO_POSITION) {
-                            listener.onCommentsClick(position);
-                        }
+            vComments.setOnClickListener(v -> {
+                if (listener != null) {
+                    int position = getAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        listener.onCommentsClick(position);
                     }
                 }
             });
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (listener != null) {
-                        int position = getAdapterPosition();
-                        if (position != RecyclerView.NO_POSITION) {
-                            listener.onItemClick(position);
-                        }
+            itemView.setOnClickListener(v -> {
+                if (listener != null) {
+                    int position = getAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        listener.onItemClick(position);
                     }
                 }
             });
@@ -83,8 +74,7 @@ public class MachineAdapter extends RecyclerView.Adapter<MachineAdapter.MachineV
     @Override
     public MachineViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.item_machine,parent,false);
-       MachineViewHolder vvh = new MachineViewHolder(v,listener);
-        return vvh;
+        return new MachineViewHolder(v,listener);
     }
 
     @Override

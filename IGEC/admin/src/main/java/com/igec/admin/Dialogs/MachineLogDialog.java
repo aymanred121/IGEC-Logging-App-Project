@@ -2,6 +2,7 @@ package com.igec.admin.Dialogs;
 
 import static com.igec.common.CONSTANTS.MACHINE_EMPLOYEE_COL;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -22,7 +22,6 @@ import com.igec.admin.R;
 import com.igec.admin.databinding.DialogMachineLogBinding;
 import com.igec.common.firebase.Machine;
 import com.igec.common.firebase.Machine_Employee;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 
@@ -31,17 +30,17 @@ public class MachineLogDialog extends DialogFragment {
 
 
     private final Machine machine;
-    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private ArrayList<Machine_Employee> machineSummaryData;
     private MachineLogAdapter adapter;
-    private RecyclerView.LayoutManager layoutManager;
 
     public MachineLogDialog(Machine machine) {
         this.machine = machine;
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private void retrieveMachineSummary() {
         MACHINE_EMPLOYEE_COL.whereEqualTo("machine.id", machine.getId()).get().addOnSuccessListener(queryDocumentSnapshots -> {
+                        machineSummaryData.clear();
                     if (queryDocumentSnapshots.size() != 0) {
                         machineSummaryData.addAll(queryDocumentSnapshots.toObjects(Machine_Employee.class));
                         adapter.setMachineEmployees(machineSummaryData);
@@ -79,7 +78,7 @@ public class MachineLogDialog extends DialogFragment {
 
     private DialogMachineLogBinding binding;
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         binding = DialogMachineLogBinding.inflate(inflater,container,false);
@@ -101,7 +100,7 @@ public class MachineLogDialog extends DialogFragment {
     void initialize() {
         machineSummaryData = new ArrayList<>();
         binding.recyclerView.setHasFixedSize(true);
-        layoutManager = new LinearLayoutManager(getActivity());
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
         adapter = new MachineLogAdapter(machineSummaryData);
         binding.recyclerView.setLayoutManager(layoutManager);
         binding.recyclerView.setAdapter(adapter);

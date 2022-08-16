@@ -29,10 +29,16 @@ public class ProjectsFragment extends Fragment {
     ProjectAdapter adapter;
     RecyclerView.LayoutManager layoutManager;
     private FragmentProjectsBinding binding;
+    private boolean opened = false;
+
+    public void setOpened(boolean opened) {
+        this.opened = opened;
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        binding = FragmentProjectsBinding.inflate(inflater,container,false);
+        binding = FragmentProjectsBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 
@@ -49,7 +55,7 @@ public class ProjectsFragment extends Fragment {
         adapter.setOnItemClickListener(itclProjectAdapter);
     }
 
-    void initialize(){
+    void initialize() {
         projects = new ArrayList<>();
         binding.recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
@@ -58,12 +64,13 @@ public class ProjectsFragment extends Fragment {
         binding.recyclerView.setAdapter(adapter);
         getProjects();
     }
+
     @SuppressLint("NotifyDataSetChanged")
     void getProjects() {
         PROJECT_COL.addSnapshotListener((queryDocumentSnapshots, e) -> {
             projects.clear();
             assert queryDocumentSnapshots != null;
-            for(DocumentSnapshot d : queryDocumentSnapshots){
+            for (DocumentSnapshot d : queryDocumentSnapshots) {
                 projects.add(d.toObject(Project.class));
             }
             adapter.setProjectsList(projects);
@@ -75,8 +82,10 @@ public class ProjectsFragment extends Fragment {
     private final ProjectAdapter.OnItemClickListener itclProjectAdapter = new ProjectAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position) {
+            if (opened) return;
+            opened = true;
             ProjectFragmentDialog projectFragmentDialog = new ProjectFragmentDialog(adapter.getProjectsList().get(position));
-            projectFragmentDialog.show(getParentFragmentManager(),"");
+            projectFragmentDialog.show(getParentFragmentManager(), "");
         }
     };
 }

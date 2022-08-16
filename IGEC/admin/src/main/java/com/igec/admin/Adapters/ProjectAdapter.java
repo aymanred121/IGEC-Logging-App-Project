@@ -13,12 +13,13 @@ import com.igec.common.firebase.Project;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 
 public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectViewHolder> {
     private ArrayList<Project> projectsList;
     private ProjectAdapter.OnItemClickListener listener;
 
-    public interface OnItemClickListener{
+    public interface OnItemClickListener {
         void onItemClick(int position);
     }
 
@@ -26,9 +27,10 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectV
         this.listener = listener;
     }
 
-    public static class ProjectViewHolder extends RecyclerView.ViewHolder{
+    public static class ProjectViewHolder extends RecyclerView.ViewHolder {
 
-        public TextView vName,vNEmployee,vNMachine,vNHEmployee,vNHMachine;
+        public TextView vName, vNEmployee, vNMachine, vNHEmployee, vNHMachine;
+
         public ProjectViewHolder(@NonNull View itemView, ProjectAdapter.OnItemClickListener listener) {
             super(itemView);
             vName = itemView.findViewById(R.id.TextView_ProjectName);
@@ -38,11 +40,9 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectV
             vNHEmployee = itemView.findViewById(R.id.TextView_nHourEmployee);
 
             itemView.setOnClickListener(v -> {
-                if(listener != null)
-                {
+                if (listener != null) {
                     int position = getAdapterPosition();
-                    if(position != RecyclerView.NO_POSITION)
-                    {
+                    if (position != RecyclerView.NO_POSITION) {
                         listener.onItemClick(position);
                     }
                 }
@@ -59,35 +59,36 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectV
     @NonNull
     @Override
     public ProjectAdapter.ProjectViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.item_project,parent,false);
-        return new ProjectViewHolder(v,listener);
+        View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.item_project, parent, false);
+        return new ProjectViewHolder(v, listener);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ProjectAdapter.ProjectViewHolder holder, int position) {
         Project project = projectsList.get(position);
 
-            holder.vName.setText(project.getName());
-            holder.vNEmployee.setText("# Employee: "+(project.getEmployees().size()));
-            holder.vNMachine.setText("# Machine: "+ project.getMachineWorkedTime().size());
-            holder.vNHEmployee.setText("# Hours by Employee: "+ projectWorkingHours(project,1));
-            holder.vNHMachine.setText("# Hours by Machine: "+  projectWorkingHours(project,0));
+        holder.vName.setText(project.getName());
+        holder.vNEmployee.setText(String.format(Locale.getDefault(), "# Employee: %d", project.getEmployees().size()));
+        holder.vNMachine.setText(String.format(Locale.getDefault(), "# Machine: %d", project.getMachineWorkedTime().size()));
+        holder.vNHEmployee.setText(String.format(Locale.getDefault(), "# Hours by Employee: %d", projectWorkingHours(project, 1)));
+        holder.vNHMachine.setText(String.format(Locale.getDefault(), "# Hours by Machine: %d", projectWorkingHours(project, 0)));
 
 
     }
 
-    private long projectWorkingHours(Project project,int flag) {
+    private long projectWorkingHours(Project project, int flag) {
         long seconds = 0;
-        HashMap<String,Object> workingHoursMap;
-        if(flag ==1){
+        HashMap<String, Object> workingHoursMap;
+        if (flag == 1) {
             workingHoursMap = project.getEmployeeWorkedTime();
-
-        }else
+        } else
             workingHoursMap = project.getMachineWorkedTime();
-        for( String key : workingHoursMap.keySet()){
-            seconds+= (long)workingHoursMap.get(key);
+        for (String key : workingHoursMap.keySet()) {
+            Object time = workingHoursMap.get(key);
+            if (time == null) return 0;
+            seconds += (long) time;
         }
-        return seconds/3600;
+        return seconds / 3600;
     }
 
 
@@ -97,14 +98,6 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectV
 
     public void setProjectsList(ArrayList<Project> projectsList) {
         this.projectsList = projectsList;
-    }
-
-    public ProjectAdapter.OnItemClickListener getListener() {
-        return listener;
-    }
-
-    public void setListener(ProjectAdapter.OnItemClickListener listener) {
-        this.listener = listener;
     }
 
     @Override

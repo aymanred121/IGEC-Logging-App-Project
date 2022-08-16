@@ -1,5 +1,6 @@
 package com.igec.admin.Adapters;
 
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +17,7 @@ import java.util.ArrayList;
 
 public class WorkingDayAdapter extends RecyclerView.Adapter<WorkingDayAdapter.DayViewHolder> {
 
-    private ArrayList<WorkingDay> workingDays;
+    private final ArrayList<WorkingDay> workingDays;
     private WorkingDayAdapter.OnItemClickListener listener;
 
     public interface OnItemClickListener {
@@ -25,14 +26,6 @@ public class WorkingDayAdapter extends RecyclerView.Adapter<WorkingDayAdapter.Da
 
     public void setOnItemClickListener(WorkingDayAdapter.OnItemClickListener listener) {
         this.listener = listener;
-    }
-
-    public ArrayList<WorkingDay> getWorkingDays() {
-        return workingDays;
-    }
-
-    public void setWorkingDays(ArrayList<WorkingDay> workingDays) {
-        this.workingDays = workingDays;
     }
 
     public static class DayViewHolder extends RecyclerView.ViewHolder {
@@ -65,15 +58,16 @@ public class WorkingDayAdapter extends RecyclerView.Adapter<WorkingDayAdapter.Da
         return new DayViewHolder(v, listener);
     }
 
+    @SuppressLint("DefaultLocale")
     @Override
     public void onBindViewHolder(@NonNull DayViewHolder holder, int position) {
         WorkingDay workingDay = workingDays.get(position);
         try {
-            holder.vDay.setText(workingDay.getDay() + "\n" + workingDay.getName());
+            holder.vDay.setText(String.format("%s\n%s", workingDay.getDay(), workingDay.getName()));
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        holder.vHours.setText(String.format("%s Hour(s)", (int) workingDay.getHours()));
+        holder.vHours.setText(String.format("%.2f %s", workingDay.getHours(), workingDay.getHours() > 1 ? "Hours" : "Hour"));
     }
 
     @Override

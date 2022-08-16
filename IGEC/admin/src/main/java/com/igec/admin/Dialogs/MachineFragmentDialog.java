@@ -40,6 +40,7 @@ import androidx.fragment.app.FragmentResultListener;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.StorageTask;
+import com.igec.admin.Fragments.MachinesFragment;
 import com.igec.admin.R;
 import com.igec.admin.databinding.FragmentAddMachineBinding;
 import com.igec.common.firebase.Machine;
@@ -86,6 +87,11 @@ public class MachineFragmentDialog extends DialogFragment {
     private ArrayList<String> oldNames;
     private ArrayList<Pair<TextInputLayout, TextInputEditText>> views;
     private boolean loaded = false;
+    private int count = 1;
+
+    public void setCount(int count) {
+        this.count = count;
+    }
 
     public MachineFragmentDialog(Machine machine) {
         this.machine = machine;
@@ -140,6 +146,8 @@ public class MachineFragmentDialog extends DialogFragment {
     public void onDestroy() {
         super.onDestroy();
         downloadTasks.forEach(StorageTask::cancel);
+        int parent =getParentFragmentManager().getFragments().size()-1;
+        ((MachinesFragment) getParentFragmentManager().getFragments().get(parent)).setOpened(false);
         binding = null;
     }
 
@@ -403,6 +411,8 @@ public class MachineFragmentDialog extends DialogFragment {
     private final View.OnClickListener oclAddSupplement = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            if(count == 2) return;
+            count++;
             AddAccessoriesDialog addAccessoriesDialog;
             if (accessories == null || !loaded)
                 addAccessoriesDialog = new AddAccessoriesDialog(machine);
@@ -434,6 +444,8 @@ public class MachineFragmentDialog extends DialogFragment {
     private View.OnClickListener oclSerialNumber = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+            if(count == 2) return;
+            count++;
             MachineSerialNumberDialog machineSerialNumberDialog = new MachineSerialNumberDialog();
             machineSerialNumberDialog.show(getParentFragmentManager(), "");
         }

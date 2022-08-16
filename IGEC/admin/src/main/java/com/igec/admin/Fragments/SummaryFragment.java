@@ -56,7 +56,11 @@ public class SummaryFragment extends Fragment {
     private RecyclerView.LayoutManager layoutManager;
     private String year, month, prevMonth, prevYear;
     private ArrayList<EmployeeOverview> employees;
+    private boolean opened = false;
 
+    public void setOpened(boolean opened) {
+        this.opened = opened;
+    }
 
     private FragmentSummaryBinding binding;
 
@@ -130,22 +134,19 @@ public class SummaryFragment extends Fragment {
     private final View.OnClickListener oclMonthPicker = v -> {
         final Calendar today = Calendar.getInstance();
         MonthPickerDialog.Builder builder = new MonthPickerDialog.Builder(getActivity(),
-                new MonthPickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(int selectedMonth, int selectedYear) {
-                        binding.monthLayout.setError(null);
-                        binding.monthLayout.setErrorEnabled(false);
-                        binding.monthEdit.setText(String.format("%d/%d", selectedMonth + 1, selectedYear));
-                        year = String.format("%d", selectedYear);
-                        month = String.format("%02d", selectedMonth);
+                (selectedMonth, selectedYear) -> {
+                    binding.monthLayout.setError(null);
+                    binding.monthLayout.setErrorEnabled(false);
+                    binding.monthEdit.setText(String.format("%d/%d", selectedMonth + 1, selectedYear));
+                    year = String.format("%d", selectedYear);
+                    month = String.format("%02d", selectedMonth);
 
-                        if (selectedMonth - 1 == 0) {
-                            prevMonth = "12";
-                            prevYear = String.format("%d", selectedYear - 1);
-                        } else {
-                            prevMonth = String.format("%02d", selectedMonth - 1);
-                            prevYear = year;
-                        }
+                    if (selectedMonth - 1 == 0) {
+                        prevMonth = "12";
+                        prevYear = String.format("%d", selectedYear - 1);
+                    } else {
+                        prevMonth = String.format("%02d", selectedMonth - 1);
+                        prevYear = year;
                     }
                 }, today.get(Calendar.YEAR), today.get(Calendar.MONTH));
         builder.setActivatedMonth(today.get(Calendar.MONTH))
@@ -174,7 +175,7 @@ public class SummaryFragment extends Fragment {
                                         if (counter[0] == queryDocumentSnapshots.size() - 1) {
                                             try {
                                                 csvWriter.build(year + "-" + month);
-                                                Snackbar.make(binding.getRoot(),"CSV file created",Snackbar.LENGTH_SHORT).show();
+                                                Snackbar.make(binding.getRoot(), "CSV file created", Snackbar.LENGTH_SHORT).show();
 
                                             } catch (IOException e) {
                                                 e.printStackTrace();
@@ -221,7 +222,6 @@ public class SummaryFragment extends Fragment {
                                     }
 
 
-
                                     nextMonth = other + personal + accommodation + site + remote + food;
                                     currentMonth = transportation + emp.getSalary() + cuts + overTime;
                                     if (!doc.exists())
@@ -245,7 +245,7 @@ public class SummaryFragment extends Fragment {
                                     if (counter[0] == queryDocumentSnapshots.size() - 1) {
                                         try {
                                             csvWriter.build(year + "-" + month);
-                                            Snackbar.make(binding.getRoot(),"CSV file created",Snackbar.LENGTH_SHORT).show();
+                                            Snackbar.make(binding.getRoot(), "CSV file created", Snackbar.LENGTH_SHORT).show();
                                         } catch (IOException e) {
                                             e.printStackTrace();
                                         }
@@ -286,8 +286,10 @@ public class SummaryFragment extends Fragment {
                         String empName = employee.getFirstName() + " " + employee.getLastName();
                         SUMMARY_COL.document(employee.getId()).collection(year + "-" + month)
                                 .get().addOnSuccessListener(queryDocumentSnapshots -> {
-                                    if (queryDocumentSnapshots.size() == 0)
+                                    if (queryDocumentSnapshots.size() == 0) {
+                                        Snackbar.make(binding.getRoot(), "No Work is registered", Snackbar.LENGTH_SHORT).show();
                                         return;
+                                    }
                                     for (QueryDocumentSnapshot q : queryDocumentSnapshots) {
                                         if (q.getData().get("checkOut") == null)
                                             continue;
@@ -308,13 +310,14 @@ public class SummaryFragment extends Fragment {
                                             String projectLocation = String.format("%s, %s, %s", project.getLocationCity(), project.getLocationArea(), project.getLocationStreet());
                                             workingDays.add(new WorkingDay(day, month, year, hours, empName, checkInLocation, checkOutLocation, project.getName(), projectLocation));
                                             if (queryDocumentSnapshots.getDocuments().lastIndexOf(q) == queryDocumentSnapshots.getDocuments().size() - 1) {
+                                                if (opened) return;
+                                                opened = true;
                                                 MonthSummaryDialog monthSummaryDialog = new MonthSummaryDialog(workingDays);
                                                 monthSummaryDialog.show(getParentFragmentManager(), "");
                                             }
                                         });
                                     }
                                 });
-
                     }, today.get(Calendar.YEAR), today.get(Calendar.MONTH));
             MonthPickerDialog monthPickerDialog = builder.setActivatedMonth(today.get(Calendar.MONTH))
                     .setMinYear(today.get(Calendar.YEAR) - 1)
@@ -335,8 +338,10 @@ public class SummaryFragment extends Fragment {
                 SUMMARY_COL.document(employee.getId()).collection(year + "-" + month)
                         //.whereEqualTo("projectId", employee.getProjectId())
                         .get().addOnSuccessListener(queryDocumentSnapshots -> {
-                            if (queryDocumentSnapshots.size() == 0)
+                            if (queryDocumentSnapshots.size() == 0) {
+                                Snackbar.make(binding.getRoot(), "No Work is registered", Snackbar.LENGTH_SHORT).show();
                                 return;
+                            }
                             for (QueryDocumentSnapshot q : queryDocumentSnapshots) {
                                 if (q.getData().get("checkOut") == null)
                                     continue;
@@ -357,6 +362,8 @@ public class SummaryFragment extends Fragment {
                                     String projectLocation = String.format("%s, %s, %s", project.getLocationCity(), project.getLocationArea(), project.getLocationStreet());
                                     workingDays.add(new WorkingDay(day, month, year, hours, empName, checkInLocation, checkOutLocation, project.getName(), projectLocation));
                                     if (queryDocumentSnapshots.getDocuments().lastIndexOf(q) == queryDocumentSnapshots.getDocuments().size() - 1) {
+                                        if (opened) return;
+                                        opened = true;
                                         MonthSummaryDialog monthSummaryDialog = new MonthSummaryDialog(workingDays);
                                         monthSummaryDialog.show(getParentFragmentManager(), "");
                                     }

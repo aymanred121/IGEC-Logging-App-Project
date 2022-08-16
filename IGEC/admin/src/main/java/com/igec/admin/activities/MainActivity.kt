@@ -1,10 +1,12 @@
-package com.igec.admin.Activities
+package com.igec.admin.activities
 
 import android.Manifest.permission.READ_EXTERNAL_STORAGE
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
+import android.net.Network
 import android.net.Uri
 import android.os.Build
 import android.os.Build.VERSION.SDK_INT
@@ -42,6 +44,20 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private var lastTab: Int = R.id.nav_add_user
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val connectivityManager = applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        connectivityManager.let {
+            it.registerDefaultNetworkCallback(object : ConnectivityManager.NetworkCallback() {
+                override fun onAvailable(network: Network) {
+                    //take action when network connection is gained
+                }
+                override fun onLost(network: Network) {
+                    //take action when network connection is lost
+                    val intent = Intent(this@MainActivity, InternetConnection::class.java)
+                    startActivity(intent)
+                    finish()
+                }
+            })
+        }
         if (!checkStoragePermission())
             requestStoragePermission()
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -84,11 +100,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         ProjectFragmentDialog.clearTeam()
     }
 
-    override fun onResume() {
-        super.onResume()
-        isNetworkAvailable()
-    }
-
     //Functions
     private fun checkStoragePermission(): Boolean {
         return if (SDK_INT >= Build.VERSION_CODES.R) {
@@ -122,17 +133,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 arrayOf(WRITE_EXTERNAL_STORAGE),
                 123
             )
-        }
-    }
-
-    private fun isNetworkAvailable() {
-        val connectivityManager = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
-        val activeNetworkInfo = connectivityManager.activeNetworkInfo
-        val connected = activeNetworkInfo != null && activeNetworkInfo.isConnected
-        if (!connected) {
-            val intent = Intent(this@MainActivity, SplashScreen_InternetConnection::class.java)
-            startActivity(intent)
-            finish()
         }
     }
 //    override fun onCreateOptionsMenu(menu: Menu): Boolean {

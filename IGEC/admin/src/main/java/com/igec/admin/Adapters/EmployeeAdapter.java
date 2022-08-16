@@ -1,7 +1,5 @@
 package com.igec.admin.Adapters;
 
-import static com.igec.common.CONSTANTS.ADMIN;
-
 import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,7 +21,7 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
     private ArrayList<EmployeeOverview> employeeOverviewsList;
     private OnItemClickListener listener;
     private String MID = null;
-    private boolean isAdd;
+    private final boolean isCheckable;
 
     public interface OnItemClickListener {
         void onItemClick(int position);
@@ -49,13 +47,13 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
         public MaterialRadioButton vManager;
 
 
-        public EmployeeViewHolder(@NonNull View itemView, OnItemClickListener listener, boolean isAdd) {
+        public EmployeeViewHolder(@NonNull View itemView, OnItemClickListener listener, boolean isCheckable) {
             super(itemView);
             vName = itemView.findViewById(R.id.TextView_Name);
             vID = itemView.findViewById(R.id.TextView_ID);
             vSelected = itemView.findViewById(R.id.ImageView_EmployeeSelected);
             vManager = itemView.findViewById(R.id.manager_radioButton);
-            if (!isAdd) {
+            if (!isCheckable) {
                 itemView.setOnClickListener(v -> {
                     if (listener != null) {
                         int position = getAdapterPosition();
@@ -65,8 +63,8 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
                     }
                 });
             }
-            vSelected.setVisibility(isAdd ? View.VISIBLE : View.GONE);
-            vManager.setVisibility(isAdd ? View.VISIBLE : View.GONE);
+            vSelected.setVisibility(isCheckable ? View.VISIBLE : View.GONE);
+            vManager.setVisibility(isCheckable ? View.VISIBLE : View.GONE);
             vSelected.setOnClickListener(v -> {
                 if (listener != null) {
                     int position = getAdapterPosition();
@@ -89,14 +87,14 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
 
     public EmployeeAdapter(ArrayList<EmployeeOverview> employeeOverviewsList, boolean isCheckable) {
         this.employeeOverviewsList = employeeOverviewsList;
-        this.isAdd = isCheckable;
+        this.isCheckable = isCheckable;
     }
 
     @NonNull
     @Override
     public EmployeeViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.item_employee, parent, false);
-        return new EmployeeViewHolder(v, listener, isAdd);
+        return new EmployeeViewHolder(v, listener, isCheckable);
     }
 
     @SuppressLint("SetTextI18n")
@@ -119,15 +117,6 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
     public void setEmployeeOverviewsList(ArrayList<EmployeeOverview> employeeOverviewsList) {
         this.employeeOverviewsList = employeeOverviewsList;
     }
-
-    public OnItemClickListener getListener() {
-        return listener;
-    }
-
-    public void setListener(OnItemClickListener listener) {
-        this.listener = listener;
-    }
-
     @Override
     public int getItemCount() {
         return employeeOverviewsList.size();

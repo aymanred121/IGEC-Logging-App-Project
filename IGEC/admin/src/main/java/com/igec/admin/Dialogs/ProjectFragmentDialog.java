@@ -33,6 +33,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.igec.admin.Adapters.EmployeeAdapter;
+import com.igec.admin.Fragments.ProjectsFragment;
+import com.igec.admin.Fragments.UsersFragment;
 import com.igec.admin.R;
 import com.igec.admin.databinding.FragmentAddProjectBinding;
 import com.igec.common.firebase.Allowance;
@@ -179,6 +181,8 @@ public class ProjectFragmentDialog extends DialogFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        int parent =getParentFragmentManager().getFragments().size()-1;
+        ((ProjectsFragment)getParentFragmentManager().getFragments().get(parent)).setOpened(false);
         binding = null;
     }
 

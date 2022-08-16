@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -36,9 +37,13 @@ public class UsersFragment extends Fragment {
     private ArrayList<EmployeeOverview> employees = new ArrayList<>();
     private EmployeeAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
-
+    private boolean opened = false;
 
     private FragmentUsersBinding binding;
+
+    public void setOpened(boolean opened) {
+        this.opened = opened;
+    }
 
     @Nullable
     @Override
@@ -106,10 +111,12 @@ public class UsersFragment extends Fragment {
     private final EmployeeAdapter.OnItemClickListener itclEmployeeAdapter = new EmployeeAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position) {
-            EMPLOYEE_COL.document(adapter.getEmployeeOverviewsList().get(position).getId()).get().addOnSuccessListener(documentSnapshot -> {
-                UserFragmentDialog userFragmentDialog = UserFragmentDialog.newInstance(documentSnapshot.toObject(Employee.class));
-                userFragmentDialog.show(getParentFragmentManager(), "");
-            });
+                if(opened) return;
+                opened = true;
+                EMPLOYEE_COL.document(adapter.getEmployeeOverviewsList().get(position).getId()).get().addOnSuccessListener(documentSnapshot -> {
+                    UserFragmentDialog userFragmentDialog = UserFragmentDialog.newInstance(documentSnapshot.toObject(Employee.class));
+                    userFragmentDialog.show(getParentFragmentManager(), "");
+                });
         }
 
         @Override

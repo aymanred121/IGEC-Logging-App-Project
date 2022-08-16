@@ -1,6 +1,5 @@
 package com.igec.admin.Dialogs;
 
-import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Intent;
 import android.net.Uri;
@@ -10,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,17 +18,14 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.igec.admin.Adapters.WorkingDayAdapter;
+import com.igec.admin.Fragments.SummaryFragment;
 import com.igec.admin.R;
 import com.igec.admin.databinding.FragmentMonthSummaryBinding;
 import com.igec.common.utilities.CsvWriter;
 import com.igec.common.utilities.WorkingDay;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.StringJoiner;
 import java.util.stream.IntStream;
 
@@ -38,10 +33,7 @@ public class MonthSummaryDialog extends DialogFragment {
 
 
     private WorkingDayAdapter adapter;
-    private RecyclerView.LayoutManager layoutManager;
     private ArrayList<WorkingDay> workingDays;
-    private final int MONTH31DAYS = 0xA55;
-    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     public MonthSummaryDialog(ArrayList<WorkingDay> workingDays) {
         this.workingDays = workingDays;
@@ -56,8 +48,6 @@ public class MonthSummaryDialog extends DialogFragment {
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-
-
         Dialog dialog = super.onCreateDialog(savedInstanceState);
         Window window = dialog.getWindow();
 
@@ -80,6 +70,8 @@ public class MonthSummaryDialog extends DialogFragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        int parent =getParentFragmentManager().getFragments().size()-1;
+        ((SummaryFragment)getParentFragmentManager().getFragments().get(parent)).setOpened(false);
         binding = null;
     }
 
@@ -93,7 +85,7 @@ public class MonthSummaryDialog extends DialogFragment {
 
     void initialize() {
         binding.recyclerView.setHasFixedSize(true);
-        layoutManager = new LinearLayoutManager(getActivity());
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
         adapter = new WorkingDayAdapter(workingDays);
         binding.recyclerView.setLayoutManager(layoutManager);
         binding.recyclerView.setAdapter(adapter);
@@ -101,8 +93,6 @@ public class MonthSummaryDialog extends DialogFragment {
     }
 
     private final View.OnClickListener oclCSV = v -> {
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
-        String currentDateAndTime = sdf.format(new Date());
         String month = workingDays.get(0).getMonth();
         String year = workingDays.get(0).getYear();
         String empName = workingDays.get(0).getEmpName();
@@ -127,6 +117,7 @@ public class MonthSummaryDialog extends DialogFragment {
         0b0101001010101
         we will always get 0 and otherwise with other numbers
          */
+        int MONTH31DAYS = 0xA55;
         if ((1 << (monthNumber) & MONTH31DAYS) == 0) {
             //create header with 31 days
             for (int i = 1; i <= 31; i++) {

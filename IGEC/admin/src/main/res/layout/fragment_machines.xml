@@ -7,6 +7,6 @@
     android:overScrollMode="never"
     android:scrollbars="vertical"
     tools:listitem="@layout/item_machine"
-    tools:context=".Fragments.MachinesFragment">
+    tools:context=".fragments.MachinesFragment">
 
 </androidx.recyclerview.widget.RecyclerView>

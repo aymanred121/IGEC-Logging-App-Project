@@ -7,6 +7,6 @@
     android:overScrollMode="never"
     android:scrollbars="vertical"
     tools:listitem="@layout/item_employee"
-    tools:context=".Fragments.UsersFragment">
+    tools:context=".fragments.UsersFragment">
 
 </androidx.recyclerview.widget.RecyclerView>

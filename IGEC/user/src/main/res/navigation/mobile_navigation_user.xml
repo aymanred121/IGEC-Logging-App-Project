@@ -8,29 +8,29 @@
 
     <fragment
         android:id="@+id/nav_check_in_out"
-        android:name="com.igec.user.Fragments.CheckInOutFragment"
+        android:name="com.igec.user.fragments.CheckInOutFragment"
         android:label="@string/check_in_out"
         tools:layout="@layout/fragment_check_in_out" />
     <fragment
         android:id="@+id/nav_change_password"
-        android:name="com.igec.user.Fragments.ChangePasswordFragment"
+        android:name="com.igec.user.fragments.ChangePasswordFragment"
         android:label="@string/change_password"
         tools:layout="@layout/fragment_change_password" />
     <fragment
         android:id="@+id/nav_gross_salary"
-        android:name="com.igec.user.Fragments.GrossSalaryFragment"
+        android:name="com.igec.user.fragments.GrossSalaryFragment"
         android:label="@string/gross_salary"
         tools:layout="@layout/fragment_gross_salary" />
 
 
     <fragment
         android:id="@+id/nav_send_vacation_request"
-        android:name="com.igec.user.Fragments.SendVacationRequestFragment"
+        android:name="com.igec.user.fragments.SendVacationRequestFragment"
         android:label="@string/send_vacation_request"
         tools:layout="@layout/fragment_send_vacation_request" />
     <fragment
         android:id="@+id/nav_vacations_log"
-        android:name="com.igec.common.Fragments.VacationsLogFragment"
+        android:name="com.igec.common.fragments.VacationsLogFragment"
         android:label="@string/vacations_log"
         tools:layout="@layout/fragment_vacations_log" />
 </navigation>

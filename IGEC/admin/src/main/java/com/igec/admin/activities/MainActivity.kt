@@ -28,12 +28,12 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
-import com.igec.admin.Dialogs.ProjectFragmentDialog
-import com.igec.admin.Fragments.*
+import com.igec.admin.dialogs.ProjectFragmentDialog
+import com.igec.admin.fragments.*
 import com.igec.admin.R
 import com.igec.admin.databinding.ActivityMainBinding
-import com.igec.common.Fragments.VacationRequestsFragment
-import com.igec.common.Fragments.VacationsLogFragment
+import com.igec.common.fragments.VacationRequestsFragment
+import com.igec.common.fragments.VacationsLogFragment
 
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {

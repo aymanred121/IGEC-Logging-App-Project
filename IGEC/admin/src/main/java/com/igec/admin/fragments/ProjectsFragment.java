@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.igec.admin.adapters.ProjectAdapter;
+import com.igec.admin.databinding.FragmentProjectsBinding;
 import com.igec.admin.dialogs.ProjectFragmentDialog;
 import com.igec.common.firebase.Project;
 import com.google.firebase.firestore.DocumentSnapshot;

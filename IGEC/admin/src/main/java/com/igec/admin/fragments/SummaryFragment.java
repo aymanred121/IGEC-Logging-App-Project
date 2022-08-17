@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.igec.admin.adapters.EmployeeAdapter;
+import com.igec.admin.databinding.FragmentSummaryBinding;
 import com.igec.admin.dialogs.MonthSummaryDialog;
 import com.igec.common.firebase.Allowance;
 import com.igec.common.firebase.Employee;

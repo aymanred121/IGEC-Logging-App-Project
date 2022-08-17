@@ -33,6 +33,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.igec.admin.adapters.EmployeeAdapter;
+import com.igec.admin.databinding.FragmentAddProjectBinding;
 import com.igec.admin.fragments.ProjectsFragment;
 import com.igec.admin.R;
 import com.igec.common.firebase.Allowance;

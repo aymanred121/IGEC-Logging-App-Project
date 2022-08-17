@@ -39,6 +39,7 @@ import androidx.fragment.app.FragmentResultListener;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.StorageTask;
+import com.igec.admin.databinding.FragmentAddMachineBinding;
 import com.igec.admin.fragments.MachinesFragment;
 import com.igec.admin.R;
 import com.igec.common.firebase.Machine;

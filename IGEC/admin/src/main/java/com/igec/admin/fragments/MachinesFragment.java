@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.igec.admin.adapters.MachineAdapter;
+import com.igec.admin.databinding.FragmentMachinesBinding;
 import com.igec.admin.dialogs.MachineFragmentDialog;
 import com.igec.admin.dialogs.MachineLogDialog;
 import com.igec.common.firebase.Machine;

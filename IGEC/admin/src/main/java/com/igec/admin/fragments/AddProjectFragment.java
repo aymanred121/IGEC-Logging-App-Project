@@ -29,6 +29,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.igec.admin.adapters.EmployeeAdapter;
+import com.igec.admin.databinding.FragmentAddProjectBinding;
 import com.igec.admin.dialogs.AddAllowanceDialog;
 import com.igec.admin.dialogs.AddClientDialog;
 import com.igec.admin.dialogs.LocationDialog;

@@ -14,6 +14,7 @@ import androidx.fragment.app.DialogFragment;
 
 import com.budiyev.android.codescanner.CodeScanner;
 import com.igec.user.R;
+import com.igec.user.databinding.DialogMachineCheckInOutBinding;
 
 public class MachineCheckInOutDialog extends DialogFragment {
     private CodeScanner mCodeScanner;

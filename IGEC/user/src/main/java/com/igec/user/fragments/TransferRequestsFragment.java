@@ -29,6 +29,7 @@ import com.igec.common.firebase.Project;
 import com.igec.common.firebase.TransferRequests;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.WriteBatch;
+import com.igec.user.databinding.FragmentTransferRequestsBinding;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

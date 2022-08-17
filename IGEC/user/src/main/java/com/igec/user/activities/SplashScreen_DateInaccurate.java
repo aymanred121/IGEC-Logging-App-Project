@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
 
+import com.igec.user.databinding.ActivitySplashScreenDateIncorrectBinding;
+
 public class SplashScreen_DateInaccurate extends AppCompatActivity {
 
     private ActivitySplashScreenDateIncorrectBinding binding;

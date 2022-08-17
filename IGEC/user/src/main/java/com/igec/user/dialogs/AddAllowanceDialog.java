@@ -30,6 +30,7 @@ import com.igec.common.utilities.allowancesEnum;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
+import com.igec.user.databinding.DialogAddAllowanceBinding;
 
 import java.util.ArrayList;
 import java.util.Calendar;

@@ -31,6 +31,7 @@ import androidx.fragment.app.FragmentResultListener;
 import com.birjuvachhani.locus.Locus;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.material.snackbar.Snackbar;
+import com.igec.user.databinding.FragmentCheckInOutBinding;
 import com.igec.user.dialogs.ClientInfoDialog;
 import com.igec.user.dialogs.MachineCheckInOutDialog;
 import com.igec.user.dialogs.AccessoriesDialog;

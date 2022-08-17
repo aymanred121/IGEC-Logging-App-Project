@@ -26,6 +26,7 @@ import com.igec.common.firebase.Employee;
 import com.igec.common.utilities.allowancesEnum;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.igec.user.databinding.DialogAllowanceInfoBinding;
 
 import java.util.ArrayList;
 import java.util.Locale;

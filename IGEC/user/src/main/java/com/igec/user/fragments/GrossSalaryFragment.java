@@ -19,6 +19,7 @@ import com.igec.common.firebase.Allowance;
 import com.igec.common.firebase.EmployeesGrossSalary;
 import com.igec.common.utilities.allowancesEnum;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.igec.user.databinding.FragmentGrossSalaryBinding;
 import com.whiteelephant.monthpicker.MonthPickerDialog;
 
 import java.text.SimpleDateFormat;

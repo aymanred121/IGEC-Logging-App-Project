@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.igec.user.adapters.EmployeeAdapter;
+import com.igec.user.databinding.FragmentProjectSummaryBinding;
 import com.igec.user.dialogs.AddAllowanceDialog;
 import com.igec.common.firebase.Allowance;
 import com.igec.common.firebase.Employee;

@@ -29,6 +29,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.igec.user.databinding.FragmentSendTransferRequestBinding;
 
 import java.io.IOException;
 import java.io.OutputStreamWriter;

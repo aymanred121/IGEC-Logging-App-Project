@@ -6,7 +6,9 @@ import static com.igec.common.CONSTANTS.PROJECT_COL;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +33,7 @@ import com.igec.common.utilities.allowancesEnum;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
+import com.igec.user.activities.DateInaccurate;
 import com.igec.user.databinding.DialogAddAllowanceBinding;
 
 import java.util.ArrayList;

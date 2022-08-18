@@ -588,7 +588,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                     return null;
                                 }
                                 // open supplements dialog if not
-                                AccessoriesDialog accessoriesDialog = new AccessoriesDialog(isItAUser, currMachine, currEmployee);
+                                AccessoriesDialog accessoriesDialog = new AccessoriesDialog(isItAUser, currMachine);
                                 accessoriesDialog.show(getParentFragmentManager(), "");
                                 return null;
                             });

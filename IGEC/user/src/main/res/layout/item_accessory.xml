@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="wrap_content"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_marginBottom="8dp"
-    app:cardCornerRadius="5dp">
+    android:layout_margin="8dp"
+    app:cardCornerRadius="5dp"
+    tools:cardBackgroundColor="@color/black">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -14,12 +15,11 @@
 
         <ImageView
             android:id="@+id/image_image_view"
-            android:layout_width="150dp"
-            android:layout_height="150dp"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             tools:text="test"
             android:layout_centerHorizontal="true"
-            tools:src="@drawable/ic_launcher_foreground"
-            tools:tint="@color/black" />
+            tools:src="@drawable/ic_launcher_foreground" />
 
         <TextView
             android:id="@+id/name_text"
@@ -28,7 +28,8 @@
             android:layout_centerHorizontal="true"
             android:layout_below="@id/image_image_view"
             android:layout_centerVertical="true"
-            android:textSize="20sp"
+            android:textSize="16sp"
+            tools:textColor="@color/white"
             tools:text="Supplement Name" />
     </RelativeLayout>
 

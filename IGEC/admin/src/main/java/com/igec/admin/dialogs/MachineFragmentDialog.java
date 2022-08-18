@@ -86,11 +86,6 @@ public class MachineFragmentDialog extends DialogFragment {
     private ArrayList<String> oldNames;
     private ArrayList<Pair<TextInputLayout, TextInputEditText>> views;
     private boolean loaded = false;
-    private int count = 1;
-
-    public void setCount(int count) {
-        this.count = count;
-    }
 
     public MachineFragmentDialog(Machine machine) {
         this.machine = machine;
@@ -404,8 +399,6 @@ public class MachineFragmentDialog extends DialogFragment {
     private final View.OnClickListener oclAddSupplement = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            if(count == 2) return;
-            count++;
             AddAccessoriesDialog addAccessoriesDialog;
             if (accessories == null || !loaded)
                 addAccessoriesDialog = new AddAccessoriesDialog(machine);
@@ -437,8 +430,6 @@ public class MachineFragmentDialog extends DialogFragment {
     private View.OnClickListener oclSerialNumber = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            if(count == 2) return;
-            count++;
             MachineSerialNumberDialog machineSerialNumberDialog = new MachineSerialNumberDialog();
             machineSerialNumberDialog.show(getParentFragmentManager(), "");
         }

@@ -11,14 +11,15 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.igec.admin.R;
+import com.igec.common.firebase.Accessory;
 
 import java.util.ArrayList;
 
 public class AccessoryAdapter extends RecyclerView.Adapter<AccessoryAdapter.AccessoryViewHolder> {
-    private ArrayList<com.igec.common.firebase.Accessory> accessories;
+    private ArrayList<Accessory> accessories;
     private OnItemClickListener listener;
 
-    public AccessoryAdapter(ArrayList<com.igec.common.firebase.Accessory> accessories) {
+    public AccessoryAdapter(ArrayList<Accessory> accessories) {
         this.accessories = accessories;
     }
 
@@ -31,7 +32,7 @@ public class AccessoryAdapter extends RecyclerView.Adapter<AccessoryAdapter.Acce
 
     @Override
     public void onBindViewHolder(@NonNull AccessoryViewHolder holder, int position) {
-        com.igec.common.firebase.Accessory accessory = accessories.get(position);
+        Accessory accessory = accessories.get(position);
         holder.vName.setText(accessory.getName());
         holder.vImg.setImageBitmap(accessory.getPhoto());
 
@@ -50,11 +51,11 @@ public class AccessoryAdapter extends RecyclerView.Adapter<AccessoryAdapter.Acce
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.listener = listener;
     }
-    public ArrayList<com.igec.common.firebase.Accessory> getSupplements() {
+    public ArrayList<Accessory> getSupplements() {
         return accessories;
     }
 
-    public void setSupplements(ArrayList<com.igec.common.firebase.Accessory> accessories) {
+    public void setSupplements(ArrayList<Accessory> accessories) {
         this.accessories = accessories;
     }
 

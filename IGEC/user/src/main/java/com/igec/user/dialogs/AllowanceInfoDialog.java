@@ -101,11 +101,6 @@ public class AllowanceInfoDialog extends DialogFragment {
         super.onDestroy();
         binding = null;
     }
-    @Override
-    public void onResume() {
-        super.onResume();
-        validateDate(getActivity());
-    }
     private void validateDate(Context c) {
         if (Settings.Global.getInt(c.getContentResolver(), Settings.Global.AUTO_TIME, 0) != 1) {
             Intent intent = new Intent(getActivity(), DateInaccurate.class);
@@ -130,6 +125,7 @@ public class AllowanceInfoDialog extends DialogFragment {
     @Override
     public void onResume() {
         super.onResume();
+        validateDate(getActivity());
         allowancesList.clear();
         types.clear();
         types.add("Transportation");

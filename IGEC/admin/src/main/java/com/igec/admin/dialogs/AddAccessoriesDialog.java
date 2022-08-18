@@ -46,8 +46,8 @@ import java.util.ArrayList;
 public class AddAccessoriesDialog extends DialogFragment {
 
     private ActivityResultLauncher<Intent> activityResultLauncher;
-    private ArrayList<com.igec.common.firebase.Accessory> accessories; // should not be modified -> not saved
-    private ArrayList<com.igec.common.firebase.Accessory> updatedAccessories; // all modifications happens here -> saved
+    private ArrayList<Accessory> accessories; // should not be modified -> not saved
+    private ArrayList<Accessory> updatedAccessories; // all modifications happens here -> saved
     private AccessoryAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
     private Machine machine;
@@ -113,7 +113,7 @@ public class AddAccessoriesDialog extends DialogFragment {
         setStyle(DialogFragment.STYLE_NORMAL, R.style.FullscreenDialogTheme);
         getParentFragmentManager().setFragmentResultListener("addSupplement", this, (requestKey, bundle) -> {
             // We use a String here, but any type that can be put in a Bundle is supported
-            updatedAccessories.add((com.igec.common.firebase.Accessory) bundle.getSerializable("supplement"));
+            updatedAccessories.add((Accessory) bundle.getSerializable("supplement"));
             // Do something with the result
             adapter.notifyDataSetChanged();
         });
@@ -121,7 +121,7 @@ public class AddAccessoriesDialog extends DialogFragment {
         getParentFragmentManager().setFragmentResultListener("editSupplement", this, (requestKey, bundle) -> {
             // We use a String here, but any type that can be put in a Bundle is supported
             int position = bundle.getInt("position");
-            com.igec.common.firebase.Accessory accessory = (com.igec.common.firebase.Accessory) bundle.getSerializable("supplement");
+            Accessory accessory = (Accessory) bundle.getSerializable("supplement");
             if (!accessory.getName().equals(updatedAccessories.get(position).getName())) {
                 if (oldNamesIndexes.contains(position)) {
                     oldNamesIndexes.remove(position);
@@ -188,7 +188,7 @@ public class AddAccessoriesDialog extends DialogFragment {
         activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
             if (result.getResultCode() == RESULT_OK) {
                 Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath);
-                com.igec.common.firebase.Accessory accessory = new com.igec.common.firebase.Accessory();
+                Accessory accessory = new Accessory();
                 accessory.setName("");
                 accessory.setPhoto(bitmap);
                 AccessoryInfoDialog accessoryInfoDialog = new AccessoryInfoDialog(-1, accessory, updatedAccessories);

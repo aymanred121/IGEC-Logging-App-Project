@@ -18,18 +18,13 @@ import android.view.animation.AnimationUtils;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
-import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import com.igec.user.activities.DateInaccurate;
 import com.igec.user.adapters.AccessoryAdapter;
 import com.igec.user.R;
-import com.igec.common.firebase.Employee;
 import com.igec.common.firebase.Machine;
 import com.igec.common.firebase.Accessory;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -41,18 +36,14 @@ import java.util.ArrayList;
 public class AccessoriesDialog extends DialogFragment {
 
 
-    private Machine machine;
-    private Employee employee;
+    private final Machine machine;
     private ArrayList<Accessory> accessories;
     private boolean isItAUser;
-    private Accessory machineCover = new Accessory();
-    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private final Accessory machineCover = new Accessory();
 
     //Views
     private Animation show, hide;
     private AccessoryAdapter adapter;
-    private RecyclerView.LayoutManager layoutManager;
-
 
     @NonNull
     @Override
@@ -108,10 +99,9 @@ public class AccessoriesDialog extends DialogFragment {
         binding.doneFab.setOnClickListener(oclDone);
     }
 
-    public AccessoriesDialog(boolean isItAUser, Machine machine, Employee employee) {
+    public AccessoriesDialog(boolean isItAUser, Machine machine) {
         this.isItAUser = isItAUser;
         this.machine = machine;
-        this.employee = employee;
     }
 
     // Functions
@@ -120,9 +110,7 @@ public class AccessoriesDialog extends DialogFragment {
         show = AnimationUtils.loadAnimation(getActivity(), R.anim.show);
         hide = AnimationUtils.loadAnimation(getActivity(), R.anim.hide);
         binding.recyclerView.setHasFixedSize(true);
-        layoutManager = new GridLayoutManager(getActivity(), 3);
         adapter = new AccessoryAdapter(accessories);
-        binding.recyclerView.setLayoutManager(layoutManager);
         binding.recyclerView.setAdapter(adapter);
         if (machine.getSupplementsNames().size() != 0) {
             getAllSupplements();

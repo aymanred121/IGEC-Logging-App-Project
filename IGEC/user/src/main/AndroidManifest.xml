@@ -38,7 +38,7 @@
             android:screenOrientation="portrait"
             android:exported="false" />
         <activity
-            android:name=".activities.SplashScreen_DateInaccurate"
+            android:name=".activities.DateInaccurate"
             android:exported="false"
             android:screenOrientation="portrait" />
         <activity

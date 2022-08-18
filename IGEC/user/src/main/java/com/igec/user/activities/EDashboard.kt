@@ -1,6 +1,9 @@
 package com.igec.user.activities
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
@@ -28,9 +31,9 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
     private var lastTab: Int = R.id.nav_check_in_out
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         binding = ActivityEdashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        validateDate(this)
         currEmployee = intent.getSerializableExtra("user") as Employee?
         setSupportActionBar(binding.toolbar)
 
@@ -60,6 +63,13 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         binding.navView.getHeaderView(0).findViewById<TextView>(R.id.EmployeeID).text =
             currEmployee?.id
 
+    }
+    private fun validateDate(c: Context) {
+        if (Settings.Global.getInt(c.contentResolver, Settings.Global.AUTO_TIME, 0) != 1) {
+            val intent = Intent(this@EDashboard, DateInaccurate::class.java)
+            startActivity(intent)
+            finish()
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {

@@ -1,7 +1,10 @@
 package com.igec.user.activities
 
+import android.content.Context
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.provider.Settings
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
@@ -31,6 +34,7 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         super.onCreate(savedInstanceState)
         binding = ActivityMdashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        validateDate(this)
         currManager = intent.getSerializableExtra("user") as Employee?
         setSupportActionBar(binding.toolbar)
 
@@ -66,6 +70,13 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
 
     }
 
+    private fun validateDate(c: Context) {
+        if (Settings.Global.getInt(c.contentResolver, Settings.Global.AUTO_TIME, 0) != 1) {
+            val intent = Intent(this@MDashboard, DateInaccurate::class.java)
+            startActivity(intent)
+            finish()
+        }
+    }
     override fun onBackPressed() {
         if (binding.drawerLayout.isDrawerOpen(GravityCompat.START))
             binding.drawerLayout.closeDrawer(GravityCompat.START)

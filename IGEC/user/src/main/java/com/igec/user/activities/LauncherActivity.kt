@@ -1,32 +1,25 @@
-package com.igec.user.activities;
+package com.igec.user.activities
 
-import static com.igec.common.CONSTANTS.ADMIN;
-import static com.igec.common.CONSTANTS.EMPLOYEE_COL;
-import static com.igec.common.CONSTANTS.ID;
-import static com.igec.common.CONSTANTS.IGEC;
-import static com.igec.common.CONSTANTS.LOGGED;
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import android.os.Bundle
+import android.os.Handler
+import android.provider.Settings
+import android.widget.Toast
+import com.igec.common.CONSTANTS
+import com.google.firebase.firestore.DocumentSnapshot
+import com.igec.common.firebase.Employee
 
-import android.app.Activity;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.os.Bundle;
-import android.os.Handler;
-import android.widget.Toast;
-
-import androidx.annotation.Nullable;
-
-import com.igec.common.firebase.Employee;
-
-public class LauncherActivity extends Activity {
-    private boolean logged = false;
-    @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
+class LauncherActivity : Activity() {
+    private var logged = false
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        validateDate(this)
         // for splash screen
-        new Handler().postDelayed(() -> {
-            SharedPreferences preferences = getSharedPreferences(IGEC, MODE_PRIVATE);
-            logged = preferences.getBoolean(LOGGED, false);
+        Handler().postDelayed({
+            val preferences = getSharedPreferences(CONSTANTS.IGEC, MODE_PRIVATE)
+            logged = preferences.getBoolean(CONSTANTS.LOGGED, false)
 
 
             /*
@@ -37,44 +30,59 @@ public class LauncherActivity extends Activity {
              *      assigned to a project:
              *          the account isn't locked => Open login Activity [x]
              *          the account is locked => open suitable dashboard [x]
-             * */
-
-            if (!logged) {
-                Intent intent = new Intent(LauncherActivity.this, LoginActivity.class);
-                startActivity(intent);
-                finish();
-            } else {
-                String savedID = preferences.getString(ID, "");
-                EMPLOYEE_COL.document(savedID).get().addOnSuccessListener(documentSnapshot -> {
-                    if (!documentSnapshot.exists())
-                        return;
-                    Employee employee = documentSnapshot.toObject(Employee.class);
-                    Intent intent;
-                    // not assigned to any project -> can't login
-                    assert employee != null;
-                    if (employee.getManagerID() == null) {
-                        Toast.makeText(LauncherActivity.this, "You're not assigned to any project yet", Toast.LENGTH_SHORT).show();
-                        finish();
+             * */if (!logged) {
+            val intent = Intent(this@LauncherActivity, LoginActivity::class.java)
+            startActivity(intent)
+            finish()
+        } else {
+            val savedID = preferences.getString(CONSTANTS.ID, "")
+            CONSTANTS.EMPLOYEE_COL.document(savedID!!).get()
+                .addOnSuccessListener { documentSnapshot: DocumentSnapshot ->
+                    if (!documentSnapshot.exists()) return@addOnSuccessListener
+                    val employee = documentSnapshot.toObject(Employee::class.java)
+                    val intent: Intent
+                    assert(employee != null)
+                    if (employee!!.managerID == null) {
+                        Toast.makeText(
+                            this@LauncherActivity,
+                            "You're not assigned to any project yet",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        finish()
                     }
                     // not used by another device but still logged here
                     // meaning that the account has been unlocked while the account is still open in a device
-                    if (!employee.isLocked()) {
-                        intent = new Intent(LauncherActivity.this, LoginActivity.class);
-                        Toast.makeText(LauncherActivity.this, "Account is unlocked, login is required", Toast.LENGTH_SHORT).show();
+                    if (!employee.isLocked) {
+                        intent = Intent(this@LauncherActivity, LoginActivity::class.java)
+                        Toast.makeText(
+                            this@LauncherActivity,
+                            "Account is unlocked, login is required",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     } else {
                         // not used -> Open suitable dashboard
-                        if (employee.getManagerID().equals(ADMIN))
-                            intent = new Intent(LauncherActivity.this, MDashboard.class);
-                        else
-                            intent = new Intent(LauncherActivity.this, EDashboard.class);
+                        intent = if (employee.managerID == CONSTANTS.ADMIN) Intent(
+                            this@LauncherActivity,
+                            MDashboard::class.java
+                        ) else Intent(this@LauncherActivity, EDashboard::class.java)
                     }
-                    intent.putExtra("user", employee);
-                    startActivity(intent);
-                    finish();
-                });
-            }
-        }, 2000);
+                    intent.putExtra("user", employee)
+                    startActivity(intent)
+                    finish()
+                }
+        }
+        }, 2000)
+    }
 
-
+    override fun onResume() {
+        super.onResume()
+        validateDate(this)
+    }
+    private fun validateDate(c: Context) {
+        if (Settings.Global.getInt(c.contentResolver, Settings.Global.AUTO_TIME, 0) != 1) {
+            val intent = Intent(this@LauncherActivity, DateInaccurate::class.java)
+            startActivity(intent)
+            finish()
+        }
     }
 }

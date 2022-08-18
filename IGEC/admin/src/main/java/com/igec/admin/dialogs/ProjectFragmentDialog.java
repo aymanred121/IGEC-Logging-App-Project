@@ -26,6 +26,7 @@ import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.collection.ArraySet;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -73,11 +74,10 @@ public class ProjectFragmentDialog extends DialogFragment {
     private final MaterialDatePicker.Builder<Long> vTimeDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vTimeDatePicker;
     ArrayList<EmployeeOverview> employees = new ArrayList<>();
-    private static ArrayList<String> TeamID = new ArrayList<>();
+    private static ArraySet<String> TeamID = new ArraySet<>();
     private static ArrayList<EmployeeOverview> Team = new ArrayList<>();
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     Project project;
-    private Boolean isDeleted = false;
     private WriteBatch batch = FirebaseFirestore.getInstance().batch();
     private final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
     private ArrayList<Pair<TextInputLayout, EditText>> views;
@@ -101,7 +101,6 @@ public class ProjectFragmentDialog extends DialogFragment {
     }
 
     public static void clearTeam() {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
         WriteBatch batch = FirebaseFirestore.getInstance().batch();
         for (EmployeeOverview emp : Team) {
             if (emp.getManagerID() == null) {
@@ -180,8 +179,8 @@ public class ProjectFragmentDialog extends DialogFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        int parent =getParentFragmentManager().getFragments().size()-1;
-        ((ProjectsFragment)getParentFragmentManager().getFragments().get(parent)).setOpened(false);
+        int parent = getParentFragmentManager().getFragments().size() - 1;
+        ((ProjectsFragment) getParentFragmentManager().getFragments().get(parent)).setOpened(false);
         binding = null;
     }
 
@@ -335,29 +334,13 @@ public class ProjectFragmentDialog extends DialogFragment {
     }
 
     private void updateEmployeesDetails(String projectID) {
-        String currentDateAndTime = sdf.format(new Date());
-        String month = currentDateAndTime.substring(3, 5);
-        String year = currentDateAndTime.substring(6, 10);
+
         batch = FirebaseFirestore.getInstance().batch();
         for (EmployeeOverview empOverview : employees) {
             ArrayList<String> empInfo = new ArrayList<>();
-            if (isDeleted || empOverview.getProjectId() == null) {
-                empOverview.setManagerID(null);
-                empOverview.setProjectId(null);
-                empOverview.isSelected = false;
-                EMPLOYEE_GROSS_SALARY_COL.document(empOverview.getId()).get().addOnSuccessListener(doc -> {
-                    if (!doc.exists())
-                        return;
-                    EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
-                    employeesGrossSalary.getAllTypes().removeIf(x -> x.getProjectId().equals(project.getId()));
-                    db.document(doc.getReference().getPath()).update("allTypes", employeesGrossSalary.getAllTypes());
-                });
-                EMPLOYEE_GROSS_SALARY_COL.document(empOverview.getId()).collection(year).document(month).update("baseAllowances", null);
-                Team.remove(empOverview);
-            }
-            if (empOverview.getId().equals(MID) && !isDeleted) {
+            if (empOverview.getId().equals(MID)) {
                 empOverview.setManagerID(ADMIN);
-            } else if (empOverview.getProjectId() != null && empOverview.getProjectId().equals(projectID) && !isDeleted) {
+            } else if (empOverview.getProjectId() != null && empOverview.getProjectId().equals(projectID)) {
                 empOverview.setManagerID(MID);
             }
             empInfo.add(empOverview.getFirstName());
@@ -378,8 +361,6 @@ public class ProjectFragmentDialog extends DialogFragment {
     @SuppressLint("NotifyDataSetChanged")
     void retrieveEmployees(Map<String, ArrayList<String>> empMap) {
         employees.clear();
-        Team.clear();
-        TeamID.clear();
         for (String key : empMap.keySet()) {
             String firstName = empMap.get(key).get(0);
             String lastName = empMap.get(key).get(1);
@@ -392,12 +373,14 @@ public class ProjectFragmentDialog extends DialogFragment {
             if (project.getId().equals(projectID)) {
                 newEmp.setManagerID(id.equals(project.getManagerID()) ? ADMIN : MID);
                 newEmp.isSelected = true;
-                Team.add(newEmp);
-                TeamID.add(newEmp.getId());
+                if (!TeamID.contains(id)) {
+                    TeamID.add(newEmp.getId());
+                    Team.add(newEmp);
+                }
             }
             boolean matchWithDb = TeamID.contains(id) == isSelected;
             boolean hasNoManager = managerID == null;
-            if (matchWithDb && (hasNoManager|| project.getId().equals(projectID)))
+            if (matchWithDb && (hasNoManager || project.getId().equals(projectID)))
                 employees.add(newEmp);
 
 
@@ -554,19 +537,41 @@ public class ProjectFragmentDialog extends DialogFragment {
     }
 
     void deleteProject() {
+        String currentDateAndTime = sdf.format(new Date());
+        String month = currentDateAndTime.substring(3, 5);
+        String year = currentDateAndTime.substring(6, 10);
         batch.delete(PROJECT_COL.document(project.getId()));
-        isDeleted = true;
-        batch.commit().addOnSuccessListener(unused -> {
-            updateEmployeesDetails(project.getId());
-            batch.commit().addOnSuccessListener(unused2 -> {
-                batch = FirebaseFirestore.getInstance().batch();
-                Snackbar.make(binding.getRoot(), "Deleted", Snackbar.LENGTH_SHORT).show();
-                binding.deleteButton.setEnabled(true);
-                dismiss();
+        project.getEmployees().forEach(member -> {
+            member.setManagerID(null);
+            member.setProjectId(null);
+            member.isSelected = false;
+            EMPLOYEE_GROSS_SALARY_COL.document(member.getId()).get().addOnSuccessListener(doc -> {
+                if (!doc.exists())
+                    return;
+                EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
+                employeesGrossSalary.getAllTypes().removeIf(x -> x.getProjectId().equals(project.getId()));
+                db.document(doc.getReference().getPath()).update("allTypes", employeesGrossSalary.getAllTypes());
+                employeesGrossSalary.getAllTypes().removeIf(x->x.getType() == allowancesEnum.NETSALARY.ordinal());
+                EMPLOYEE_GROSS_SALARY_COL.document(member.getId()).collection(year).document(month).update("baseAllowances", employeesGrossSalary.getAllTypes());
             });
+            ArrayList<String> empInfo = new ArrayList<>();
+            empInfo.add(member.getFirstName());
+            empInfo.add(member.getLastName());
+            empInfo.add(member.getTitle());
+            empInfo.add(null);
+            empInfo.add(null);
+            empInfo.add("0");
+            Map<String, Object> empInfoMap = new HashMap<>();
+            empInfoMap.put(member.getId(), empInfo);
+            batch.update(EMPLOYEE_OVERVIEW_REF, empInfoMap);
+            batch.update(EMPLOYEE_COL.document(member.getId()), "managerID", null, "projectID", null);
         });
-
-
+        batch.commit().addOnSuccessListener(unused2 -> {
+            batch = FirebaseFirestore.getInstance().batch();
+            Snackbar.make(binding.getRoot(), "Deleted", Snackbar.LENGTH_SHORT).show();
+            binding.deleteButton.setEnabled(true);
+            dismiss();
+        });
     }
 
     private void hideError(TextInputLayout layout) {

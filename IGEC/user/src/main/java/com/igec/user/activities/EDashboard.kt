@@ -31,7 +31,7 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
 
         binding = ActivityEdashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        currEmployee = intent.getSerializableExtra("emp") as Employee?
+        currEmployee = intent.getSerializableExtra("user") as Employee?
         setSupportActionBar(binding.toolbar)
 
         val drawerLayout: DrawerLayout = binding.drawerLayout

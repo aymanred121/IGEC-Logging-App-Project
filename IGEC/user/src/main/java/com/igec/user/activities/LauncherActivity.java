@@ -16,55 +16,61 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 
 import com.igec.common.firebase.Employee;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 public class LauncherActivity extends Activity {
     private boolean logged = false;
-    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                SharedPreferences preferences = getSharedPreferences(IGEC, MODE_PRIVATE);
-                logged = preferences.getBoolean(LOGGED, false);
-                if (!logged) {
-                    Intent intent = new Intent(LauncherActivity.this, MainActivity.class);
+
+        // for splash screen
+        new Handler().postDelayed(() -> {
+            SharedPreferences preferences = getSharedPreferences(IGEC, MODE_PRIVATE);
+            logged = preferences.getBoolean(LOGGED, false);
+
+
+            // not logged before -> Open  login Activity [t]
+            // logged:
+            // not assigned to a project -> closes the app []
+            // assigned to a project:
+            // the account isn't locked => Open login Activity []
+            // the account is locked => open suitable dashboard []
+
+
+
+            if (!logged) {
+                Intent intent = new Intent(LauncherActivity.this, LoginActivity.class);
+                startActivity(intent);
+                finish();
+            } else {
+                String savedID = preferences.getString(ID, "");
+                EMPLOYEE_COL.document(savedID).get().addOnSuccessListener(documentSnapshot -> {
+                    if (!documentSnapshot.exists())
+                        return;
+                    Employee employee = documentSnapshot.toObject(Employee.class);
+                    Intent intent;
+                    // not assigned to any project -> can't login
+                    assert employee != null;
+                    if (employee.getManagerID() == null) {
+                        Toast.makeText(LauncherActivity.this, "You're not assigned to any project yet", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                    // not used by another device but still logged here
+                    // meaning that the account has been unlocked while the account is still open in a device
+                    if (!employee.isLocked()) {
+                        intent = new Intent(LauncherActivity.this, LoginActivity.class);
+                        Toast.makeText(LauncherActivity.this, "Account is unlocked, login is required", Toast.LENGTH_SHORT).show();
+                    } else {
+                        // not used -> Open suitable dashboard
+                        if (employee.getManagerID().equals(ADMIN))
+                            intent = new Intent(LauncherActivity.this, MDashboard.class);
+                        else
+                            intent = new Intent(LauncherActivity.this, EDashboard.class);
+                    }
+                    intent.putExtra("user", employee);
                     startActivity(intent);
                     finish();
-                } else {
-                    String savedID = preferences.getString(ID, "");
-                    EMPLOYEE_COL.document(savedID).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                        @Override
-                        public void onSuccess(DocumentSnapshot documentSnapshot) {
-                            if (!documentSnapshot.exists())
-                                return;
-                            Employee employee = documentSnapshot.toObject(Employee.class);
-                            Intent intent;
-                            if (employee.getManagerID() == null) {
-                                Toast.makeText(LauncherActivity.this, "You're not assigned to any project yet", Toast.LENGTH_SHORT).show();
-                                finishAffinity();
-                                System.exit(0);
-                            }
-                            if (!employee.isLocked()) {
-                                intent = new Intent(LauncherActivity.this, MainActivity.class);
-                                Toast.makeText(LauncherActivity.this, "Account is unlocked, login is required", Toast.LENGTH_SHORT).show();
-                            } else {
-                                if (employee.getManagerID().equals(ADMIN))
-                                    intent = new Intent(LauncherActivity.this, MDashboard.class);
-                                else
-                                    intent = new Intent(LauncherActivity.this, EDashboard.class);
-                            }
-                            intent.putExtra("emp", employee);
-                            startActivity(intent);
-                            finish();
-                        }
-                    });
-                }
+                });
             }
         }, 2000);
 

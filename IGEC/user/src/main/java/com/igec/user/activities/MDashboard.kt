@@ -31,7 +31,7 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         super.onCreate(savedInstanceState)
         binding = ActivityMdashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        currManager = intent.getSerializableExtra("emp") as Employee?
+        currManager = intent.getSerializableExtra("user") as Employee?
         setSupportActionBar(binding.toolbar)
 
         val drawerLayout: DrawerLayout = binding.drawerLayout

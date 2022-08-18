@@ -32,14 +32,14 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
-import com.igec.user.databinding.ActivityMainBinding;
+import com.igec.user.databinding.ActivityLoginBinding;
 
 import java.util.regex.Pattern;
 
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class MainActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity {
 
     private final int PROJECT = 0;
     private final int NETSALARY = 1;
@@ -48,12 +48,12 @@ public class MainActivity extends AppCompatActivity {
     private final int PENALTY = 4;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     // Overrides
-    private ActivityMainBinding binding;
+    private ActivityLoginBinding binding;
     @RequiresApi(api = Build.VERSION_CODES.Q)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        binding = ActivityLoginBinding.inflate(getLayoutInflater());
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
         setContentView(binding.getRoot());
         validateDate(this);
@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void validateDate(Context c) {
         if (Settings.Global.getInt(c.getContentResolver(), Settings.Global.AUTO_TIME, 0) != 1) {
-            Intent intent = new Intent(MainActivity.this, SplashScreen_DateInaccurate.class);
+            Intent intent = new Intent(LoginActivity.this, SplashScreen_DateInaccurate.class);
             startActivity(intent);
             finish();
         }
@@ -190,9 +190,9 @@ public class MainActivity extends AppCompatActivity {
                                     Snackbar.make(binding.getRoot(), "you are not assigned to any project", Snackbar.LENGTH_SHORT).show();
                                     return;
                                 } else if (currEmployee != null && currEmployee.getManagerID().equals(ADMIN)) {
-                                    intent = new Intent(MainActivity.this, MDashboard.class);
+                                    intent = new Intent(LoginActivity.this, MDashboard.class);
                                 } else {
-                                    intent = new Intent(MainActivity.this, EDashboard.class);
+                                    intent = new Intent(LoginActivity.this, EDashboard.class);
                                 }
                                 intent.putExtra("emp", currEmployee);
                                 SharedPreferences sharedPreferences = getSharedPreferences(IGEC, MODE_PRIVATE);

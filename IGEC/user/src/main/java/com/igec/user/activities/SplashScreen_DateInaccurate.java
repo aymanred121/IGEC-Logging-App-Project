@@ -29,7 +29,7 @@ public class SplashScreen_DateInaccurate extends AppCompatActivity {
     }
     public void validateTime(Context c) {
         if (Settings.Global.getInt(c.getContentResolver(), Settings.Global.AUTO_TIME, 0) == 1) {
-            Intent intent = new Intent(SplashScreen_DateInaccurate.this, MainActivity.class);
+            Intent intent = new Intent(SplashScreen_DateInaccurate.this, LoginActivity.class);
             startActivity(intent);
             finish();
         }

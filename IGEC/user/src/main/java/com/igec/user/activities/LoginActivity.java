@@ -151,12 +151,23 @@ public class LoginActivity extends AppCompatActivity {
                 binding.emailLayout.setError(null);
             }
             hideError(binding.emailLayout);
+            binding.passwordLayout.setError(null);
+            hideError(binding.passwordLayout);
         }
     };
     private final View.OnClickListener clSignIn = new View.OnClickListener() {
         @RequiresApi(api = Build.VERSION_CODES.Q)
         @Override
         public void onClick(View v) {
+
+            /*
+            *
+            * wrong email or password -> show Snack bar with info [x]
+            * Correct email and password:
+            *           - locked -> this email is already in use [x]
+            *           - unlocked -> save shared preference ,open suitable dashboard [x]
+            *
+            * */
             EMPLOYEE_COL
                     .whereEqualTo("email", (binding.emailEdit.getText() != null) ? binding.emailEdit.getText().toString() : "")
                     .limit(1)
@@ -168,7 +179,8 @@ public class LoginActivity extends AppCompatActivity {
                         DocumentSnapshot d = queryDocumentSnapshots.getDocuments().get(0);
                         if (d.exists()) {
                             Employee currEmployee = d.toObject(Employee.class);
-                            if (currEmployee != null && !isPasswordRight(currEmployee.getPassword())) {
+                            assert currEmployee != null;
+                            if (!isPasswordRight(currEmployee.getPassword())) {
                                 return;
                             }
                             if (currEmployee.isLocked()) {
@@ -178,10 +190,10 @@ public class LoginActivity extends AppCompatActivity {
                             currEmployee.setLocked(true);
                             EMPLOYEE_COL.document(currEmployee.getId()).set(currEmployee, SetOptions.merge()).addOnSuccessListener(unused -> {
                                 Intent intent;
-                                if (currEmployee != null && currEmployee.getManagerID() == null) {
-                                    Snackbar.make(binding.getRoot(), "you are not assigned to any project", Snackbar.LENGTH_SHORT).show();
+                                if (currEmployee.getManagerID() == null) {
+                                    Snackbar.make(binding.getRoot(), "you are not assigned to any project yet", Snackbar.LENGTH_SHORT).show();
                                     return;
-                                } else if (currEmployee != null && currEmployee.getManagerID().equals(ADMIN)) {
+                                } else if (currEmployee.getManagerID().equals(ADMIN)) {
                                     intent = new Intent(LoginActivity.this, MDashboard.class);
                                 } else {
                                     intent = new Intent(LoginActivity.this, EDashboard.class);

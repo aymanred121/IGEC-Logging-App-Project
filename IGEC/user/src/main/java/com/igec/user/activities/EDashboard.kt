@@ -56,10 +56,9 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         navView.setupWithNavController(navController)
         navView.setNavigationItemSelectedListener(this)
 
-        binding.navView.getHeaderView(0).findViewById<TextView>(R.id.EmployeeName).text =
-            "${currEmployee?.firstName} ${currEmployee?.lastName}";
+        "${currEmployee?.firstName} ${currEmployee?.lastName}".also { employeeName-> binding.navView.getHeaderView(0).findViewById<TextView>(R.id.EmployeeName).text = employeeName }
         binding.navView.getHeaderView(0).findViewById<TextView>(R.id.EmployeeID).text =
-            currEmployee?.id;
+            currEmployee?.id
 
     }
 

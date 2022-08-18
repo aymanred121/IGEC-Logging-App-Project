@@ -1,7 +1,10 @@
 package com.igec.user.dialogs;
 
 import android.app.Dialog;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Pair;
@@ -20,6 +23,7 @@ import com.igec.user.R;
 import com.igec.common.firebase.Client;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.igec.user.activities.DateInaccurate;
 import com.igec.user.databinding.DialogClientInfoBinding;
 
 import java.util.ArrayList;
@@ -73,6 +77,18 @@ public class ClientInfoDialog extends DialogFragment {
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+    @Override
+    public void onResume() {
+        super.onResume();
+        validateDate(getActivity());
+    }
+    private void validateDate(Context c) {
+        if (Settings.Global.getInt(c.getContentResolver(), Settings.Global.AUTO_TIME, 0) != 1) {
+            Intent intent = new Intent(getActivity(), DateInaccurate.class);
+            startActivity(intent);
+            getActivity().finish();
+        }
     }
 
     @Override

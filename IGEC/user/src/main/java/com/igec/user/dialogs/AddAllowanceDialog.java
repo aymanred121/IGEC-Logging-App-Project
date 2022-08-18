@@ -5,6 +5,7 @@ import static com.igec.common.CONSTANTS.PROJECT_COL;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -133,7 +134,18 @@ public class AddAllowanceDialog extends DialogFragment {
         super.onDestroy();
         binding = null;
     }
-
+    @Override
+    public void onResume() {
+        super.onResume();
+        validateDate(getActivity());
+    }
+    private void validateDate(Context c) {
+        if (Settings.Global.getInt(c.getContentResolver(), Settings.Global.AUTO_TIME, 0) != 1) {
+            Intent intent = new Intent(getActivity(), DateInaccurate.class);
+            startActivity(intent);
+            getActivity().finish();
+        }
+    }
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);

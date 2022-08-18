@@ -3,7 +3,10 @@ package com.igec.user.fragments;
 import static com.igec.common.CONSTANTS.EMPLOYEE_GROSS_SALARY_COL;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +22,7 @@ import com.igec.common.firebase.Allowance;
 import com.igec.common.firebase.EmployeesGrossSalary;
 import com.igec.common.utilities.allowancesEnum;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.igec.user.activities.DateInaccurate;
 import com.igec.user.databinding.FragmentGrossSalaryBinding;
 import com.whiteelephant.monthpicker.MonthPickerDialog;
 
@@ -61,6 +65,18 @@ public class GrossSalaryFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         binding = null;
+    }
+    @Override
+    public void onResume() {
+        super.onResume();
+        validateDate(getActivity());
+    }
+    private void validateDate(Context c) {
+        if (Settings.Global.getInt(c.getContentResolver(), Settings.Global.AUTO_TIME, 0) != 1) {
+            Intent intent = new Intent(getActivity(), DateInaccurate.class);
+            startActivity(intent);
+            getActivity().finish();
+        }
     }
 
     AllowanceAdapter.OnItemClickListener onItemClickListener = new AllowanceAdapter.OnItemClickListener() {

@@ -1,7 +1,10 @@
 package com.igec.user.dialogs;
 
 import android.app.Dialog;
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +17,7 @@ import androidx.fragment.app.DialogFragment;
 
 import com.budiyev.android.codescanner.CodeScanner;
 import com.igec.user.R;
+import com.igec.user.activities.DateInaccurate;
 import com.igec.user.databinding.DialogMachineCheckInOutBinding;
 
 public class MachineCheckInOutDialog extends DialogFragment {
@@ -54,7 +58,13 @@ public class MachineCheckInOutDialog extends DialogFragment {
         super.onDestroyView();
         binding = null;
     }
-
+    private void validateDate(Context c) {
+        if (Settings.Global.getInt(c.getContentResolver(), Settings.Global.AUTO_TIME, 0) != 1) {
+            Intent intent = new Intent(getActivity(), DateInaccurate.class);
+            startActivity(intent);
+            getActivity().finish();
+        }
+    }
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -73,6 +83,7 @@ public class MachineCheckInOutDialog extends DialogFragment {
     public void onResume() {
         super.onResume();
         mCodeScanner.startPreview();
+        validateDate(getActivity());
     }
 
     @Override

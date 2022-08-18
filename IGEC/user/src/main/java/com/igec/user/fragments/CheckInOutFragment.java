@@ -11,10 +11,13 @@ import static com.igec.common.CONSTANTS.SUMMARY_COL;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +34,7 @@ import androidx.fragment.app.FragmentResultListener;
 import com.birjuvachhani.locus.Locus;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.material.snackbar.Snackbar;
+import com.igec.user.activities.DateInaccurate;
 import com.igec.user.databinding.FragmentCheckInOutBinding;
 import com.igec.user.dialogs.ClientInfoDialog;
 import com.igec.user.dialogs.MachineCheckInOutDialog;
@@ -110,6 +114,18 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     public void onDestroy() {
         super.onDestroy();
         binding = null;
+    }
+    @Override
+    public void onResume() {
+        super.onResume();
+        validateDate(getActivity());
+    }
+    private void validateDate(Context c) {
+        if (Settings.Global.getInt(c.getContentResolver(), Settings.Global.AUTO_TIME, 0) != 1) {
+            Intent intent = new Intent(getActivity(), DateInaccurate.class);
+            startActivity(intent);
+            getActivity().finish();
+        }
     }
 
     @Override

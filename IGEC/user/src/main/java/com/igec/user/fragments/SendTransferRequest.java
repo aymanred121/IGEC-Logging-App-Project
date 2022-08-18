@@ -4,7 +4,9 @@ import static com.igec.common.CONSTANTS.PROJECT_COL;
 import static com.igec.common.CONSTANTS.TRANSFER_REQUESTS_COL;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -29,6 +31,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.igec.user.activities.DateInaccurate;
 import com.igec.user.databinding.FragmentSendTransferRequestBinding;
 
 import java.io.IOException;
@@ -70,7 +73,18 @@ public class SendTransferRequest extends Fragment {
         super.onDestroy();
         binding = null;
     }
-
+    @Override
+    public void onResume() {
+        super.onResume();
+        validateDate(getActivity());
+    }
+    private void validateDate(Context c) {
+        if (Settings.Global.getInt(c.getContentResolver(), Settings.Global.AUTO_TIME, 0) != 1) {
+            Intent intent = new Intent(getActivity(), DateInaccurate.class);
+            startActivity(intent);
+            getActivity().finish();
+        }
+    }
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);

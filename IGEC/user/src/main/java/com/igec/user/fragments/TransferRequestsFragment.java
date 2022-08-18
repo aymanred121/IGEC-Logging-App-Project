@@ -8,8 +8,11 @@ import static com.igec.common.CONSTANTS.TRANSFER_REQUESTS_COL;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +23,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.igec.user.activities.DateInaccurate;
 import com.igec.user.adapters.TransferAdapter;
 import com.igec.common.firebase.Allowance;
 import com.igec.common.firebase.Employee;
@@ -69,6 +73,19 @@ public class TransferRequestsFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         binding = null;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        validateDate(getActivity());
+    }
+    private void validateDate(Context c) {
+        if (Settings.Global.getInt(c.getContentResolver(), Settings.Global.AUTO_TIME, 0) != 1) {
+            Intent intent = new Intent(getActivity(), DateInaccurate.class);
+            startActivity(intent);
+            getActivity().finish();
+        }
     }
 
     @Override

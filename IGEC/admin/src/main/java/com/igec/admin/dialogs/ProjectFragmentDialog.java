@@ -333,28 +333,42 @@ public class ProjectFragmentDialog extends DialogFragment {
                 });
     }
 
-    private void updateEmployeesDetails(String projectID) {
-
+    private void updateEmployeesDetails() {
+        String currentDateAndTime = sdf.format(new Date());
+        String month = currentDateAndTime.substring(3, 5);
+        String year = currentDateAndTime.substring(6, 10);
         batch = FirebaseFirestore.getInstance().batch();
-        for (EmployeeOverview empOverview : employees) {
-            ArrayList<String> empInfo = new ArrayList<>();
-            if (empOverview.getId().equals(MID)) {
-                empOverview.setManagerID(ADMIN);
-            } else if (empOverview.getProjectId() != null && empOverview.getProjectId().equals(projectID)) {
-                empOverview.setManagerID(MID);
+        employees.forEach(emp -> {
+            if (emp.getManagerID() != null && emp.getProjectId() != null && !emp.isSelected) {
+                // removed
+                emp.setProjectId(null);
+                emp.setManagerID(null);
+                EMPLOYEE_GROSS_SALARY_COL.document(emp.getId()).get().addOnSuccessListener(doc -> {
+                    if (!doc.exists())
+                        return;
+                    EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
+                    employeesGrossSalary.getAllTypes().removeIf(x -> x.getProjectId().equals(project.getId()));
+                    db.document(doc.getReference().getPath()).update("allTypes", employeesGrossSalary.getAllTypes());
+                    employeesGrossSalary.getAllTypes().removeIf(x -> x.getType() == allowancesEnum.NETSALARY.ordinal());
+                    EMPLOYEE_GROSS_SALARY_COL.document(emp.getId()).collection(year).document(month).update("baseAllowances", employeesGrossSalary.getAllTypes());
+                });
+            } else if (TeamID.contains(emp.getId())) {
+                // newly added
+                emp.setProjectId(project.getId());
+                emp.setManagerID(emp.getId().equals(MID) ? ADMIN : MID);
             }
-            empInfo.add(empOverview.getFirstName());
-            empInfo.add(empOverview.getLastName());
-            empInfo.add(empOverview.getTitle());
-            empInfo.add(empOverview.getManagerID());
-            empInfo.add(empOverview.getProjectId());
-            empInfo.add(empOverview.isSelected ? "1" : "0");
+            ArrayList<String> empInfo = new ArrayList<>();
+            empInfo.add(emp.getFirstName());
+            empInfo.add(emp.getLastName());
+            empInfo.add(emp.getTitle());
+            empInfo.add(emp.getManagerID());
+            empInfo.add(emp.getProjectId());
+            empInfo.add(emp.isSelected ? "1" : "0");
             Map<String, Object> empInfoMap = new HashMap<>();
-            empInfoMap.put(empOverview.getId(), empInfo);
+            empInfoMap.put(emp.getId(), empInfo);
             batch.update(EMPLOYEE_OVERVIEW_REF, empInfoMap);
-            batch.update(EMPLOYEE_COL.document(empOverview.getId()), "managerID", empOverview.getManagerID(), "projectID", empOverview.getProjectId());
-        }
-
+            batch.update(EMPLOYEE_COL.document(emp.getId()), "managerID", emp.getManagerID(), "projectID", emp.getProjectId());
+        });
     }
 
 
@@ -416,7 +430,7 @@ public class ProjectFragmentDialog extends DialogFragment {
     }
 
     void updateProject() {
-        updateEmployeesDetails(project.getId());
+        updateEmployeesDetails();
         Team.forEach(employeeOverview -> {
             if (employeeOverview.getId().equals(MID))
                 employeeOverview.setManagerID(ADMIN);
@@ -424,7 +438,6 @@ public class ProjectFragmentDialog extends DialogFragment {
                 employeeOverview.setManagerID(MID);
             employeeOverview.setProjectId(project.getId());
         });
-
         Project newProject = new Project(binding.managerNameEdit.getText().toString()
                 , MID
                 , binding.nameEdit.getText().toString()
@@ -551,7 +564,7 @@ public class ProjectFragmentDialog extends DialogFragment {
                 EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
                 employeesGrossSalary.getAllTypes().removeIf(x -> x.getProjectId().equals(project.getId()));
                 db.document(doc.getReference().getPath()).update("allTypes", employeesGrossSalary.getAllTypes());
-                employeesGrossSalary.getAllTypes().removeIf(x->x.getType() == allowancesEnum.NETSALARY.ordinal());
+                employeesGrossSalary.getAllTypes().removeIf(x -> x.getType() == allowancesEnum.NETSALARY.ordinal());
                 EMPLOYEE_GROSS_SALARY_COL.document(member.getId()).collection(year).document(month).update("baseAllowances", employeesGrossSalary.getAllTypes());
             });
             ArrayList<String> empInfo = new ArrayList<>();

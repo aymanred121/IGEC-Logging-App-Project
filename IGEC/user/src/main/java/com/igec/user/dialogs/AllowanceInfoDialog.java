@@ -47,11 +47,13 @@ public class AllowanceInfoDialog extends DialogFragment {
     private String baseCurrency;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
-    public AllowanceInfoDialog(int position, boolean canGivePenalty, boolean isProject, String id) {
+    public AllowanceInfoDialog(int position, boolean canGivePenalty, boolean isProject, String id, double baseSalary, String baseCurrency) {
         this.position = position;
         this.canGivePenalty = canGivePenalty;
         this.isProject = isProject;
         this.EmployeeID = id;
+        this.baseSalary = baseSalary;
+        this.baseCurrency = baseCurrency;
     }
 
     public AllowanceInfoDialog(int position, Allowance allowance, boolean canGivePenalty, boolean isProject, String id, double baseSalary, String baseCurrency) {
@@ -323,6 +325,7 @@ public class AllowanceInfoDialog extends DialogFragment {
             binding.mountLayout.setSuffixText(isRetentionByDays ? "Day(s)" : binding.currencyAuto.getText().toString());
             binding.nameLayout.setVisibility(isOther ? View.VISIBLE : View.GONE);
             binding.currencyLayout.setVisibility(isRetentionByDays ? View.GONE : View.VISIBLE);
+            binding.currencyAuto.setText(isRetentionByDays?baseCurrency:binding.currencyAuto.getText());
             binding.nameEdit.setText("");
             hideError(binding.typeLayout);
         }

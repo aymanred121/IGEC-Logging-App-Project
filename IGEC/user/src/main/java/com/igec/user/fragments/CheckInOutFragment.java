@@ -97,9 +97,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         return fragment;
     }
 
-    private final View.OnClickListener oclMachine = view -> {
-        animationFab();
-    };
+
 
     private FragmentCheckInOutBinding binding;
 
@@ -442,24 +440,6 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         });
     }
 
-
-    private final View.OnClickListener oclInside = view -> {
-        if (!getCameraPermission()) {
-            Snackbar.make(binding.getRoot(), "Please, Enable camera permission !", Snackbar.LENGTH_SHORT).show();
-            return;
-        }
-        MachineCheckInOutDialog machineCheckInOutDialog = new MachineCheckInOutDialog(true);
-        machineCheckInOutDialog.show(getParentFragmentManager(), "");
-    };
-    private final View.OnClickListener oclOutside = view -> {
-        if (!getCameraPermission()) {
-            Snackbar.make(binding.getRoot(), "Please, Enable camera permission !", Snackbar.LENGTH_SHORT).show();
-            return;
-        }
-        MachineCheckInOutDialog machineCheckInOutDialog = new MachineCheckInOutDialog(false);
-        machineCheckInOutDialog.show(getParentFragmentManager(), "");
-    };
-
     private void machineCheckInOut(Client client, String note) {
         MACHINE_EMPLOYEE_COL.document(machineEmpId).get().addOnSuccessListener(documentSnapshot -> {
             if (!documentSnapshot.exists()) {
@@ -651,4 +631,24 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
             new AppSettingsDialog.Builder(this).build().show();
         }
     }
+
+    private final View.OnClickListener oclInside = view -> {
+        if (!getCameraPermission()) {
+            Snackbar.make(binding.getRoot(), "Please, Enable camera permission !", Snackbar.LENGTH_SHORT).show();
+            return;
+        }
+        MachineCheckInOutDialog machineCheckInOutDialog = new MachineCheckInOutDialog(true);
+        machineCheckInOutDialog.show(getParentFragmentManager(), "");
+    };
+    private final View.OnClickListener oclOutside = view -> {
+        if (!getCameraPermission()) {
+            Snackbar.make(binding.getRoot(), "Please, Enable camera permission !", Snackbar.LENGTH_SHORT).show();
+            return;
+        }
+        MachineCheckInOutDialog machineCheckInOutDialog = new MachineCheckInOutDialog(false);
+        machineCheckInOutDialog.show(getParentFragmentManager(), "");
+    };
+    private final View.OnClickListener oclMachine = view -> {
+        animationFab();
+    };
 }

@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 public class AllowanceAdapter extends RecyclerView.Adapter<AllowanceAdapter.AllowanceViewHolder> {
-    private ArrayList<Allowance> allowances;
+    private ArrayList<Allowance> allowances = new ArrayList<>();
     private OnItemClickListener listener;
     private final boolean canRemove;
     private boolean clickable = true;

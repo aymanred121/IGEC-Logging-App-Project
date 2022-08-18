@@ -17,11 +17,13 @@ import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.collection.ArraySet;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.firestore.ListenerRegistration;
 import com.igec.common.adapters.AllowanceAdapter;
 import com.igec.user.R;
 import com.igec.common.firebase.Allowance;
@@ -55,6 +57,7 @@ public class AddAllowanceDialog extends DialogFragment {
     private String currency;
 
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private ArrayList<ListenerRegistration> tasks = new ArrayList<>();
 
     public AddAllowanceDialog(Employee manager, ArrayList<Allowance> allowances, boolean canGivePenalty, boolean canRemove) {
         this.manager = manager;
@@ -135,13 +138,16 @@ public class AddAllowanceDialog extends DialogFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        tasks.forEach(ListenerRegistration::remove);
         binding = null;
     }
+
     @Override
     public void onResume() {
         super.onResume();
         validateDate(getActivity());
     }
+
     private void validateDate(Context c) {
         if (Settings.Global.getInt(c.getContentResolver(), Settings.Global.AUTO_TIME, 0) != 1) {
             Intent intent = new Intent(getActivity(), DateInaccurate.class);
@@ -149,6 +155,7 @@ public class AddAllowanceDialog extends DialogFragment {
             getActivity().finish();
         }
     }
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -164,7 +171,6 @@ public class AddAllowanceDialog extends DialogFragment {
         layoutManager = new LinearLayoutManager(getActivity());
         binding.recyclerView.setLayoutManager(layoutManager);
         adapter = new AllowanceAdapter(canRemove);
-        binding.recyclerView.setAdapter(adapter);
         final Calendar today = Calendar.getInstance();
         year = String.valueOf(today.get(Calendar.YEAR));
         month = String.format("%02d", today.get(Calendar.MONTH) + 1);
@@ -179,10 +185,14 @@ public class AddAllowanceDialog extends DialogFragment {
         isProject = allowances != null;
         if (isProject) {
             adapter.setAllowances(allowances);
+            binding.recyclerView.setAdapter(adapter);
+
         } else {
-            EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()).collection(year).document(month).addSnapshotListener((value, error) -> {
+            tasks.add(EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()).collection(year).document(month).addSnapshotListener((value, error) -> {
                 allowances = new ArrayList<>();
                 adapter.setAllowances(allowances);
+                binding.recyclerView.setAdapter(adapter);
+
                 if (!value.exists())
                     return;
                 //allowances.clear();
@@ -200,7 +210,7 @@ public class AddAllowanceDialog extends DialogFragment {
                 //get baseAllowances
                 employeesGrossSalary.getBaseAllowances().stream().filter(allowance -> allowance.getType() != allowancesEnum.PROJECT.ordinal()).forEach(allowance -> allowances.add(allowance));
                 adapter.notifyDataSetChanged();
-            });
+            }));
         }
 
     }
@@ -301,16 +311,53 @@ public class AddAllowanceDialog extends DialogFragment {
     private final View.OnClickListener oclAddAllowance = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            AllowanceInfoDialog allowanceInfoDialog = new AllowanceInfoDialog(-1, canGivePenalty, isProject, (employee != null) ? employee.getId() : null);
-            allowanceInfoDialog.show(getParentFragmentManager(), "");
+
+
+            if (employee == null) {
+                AllowanceInfoDialog allowanceInfoDialog = new AllowanceInfoDialog(-1, canGivePenalty, isProject, null, baseSalary, currency);
+                allowanceInfoDialog.show(getParentFragmentManager(), "");
+            } else {
+                EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()).get().addOnSuccessListener(doc -> {
+                    if (!doc.exists())
+                        return;
+                    EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
+                    employeesGrossSalary.getAllTypes().forEach(allowance -> {
+                        if (allowance.getType() == allowancesEnum.NETSALARY.ordinal()) {
+                            baseSalary = allowance.getAmount();
+                            currency = allowance.getCurrency();
+                        }
+                    });
+                    AllowanceInfoDialog allowanceInfoDialog = new AllowanceInfoDialog(-1, canGivePenalty, isProject, employee.getId(), baseSalary, currency);
+                    allowanceInfoDialog.show(getParentFragmentManager(), "");
+                });
+            }
         }
+
     };
     private final AllowanceAdapter.OnItemClickListener oclItemClickListener = new AllowanceAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position) {
 
-            AllowanceInfoDialog allowanceInfoDialog = new AllowanceInfoDialog(position, allowances.get(position), canGivePenalty, isProject, (employee != null) ? employee.getId() : null, baseSalary, currency);
-            allowanceInfoDialog.show(getParentFragmentManager(), "");
+            if (employee == null) {
+                AllowanceInfoDialog allowanceInfoDialog = new AllowanceInfoDialog(position, allowances.get(position), canGivePenalty, isProject, null, baseSalary, currency);
+                allowanceInfoDialog.show(getParentFragmentManager(), "");
+            } else {
+                EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()).get().addOnSuccessListener(doc -> {
+                    if (!doc.exists())
+                        return;
+                    EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
+                    employeesGrossSalary.getAllTypes().forEach(allowance -> {
+                        if (allowance.getType() == allowancesEnum.NETSALARY.ordinal()) {
+                            baseSalary = allowance.getAmount();
+                            currency = allowance.getCurrency();
+                        }
+
+                    });
+                    AllowanceInfoDialog allowanceInfoDialog = new AllowanceInfoDialog(position, allowances.get(position), canGivePenalty, isProject, employee.getId(), baseSalary, currency);
+                    allowanceInfoDialog.show(getParentFragmentManager(), "");
+                });
+            }
+
         }
 
         @Override

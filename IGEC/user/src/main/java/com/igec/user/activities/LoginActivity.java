@@ -40,13 +40,6 @@ import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
 public class LoginActivity extends AppCompatActivity {
-
-    private final int PROJECT = 0;
-    private final int NETSALARY = 1;
-    private final int ALLOWANCE = 2;
-    private final int BONUS = 3;
-    private final int PENALTY = 4;
-    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     // Overrides
     private ActivityLoginBinding binding;
     @RequiresApi(api = Build.VERSION_CODES.Q)
@@ -164,7 +157,6 @@ public class LoginActivity extends AppCompatActivity {
         @RequiresApi(api = Build.VERSION_CODES.Q)
         @Override
         public void onClick(View v) {
-            FirebaseFirestore db = FirebaseFirestore.getInstance();
             EMPLOYEE_COL
                     .whereEqualTo("email", (binding.emailEdit.getText() != null) ? binding.emailEdit.getText().toString() : "")
                     .limit(1)
@@ -194,7 +186,7 @@ public class LoginActivity extends AppCompatActivity {
                                 } else {
                                     intent = new Intent(LoginActivity.this, EDashboard.class);
                                 }
-                                intent.putExtra("emp", currEmployee);
+                                intent.putExtra("user", currEmployee);
                                 SharedPreferences sharedPreferences = getSharedPreferences(IGEC, MODE_PRIVATE);
                                 SharedPreferences.Editor editor = sharedPreferences.edit();
                                 editor.putBoolean(LOGGED, true);

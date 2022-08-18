@@ -29,14 +29,15 @@ public class LauncherActivity extends Activity {
             logged = preferences.getBoolean(LOGGED, false);
 
 
-            // not logged before -> Open  login Activity [t]
-            // logged:
-            // not assigned to a project -> closes the app []
-            // assigned to a project:
-            // the account isn't locked => Open login Activity []
-            // the account is locked => open suitable dashboard []
-
-
+            /*
+             *
+             * not logged before -> Open  login Activity [x]
+             * logged:
+             *      not assigned to a project -> closes the app [x]
+             *      assigned to a project:
+             *          the account isn't locked => Open login Activity [x]
+             *          the account is locked => open suitable dashboard [x]
+             * */
 
             if (!logged) {
                 Intent intent = new Intent(LauncherActivity.this, LoginActivity.class);

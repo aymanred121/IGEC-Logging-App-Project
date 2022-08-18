@@ -17,7 +17,7 @@ import java.util.ArrayList;
 public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.EmployeeAdapterViewHolder> {
     private final ArrayList<EmployeeOverview> employeeOverviews;
     private OnItemClickListener listener;
-    private Project project;
+    private final Project project;
 
     public EmployeeAdapter(ArrayList<EmployeeOverview> employeeOverviews, Project project) {
         this.employeeOverviews = employeeOverviews;
@@ -41,7 +41,7 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
         holder.vEmployeeName.setText(String.format("Employee Name: %s %s", EmployeeOverview.getFirstName(), EmployeeOverview.getLastName()));
         holder.vEmployeeID.setText(String.format("Employee Id: %s", EmployeeOverview.getId()));
         if (project.getEmployeeWorkedTime().get(EmployeeOverview.getId()) == null)
-            holder.vWorkingHours.setText("0 Hours");
+            holder.vWorkingHours.setText(R.string.defaultTime);
         else{
             double workingTime = (double)((long) project.getEmployeeWorkedTime().get(EmployeeOverview.getId()));
             workingTime /=3600.0;

@@ -16,7 +16,7 @@ import java.util.ArrayList;
 
 public class AccessoryAdapter extends RecyclerView.Adapter<AccessoryAdapter.AccessoryViewHolder> {
 
-    private ArrayList<Accessory> accessories;
+    private final ArrayList<Accessory> accessories;
 
     public AccessoryAdapter(ArrayList<Accessory> accessories) {
         this.accessories = accessories;
@@ -41,14 +41,6 @@ public class AccessoryAdapter extends RecyclerView.Adapter<AccessoryAdapter.Acce
     @Override
     public int getItemCount() {
         return accessories.size();
-    }
-
-    public ArrayList<Accessory> getSupplements() {
-        return accessories;
-    }
-
-    public void setSupplements(ArrayList<Accessory> accessories) {
-        this.accessories = accessories;
     }
 
     static class AccessoryViewHolder extends RecyclerView.ViewHolder {

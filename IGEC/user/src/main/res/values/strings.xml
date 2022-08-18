@@ -71,4 +71,5 @@
     <string name="currency">Currency</string>
     <string name="company">Company</string>
     <string name="employee">Employee</string>
+    <string name="defaultTime">0 Hours</string>
 </resources>

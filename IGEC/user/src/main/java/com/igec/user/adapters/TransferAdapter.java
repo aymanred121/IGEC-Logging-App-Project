@@ -22,9 +22,6 @@ public class TransferAdapter extends RecyclerView.Adapter<TransferAdapter.Transf
         void onItemClick(int position);
     }
 
-    public OnItemClickListener getOnItemClickListener() {
-        return listener;
-    }
 
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.listener = listener;
@@ -34,9 +31,6 @@ public class TransferAdapter extends RecyclerView.Adapter<TransferAdapter.Transf
         this.transfers = transfers;
     }
 
-    public ArrayList<TransferRequests> getTransfers() {
-        return transfers;
-    }
 
     public void setTransfers(ArrayList<TransferRequests> transfers) {
         this.transfers = transfers;

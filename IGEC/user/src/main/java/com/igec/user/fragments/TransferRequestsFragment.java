@@ -49,6 +49,7 @@ public class TransferRequestsFragment extends Fragment {
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private ArrayList<TransferRequests> requests;
     private String day,year,month;
+    private Project newProject;
     private WriteBatch batch = FirebaseFirestore.getInstance().batch();
 
     public static TransferRequestsFragment newInstance(Employee manager) {
@@ -133,41 +134,33 @@ public class TransferRequestsFragment extends Fragment {
     }
 
     private void updateEmployeeData(TransferRequests request) {
-        batch.update(EMPLOYEE_COL.document(request.getEmployee().getId()), "projectID", request.getNewProjectId()
-                , "managerID", manager.getId());
+        batch.update(EMPLOYEE_COL.document(request.getEmployee().getId()), "projectID", newProject.getId()
+                , "managerID", newProject.getManagerID());
 
         ArrayList<String> empInfo = new ArrayList<>();
         empInfo.add(request.getEmployee().getFirstName());
         empInfo.add(request.getEmployee().getLastName());
         empInfo.add(request.getEmployee().getTitle());
-        empInfo.add(manager.getId());
-        empInfo.add(request.getNewProjectId());
+        empInfo.add(newProject.getManagerID());
+        empInfo.add(newProject.getId());
         empInfo.add("1"); // by default because already in project
         Map<String, Object> empInfoMap = new HashMap<>();
         empInfoMap.put(request.getEmployee().getId(), empInfo);
         batch.update(EMPLOYEE_OVERVIEW_REF, empInfoMap);
     }
 
+
     private void updateProjectData(TransferRequests request) {
         //remove emp from old project
         batch.update(PROJECT_COL.document(request.getOldProjectId()),"employees", FieldValue.arrayRemove(request.getEmployee()));
         //add emp to new project
         request.getEmployee().setProjectId(request.getNewProjectId());
-        request.getEmployee().setManagerID(manager.getId());
+        request.getEmployee().setManagerID(newProject.getManagerID());
         batch.update(PROJECT_COL.document(request.getNewProjectId()),"employees", FieldValue.arrayUnion(request.getEmployee()));
-
-        PROJECT_COL.document(request.getNewProjectId()).get().addOnSuccessListener((value) ->
-        {
-            if (!value.exists()) return;
-            Project projectTemp = value.toObject(Project.class);
-            updateAllowancesData(request, projectTemp.getAllowancesList());
-
-        });
     }
-
     private void updateAllowancesData(TransferRequests request, ArrayList<Allowance> projectAllowances) {
         updateDate();
-      EMPLOYEE_GROSS_SALARY_COL.document(request.getEmployee().getId()).get().addOnSuccessListener(value -> {
+        EMPLOYEE_GROSS_SALARY_COL.document(request.getEmployee().getId()).get().addOnSuccessListener(value -> {
             if (!value.exists())
                 return;
             EmployeesGrossSalary employeesGrossSalary1 = value.toObject(EmployeesGrossSalary.class);
@@ -193,9 +186,16 @@ public class TransferRequestsFragment extends Fragment {
     private void updateRequestStatus(TransferRequests request, int status) {
         batch = FirebaseFirestore.getInstance().batch();
         if(status==1){
-            batch.update(TRANSFER_REQUESTS_COL.document(request.getTransferId()),"transferStatus", status);
-            updateEmployeeData(request);
-            updateProjectData(request);
+            PROJECT_COL.document(request.getNewProjectId()).get().addOnSuccessListener(doc->{
+                if(!doc.exists())
+                    return;
+                newProject = doc.toObject(Project.class);
+                batch.update(TRANSFER_REQUESTS_COL.document(request.getTransferId()),"transferStatus", status);
+                updateEmployeeData(request);
+                updateProjectData(request);
+                updateAllowancesData(request, newProject.getAllowancesList());
+            });
+
         }
 
 

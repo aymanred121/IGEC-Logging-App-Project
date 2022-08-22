@@ -2,14 +2,13 @@ package com.igec.admin.adapters;
 
 import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.igec.admin.R;
+import com.igec.admin.databinding.ItemWorkdayBinding;
 import com.igec.common.utilities.WorkingDay;
 
 import java.text.ParseException;
@@ -32,11 +31,11 @@ public class WorkingDayAdapter extends RecyclerView.Adapter<WorkingDayAdapter.Da
         public TextView vDay;
         public TextView vHours;
 
-        public DayViewHolder(@NonNull View itemView, WorkingDayAdapter.OnItemClickListener listener) {
-            super(itemView);
-            vDay = itemView.findViewById(R.id.TextView_day);
-            vHours = itemView.findViewById(R.id.TextView_hours);
-            itemView.setOnClickListener(v -> {
+        public DayViewHolder(@NonNull ItemWorkdayBinding itemView, OnItemClickListener listener) {
+            super(itemView.getRoot());
+            vDay = itemView.TextViewDay;
+            vHours = itemView.TextViewHours;
+            itemView.getRoot().setOnClickListener(v -> {
                 if (listener != null) {
                     int position = getAdapterPosition();
                     if (position != RecyclerView.NO_POSITION) {
@@ -54,8 +53,8 @@ public class WorkingDayAdapter extends RecyclerView.Adapter<WorkingDayAdapter.Da
     @NonNull
     @Override
     public DayViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.item_workday, parent, false);
-        return new DayViewHolder(v, listener);
+        ItemWorkdayBinding binding = ItemWorkdayBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
+        return new DayViewHolder(binding, listener);
     }
 
     @SuppressLint("DefaultLocale")

@@ -1,14 +1,13 @@
 package com.igec.admin.adapters;
 
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.igec.admin.R;
+import com.igec.admin.databinding.ItemProjectBinding;
 import com.igec.common.firebase.Project;
 
 import java.util.ArrayList;
@@ -31,15 +30,15 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectV
 
         public TextView vName, vNEmployee, vNMachine, vNHEmployee, vNHMachine;
 
-        public ProjectViewHolder(@NonNull View itemView, ProjectAdapter.OnItemClickListener listener) {
-            super(itemView);
-            vName = itemView.findViewById(R.id.TextView_ProjectName);
-            vNEmployee = itemView.findViewById(R.id.TextView_nEmployee);
-            vNMachine = itemView.findViewById(R.id.TextView_nMachine);
-            vNHMachine = itemView.findViewById(R.id.TextView_nHourMachine);
-            vNHEmployee = itemView.findViewById(R.id.TextView_nHourEmployee);
+        public ProjectViewHolder(@NonNull ItemProjectBinding itemView, OnItemClickListener listener) {
+            super(itemView.getRoot());
+            vName = itemView.TextViewProjectName;
+            vNEmployee = itemView.TextViewNEmployee;
+            vNMachine = itemView.TextViewNMachine;
+            vNHMachine = itemView.TextViewNHourMachine;
+            vNHEmployee = itemView.TextViewNHourEmployee;
 
-            itemView.setOnClickListener(v -> {
+            itemView.getRoot().setOnClickListener(v -> {
                 if (listener != null) {
                     int position = getAdapterPosition();
                     if (position != RecyclerView.NO_POSITION) {
@@ -59,8 +58,8 @@ public class ProjectAdapter extends RecyclerView.Adapter<ProjectAdapter.ProjectV
     @NonNull
     @Override
     public ProjectAdapter.ProjectViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.item_project, parent, false);
-        return new ProjectViewHolder(v, listener);
+       ItemProjectBinding binding  = ItemProjectBinding.inflate(LayoutInflater.from(parent.getContext()),parent,false);
+        return new ProjectViewHolder(binding, listener);
     }
 
     @Override

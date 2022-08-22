@@ -1,7 +1,6 @@
 package com.igec.user.adapters;
 
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -9,8 +8,8 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.igec.user.R;
 import com.igec.common.firebase.Accessory;
+import com.igec.user.databinding.ItemAccessoryBinding;
 
 import java.util.ArrayList;
 
@@ -26,8 +25,8 @@ public class AccessoryAdapter extends RecyclerView.Adapter<AccessoryAdapter.Acce
     @NonNull
     @Override
     public AccessoryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.item_accessory, parent, false);
-        return new AccessoryViewHolder(v);
+        ItemAccessoryBinding binding  = ItemAccessoryBinding.inflate(LayoutInflater.from(parent.getContext()),parent,false);
+        return new AccessoryViewHolder(binding);
     }
 
 
@@ -47,10 +46,10 @@ public class AccessoryAdapter extends RecyclerView.Adapter<AccessoryAdapter.Acce
         public TextView vName;
         public ImageView vImage;
 
-        public AccessoryViewHolder(@NonNull View itemView) {
-            super(itemView);
-            vName = itemView.findViewById(R.id.name_text);
-            vImage = itemView.findViewById(R.id.image_image_view);
+        public AccessoryViewHolder(@NonNull ItemAccessoryBinding itemView) {
+            super(itemView.getRoot());
+            vName = itemView.nameText;
+            vImage = itemView.imageImageView;
         }
     }
 }

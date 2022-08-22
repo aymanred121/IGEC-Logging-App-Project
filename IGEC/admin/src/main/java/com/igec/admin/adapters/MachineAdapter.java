@@ -1,7 +1,6 @@
 package com.igec.admin.adapters;
 
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
@@ -9,7 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.igec.admin.R;
+import com.igec.admin.databinding.ItemMachineBinding;
 import com.igec.common.firebase.Machine;
 
 import java.util.ArrayList;
@@ -18,9 +17,11 @@ public class MachineAdapter extends RecyclerView.Adapter<MachineAdapter.MachineV
     private ArrayList<Machine> machinesList;
     private OnItemClickListener listener;
 
-    public interface OnItemClickListener{
+    public interface OnItemClickListener {
         void onItemClick(int position);
+
         void onLogClick(int position);
+
         void onCommentsClick(int position);
     }
 
@@ -28,15 +29,16 @@ public class MachineAdapter extends RecyclerView.Adapter<MachineAdapter.MachineV
         this.listener = listener;
     }
 
-    public static class MachineViewHolder extends RecyclerView.ViewHolder{
+    public static class MachineViewHolder extends RecyclerView.ViewHolder {
         TextView vID, vCodeName;
-        FloatingActionButton vLog,vComments;
-        public MachineViewHolder(@NonNull View itemView, OnItemClickListener listener) {
-            super(itemView);
-            vID = itemView.findViewById(R.id.TextView_MachineID);
-            vCodeName = itemView.findViewById(R.id.TextView_MachineCodeName);
-            vLog = itemView.findViewById(R.id.Button_Log);
-            vComments = itemView.findViewById(R.id.Button_Comment);
+        FloatingActionButton vLog, vComments;
+
+        public MachineViewHolder(@NonNull ItemMachineBinding itemView, OnItemClickListener listener) {
+            super(itemView.getRoot());
+            vID = itemView.TextViewMachineID;
+            vCodeName = itemView.TextViewMachineCodeName;
+            vLog = itemView.ButtonLog;
+            vComments = itemView.ButtonComment;
 
             vLog.setOnClickListener(v -> {
                 if (listener != null) {
@@ -54,7 +56,7 @@ public class MachineAdapter extends RecyclerView.Adapter<MachineAdapter.MachineV
                     }
                 }
             });
-            itemView.setOnClickListener(v -> {
+            itemView.getRoot().setOnClickListener(v -> {
                 if (listener != null) {
                     int position = getAdapterPosition();
                     if (position != RecyclerView.NO_POSITION) {
@@ -73,8 +75,8 @@ public class MachineAdapter extends RecyclerView.Adapter<MachineAdapter.MachineV
     @NonNull
     @Override
     public MachineViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.item_machine,parent,false);
-        return new MachineViewHolder(v,listener);
+        ItemMachineBinding binding = ItemMachineBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
+        return new MachineViewHolder(binding, listener);
     }
 
     @Override

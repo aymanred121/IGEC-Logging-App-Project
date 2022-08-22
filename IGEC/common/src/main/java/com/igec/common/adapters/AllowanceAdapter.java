@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.igec.common.databinding.ItemAllowanceBinding;
 import com.igec.common.firebase.Allowance;
 import com.igec.common.utilities.allowancesEnum;
 import com.igec.common.R;
@@ -38,8 +39,8 @@ public class AllowanceAdapter extends RecyclerView.Adapter<AllowanceAdapter.Allo
     @NonNull
     @Override
     public AllowanceViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.item_allowance, parent, false);
-        return new AllowanceViewHolder(v, listener, canRemove, clickable);
+        ItemAllowanceBinding binding  = ItemAllowanceBinding.inflate(LayoutInflater.from(parent.getContext()),parent,false);
+        return new AllowanceViewHolder(binding, listener, canRemove, clickable);
     }
 
     @Override
@@ -99,13 +100,13 @@ public class AllowanceAdapter extends RecyclerView.Adapter<AllowanceAdapter.Allo
         public TextView vName, vAmount, vNote;
         public FloatingActionButton vDelete;
 
-        public AllowanceViewHolder(@NonNull View itemView, OnItemClickListener listener, boolean canRemove, boolean clickable) {
-            super(itemView);
+        public AllowanceViewHolder(@NonNull ItemAllowanceBinding itemView, OnItemClickListener listener, boolean canRemove, boolean clickable) {
+            super(itemView.getRoot());
 
-            vName = itemView.findViewById(R.id.TextView_ReasonFor);
-            vAmount = itemView.findViewById(R.id.TextView_MountOf);
-            vNote = itemView.findViewById(R.id.TextView_Note);
-            vDelete = itemView.findViewById(R.id.delete_button);
+            vName = itemView.TextViewReasonFor;
+            vAmount = itemView.TextViewMountOf;
+            vNote = itemView.TextViewNote;
+            vDelete = itemView.deleteButton;
             vDelete.setVisibility(View.GONE);
 
             if (canRemove) {
@@ -120,7 +121,7 @@ public class AllowanceAdapter extends RecyclerView.Adapter<AllowanceAdapter.Allo
                 });
             }
             if (clickable)
-                itemView.setOnClickListener(v -> {
+                itemView.getRoot().setOnClickListener(v -> {
                     if (listener != null) {
                         int position = getAdapterPosition();
                         if (position != RecyclerView.NO_POSITION) {

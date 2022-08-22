@@ -2,7 +2,6 @@ package com.igec.common.adapters;
 
 import android.graphics.Color;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
@@ -11,7 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 
 import com.google.android.material.card.MaterialCardView;
-import com.igec.common.R;
+import com.igec.common.databinding.ItemVacationRequestBinding;
 import com.igec.common.firebase.VacationRequest;
 
 import java.text.SimpleDateFormat;
@@ -41,8 +40,8 @@ public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.Vacati
     @NonNull
     @Override
     public VacationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.item_vacation_request, parent, false);
-        return new VacationViewHolder(v, listener, clickable);
+        ItemVacationRequestBinding binding  = ItemVacationRequestBinding.inflate(LayoutInflater.from(parent.getContext()),parent,false);
+        return new VacationViewHolder(binding, listener, clickable);
 
     }
 
@@ -91,16 +90,16 @@ public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.Vacati
         public TextView vVacationDays;
 
 
-        public VacationViewHolder(@NonNull View itemView, OnItemClickListener listener, boolean clickable) {
-            super(itemView);
-            layout = itemView.findViewById(R.id.layout);
-            vName = itemView.findViewById(R.id.TextView_Name);
-            vID = itemView.findViewById(R.id.TextView_Id);
-            vVacationDays = itemView.findViewById(R.id.TextView_VacationDays);
-            vVacationStartDate = itemView.findViewById(R.id.TextView_VacationStartDate);
+        public VacationViewHolder(@NonNull ItemVacationRequestBinding itemView, OnItemClickListener listener, boolean clickable) {
+            super(itemView.getRoot());
+            layout = itemView.layout;
+            vName = itemView.TextViewName;
+            vID = itemView.TextViewId;
+            vVacationDays = itemView.TextViewVacationDays;
+            vVacationStartDate = itemView.TextViewVacationStartDate;
 
             if (clickable)
-                itemView.setOnClickListener(v -> {
+                itemView.getRoot().setOnClickListener(v -> {
                     if (listener != null) {
                         int position = getAdapterPosition();
                         if (position != RecyclerView.NO_POSITION) {

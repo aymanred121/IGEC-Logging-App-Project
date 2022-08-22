@@ -2,14 +2,13 @@ package com.igec.admin.adapters;
 
 import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.igec.admin.R;
+import com.igec.admin.databinding.ItemMachineLogBinding;
 import com.igec.common.firebase.Machine_Employee;
 import com.google.firebase.Timestamp;
 
@@ -27,9 +26,8 @@ public class MachineLogAdapter extends RecyclerView.Adapter<MachineLogAdapter.Ma
     @NonNull
     @Override
     public MachineLogViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.item_machine_log, parent, false);
-        MachineLogViewHolder vvh = new MachineLogViewHolder(v);
-        return vvh;
+        ItemMachineLogBinding binding  = ItemMachineLogBinding.inflate(LayoutInflater.from(parent.getContext()),parent,false);
+        return new MachineLogViewHolder(binding);
     }
 
     @Override
@@ -68,12 +66,12 @@ public class MachineLogAdapter extends RecyclerView.Adapter<MachineLogAdapter.Ma
     public static class MachineLogViewHolder extends RecyclerView.ViewHolder {
         public TextView vEmployee, vStartDate, vEndDate, vCost;
 
-        public MachineLogViewHolder(@NonNull View itemView) {
-            super(itemView);
-            vEmployee = itemView.findViewById(R.id.TextView_Employee);
-            vStartDate = itemView.findViewById(R.id.TextView_StartDate);
-            vEndDate = itemView.findViewById(R.id.TextView_EndDate);
-            vCost = itemView.findViewById(R.id.TextView_Cost);
+        public MachineLogViewHolder(@NonNull ItemMachineLogBinding itemView) {
+            super(itemView.getRoot());
+            vEmployee = itemView.TextViewEmployee;
+            vStartDate = itemView.TextViewStartDate;
+            vEndDate = itemView.TextViewEndDate;
+            vCost = itemView.TextViewCost;
         }
     }
 }

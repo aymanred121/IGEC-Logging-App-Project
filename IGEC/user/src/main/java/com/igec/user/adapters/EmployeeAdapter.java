@@ -1,7 +1,7 @@
 package com.igec.user.adapters;
 
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
@@ -11,8 +11,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.igec.user.R;
 import com.igec.common.firebase.EmployeeOverview;
 import com.igec.common.firebase.Project;
+import com.igec.user.databinding.ItemEmployeeBinding;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.EmployeeAdapterViewHolder> {
     private final ArrayList<EmployeeOverview> employeeOverviews;
@@ -31,10 +33,11 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
     @NonNull
     @Override
     public EmployeeAdapterViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.item_employee, parent, false);
-        return new EmployeeAdapterViewHolder(v, listener);
+        ItemEmployeeBinding binding = ItemEmployeeBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
+        return new EmployeeAdapterViewHolder(binding, listener);
     }
 
+    @SuppressLint("DefaultLocale")
     @Override
     public void onBindViewHolder(@NonNull EmployeeAdapterViewHolder holder, int position) {
         EmployeeOverview EmployeeOverview = employeeOverviews.get(position);
@@ -59,14 +62,14 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
     }
 
     public static class EmployeeAdapterViewHolder extends RecyclerView.ViewHolder {
-        public TextView vEmployeeName, vEmployeeID, vWorkingHours, vCurrentMachine;
+        public TextView vEmployeeName, vEmployeeID, vWorkingHours;
 
-        public EmployeeAdapterViewHolder(@NonNull View itemView, OnItemClickListener listener) {
-            super(itemView);
-            vEmployeeID = itemView.findViewById(R.id.TextView_EmployeeID);
-            vEmployeeName = itemView.findViewById(R.id.TextView_EmployeeName);
-            vWorkingHours = itemView.findViewById(R.id.TextView_EmployeeHours);
-            itemView.setOnClickListener(v -> {
+        public EmployeeAdapterViewHolder(@NonNull ItemEmployeeBinding itemView, OnItemClickListener listener) {
+            super(itemView.getRoot());
+            vEmployeeID = itemView.TextViewEmployeeID;
+            vEmployeeName = itemView.TextViewEmployeeName;
+            vWorkingHours = itemView.TextViewEmployeeHours;
+            itemView.getRoot().setOnClickListener(v -> {
                 if (listener != null) {
                     int position = getAdapterPosition();
                     if (position != RecyclerView.NO_POSITION) {

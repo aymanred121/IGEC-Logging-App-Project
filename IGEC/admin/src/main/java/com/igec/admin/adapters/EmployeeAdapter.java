@@ -10,7 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.radiobutton.MaterialRadioButton;
-import com.igec.admin.R;
+import com.igec.admin.databinding.ItemEmployeeBinding;
 import com.igec.common.firebase.EmployeeOverview;
 import com.google.android.material.checkbox.MaterialCheckBox;
 
@@ -47,14 +47,14 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
         public MaterialRadioButton vManager;
 
 
-        public EmployeeViewHolder(@NonNull View itemView, OnItemClickListener listener, boolean isCheckable) {
-            super(itemView);
-            vName = itemView.findViewById(R.id.TextView_Name);
-            vID = itemView.findViewById(R.id.TextView_ID);
-            vSelected = itemView.findViewById(R.id.ImageView_EmployeeSelected);
-            vManager = itemView.findViewById(R.id.manager_radioButton);
+        public EmployeeViewHolder(@NonNull ItemEmployeeBinding itemView, OnItemClickListener listener, boolean isCheckable) {
+            super(itemView.getRoot());
+            vName = itemView.TextViewName;
+            vID = itemView.TextViewID;
+            vSelected = itemView.ImageViewEmployeeSelected;
+            vManager = itemView.managerRadioButton;
             if (!isCheckable) {
-                itemView.setOnClickListener(v -> {
+                itemView.getRoot().setOnClickListener(v -> {
                     if (listener != null) {
                         int position = getAdapterPosition();
                         if (position != RecyclerView.NO_POSITION) {
@@ -93,8 +93,8 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
     @NonNull
     @Override
     public EmployeeViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.item_employee, parent, false);
-        return new EmployeeViewHolder(v, listener, isCheckable);
+        ItemEmployeeBinding binding = ItemEmployeeBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
+        return new EmployeeViewHolder(binding, listener, isCheckable);
     }
 
     @SuppressLint("SetTextI18n")
@@ -104,7 +104,7 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
         holder.vName.setText("Name: " + employee.getFirstName() + " " + employee.getLastName());
         holder.vID.setText("ID: " + employee.getId());
         holder.vSelected.setChecked(employee.isSelected);
-        holder.vManager.setVisibility(employee.isSelected? View.VISIBLE: View.GONE);
+        holder.vManager.setVisibility(employee.isSelected ? View.VISIBLE : View.GONE);
         boolean isHeTheManager = employee.getId().equals(MID);
         holder.vManager.setChecked(isHeTheManager);
         holder.vSelected.setEnabled(!isHeTheManager);
@@ -117,6 +117,7 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
     public void setEmployeeOverviewsList(ArrayList<EmployeeOverview> employeeOverviewsList) {
         this.employeeOverviewsList = employeeOverviewsList;
     }
+
     @Override
     public int getItemCount() {
         return employeeOverviewsList.size();

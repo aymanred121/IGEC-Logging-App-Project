@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.igec.admin.R;
+import com.igec.admin.databinding.ItemAccessoryBinding;
 import com.igec.common.firebase.Accessory;
 
 import java.util.ArrayList;
@@ -26,8 +27,8 @@ public class AccessoryAdapter extends RecyclerView.Adapter<AccessoryAdapter.Acce
     @NonNull
     @Override
     public AccessoryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.item_accessory,parent,false);
-        return new AccessoryViewHolder(v,listener);
+        ItemAccessoryBinding binding  = ItemAccessoryBinding.inflate(LayoutInflater.from(parent.getContext()),parent,false);
+        return new AccessoryViewHolder(binding,listener);
     }
 
     @Override
@@ -71,14 +72,14 @@ public class AccessoryAdapter extends RecyclerView.Adapter<AccessoryAdapter.Acce
         public ImageView vImg;
         public FloatingActionButton vDelete;
 
-        public AccessoryViewHolder(@NonNull View itemView, OnItemClickListener listener) {
-            super(itemView);
+        public AccessoryViewHolder(@NonNull ItemAccessoryBinding itemView, OnItemClickListener listener) {
+            super(itemView.getRoot());
 
-            vName = itemView.findViewById(R.id.name_text);
-            vImg = itemView.findViewById(R.id.image_image_view);
-            vDelete = itemView.findViewById(R.id.delete_button);
+            vName = itemView.nameText;
+            vImg = itemView.imageImageView;
+            vDelete = itemView.deleteButton;
 
-            itemView.setOnClickListener(v -> {
+            itemView.getRoot().setOnClickListener(v -> {
                 if(listener != null)
                 {
                     int position = getAdapterPosition();

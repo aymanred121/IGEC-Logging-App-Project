@@ -1,15 +1,14 @@
 package com.igec.user.adapters;
 
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.igec.user.R;
 import com.igec.common.firebase.TransferRequests;
+import com.igec.user.databinding.ItemTransferRequestBinding;
 
 import java.util.ArrayList;
 
@@ -39,8 +38,8 @@ public class TransferAdapter extends RecyclerView.Adapter<TransferAdapter.Transf
     @NonNull
     @Override
     public TransferViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from((parent.getContext())).inflate(R.layout.item_transfer_request,parent,false);
-        return new TransferViewHolder(v,listener);
+        ItemTransferRequestBinding binding  = ItemTransferRequestBinding.inflate(LayoutInflater.from(parent.getContext()),parent,false);
+        return new TransferViewHolder(binding,listener);
     }
 
     @Override
@@ -58,13 +57,13 @@ public class TransferAdapter extends RecyclerView.Adapter<TransferAdapter.Transf
 
     public static class TransferViewHolder extends RecyclerView.ViewHolder {
         public TextView vTransferredEmployeeName,vTransferredEmployeeId,vTransferredEmployeeProject;
-        public TransferViewHolder(@NonNull View itemView, OnItemClickListener listener) {
-            super(itemView);
-            vTransferredEmployeeId = itemView.findViewById(R.id.TextView_TransferredEmployeeId);
-            vTransferredEmployeeName = itemView.findViewById(R.id.TextView_TransferredEmployeeName);
-            vTransferredEmployeeProject = itemView.findViewById(R.id.TextView_TransferredEmployeeProject);
+        public TransferViewHolder(@NonNull ItemTransferRequestBinding itemView, OnItemClickListener listener) {
+            super(itemView.getRoot());
+            vTransferredEmployeeId = itemView.TextViewTransferredEmployeeId;
+            vTransferredEmployeeName = itemView.TextViewTransferredEmployeeName;
+            vTransferredEmployeeProject = itemView.TextViewTransferredEmployeeProject;
 
-            itemView.setOnClickListener(v -> {
+            itemView.getRoot().setOnClickListener(v -> {
                 if(listener != null)
                 {
                     int position = getAdapterPosition();

@@ -174,6 +174,7 @@ public class SendVacationRequestFragment extends Fragment implements DatePickerD
                     VACATION_COL.document(vacationID).set(vacationRequest).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void unused) {
+                            binding.sendButton.setEnabled(true);
                             clearInputs();
                         }
                     });
@@ -286,6 +287,7 @@ public class SendVacationRequestFragment extends Fragment implements DatePickerD
     };
     private View.OnClickListener oclSendRequest = v -> {
         if (validateInputs()) {
+            binding.sendButton.setEnabled(false);
             if (daysAfterVacationIsTaken < 0) {
                 MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
                 builder.setTitle("Days exceeded by " + daysAfterVacationIsTaken * -1 + " ...")

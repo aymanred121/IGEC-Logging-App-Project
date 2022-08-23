@@ -48,8 +48,8 @@ import com.igec.common.fragments.VacationRequestsFragment
 import com.igec.common.fragments.VacationsLogFragment
 
 
-private const val CHANNEL_ID = "GREETINGS"
-private const val NOTIFICATION_ID = 0
+private const val CHANNEL_ID = "RECEIVING"
+private  var NOTIFICATION_ID = 0
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -125,9 +125,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         run {
                             val vacation = documentSnapshot.toObject(VacationRequest::class.java);
                             val msg =
-                                "${vacation!!.employee.firstName} has requested ${vacation.days} days"
-                            setupNotification("new Vacation request", msg, R.drawable.ic_baseline_mail_24)
-                            notificationManager.notify(NOTIFICATION_ID, notification)
+                                "${vacation!!.employee.firstName} has requested ${vacation.days} days, starting from ${vacation.convertDateToString(vacation.startDate.time)}"
+                            setupNotification("New Vacation Request", msg, R.drawable.ic_baseline_mail_24)
+                            notificationManager.notify(NOTIFICATION_ID++, notification)
                             VACATION_COL.document(vacation.id).update("vacationNotification",0);
                         }
                     };

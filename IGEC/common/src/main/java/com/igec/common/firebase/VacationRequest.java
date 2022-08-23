@@ -1,8 +1,12 @@
 package com.igec.common.firebase;
 
+import android.annotation.SuppressLint;
+
 import com.google.firebase.database.Exclude;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 public class VacationRequest implements Serializable {
@@ -100,6 +104,13 @@ public class VacationRequest implements Serializable {
         return String.valueOf(days);
     }
 
+    @Exclude
+    public String convertDateToString(long selection) {
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(selection);
+        return simpleDateFormat.format(calendar.getTime());
+    }
     public int getVacationNotification() {
         return vacationNotification;
     }

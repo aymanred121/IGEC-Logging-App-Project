@@ -367,7 +367,7 @@ public class AddAllowanceDialog extends DialogFragment {
                     .setMessage(getString(R.string.AreUSure))
                     .setNegativeButton(getString(R.string.cancel), (dialogInterface, i) -> {
                     })
-                    .setPositiveButton(getString(R.string.accept), (dialogInterface, i) -> {
+                    .setPositiveButton(getString(R.string.Yes), (dialogInterface, i) -> {
                         allowances.remove(position);
                         adapter.notifyItemRemoved(position);
                     })

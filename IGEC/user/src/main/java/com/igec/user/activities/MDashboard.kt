@@ -36,15 +36,19 @@ import com.igec.common.firebase.VacationRequest
 import com.igec.common.fragments.VacationRequestsFragment
 import com.igec.common.fragments.VacationsLogFragment
 
-private const val CHANNEL_ID = "GREETINGS"
-private const val NOTIFICATION_ID = 0
+private const val ACTION_CHANNEL_ID = "ACTION"
+private const val RECEIVING_CHANNEL_ID = "RECEIVING"
+private var ACTION_NOTIFICATION_ID = 0
+private var RECEIVING_NOTIFICATION_ID = 0
+
 class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private var currManager: Employee? = null
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMdashboardBinding
     private lateinit var navController: NavController
     private var lastTab: Int = R.id.nav_check_in_out
-    private lateinit var notification: Notification
+    private lateinit var actionNotification: Notification
+    private lateinit var receivingNotification: Notification
     private lateinit var notificationManager: NotificationManagerCompat
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,11 +87,13 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         }
         binding.navView.getHeaderView(0).findViewById<TextView>(R.id.EmployeeID).text =
             currManager?.id
-        createNotificationChannel()
+        createNotificationChannel(ACTION_CHANNEL_ID)
+        createNotificationChannel(RECEIVING_CHANNEL_ID)
+        notificationManager = NotificationManagerCompat.from(this)
         //get your pending request status
-        CONSTANTS.VACATION_COL.whereEqualTo("employee.id",currManager!!.id)
-            .whereEqualTo("vacationNotification",0)
-            .whereNotEqualTo("vacationStatus",0)
+        CONSTANTS.VACATION_COL.whereEqualTo("employee.id", currManager!!.id)
+            .whereEqualTo("vacationNotification", 0)
+            .whereNotEqualTo("vacationStatus", 0)
             .addSnapshotListener { values, error ->
                 run {
                     if (error != null) {
@@ -97,20 +103,26 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                     values!!.documents.forEach { documentSnapshot ->
                         run {
                             val vacation = documentSnapshot.toObject(VacationRequest::class.java);
-                            val msg:String = if(vacation!!.vacationStatus ==-1)
+                            val msg: String = if (vacation!!.vacationStatus == -1)
                                 "your vacation request for ${vacation.days} days has been rejected"
                             else
                                 "your vacation request for ${vacation.days} days has been accepted"
-                            setupNotification("your Vacation request", msg, R.drawable.ic_baseline_mail_24)
-                            notificationManager.notify(NOTIFICATION_ID, notification)
-                            CONSTANTS.VACATION_COL.document(vacation.id).update("vacationNotification",1);
+                            actionNotification = setupNotification(
+                                "Vacation Request Status",
+                                msg,
+                                R.drawable.ic_baseline_mail_24,
+                                ACTION_CHANNEL_ID
+                            )
+                            notificationManager.notify(ACTION_NOTIFICATION_ID++, actionNotification)
+                            CONSTANTS.VACATION_COL.document(vacation.id)
+                                .update("vacationNotification", 1);
                         }
                     };
                 }
             }
         //get vacation requests from your employees
-        CONSTANTS.VACATION_COL.whereEqualTo("manager.id",currManager!!.id)
-            .whereEqualTo("vacationNotification",-1).addSnapshotListener { values, error ->
+        CONSTANTS.VACATION_COL.whereEqualTo("manager.id", currManager!!.id)
+            .whereEqualTo("vacationNotification", -1).addSnapshotListener { values, error ->
                 run {
                     if (error != null) {
                         Log.w("error", error.toString())
@@ -120,17 +132,26 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                         run {
                             val vacation = documentSnapshot.toObject(VacationRequest::class.java);
                             val msg =
-                                "${vacation!!.employee.firstName} has requested ${vacation.days}"
-                            setupNotification("new Vacation request", msg, R.drawable.ic_baseline_mail_24)
-                            notificationManager.notify(NOTIFICATION_ID, notification)
-                            CONSTANTS.VACATION_COL.document(vacation.id).update("vacationNotification",0)
+                                "${vacation!!.employee.firstName} has requested ${vacation.days} days, starting from ${vacation.convertDateToString(vacation.startDate.time)}"
+                            receivingNotification = setupNotification(
+                                "New Vacation Request",
+                                msg,
+                                R.drawable.ic_baseline_mail_24,
+                                RECEIVING_CHANNEL_ID
+                            )
+                            notificationManager.notify(
+                                RECEIVING_NOTIFICATION_ID++,
+                                receivingNotification
+                            )
+                            CONSTANTS.VACATION_COL.document(vacation.id)
+                                .update("vacationNotification", 0)
                         }
                     };
                 }
             }
     }
 
-    private fun createNotificationChannel() {
+    private fun createNotificationChannel(CHANNEL_ID: String) {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
         val name = getString(R.string.channel_name)
@@ -141,7 +162,7 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
             description = descriptionText
             enableLights(true)
             lightColor = Color.GREEN
-            setSound(alarmSound,null)
+            setSound(alarmSound, null)
         }
         // Register the channel with the system
         val notificationManager: NotificationManager =
@@ -149,7 +170,12 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         notificationManager.createNotificationChannel(channel)
     }
 
-    private fun setupNotification(title: String, content: String, icon: Int) {
+    private fun setupNotification(
+        title: String,
+        content: String,
+        icon: Int,
+        CHANNEL_ID: String
+    ): Notification {
         // Create an explicit intent for an Activity in your app
         val intent = Intent(this, LauncherActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -158,14 +184,13 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         val pendingIntent: PendingIntent =
             PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
 
-        notification = NotificationCompat.Builder(this, CHANNEL_ID)
+        return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(icon)
             .setContentTitle(title)
             .setContentText(content)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT).build()
-        notificationManager = NotificationManagerCompat.from(this)
     }
 
     private fun validateDate(c: Context) {
@@ -175,6 +200,7 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
             finish()
         }
     }
+
     override fun onBackPressed() {
         if (binding.drawerLayout.isDrawerOpen(GravityCompat.START))
             binding.drawerLayout.closeDrawer(GravityCompat.START)

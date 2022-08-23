@@ -37,8 +37,8 @@ import com.igec.common.fragments.VacationsLogFragment
 
 
 
-private const val CHANNEL_ID = "GREETINGS"
-private const val NOTIFICATION_ID = 0
+private const val CHANNEL_ID = "ACTION"
+private var NOTIFICATION_ID = 0
 
 class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private var currEmployee: Employee? = null
@@ -99,8 +99,8 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                                 "your vacation request for ${vacation.days} days has been rejected"
                             else
                                 "your vacation request for ${vacation.days} days has been accepted"
-                            setupNotification("your Vacation request", msg, R.drawable.ic_baseline_mail_24)
-                            notificationManager.notify(NOTIFICATION_ID, notification)
+                            setupNotification("Vacation Request Status", msg, R.drawable.ic_baseline_mail_24)
+                            notificationManager.notify(NOTIFICATION_ID++, notification)
                             CONSTANTS.VACATION_COL.document(vacation.id).update("vacationNotification",1);
                         }
                     };

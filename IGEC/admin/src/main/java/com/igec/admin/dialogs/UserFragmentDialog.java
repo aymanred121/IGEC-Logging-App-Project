@@ -470,10 +470,10 @@ public class UserFragmentDialog extends DialogFragment {
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
         builder.setTitle(getString(R.string.Delete))
                 .setMessage(getString(R.string.AreUSure))
-                .setNegativeButton(getString(R.string.cancel), (dialogInterface, i) -> {
+                .setNegativeButton(getString(R.string.no), (dialogInterface, i) -> {
                     binding.deleteButton.setEnabled(true);
                 })
-                .setPositiveButton(getString(R.string.accept), (dialogInterface, i) -> {
+                .setPositiveButton(getString(R.string.yes), (dialogInterface, i) -> {
                     deleteEmployee();
                     dialogInterface.dismiss();
                 })

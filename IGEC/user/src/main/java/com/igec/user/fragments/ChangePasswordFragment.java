@@ -136,7 +136,7 @@ public class ChangePasswordFragment extends Fragment {
                     .setMessage(getString(R.string.AreUSure))
                     .setNegativeButton(getString(R.string.cancel), (dialogInterface, i) -> {
                     })
-                    .setPositiveButton(getString(R.string.accept), (dialogInterface, i) -> {
+                    .setPositiveButton(getString(R.string.Yes), (dialogInterface, i) -> {
                         user.setPassword(binding.newPasswordEdit.getText().toString());
                         EMPLOYEE_COL.document(user.getId()).update("password", encryptedPassword()).addOnSuccessListener(unused -> {
                             Snackbar.make(binding.getRoot(), "Password Changed Successfully", Snackbar.LENGTH_SHORT).show();

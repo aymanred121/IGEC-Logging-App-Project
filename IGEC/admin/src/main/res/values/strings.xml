@@ -58,8 +58,8 @@
     <string name="Delete">Delete</string>
     <string name="accept_request">Accept</string>
     <string name="Decline_request">Decline</string>
-    <string name="cancel">No</string>
-    <string name="accept">Yes</string>
+    <string name="no">No</string>
+    <string name="yes">Yes</string>
     <string name="admin">Admin</string>
     <string name="admin_register_title">Admin Authorities</string>
     <string name="temporary">Temporary</string>

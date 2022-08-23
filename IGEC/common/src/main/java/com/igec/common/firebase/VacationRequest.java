@@ -1,5 +1,7 @@
 package com.igec.common.firebase;
 
+import com.google.firebase.database.Exclude;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -8,6 +10,13 @@ public class VacationRequest implements Serializable {
     private Employee manager,employee;
     private String vacationNote,id;
     private int vacationStatus;
+    /*
+    vacationNotification:
+    -1  = no one read it
+     0  = manager/admin had read it
+     1  = employee had read it
+     */
+    private int vacationNotification = -1;
     public VacationRequest() {
     }
 
@@ -84,10 +93,18 @@ public class VacationRequest implements Serializable {
     public void setVacationStatus(int vacationStatus) {
         this.vacationStatus = vacationStatus;
     }
-
+    @Exclude
     public String getDays() {
         long days = endDate.getTime() - startDate.getTime();
         days /= (24 * 3600 * 1000);
         return String.valueOf(days);
+    }
+
+    public int getVacationNotification() {
+        return vacationNotification;
+    }
+
+    public void setVacationNotification(int vacationNotification) {
+        this.vacationNotification = vacationNotification;
     }
 }

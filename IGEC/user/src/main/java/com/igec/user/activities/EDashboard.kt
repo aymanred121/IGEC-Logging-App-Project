@@ -11,6 +11,7 @@ import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
@@ -30,6 +31,8 @@ import com.igec.user.R
 import com.igec.user.databinding.ActivityEdashboardBinding
 import com.igec.common.firebase.Employee
 import com.google.android.material.navigation.NavigationView
+import com.igec.common.CONSTANTS
+import com.igec.common.firebase.VacationRequest
 import com.igec.common.fragments.VacationsLogFragment
 
 
@@ -80,10 +83,29 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
             currEmployee?.id
 
         createNotificationChannel()
-        //TODO change title and Message
-        setupNotification("Greetings", "Hello ${currEmployee?.firstName} ${currEmployee?.lastName}" ,R.drawable.ic_baseline_mail_24)
-        //TODO display notification if any document were found
-        notificationManager.notify(NOTIFICATION_ID, notification)
+        CONSTANTS.VACATION_COL.whereEqualTo("employee.id",currEmployee!!.id)
+            .whereEqualTo("vacationNotification",0)
+            .whereNotEqualTo("vacationStatus",0)
+            .addSnapshotListener { values, error ->
+                run {
+                    if (error != null) {
+                        Log.w("error", error.toString())
+                        return@run
+                    }
+                    values!!.documents.forEach { documentSnapshot ->
+                        run {
+                            val vacation = documentSnapshot.toObject(VacationRequest::class.java);
+                            val msg:String = if(vacation!!.vacationStatus ==-1)
+                                "your vacation request for ${vacation.days} days has been rejected"
+                            else
+                                "your vacation request for ${vacation.days} days has been accepted"
+                            setupNotification("your Vacation request", msg, R.drawable.ic_baseline_mail_24)
+                            notificationManager.notify(NOTIFICATION_ID, notification)
+                            CONSTANTS.VACATION_COL.document(vacation.id).update("vacationNotification",1);
+                        }
+                    };
+                }
+            }
     }
 
     private fun createNotificationChannel() {

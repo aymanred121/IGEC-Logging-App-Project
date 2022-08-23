@@ -20,6 +20,7 @@ import android.os.Build.VERSION.SDK_INT
 import android.os.Bundle
 import android.os.Environment
 import android.provider.Settings
+import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
@@ -41,6 +42,8 @@ import com.igec.admin.R
 import com.igec.admin.databinding.ActivityMainBinding
 import com.igec.admin.dialogs.ProjectFragmentDialog
 import com.igec.admin.fragments.*
+import com.igec.common.CONSTANTS.VACATION_COL
+import com.igec.common.firebase.VacationRequest
 import com.igec.common.fragments.VacationRequestsFragment
 import com.igec.common.fragments.VacationsLogFragment
 
@@ -111,10 +114,26 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
 
         createNotificationChannel()
-        //TODO change title and Message
-        setupNotification("Greetings", "Hello Admin", R.drawable.ic_baseline_mail_24)
-        //TODO display notification if any document were found
-        notificationManager.notify(NOTIFICATION_ID, notification)
+        VACATION_COL.whereEqualTo("manager",null)
+            .whereEqualTo("vacationNotification",-1).addSnapshotListener { values, error ->
+                run {
+                    if (error != null) {
+                        Log.w("error", error.toString())
+                        return@run
+                    }
+                    values!!.documents.forEach { documentSnapshot ->
+                        run {
+                            val vacation = documentSnapshot.toObject(VacationRequest::class.java);
+                            val msg =
+                                "${vacation!!.employee.firstName} has requested ${vacation.days} days"
+                            setupNotification("new Vacation request", msg, R.drawable.ic_baseline_mail_24)
+                            notificationManager.notify(NOTIFICATION_ID, notification)
+                            VACATION_COL.document(vacation.id).update("vacationNotification",0);
+                        }
+                    };
+                }
+            }
+
     }
 
     private fun createNotificationChannel() {

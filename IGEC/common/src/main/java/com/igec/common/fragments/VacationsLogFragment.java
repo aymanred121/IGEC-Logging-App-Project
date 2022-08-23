@@ -28,6 +28,7 @@ import com.igec.common.firebase.Employee;
 import com.igec.common.firebase.VacationRequest;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Objects;
 
 public class VacationsLogFragment extends Fragment {
@@ -70,7 +71,7 @@ public class VacationsLogFragment extends Fragment {
 
         binding.recyclerView.setHasFixedSize(true);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        adapter = new VacationAdapter(vacations,false);
+        adapter = new VacationAdapter(vacations, false);
         binding.recyclerView.setLayoutManager(layoutManager);
         binding.recyclerView.setAdapter(adapter);
 
@@ -103,9 +104,11 @@ public class VacationsLogFragment extends Fragment {
                         if (Objects.requireNonNull(doc.toObject(VacationRequest.class)).getVacationStatus() != 0)
                             vacations.add(doc.toObject(VacationRequest.class));
                     }
-                    adapter.notifyDataSetChanged();
                     if (loadOwn) {
                         loadOwnVacations();
+                    } else {
+                        vacations.sort(Comparator.comparing(VacationRequest::getRequestDate));
+                        adapter.notifyDataSetChanged();
                     }
                 });
     }
@@ -127,6 +130,7 @@ public class VacationsLogFragment extends Fragment {
                         if (Objects.requireNonNull(doc.toObject(VacationRequest.class)).getVacationStatus() != 0)
                             vacations.add(doc.toObject(VacationRequest.class));
                     }
+                    vacations.sort(Comparator.comparing(VacationRequest::getRequestDate).reversed());
                     adapter.notifyDataSetChanged();
                 });
     }

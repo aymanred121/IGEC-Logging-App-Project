@@ -89,4 +89,6 @@
     <string name="plus_code">Plus Code</string>
     <string name="diameter">Area (m²)</string>
     <string name="currency">Currency</string>
+    <string name="channel_name">channelName</string>
+    <string name="channel_description">channelDescription</string>
 </resources>

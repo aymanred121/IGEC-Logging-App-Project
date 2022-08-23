@@ -2,9 +2,16 @@ package com.igec.admin.activities
 
 import android.Manifest.permission.READ_EXTERNAL_STORAGE
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
+import android.media.AudioAttributes
+import android.media.RingtoneManager
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.Uri
@@ -18,6 +25,8 @@ import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
@@ -28,13 +37,16 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
-import com.igec.admin.dialogs.ProjectFragmentDialog
-import com.igec.admin.fragments.*
 import com.igec.admin.R
 import com.igec.admin.databinding.ActivityMainBinding
+import com.igec.admin.dialogs.ProjectFragmentDialog
+import com.igec.admin.fragments.*
 import com.igec.common.fragments.VacationRequestsFragment
 import com.igec.common.fragments.VacationsLogFragment
 
+
+private const val CHANNEL_ID = "GREETINGS"
+private const val NOTIFICATION_ID = 0
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -42,14 +54,18 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
     private var lastTab: Int = R.id.nav_add_user
+    private lateinit var notification: Notification
+    private lateinit var notificationManager: NotificationManagerCompat
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val connectivityManager = applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val connectivityManager =
+            applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         connectivityManager.let {
             it.registerDefaultNetworkCallback(object : ConnectivityManager.NetworkCallback() {
                 override fun onAvailable(network: Network) {
                     //take action when network connection is gained
                 }
+
                 override fun onLost(network: Network) {
                     //take action when network connection is lost
                     val intent = Intent(this@MainActivity, InternetConnection::class.java)
@@ -92,6 +108,62 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 )
                 this@MainActivity.startActivity(intent)
             }
+
+
+        createNotificationChannel()
+        //TODO change title and Message
+        setupNotification("Greetings", "Hello Admin", R.drawable.ic_baseline_mail_24)
+        //TODO display notification if any document were found
+        notificationManager.notify(NOTIFICATION_ID, notification)
+    }
+
+    private fun createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        val name = getString(R.string.channel_name)
+        val descriptionText = getString(R.string.channel_description)
+        val importance = NotificationManager.IMPORTANCE_DEFAULT
+        val alarmSound: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+        val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+            description = descriptionText
+            enableLights(true)
+            lightColor = Color.GREEN
+            setSound(alarmSound,null)
+        }
+        // Register the channel with the system
+        val notificationManager: NotificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
+    }
+
+    private fun setupNotification(title: String, content: String, icon: Int) {
+        // Create an explicit intent for an Activity in your app
+        val intent = Intent(this, LauncherActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+
+        val pendingIntent: PendingIntent =
+            PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+        var alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+        if (alarmSound == null) {
+            alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
+            if (alarmSound == null) {
+                alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+            }
+        }
+        notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(icon)
+            .setContentTitle(title)
+            .setContentText(content)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .setVibrate(longArrayOf(500, 500, 500, 500, 500, 500, 500, 500, 500))
+            .setStyle(NotificationCompat.InboxStyle())
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setOnlyAlertOnce(true)
+            .setSound(alarmSound)
+            .build()
+        notificationManager = NotificationManagerCompat.from(this)
     }
 
     override fun onStop() {

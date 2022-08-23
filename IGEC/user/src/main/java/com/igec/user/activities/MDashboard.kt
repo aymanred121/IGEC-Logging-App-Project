@@ -1,13 +1,22 @@
 package com.igec.user.activities
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
+import android.media.RingtoneManager
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.Settings
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.navigation.NavController
@@ -24,12 +33,16 @@ import com.google.android.material.navigation.NavigationView
 import com.igec.common.fragments.VacationRequestsFragment
 import com.igec.common.fragments.VacationsLogFragment
 
+private const val CHANNEL_ID = "GREETINGS"
+private const val NOTIFICATION_ID = 0
 class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private var currManager: Employee? = null
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMdashboardBinding
     private lateinit var navController: NavController
     private var lastTab: Int = R.id.nav_check_in_out
+    private lateinit var notification: Notification
+    private lateinit var notificationManager: NotificationManagerCompat
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMdashboardBinding.inflate(layoutInflater)
@@ -67,7 +80,49 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         }
         binding.navView.getHeaderView(0).findViewById<TextView>(R.id.EmployeeID).text =
             currManager?.id
+        createNotificationChannel()
+        //TODO change title and Message
+        setupNotification("Greetings", "Hello ${currManager?.firstName} ${currManager?.lastName}" ,R.drawable.ic_baseline_mail_24)
+        //TODO display notification if any document were found
+        notificationManager.notify(NOTIFICATION_ID, notification)
+    }
 
+    private fun createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        val name = getString(R.string.channel_name)
+        val descriptionText = getString(R.string.channel_description)
+        val importance = NotificationManager.IMPORTANCE_DEFAULT
+        val alarmSound: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+        val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+            description = descriptionText
+            enableLights(true)
+            lightColor = Color.GREEN
+            setSound(alarmSound,null)
+        }
+        // Register the channel with the system
+        val notificationManager: NotificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
+    }
+
+    private fun setupNotification(title: String, content: String, icon: Int) {
+        // Create an explicit intent for an Activity in your app
+        val intent = Intent(this, LauncherActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+
+        val pendingIntent: PendingIntent =
+            PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+
+        notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(icon)
+            .setContentTitle(title)
+            .setContentText(content)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT).build()
+        notificationManager = NotificationManagerCompat.from(this)
     }
 
     private fun validateDate(c: Context) {

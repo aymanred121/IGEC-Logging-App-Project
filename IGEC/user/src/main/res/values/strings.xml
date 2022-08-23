@@ -72,4 +72,6 @@
     <string name="company">Company</string>
     <string name="employee">Employee</string>
     <string name="defaultTime">0 Hours</string>
+    <string name="channel_name">channelName</string>
+    <string name="channel_description">channelDescription</string>
 </resources>

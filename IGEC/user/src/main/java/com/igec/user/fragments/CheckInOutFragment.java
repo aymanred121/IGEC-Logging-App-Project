@@ -32,14 +32,15 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentResultListener;
 
 import com.birjuvachhani.locus.Locus;
-import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
-import com.igec.user.activities.DateInaccurate;
-import com.igec.user.databinding.FragmentCheckInOutBinding;
-import com.igec.user.dialogs.ClientInfoDialog;
-import com.igec.user.dialogs.MachineCheckInOutDialog;
-import com.igec.user.dialogs.AccessoriesDialog;
-import com.igec.user.R;
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.firestore.WriteBatch;
 import com.igec.common.firebase.Allowance;
 import com.igec.common.firebase.Client;
 import com.igec.common.firebase.Employee;
@@ -50,15 +51,13 @@ import com.igec.common.firebase.Machine_Employee;
 import com.igec.common.firebase.Project;
 import com.igec.common.firebase.Summary;
 import com.igec.common.utilities.allowancesEnum;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.firebase.Timestamp;
-import com.google.firebase.firestore.FieldValue;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.SetOptions;
-import com.google.firebase.firestore.WriteBatch;
+import com.igec.user.R;
+import com.igec.user.activities.DateInaccurate;
+import com.igec.user.databinding.FragmentCheckInOutBinding;
+import com.igec.user.dialogs.AccessoriesDialog;
+import com.igec.user.dialogs.ClientInfoDialog;
+import com.igec.user.dialogs.MachineCheckInOutDialog;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -82,11 +81,6 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     private Machine currMachine;
     private String machineEmpId;
     private String year, month, day;
-    private FusedLocationProviderClient fusedLocationClient;
-    @SuppressLint("SimpleDateFormat")
-    private final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
-    private final double LAT = 30.103168;
-    private final double LNG = 31.373099;
     private boolean inProjectArea;
 
     public static CheckInOutFragment newInstance(Employee user) {
@@ -96,7 +90,6 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         fragment.setArguments(args);
         return fragment;
     }
-
 
 
     private FragmentCheckInOutBinding binding;
@@ -113,11 +106,13 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         super.onDestroy();
         binding = null;
     }
+
     @Override
     public void onResume() {
         super.onResume();
         validateDate(getActivity());
     }
+
     private void validateDate(Context c) {
         if (Settings.Global.getInt(c.getContentResolver(), Settings.Global.AUTO_TIME, 0) != 1) {
             Intent intent = new Intent(getActivity(), DateInaccurate.class);
@@ -161,7 +156,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
 
 
         binding.greetingText.setText(String.format("%s\n%s", getString(R.string.good_morning), currEmployee.getFirstName()));
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(getActivity());
+        LocationServices.getFusedLocationProviderClient(getActivity());
     }
 
     private void updateDate() {
@@ -272,65 +267,38 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                 return null;
                             }
                             Location location = result.getLocation();
-                            updateDate();
                             longitude = location.getLongitude();
                             latitude = location.getLatitude();
-
-                            // check if his location inside the project radius
                             double distance;
-                            float results[] = new float[3];
+                            float[] results = new float[3];
+                            assert project != null;
                             Location.distanceBetween(latitude, longitude, project.getLat(), project.getLng(), results);
                             distance = results[0];
                             if (distance < project.getArea()) // he's in the project area
                             {
                                 inProjectArea = true;
-                            } else // he's not, or he's on office work
-                            {
-                                Location.distanceBetween(latitude, longitude, LAT, LNG, results);
-                                distance = results[0];
-                                if (distance < 200 /*TODO Help placeholder for office area*/) {
-                                    inProjectArea = false;
-                                    Snackbar.make(binding.getRoot(), "You're in the office", Snackbar.LENGTH_SHORT).show();
-                                } else {
-                                    Snackbar.make(binding.getRoot(), "You're not in the project area", Snackbar.LENGTH_SHORT).show();
-                                    return null;
-                                }
-                            }
-                            Summary summary = new Summary(latitude, longitude);
-                            HashMap<String, Object> checkOutDetails = new HashMap<>(summary.getGeoMap());
-                            checkOutDetails.put("Time", Timestamp.now());
-                            SUMMARY_COL.document(id)
-                                    .collection(year + "-" + month).document(day)
-                                    .get().addOnSuccessListener(documentSnapshot -> {
-                                        if (!documentSnapshot.exists() || documentSnapshot.getData().size() == 0) {
-                                            employeeCheckIn(summary);
-                                        } else {
-                                            Summary summary1 = documentSnapshot.toObject(Summary.class);
-                                            if (summary1.getCheckOut() == null) {
-                                                employeeCheckOut(summary1, checkOutDetails);
-                                            } else {
-                                                summary1.setLastCheckInTime(Timestamp.now());
-                                                db.document(documentSnapshot.getReference().getPath()).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null);
-                                                Snackbar.make(binding.getRoot(), "Checked In successfully!", Toast.LENGTH_SHORT).show();
-                                                binding.checkInOutFab.setEnabled(true);
-                                            }
-                                        }
-                                    });
-                            isHere = !isHere;
-                            binding.checkInOutFab.setBackgroundColor((isHere) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
-                            binding.checkInOutFab.setText(isHere ? "Out" : "In");
-                            binding.addMachineFab.setClickable(isHere);
-                            if (isOpen) {
-                                binding.addMachineFab.startAnimation(rotateBackwardHide);
-                                binding.insideFab.startAnimation(fabClose);
-                                binding.outsideFab.startAnimation(fabClose);
-                                binding.insideText.startAnimation(hide);
-                                binding.outsideText.startAnimation(hide);
-                                binding.insideFab.setClickable(false);
-                                binding.outsideFab.setClickable(false);
-                                isOpen = false;
+                                updateEmployeeSummary(latitude, longitude);
+                                updateCheckInOutBtn();
                             } else {
-                                binding.addMachineFab.startAnimation(isHere ? show : hide);
+                                //check if he is in one of the offices
+                                PROJECT_COL.whereEqualTo("reference", "-99999").get().addOnSuccessListener(offices -> {
+                                    if (offices.size() == 0) {
+                                        Snackbar.make(binding.getRoot(), "You're not in the project area", Snackbar.LENGTH_SHORT).show();
+                                        return;
+                                    }
+                                    for (DocumentSnapshot office : offices.getDocuments()) {
+                                        Location.distanceBetween(latitude, longitude, office.toObject(Project.class).getLat(), office.toObject(Project.class).getLng(), results);
+                                        if (results[0] < office.toObject(Project.class).getArea()) {
+                                            inProjectArea = false;
+                                            Snackbar.make(binding.getRoot(), String.format("You're in the %s office", office.toObject(Project.class).getName()), Snackbar.LENGTH_SHORT).show();
+                                            updateEmployeeSummary(latitude, longitude);
+                                            updateCheckInOutBtn();
+                                            return;
+                                        }
+                                    }
+                                    //he is not in one of the offices
+                                    Snackbar.make(binding.getRoot(), "You're not in the project area", Snackbar.LENGTH_SHORT).show();
+                                });
                             }
                             return null;
 
@@ -340,6 +308,49 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                 })
                 .show();
     };
+
+    private void updateCheckInOutBtn() {
+        isHere = !isHere;
+        binding.checkInOutFab.setBackgroundColor((isHere) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
+        binding.checkInOutFab.setText(isHere ? "Out" : "In");
+        binding.addMachineFab.setClickable(isHere);
+        if (isOpen) {
+            binding.addMachineFab.startAnimation(rotateBackwardHide);
+            binding.insideFab.startAnimation(fabClose);
+            binding.outsideFab.startAnimation(fabClose);
+            binding.insideText.startAnimation(hide);
+            binding.outsideText.startAnimation(hide);
+            binding.insideFab.setClickable(false);
+            binding.outsideFab.setClickable(false);
+            isOpen = false;
+        } else {
+            binding.addMachineFab.startAnimation(isHere ? show : hide);
+        }
+    }
+
+    private void updateEmployeeSummary(double latitude, double longitude) {
+        updateDate();
+        Summary summary = new Summary(latitude, longitude);
+        HashMap<String, Object> checkOutDetails = new HashMap<>(summary.getGeoMap());
+        checkOutDetails.put("Time", Timestamp.now());
+        SUMMARY_COL.document(id)
+                .collection(year + "-" + month).document(day)
+                .get().addOnSuccessListener(documentSnapshot -> {
+                    if (!documentSnapshot.exists() || documentSnapshot.getData().size() == 0) {
+                        employeeCheckIn(summary);
+                    } else {
+                        Summary summary1 = documentSnapshot.toObject(Summary.class);
+                        if (summary1.getCheckOut() == null) {
+                            employeeCheckOut(summary1, checkOutDetails);
+                        } else {
+                            summary1.setLastCheckInTime(Timestamp.now());
+                            db.document(documentSnapshot.getReference().getPath()).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null);
+                            Snackbar.make(binding.getRoot(), "Checked In successfully!", Toast.LENGTH_SHORT).show();
+                            binding.checkInOutFab.setEnabled(true);
+                        }
+                    }
+                });
+    }
 
     private void employeeCheckOut(Summary summary, HashMap<String, Object> checkOut) {
         updateDate();
@@ -510,16 +521,6 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                 .addOnSuccessListener(unused1 -> {
                     MACHINE_EMPLOYEE_COL.document(machineEmpId).set(machine_employee).addOnSuccessListener(unused -> Snackbar.make(binding.getRoot(), "Machine: " + currMachine.getReference() + " checked In successfully", Toast.LENGTH_SHORT).show());
                 });
-//        ArrayList<Allowance> allTypes = new ArrayList<>();
-//        db.collection("EmployeesGrossSalary").document(currEmployee.getId()).get().addOnSuccessListener((value) -> {
-//            if (!value.exists())
-//                return;
-//            EmployeesGrossSalary employeesGrossSalary;
-//            employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
-//            allTypes.addAll(employeesGrossSalary.getAllTypes());
-//            allTypes.add(currMachine.getAllowance());
-//            db.collection("EmployeesGrossSalary").document(currEmployee.getId()).update("allTypes", allTypes);
-//        });
 
 
     }

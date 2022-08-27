@@ -20,7 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.igec.common.adapters.AllowanceAdapter;
 import com.igec.common.firebase.Allowance;
 import com.igec.common.firebase.EmployeesGrossSalary;
-import com.igec.common.utilities.allowancesEnum;
+import com.igec.common.utilities.AllowancesEnum;
 import com.igec.user.activities.DateInaccurate;
 import com.igec.user.databinding.FragmentGrossSalaryBinding;
 import com.whiteelephant.monthpicker.MonthPickerDialog;
@@ -133,9 +133,9 @@ public class GrossSalaryFragment extends Fragment {
                     continue;
                 salarySummaries.add(allowance);
                 if (allowance.getCurrency().equals("EGP"))
-                    salarySummary += allowance.getType() != allowancesEnum.RETENTION.ordinal() ? allowance.getAmount() : -allowance.getAmount();
+                    salarySummary += allowance.getType() != AllowancesEnum.RETENTION.ordinal() ? allowance.getAmount() : -allowance.getAmount();
                 if (allowance.getCurrency().equals("SAR"))
-                    salarySummarySAR += allowance.getType() != allowancesEnum.RETENTION.ordinal() ? allowance.getAmount() : -allowance.getAmount();            }
+                    salarySummarySAR += allowance.getType() != AllowancesEnum.RETENTION.ordinal() ? allowance.getAmount() : -allowance.getAmount();            }
             String gross;
             gross = String.format(
                     "%s%s%s",

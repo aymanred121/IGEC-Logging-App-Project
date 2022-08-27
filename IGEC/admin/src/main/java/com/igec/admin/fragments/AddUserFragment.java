@@ -27,7 +27,7 @@ import com.igec.admin.databinding.FragmentAddUserBinding;
 import com.igec.common.firebase.Allowance;
 import com.igec.common.firebase.Employee;
 import com.igec.common.firebase.EmployeesGrossSalary;
-import com.igec.common.utilities.allowancesEnum;
+import com.igec.common.utilities.AllowancesEnum;
 import com.github.javafaker.Faker;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
@@ -181,7 +181,7 @@ public class AddUserFragment extends Fragment {
             // grossSalary
             EmployeesGrossSalary employeesGrossSalary = new EmployeesGrossSalary();
             ArrayList<Allowance> allTypes = new ArrayList<>();
-            allTypes.add(new Allowance("Net salary", Double.parseDouble(binding.salaryEdit.getText().toString()), allowancesEnum.NETSALARY.ordinal(), binding.currencyAuto.getText().toString()));
+            allTypes.add(new Allowance("Net salary", Double.parseDouble(binding.salaryEdit.getText().toString()), AllowancesEnum.NETSALARY.ordinal(), binding.currencyAuto.getText().toString()));
             employeesGrossSalary.setEmployeeId(id);
             employeesGrossSalary.setAllTypes(allTypes);
             batch.set(EMPLOYEE_GROSS_SALARY_COL.document(id), employeesGrossSalary);

@@ -17,7 +17,6 @@ import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.collection.ArraySet;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.FragmentResultListener;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -31,7 +30,7 @@ import com.igec.common.firebase.Employee;
 import com.igec.common.firebase.EmployeeOverview;
 import com.igec.common.firebase.EmployeesGrossSalary;
 import com.igec.common.firebase.Project;
-import com.igec.common.utilities.allowancesEnum;
+import com.igec.common.utilities.AllowancesEnum;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
@@ -198,7 +197,7 @@ public class AddAllowanceDialog extends DialogFragment {
                 //allowances.clear();
                 EmployeesGrossSalary employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
                 for (Allowance allowance : employeesGrossSalary.getAllTypes()) {
-                    if (allowance.getType() == allowancesEnum.NETSALARY.ordinal()) {
+                    if (allowance.getType() == AllowancesEnum.NETSALARY.ordinal()) {
                         currency = allowance.getCurrency();
                         baseSalary = allowance.getAmount();
                     }
@@ -206,9 +205,9 @@ public class AddAllowanceDialog extends DialogFragment {
 //                baseSalary = employeesGrossSalary.getAllTypes().stream().filter(x -> x.getType() == allowancesEnum.NETSALARY.ordinal()).findFirst().map(Allowance::getAmount).orElse(baseSalary);
                 //Adds only Bonuses and penalties
                 // get (penalty || bonus )
-                employeesGrossSalary.getAllTypes().stream().filter(allowance -> allowance.getType() == allowancesEnum.RETENTION.ordinal() || allowance.getType() == allowancesEnum.BONUS.ordinal()).forEach(allowance -> allowances.add(allowance));
+                employeesGrossSalary.getAllTypes().stream().filter(allowance -> allowance.getType() == AllowancesEnum.RETENTION.ordinal() || allowance.getType() == AllowancesEnum.BONUS.ordinal()).forEach(allowance -> allowances.add(allowance));
                 //get baseAllowances
-                employeesGrossSalary.getBaseAllowances().stream().filter(allowance -> allowance.getType() != allowancesEnum.PROJECT.ordinal()).forEach(allowance -> allowances.add(allowance));
+                employeesGrossSalary.getBaseAllowances().stream().filter(allowance -> allowance.getType() != AllowancesEnum.PROJECT.ordinal()).forEach(allowance -> allowances.add(allowance));
                 adapter.notifyDataSetChanged();
             }));
         }
@@ -225,14 +224,14 @@ public class AddAllowanceDialog extends DialogFragment {
                     if (!value.exists())
                         return;
                     for (Allowance allowance : allowances) {
-                        if (allowance.getType() == allowancesEnum.BONUS.ordinal() || allowance.getType() == allowancesEnum.RETENTION.ordinal()) {
+                        if (allowance.getType() == AllowancesEnum.BONUS.ordinal() || allowance.getType() == AllowancesEnum.RETENTION.ordinal()) {
                             oneTimeAllowances.add(allowance);
                         } else {
                             permanentAllowances.add(allowance);
                         }
                     }
                     EmployeesGrossSalary employeesGrossSalary1 = value.toObject(EmployeesGrossSalary.class);
-                    employeesGrossSalary1.getAllTypes().removeIf(allowance -> allowance.getType() != allowancesEnum.NETSALARY.ordinal() && allowance.getType() != allowancesEnum.PROJECT.ordinal());
+                    employeesGrossSalary1.getAllTypes().removeIf(allowance -> allowance.getType() != AllowancesEnum.NETSALARY.ordinal() && allowance.getType() != AllowancesEnum.PROJECT.ordinal());
                     employeesGrossSalary1.getAllTypes().addAll(permanentAllowances);
                     EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()).update("allTypes", employeesGrossSalary1.getAllTypes());
                     EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()).collection(year).document(month).get().addOnSuccessListener(doc -> {
@@ -240,16 +239,16 @@ public class AddAllowanceDialog extends DialogFragment {
                             //new month
                             //add project allowances
                             employeesGrossSalary1.setBaseAllowances(employeesGrossSalary1.getAllTypes().stream().filter(x -> !x.getProjectId().trim().isEmpty()).collect(Collectors.toCollection(ArrayList::new)));
-                            employeesGrossSalary1.getAllTypes().removeIf(x -> x.getType() != allowancesEnum.NETSALARY.ordinal());
+                            employeesGrossSalary1.getAllTypes().removeIf(x -> x.getType() != AllowancesEnum.NETSALARY.ordinal());
                             employeesGrossSalary1.getAllTypes().addAll(oneTimeAllowances);
                             employeesGrossSalary1.getBaseAllowances().addAll(permanentAllowances);
                             db.document(doc.getReference().getPath()).set(employeesGrossSalary1, SetOptions.mergeFields("allTypes", "baseAllowances"));
                             return;
                         }
                         EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
-                        employeesGrossSalary.getBaseAllowances().removeIf(x -> x.getType() != allowancesEnum.PROJECT.ordinal());
+                        employeesGrossSalary.getBaseAllowances().removeIf(x -> x.getType() != AllowancesEnum.PROJECT.ordinal());
                         employeesGrossSalary.getBaseAllowances().addAll(permanentAllowances);
-                        employeesGrossSalary.getAllTypes().removeIf(x -> x.getType() == allowancesEnum.RETENTION.ordinal() || x.getType() == allowancesEnum.BONUS.ordinal());
+                        employeesGrossSalary.getAllTypes().removeIf(x -> x.getType() == AllowancesEnum.RETENTION.ordinal() || x.getType() == AllowancesEnum.BONUS.ordinal());
                         employeesGrossSalary.getAllTypes().addAll(oneTimeAllowances);
                         db.document(doc.getReference().getPath()).update("allTypes", employeesGrossSalary.getAllTypes(), "baseAllowances", employeesGrossSalary.getBaseAllowances()).addOnSuccessListener(unused -> {
                             oneTimeAllowances.clear();
@@ -263,7 +262,7 @@ public class AddAllowanceDialog extends DialogFragment {
                 //Added projectId to each allowance that is coming from project
                 allowances.forEach(allowance -> {
                     allowance.setProjectId(manager.getProjectID());
-                    allowance.setType(allowancesEnum.PROJECT.ordinal());
+                    allowance.setType(AllowancesEnum.PROJECT.ordinal());
                 });
                 PROJECT_COL.document(manager.getProjectID()).get().addOnSuccessListener(documentSnapshot -> {
                     if (!documentSnapshot.exists())
@@ -277,7 +276,7 @@ public class AddAllowanceDialog extends DialogFragment {
                             if (!value.exists())
                                 return;
                             EmployeesGrossSalary employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
-                            employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() == allowancesEnum.PROJECT.ordinal() && allowance.getProjectId().equals(project.getId()));
+                            employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() == AllowancesEnum.PROJECT.ordinal() && allowance.getProjectId().equals(project.getId()));
                             employeesGrossSalary.getAllTypes().addAll(projectAllowances);
                             EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()).update("allTypes", employeesGrossSalary.getAllTypes());
                             EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()).collection(year).document(month).get().addOnSuccessListener(doc -> {
@@ -291,12 +290,12 @@ public class AddAllowanceDialog extends DialogFragment {
 //                                    }
 //                                    employeesGrossSalary.setBaseAllowances(allowanceArrayList);
                                     employeesGrossSalary.getBaseAllowances().addAll(projectAllowances);
-                                    employeesGrossSalary.getAllTypes().removeIf(x -> x.getType() == allowancesEnum.PROJECT.ordinal());
+                                    employeesGrossSalary.getAllTypes().removeIf(x -> x.getType() == AllowancesEnum.PROJECT.ordinal());
                                     EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()).collection(year).document(month).set(employeesGrossSalary, SetOptions.mergeFields("allTypes", "baseAllowances"));
                                     return;
                                 }
                                 EmployeesGrossSalary employeesGrossSalary1 = doc.toObject(EmployeesGrossSalary.class);
-                                employeesGrossSalary1.getBaseAllowances().removeIf(x -> x.getType() == allowancesEnum.PROJECT.ordinal() && x.getProjectId().equals(project.getId()));
+                                employeesGrossSalary1.getBaseAllowances().removeIf(x -> x.getType() == AllowancesEnum.PROJECT.ordinal() && x.getProjectId().equals(project.getId()));
                                 employeesGrossSalary1.getBaseAllowances().addAll(projectAllowances);
                                 db.document(doc.getReference().getPath()).update("baseAllowances", employeesGrossSalary1.getBaseAllowances());
                             });
@@ -322,7 +321,7 @@ public class AddAllowanceDialog extends DialogFragment {
                         return;
                     EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
                     employeesGrossSalary.getAllTypes().forEach(allowance -> {
-                        if (allowance.getType() == allowancesEnum.NETSALARY.ordinal()) {
+                        if (allowance.getType() == AllowancesEnum.NETSALARY.ordinal()) {
                             baseSalary = allowance.getAmount();
                             currency = allowance.getCurrency();
                         }
@@ -347,7 +346,7 @@ public class AddAllowanceDialog extends DialogFragment {
                         return;
                     EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
                     employeesGrossSalary.getAllTypes().forEach(allowance -> {
-                        if (allowance.getType() == allowancesEnum.NETSALARY.ordinal()) {
+                        if (allowance.getType() == AllowancesEnum.NETSALARY.ordinal()) {
                             baseSalary = allowance.getAmount();
                             currency = allowance.getCurrency();
                         }

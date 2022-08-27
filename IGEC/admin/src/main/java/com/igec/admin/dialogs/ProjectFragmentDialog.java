@@ -42,7 +42,7 @@ import com.igec.common.firebase.Client;
 import com.igec.common.firebase.EmployeeOverview;
 import com.igec.common.firebase.EmployeesGrossSalary;
 import com.igec.common.firebase.Project;
-import com.igec.common.utilities.allowancesEnum;
+import com.igec.common.utilities.AllowancesEnum;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -349,7 +349,7 @@ public class ProjectFragmentDialog extends DialogFragment {
                     EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
                     employeesGrossSalary.getAllTypes().removeIf(x -> x.getProjectId().equals(project.getId()));
                     db.document(doc.getReference().getPath()).update("allTypes", employeesGrossSalary.getAllTypes());
-                    employeesGrossSalary.getAllTypes().removeIf(x -> x.getType() == allowancesEnum.NETSALARY.ordinal());
+                    employeesGrossSalary.getAllTypes().removeIf(x -> x.getType() == AllowancesEnum.NETSALARY.ordinal());
                     EMPLOYEE_GROSS_SALARY_COL.document(emp.getId()).collection(year).document(month).update("baseAllowances", employeesGrossSalary.getAllTypes());
                 });
             } else if (TeamID.contains(emp.getId())) {
@@ -487,7 +487,7 @@ public class ProjectFragmentDialog extends DialogFragment {
                     return;
                 EmployeesGrossSalary employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
                 if (allowances.size() != 0) {
-                    employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() == allowancesEnum.PROJECT.ordinal());
+                    employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() == AllowancesEnum.PROJECT.ordinal());
                     employeesGrossSalary.getAllTypes().addAll(allowances);
                 }
                 batch.update(EMPLOYEE_GROSS_SALARY_COL.document(emp.getId()), "allTypes", employeesGrossSalary.getAllTypes());
@@ -519,7 +519,7 @@ public class ProjectFragmentDialog extends DialogFragment {
                             if (employeesGrossSalary1.getBaseAllowances() == null)
                                 employeesGrossSalary1.setBaseAllowances(allowances);
                             else {
-                                employeesGrossSalary1.getBaseAllowances().removeIf(allowance -> allowance.getType() == allowancesEnum.PROJECT.ordinal());
+                                employeesGrossSalary1.getBaseAllowances().removeIf(allowance -> allowance.getType() == AllowancesEnum.PROJECT.ordinal());
                                 employeesGrossSalary1.getBaseAllowances().addAll(allowances);
                             }
                             batch.update(db.document(documentSnapshot.getReference().getPath()), "baseAllowances", employeesGrossSalary1.getBaseAllowances());
@@ -564,7 +564,7 @@ public class ProjectFragmentDialog extends DialogFragment {
                 EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
                 employeesGrossSalary.getAllTypes().removeIf(x -> x.getProjectId().equals(project.getId()));
                 db.document(doc.getReference().getPath()).update("allTypes", employeesGrossSalary.getAllTypes());
-                employeesGrossSalary.getAllTypes().removeIf(x -> x.getType() == allowancesEnum.NETSALARY.ordinal());
+                employeesGrossSalary.getAllTypes().removeIf(x -> x.getType() == AllowancesEnum.NETSALARY.ordinal());
                 EMPLOYEE_GROSS_SALARY_COL.document(member.getId()).collection(year).document(month).update("baseAllowances", employeesGrossSalary.getAllTypes());
             });
             ArrayList<String> empInfo = new ArrayList<>();

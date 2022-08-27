@@ -34,7 +34,7 @@ import com.igec.common.firebase.Project;
 import com.igec.common.utilities.CsvWriter;
 import com.igec.common.utilities.LocationDetails;
 import com.igec.common.utilities.WorkingDay;
-import com.igec.common.utilities.allowancesEnum;
+import com.igec.common.utilities.AllowancesEnum;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.whiteelephant.monthpicker.MonthPickerDialog;
 
@@ -193,7 +193,7 @@ public class SummaryFragment extends Fragment {
                                     double currentMonth = 0;
                                     double previousMonth = 0;
                                     for (Allowance allowance : documentSnapshot1.toObject(EmployeesGrossSalary.class).getAllTypes()) {
-                                        if (allowance.getType() != allowancesEnum.NETSALARY.ordinal()) {
+                                        if (allowance.getType() != AllowancesEnum.NETSALARY.ordinal()) {
                                             if (allowance.getName().trim().equalsIgnoreCase("Transportation")) {
                                                 transportation += allowance.getAmount();
                                             } else if (allowance.getName().trim().equalsIgnoreCase("accommodation")) {
@@ -204,11 +204,11 @@ public class SummaryFragment extends Fragment {
                                                 remote += allowance.getAmount();
                                             } else if (allowance.getName().trim().equalsIgnoreCase("food")) {
                                                 food += allowance.getAmount();
-                                            } else if (allowance.getType() == allowancesEnum.RETENTION.ordinal()) {
+                                            } else if (allowance.getType() == AllowancesEnum.RETENTION.ordinal()) {
                                                 cuts += allowance.getAmount();
-                                            } else if (allowance.getType() == allowancesEnum.BONUS.ordinal()) {
+                                            } else if (allowance.getType() == AllowancesEnum.BONUS.ordinal()) {
                                                 personal += allowance.getAmount();
-                                            } else if (allowance.getType() == allowancesEnum.OVERTIME.ordinal()) {
+                                            } else if (allowance.getType() == AllowancesEnum.OVERTIME.ordinal()) {
                                                 overTime += allowance.getAmount();
                                             } else {
                                                 other += allowance.getAmount();
@@ -223,12 +223,12 @@ public class SummaryFragment extends Fragment {
                                         previousMonth = 0;
                                     else {
                                         for (Allowance allowance : doc.toObject(EmployeesGrossSalary.class).getAllTypes()) {
-                                            if (allowance.getType() != allowancesEnum.NETSALARY.ordinal()) {
+                                            if (allowance.getType() != AllowancesEnum.NETSALARY.ordinal()) {
                                                 if (allowance.getName().trim().equalsIgnoreCase("Transportation"))
                                                     continue;
-                                                if (allowance.getType() == allowancesEnum.RETENTION.ordinal()) {
+                                                if (allowance.getType() == AllowancesEnum.RETENTION.ordinal()) {
                                                     continue;
-                                                } else if (allowance.getType() == allowancesEnum.OVERTIME.ordinal()) {
+                                                } else if (allowance.getType() == AllowancesEnum.OVERTIME.ordinal()) {
                                                     continue;
                                                 } else {
                                                     previousMonth += allowance.getAmount();

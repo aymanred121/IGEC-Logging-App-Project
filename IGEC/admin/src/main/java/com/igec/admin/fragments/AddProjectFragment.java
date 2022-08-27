@@ -39,7 +39,7 @@ import com.igec.common.firebase.Client;
 import com.igec.common.firebase.EmployeeOverview;
 import com.igec.common.firebase.EmployeesGrossSalary;
 import com.igec.common.firebase.Project;
-import com.igec.common.utilities.allowancesEnum;
+import com.igec.common.utilities.AllowancesEnum;
 import com.github.javafaker.Faker;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
@@ -307,7 +307,7 @@ public class AddProjectFragment extends Fragment {
                     }
                     EmployeesGrossSalary employeesGrossSalary1 = documentSnapshot.toObject(EmployeesGrossSalary.class);
                     if (employeesGrossSalary1.getBaseAllowances() != null) {
-                        employeesGrossSalary1.getBaseAllowances().removeIf(allowance -> allowance.getType() == allowancesEnum.PROJECT.ordinal());
+                        employeesGrossSalary1.getBaseAllowances().removeIf(allowance -> allowance.getType() == AllowancesEnum.PROJECT.ordinal());
                         employeesGrossSalary1.getBaseAllowances().addAll(allowances);
                     }
                     batch.set(db.document(documentSnapshot.getReference().getPath()), employeesGrossSalary1, SetOptions.mergeFields("baseAllowances"));
@@ -348,7 +348,7 @@ public class AddProjectFragment extends Fragment {
     private void addProject() {
 
         allowances.forEach(allowance -> {
-            allowance.setType(allowancesEnum.PROJECT.ordinal());
+            allowance.setType(AllowancesEnum.PROJECT.ordinal());
             allowance.setProjectId(PID);
         });
         Team.forEach(employeeOverview -> {

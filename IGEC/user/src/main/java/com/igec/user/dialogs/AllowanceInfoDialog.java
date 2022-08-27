@@ -26,7 +26,7 @@ import androidx.fragment.app.DialogFragment;
 import com.igec.user.R;
 import com.igec.common.firebase.Allowance;
 import com.igec.common.firebase.Employee;
-import com.igec.common.utilities.allowancesEnum;
+import com.igec.common.utilities.AllowancesEnum;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.igec.user.activities.DateInaccurate;
@@ -227,12 +227,12 @@ public class AllowanceInfoDialog extends DialogFragment {
                         if (!value.exists()) return;
                         Employee employee = value.toObject(Employee.class);
                         if (binding.typeAuto.getText().toString().equals("Retention by Days") || binding.typeAuto.getText().toString().equals("Retention by Amount")) {
-                            allowance.setType(allowancesEnum.RETENTION.ordinal());
+                            allowance.setType(AllowancesEnum.RETENTION.ordinal());
                             if (binding.typeAuto.getText().toString().equals("Retention by Days")) {
                                 allowance.setAmount(allowance.getAmount() * (employee.getSalary() / 30.0));
                             }
                         } else {
-                            allowance.setType(allowancesEnum.valueOf(binding.typeAuto.getText().toString().toUpperCase(Locale.ROOT)).ordinal());
+                            allowance.setType(AllowancesEnum.valueOf(binding.typeAuto.getText().toString().toUpperCase(Locale.ROOT)).ordinal());
                         }
                         result.putSerializable("allowance", allowance);
                         result.putInt("position", position);

@@ -50,7 +50,7 @@ import com.igec.common.firebase.MachineDefectsLog;
 import com.igec.common.firebase.Machine_Employee;
 import com.igec.common.firebase.Project;
 import com.igec.common.firebase.Summary;
-import com.igec.common.utilities.allowancesEnum;
+import com.igec.common.utilities.AllowancesEnum;
 import com.igec.user.R;
 import com.igec.user.activities.DateInaccurate;
 import com.igec.user.databinding.FragmentCheckInOutBinding;
@@ -363,43 +363,16 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         SUMMARY_COL.document(id).collection(year + "-" + month).document(day)
                 .update("checkOut", checkOut, "workingTime", FieldValue.increment(workingTime))
                 .addOnSuccessListener(unused -> {
-                    SUMMARY_COL
-                            .document(id)
-                            .collection(year + "-" + month)
-                            .document(day)
-                            .get().addOnSuccessListener(doc -> {
-                                long workingTime1 = (long) doc.getData().get("workingTime");
-                                long overTime = (workingTime1 - 28800);
-                                if (overTime < 0) {
-                                    overTime = 0;
-                                }
-                                overTime = overTime / 3600;
-                                long finalOverTime = overTime;
-                                WriteBatch batch = db.batch();
-                                batch.set(db.document(doc.getReference().getPath()), new HashMap<String, Object>() {{
-                                    put("overTime", finalOverTime);
-                                }}, SetOptions.merge());
-                                batch.commit();
-                                Allowance overTimeAllowance = new Allowance();
-                                overTimeAllowance.setAmount(finalOverTime * currEmployee.getOverTime());
-                                overTimeAllowance.setName("overTime");
-                                Date checkInDate = ((Timestamp) (summary.getCheckIn().get("Time"))).toDate();
-                                Calendar cal = Calendar.getInstance();
-                                cal.setTime(checkInDate);
-                                String prevDay = String.format("%02d", cal.get(Calendar.DAY_OF_MONTH));
-                                overTimeAllowance.setNote(prevDay);
-                                overTimeAllowance.setType(allowancesEnum.OVERTIME.ordinal());
-                                overTimeAllowance.setProjectId(currEmployee.getProjectID());
-                                EMPLOYEE_GROSS_SALARY_COL.document(id).collection(year).document(month).get().addOnSuccessListener(doc1 -> {
-                                    EmployeesGrossSalary emp = doc1.toObject(EmployeesGrossSalary.class);
-                                    ArrayList<Allowance> allowanceArrayList = emp.getAllTypes();
-                                    if (allowanceArrayList != null) {
-                                        allowanceArrayList.removeIf(x -> x.getName().equals("overTime") && x.getNote().trim().equals(day));
-                                    }
-                                    allowanceArrayList.add(overTimeAllowance);
-                                    EMPLOYEE_GROSS_SALARY_COL.document(id).collection(year).document(month).update("allTypes", allowanceArrayList);
-                                });
-                            });
+                    //todo uncomment those lines when needed to calculate overTime
+//                    SUMMARY_COL
+//                            .document(id)
+//                            .collection(year + "-" + month)
+//                            .document(day)
+//                            .get().addOnSuccessListener(doc -> {
+//                                long workingTime1 = (long) doc.getData().get("workingTime");
+//                                long overTime =(workingTime1 - 28800)<0?0:(workingTime1 - 28800)/3600;
+//                                updateOverTime(overTime,doc.getReference().getPath(),(Timestamp) (summary.getCheckIn().get("Time")));
+//                            });
 
                     binding.checkInOutFab.setEnabled(true);
                     PROJECT_COL.document(currEmployee.getProjectID())
@@ -408,6 +381,35 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                 });
         Snackbar.make(binding.getRoot(), "Checked Out successfully!", Toast.LENGTH_SHORT).show();
     }
+
+    private void updateOverTime(long overTime, String path, Timestamp time) {
+        WriteBatch batch = db.batch();
+        batch.set(db.document(path), new HashMap<String, Object>() {{
+            put("overTime", overTime);
+        }}, SetOptions.merge());
+        batch.commit();
+        Allowance overTimeAllowance = new Allowance();
+        overTimeAllowance.setAmount(overTime * currEmployee.getOverTime());
+        overTimeAllowance.setName("overTime");
+        Date checkInDate = (time).toDate();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(checkInDate);
+        String prevDay = String.format("%02d", cal.get(Calendar.DAY_OF_MONTH));
+        overTimeAllowance.setNote(prevDay);
+        overTimeAllowance.setType(AllowancesEnum.OVERTIME.ordinal());
+        overTimeAllowance.setCurrency(currEmployee.getCurrency());
+        overTimeAllowance.setProjectId(currEmployee.getProjectID());
+        EMPLOYEE_GROSS_SALARY_COL.document(id).collection(year).document(month).get().addOnSuccessListener(doc1 -> {
+            EmployeesGrossSalary emp = doc1.toObject(EmployeesGrossSalary.class);
+            ArrayList<Allowance> allowanceArrayList = emp.getAllTypes();
+            if (allowanceArrayList != null) {
+                allowanceArrayList.removeIf(x -> x.getType()==AllowancesEnum.OVERTIME.ordinal() && x.getNote().trim().equals(day));
+            }
+            allowanceArrayList.add(overTimeAllowance);
+            EMPLOYEE_GROSS_SALARY_COL.document(id).collection(year).document(month).update("allTypes", allowanceArrayList);
+        });
+    }
+
 
     private void employeeCheckIn(Summary summary) {
         updateDate();
@@ -425,8 +427,8 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                 EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId()).get().addOnSuccessListener(documentSnapshot -> {
                     if (!documentSnapshot.exists()) return;
                     EmployeesGrossSalary employeesGrossSalary = documentSnapshot.toObject(EmployeesGrossSalary.class);
-                    ArrayList<Allowance> allowances = employeesGrossSalary.getAllTypes().stream().filter(allowance -> allowance.getType() != allowancesEnum.NETSALARY.ordinal()).collect(Collectors.toCollection(ArrayList::new));
-                    employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() != allowancesEnum.NETSALARY.ordinal());
+                    ArrayList<Allowance> allowances = employeesGrossSalary.getAllTypes().stream().filter(allowance -> allowance.getType() != AllowancesEnum.NETSALARY.ordinal()).collect(Collectors.toCollection(ArrayList::new));
+                    employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() != AllowancesEnum.NETSALARY.ordinal());
                     employeesGrossSalary.setBaseAllowances(allowances);
                     if (inProjectArea) {
                         for (Allowance allowance : employeesGrossSalary.getBaseAllowances()) {

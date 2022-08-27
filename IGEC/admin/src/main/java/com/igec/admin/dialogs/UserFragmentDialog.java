@@ -47,7 +47,7 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.SetOptions;
-import com.igec.common.utilities.allowancesEnum;
+import com.igec.common.utilities.AllowancesEnum;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -386,7 +386,7 @@ public class UserFragmentDialog extends DialogFragment {
 
     private void updateEmployeeData() {
         oldNetSalary.setAmount(employee.getSalary());
-        oldNetSalary.setType(allowancesEnum.NETSALARY.ordinal());
+        oldNetSalary.setType(AllowancesEnum.NETSALARY.ordinal());
         oldNetSalary.setCurrency(employee.getCurrency());
         oldNetSalary.setName("Net salary");
         oldEmployeeOverviewData = new EmployeeOverview(employee.getFirstName(), employee.getLastName(), employee.getTitle(), employee.getId(), employee.getProjectID(), employee.getProjectID() != null);

@@ -1,6 +1,6 @@
 package com.igec.common.utilities;
 
-public enum allowancesEnum {
+public enum AllowancesEnum {
     PROJECT,
     NETSALARY,
     TRANSPORTATION ,

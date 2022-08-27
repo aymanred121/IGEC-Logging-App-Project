@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.igec.common.databinding.ItemAllowanceBinding;
 import com.igec.common.firebase.Allowance;
-import com.igec.common.utilities.allowancesEnum;
+import com.igec.common.utilities.AllowancesEnum;
 import com.igec.common.R;
 
 import java.util.ArrayList;
@@ -49,8 +49,8 @@ public class AllowanceAdapter extends RecyclerView.Adapter<AllowanceAdapter.Allo
         holder.vName.setText(allowance.getName());
         holder.vNote.setText(allowance.getNote() == null ? "" : String.format("Note: %s", allowance.getNote()));
         holder.vAmount.setText(String.format(Locale.getDefault(),"%.2f %s", allowance.getAmount(), allowance.getCurrency()));
-        if (allowance.getType() == allowancesEnum.NETSALARY.ordinal()) return;
-        if (allowance.getType() != allowancesEnum.RETENTION.ordinal()) {
+        if (allowance.getType() == AllowancesEnum.NETSALARY.ordinal()) return;
+        if (allowance.getType() != AllowancesEnum.RETENTION.ordinal()) {
             holder.vAmount.setTextColor(Color.rgb(0, 153, 0));
             holder.vAmount.setCompoundDrawablesWithIntrinsicBounds(R.drawable.ic_round_trending_up_24, 0, 0, 0);
             setTextViewDrawableColor(holder.vAmount, Color.rgb(0, 153, 0));

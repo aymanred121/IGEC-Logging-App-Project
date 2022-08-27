@@ -25,7 +25,7 @@ import com.google.firebase.firestore.SetOptions;
 import com.igec.common.firebase.Allowance;
 import com.igec.common.firebase.EmployeesGrossSalary;
 import com.igec.common.firebase.VacationRequest;
-import com.igec.common.utilities.allowancesEnum;
+import com.igec.common.utilities.AllowancesEnum;
 import com.igec.common.R;
 import com.igec.common.databinding.DialogVacationBinding;
 
@@ -156,14 +156,14 @@ public class VacationDialog extends DialogFragment {
                     assert employeesGrossSalary != null;
                     ArrayList<Allowance> allTypes = employeesGrossSalary.getAllTypes();
                     for (Allowance allowance:allTypes) {
-                        if (allowance.getType() != allowancesEnum.NETSALARY.ordinal()) {
+                        if (allowance.getType() != AllowancesEnum.NETSALARY.ordinal()) {
                             employeesGrossSalary.getBaseAllowances().add(allowance);
                             employeesGrossSalary.getAllTypes().remove(allowance);
                         }
                     }
                     Allowance unPaidAllowance = new Allowance();
                     unPaidAllowance.setAmount(unPaidDays * (vacationRequest.getEmployee().getSalary() / 30));
-                    unPaidAllowance.setType(allowancesEnum.RETENTION.ordinal());
+                    unPaidAllowance.setType(AllowancesEnum.RETENTION.ordinal());
                     unPaidAllowance.setName("unpaid");
                     unPaidAllowance.setNote(String.format("%d", unPaidDays));
                     employeesGrossSalary.getAllTypes().add(unPaidAllowance);
@@ -173,7 +173,7 @@ public class VacationDialog extends DialogFragment {
             } else {
                 Allowance unPaidAllowance = new Allowance();
                 unPaidAllowance.setAmount(-unPaidDays * (vacationRequest.getEmployee().getSalary() / 30));
-                unPaidAllowance.setType(allowancesEnum.RETENTION.ordinal());
+                unPaidAllowance.setType(AllowancesEnum.RETENTION.ordinal());
                 unPaidAllowance.setName("unpaid");
                 unPaidAllowance.setNote(String.format("%d", unPaidDays));
                 db.document(documentSnapshot.getReference().getPath()).update("allTypes",FieldValue.arrayUnion(unPaidAllowance));

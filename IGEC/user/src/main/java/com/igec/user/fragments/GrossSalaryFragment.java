@@ -21,7 +21,6 @@ import com.igec.common.adapters.AllowanceAdapter;
 import com.igec.common.firebase.Allowance;
 import com.igec.common.firebase.EmployeesGrossSalary;
 import com.igec.common.utilities.allowancesEnum;
-import com.google.firebase.firestore.FirebaseFirestore;
 import com.igec.user.activities.DateInaccurate;
 import com.igec.user.databinding.FragmentGrossSalaryBinding;
 import com.whiteelephant.monthpicker.MonthPickerDialog;
@@ -30,6 +29,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 
 public class GrossSalaryFragment extends Fragment {
 
@@ -40,10 +40,9 @@ public class GrossSalaryFragment extends Fragment {
     private ArrayList<Allowance> salarySummaries;
     private EmployeesGrossSalary employeesGrossSalary;
     private String employeeId;
-    private String year, month, prevMonth, prevYear;
+    private String year, month,day;
     private double salarySummary = 0;
     private double salarySummarySAR = 0;
-    private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     public static GrossSalaryFragment newInstance(String employeeId) {
 
@@ -102,6 +101,7 @@ public class GrossSalaryFragment extends Fragment {
         @SuppressLint("SimpleDateFormat")
         SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
         String currentDateAndTime = sdf.format(new Date());
+        day = currentDateAndTime.substring(0, 2);
         month = currentDateAndTime.substring(3, 5);
         year = currentDateAndTime.substring(6, 10);
         binding.monthEdit.setText(String.format("%s/%s", month, year));
@@ -110,9 +110,20 @@ public class GrossSalaryFragment extends Fragment {
     }
 
     private void getGrossSalary() {
+        if(Integer.parseInt(day)>25){
+            if(month.equals("12")){
+                month="01";
+                year = String.format(Locale.getDefault(),"%d", Integer.parseInt(year) + 1);
+            }else{
+                month = String.format(Locale.getDefault(),"%02d", Integer.parseInt(month)+1);
+            }
+        }
         EMPLOYEE_GROSS_SALARY_COL.document(employeeId).collection(year).document(month).addSnapshotListener((value, error) -> {
-            if (!value.exists())
+            if (!value.exists()){
+                adapter.getAllowances().clear();
+                adapter.notifyDataSetChanged();
                 return;
+            }
             salarySummaries.clear();
             salarySummary = 0;
             salarySummarySAR = 0;

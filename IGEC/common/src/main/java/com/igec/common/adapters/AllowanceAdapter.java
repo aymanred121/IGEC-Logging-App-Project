@@ -88,6 +88,10 @@ public class AllowanceAdapter extends RecyclerView.Adapter<AllowanceAdapter.Allo
         this.allowances = allowances;
     }
 
+    public ArrayList<Allowance> getAllowances() {
+        return allowances;
+    }
+
     public OnItemClickListener getListener() {
         return listener;
     }

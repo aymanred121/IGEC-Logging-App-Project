@@ -9,13 +9,13 @@ import android.content.Intent
 import android.graphics.Color
 import android.media.RingtoneManager
 import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.view.GravityCompat
@@ -26,15 +26,17 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import com.igec.user.fragments.*
-import com.igec.user.R
-import com.igec.user.databinding.ActivityMdashboardBinding
-import com.igec.common.firebase.Employee
 import com.google.android.material.navigation.NavigationView
+import com.google.firebase.firestore.FieldValue
 import com.igec.common.CONSTANTS
+import com.igec.common.firebase.Employee
+import com.igec.common.firebase.TransferRequests
 import com.igec.common.firebase.VacationRequest
 import com.igec.common.fragments.VacationRequestsFragment
 import com.igec.common.fragments.VacationsLogFragment
+import com.igec.user.R
+import com.igec.user.databinding.ActivityMdashboardBinding
+import com.igec.user.fragments.*
 
 private const val ACTION_CHANNEL_ID = "ACTION"
 private const val RECEIVING_CHANNEL_ID = "RECEIVING"
@@ -132,7 +134,11 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                         run {
                             val vacation = documentSnapshot.toObject(VacationRequest::class.java);
                             val msg =
-                                "${vacation!!.employee.firstName} has requested ${vacation.days} days, starting from ${vacation.convertDateToString(vacation.startDate.time)}"
+                                "${vacation!!.employee.firstName} has requested ${vacation.days} days, starting from ${
+                                    vacation.convertDateToString(
+                                        vacation.startDate.time
+                                    )
+                                }"
                             receivingNotification = setupNotification(
                                 "New Vacation Request",
                                 msg,
@@ -147,6 +153,48 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                                 .update("vacationNotification", 0)
                         }
                     };
+                }
+            }
+
+
+        //check if their is new transfer request
+        CONSTANTS.TRANSFER_REQUESTS_COL.whereEqualTo("newProjectId", currManager!!.projectID)
+            .whereEqualTo("TransferNotification", -1)
+            .addSnapshotListener { values, error ->
+                run {
+                    if (error != null) {
+                        Log.w("listen error", error.toString())
+                        return@run
+                    }
+                    for (document in values!!.documents) {
+                        var msg = "new transfer request"
+                        CONSTANTS.TRANSFER_REQUESTS_COL.document(document.id)
+                            .update("TransferNotification", 0)
+                        //TODO create notification using msg
+                    }
+                }
+            }
+        //check transfer request status
+        CONSTANTS.TRANSFER_REQUESTS_COL.whereEqualTo("oldProjectId", currManager!!.projectID)
+            .whereIn("TransferNotification", listOf(0, 1))
+            .addSnapshotListener { values, error ->
+                run {
+                    if (error != null) {
+                        Log.w("listen error", error.toString())
+                        return@run
+                    }
+                    for (document in values!!.documents) {
+                        if ((document.toObject(TransferRequests::class.java)!!.transferStatus == -1))
+                            continue
+                        var msg =
+                            if (document.toObject(TransferRequests::class.java)!!.transferStatus == 0)
+                                "transfer request for employee ${document.toObject(TransferRequests::class.java)!!.employee.firstName} is rejected"
+                            else
+                                "transfer request for employee ${document.toObject(TransferRequests::class.java)!!.employee.firstName} is accepted"
+                        //TODO create notification using msg
+                        CONSTANTS.TRANSFER_REQUESTS_COL.document(document.id)
+                            .update("TransferNotification", FieldValue.increment(1))
+                    }
                 }
             }
     }

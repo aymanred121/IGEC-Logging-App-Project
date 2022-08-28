@@ -214,29 +214,20 @@ public class TransferRequestsFragment extends Fragment {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setMessage(content);
             builder.setTitle("Content");
-            builder.setPositiveButton("Accept", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    transferRequestStatus = 1;
-                    requests.remove(request);
-                    adapter.notifyItemRemoved(position);
-                    updateRequestStatus(request, transferRequestStatus);
-                }
+            builder.setPositiveButton("Accept", (dialog, which) -> {
+                transferRequestStatus = 1;
+                requests.remove(request);
+                adapter.notifyItemRemoved(position);
+                updateRequestStatus(request, transferRequestStatus);
             });
-            builder.setNegativeButton("Reject", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    transferRequestStatus = 0;
-                    requests.remove(request);
-                    adapter.notifyItemRemoved(position);
-                    updateRequestStatus(request, transferRequestStatus);
-                }
+            builder.setNegativeButton("Reject", (dialogInterface, i) -> {
+                transferRequestStatus = 0;
+                requests.remove(request);
+                adapter.notifyItemRemoved(position);
+                updateRequestStatus(request, transferRequestStatus);
             });
-            builder.setNeutralButton("Cancel", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
+            builder.setNeutralButton("Cancel", (dialogInterface, i) -> {
 
-                }
             });
             builder.show();
 

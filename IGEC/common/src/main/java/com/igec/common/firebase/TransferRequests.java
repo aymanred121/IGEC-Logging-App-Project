@@ -10,9 +10,10 @@ public class TransferRequests {
             newProjectId,
             newProjectReference,
             transferId;
-    private int transferStatus = -1;
+    private int transferStatus = -1,TransferNotification = -1;
 
-    /**
+    /*
+     * transferStatus:
      * -1 means pending
      * 0 means rejected
      * 1 means accepted
@@ -110,5 +111,13 @@ public class TransferRequests {
 
     public void setTransferId(String transferId) {
         this.transferId = transferId;
+    }
+
+    public int getTransferNotification() {
+        return TransferNotification;
+    }
+
+    public void setTransferNotification(int transferNotification) {
+        TransferNotification = transferNotification;
     }
 }

@@ -26,15 +26,19 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import com.igec.user.fragments.*
-import com.igec.user.R
-import com.igec.user.databinding.ActivityEdashboardBinding
-import com.igec.common.firebase.Employee
 import com.google.android.material.navigation.NavigationView
+import com.google.firebase.firestore.FieldValue
 import com.igec.common.CONSTANTS
+import com.igec.common.firebase.Employee
+import com.igec.common.firebase.TransferRequests
 import com.igec.common.firebase.VacationRequest
 import com.igec.common.fragments.VacationsLogFragment
-
+import com.igec.user.R
+import com.igec.user.databinding.ActivityEdashboardBinding
+import com.igec.user.fragments.ChangePasswordFragment
+import com.igec.user.fragments.CheckInOutFragment
+import com.igec.user.fragments.GrossSalaryFragment
+import com.igec.user.fragments.SendVacationRequestFragment
 
 
 private const val CHANNEL_ID = "ACTION"
@@ -78,14 +82,18 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         navView.setupWithNavController(navController)
         navView.setNavigationItemSelectedListener(this)
 
-        "${currEmployee?.firstName} ${currEmployee?.lastName}".also { employeeName-> binding.navView.getHeaderView(0).findViewById<TextView>(R.id.EmployeeName).text = employeeName }
+        "${currEmployee?.firstName} ${currEmployee?.lastName}".also { employeeName ->
+            binding.navView.getHeaderView(
+                0
+            ).findViewById<TextView>(R.id.EmployeeName).text = employeeName
+        }
         binding.navView.getHeaderView(0).findViewById<TextView>(R.id.EmployeeID).text =
             currEmployee?.id
 
         createNotificationChannel()
-        CONSTANTS.VACATION_COL.whereEqualTo("employee.id",currEmployee!!.id)
-            .whereEqualTo("vacationNotification",0)
-            .whereNotEqualTo("vacationStatus",0)
+        CONSTANTS.VACATION_COL.whereEqualTo("employee.id", currEmployee!!.id)
+            .whereEqualTo("vacationNotification", 0)
+            .whereNotEqualTo("vacationStatus", 0)
             .addSnapshotListener { values, error ->
                 run {
                     if (error != null) {
@@ -95,15 +103,52 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                     values!!.documents.forEach { documentSnapshot ->
                         run {
                             val vacation = documentSnapshot.toObject(VacationRequest::class.java);
-                            val msg:String = if(vacation!!.vacationStatus ==-1)
+                            val msg: String = if (vacation!!.vacationStatus == -1)
                                 "your vacation request for ${vacation.days} days has been rejected"
                             else
                                 "your vacation request for ${vacation.days} days has been accepted"
-                            setupNotification("Vacation Request Status", msg, R.drawable.ic_baseline_mail_24)
+                            setupNotification(
+                                "Vacation Request Status",
+                                msg,
+                                R.drawable.ic_baseline_mail_24
+                            )
                             notificationManager.notify(NOTIFICATION_ID++, notification)
-                            CONSTANTS.VACATION_COL.document(vacation.id).update("vacationNotification",1);
+                            CONSTANTS.VACATION_COL.document(vacation.id)
+                                .update("vacationNotification", 1);
                         }
                     };
+                }
+            }
+        //check transfer request
+        CONSTANTS.TRANSFER_REQUESTS_COL.whereEqualTo("employee.id", currEmployee!!.id)
+            .whereIn("TransferNotification", listOf(0, 1))
+            .addSnapshotListener { values, error ->
+                run {
+                    if (error != null) {
+                        Log.w("listen error", error.toString())
+                        return@run
+                    }
+                    for (document in values!!.documents) {
+                        if (document.toObject(TransferRequests::class.java)!!.transferStatus ==0){
+                            //rejected
+                            CONSTANTS.TRANSFER_REQUESTS_COL.document(document.id)
+                                .update("TransferNotification", FieldValue.increment(1))
+                            continue
+                        }
+                        if (document.toObject(TransferRequests::class.java)!!.transferStatus ==-1){
+                            //pending
+                            continue
+                        }
+                        var msg =
+                            "you have been transferred to project ${
+                                document.toObject(
+                                    TransferRequests::class.java
+                                )!!.newProjectName
+                            }"
+                        //TODO create notification using msg
+                        CONSTANTS.TRANSFER_REQUESTS_COL.document(document.id)
+                            .update("TransferNotification", FieldValue.increment(1))
+                    }
                 }
             }
     }
@@ -119,7 +164,7 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
             description = descriptionText
             enableLights(true)
             lightColor = Color.GREEN
-            setSound(alarmSound,null)
+            setSound(alarmSound, null)
         }
         // Register the channel with the system
         val notificationManager: NotificationManager =

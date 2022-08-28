@@ -12,6 +12,7 @@ import static com.google.android.material.textfield.TextInputLayout.END_ICON_CUS
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
@@ -174,8 +175,8 @@ public class UserFragmentDialog extends DialogFragment {
         binding.deleteButton.setVisibility(View.VISIBLE);
         binding.updateButton.setVisibility(View.VISIBLE);
         binding.unlockButton.setVisibility(View.VISIBLE);
-
-
+        Drawable state = employee.isLocked() ? getActivity().getDrawable(R.drawable.ic_outline_lock_24) : getActivity().getDrawable(R.drawable.ic_round_lock_open_24);
+        binding.unlockButton.setIcon(state);
         views = new ArrayList<>();
         views.add(new Pair<>(binding.firstNameLayout, binding.firstNameEdit));
         views.add(new Pair<>(binding.secondNameLayout, binding.secondNameEdit));
@@ -481,8 +482,15 @@ public class UserFragmentDialog extends DialogFragment {
 
     };
     private View.OnClickListener clUnlock = v -> {
-        employee.setLocked(false);
-        EMPLOYEE_COL.document(employee.getId()).set(employee, SetOptions.mergeFields("locked"));
+        if (!employee.isLocked()) {
+            Snackbar.make(binding.getRoot(), "E-mail is already unlocked", Snackbar.LENGTH_SHORT).show();
+        } else {
+            employee.setLocked(false);
+            binding.unlockButton.setIcon(getActivity().getDrawable(R.drawable.ic_round_lock_open_24));
+            EMPLOYEE_COL.document(employee.getId()).set(employee, SetOptions.mergeFields("locked")).addOnSuccessListener(unused -> {
+                Snackbar.make(binding.getRoot(), "E-mail unlocked", Snackbar.LENGTH_SHORT).show();
+            });
+        }
     };
 
     private View.OnClickListener oclHireDate = new View.OnClickListener() {

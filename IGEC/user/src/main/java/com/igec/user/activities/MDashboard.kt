@@ -38,10 +38,14 @@ import com.igec.user.R
 import com.igec.user.databinding.ActivityMdashboardBinding
 import com.igec.user.fragments.*
 
-private const val ACTION_CHANNEL_ID = "ACTION"
-private const val RECEIVING_CHANNEL_ID = "RECEIVING"
-private var ACTION_NOTIFICATION_ID = 0
-private var RECEIVING_NOTIFICATION_ID = 0
+private const val VACATION_STATUS_CHANNEL_ID = "VACATION_STATUS"
+private const val TRANSFER_STATUS_CHANNEL_ID = "TRANSFER_STATUS"
+private const val VACATION_REQUEST_CHANNEL_ID = "VACATION_REQUEST"
+private const val TRANSFER_REQUEST_CHANNEL_ID = "TRANSFER_REQUEST"
+private var VACATION_REQUEST_NOTIFICATION_ID = 0
+private var VACATION_STATUS_NOTIFICATION_ID = 0
+private var TRANSFER_REQUEST_NOTIFICATION_ID = 0
+private var TRANSFER_STATUS_NOTIFICATION_ID = 0
 
 class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private var currManager: Employee? = null
@@ -49,8 +53,10 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
     private lateinit var binding: ActivityMdashboardBinding
     private lateinit var navController: NavController
     private var lastTab: Int = R.id.nav_check_in_out
-    private lateinit var actionNotification: Notification
-    private lateinit var receivingNotification: Notification
+    private lateinit var vacationStatusNotification: Notification
+    private lateinit var vacationRequestNotification: Notification
+    private lateinit var transferStatusNotification: Notification
+    private lateinit var transferRequestNotification: Notification
     private lateinit var notificationManager: NotificationManagerCompat
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,8 +95,11 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         }
         binding.navView.getHeaderView(0).findViewById<TextView>(R.id.EmployeeID).text =
             currManager?.id
-        createNotificationChannel(ACTION_CHANNEL_ID)
-        createNotificationChannel(RECEIVING_CHANNEL_ID)
+        createNotificationChannel(VACATION_STATUS_CHANNEL_ID)
+        createNotificationChannel(VACATION_REQUEST_CHANNEL_ID)
+        createNotificationChannel(TRANSFER_STATUS_CHANNEL_ID)
+        createNotificationChannel(TRANSFER_REQUEST_CHANNEL_ID)
+
         notificationManager = NotificationManagerCompat.from(this)
         //get your pending request status
         CONSTANTS.VACATION_COL.whereEqualTo("employee.id", currManager!!.id)
@@ -104,22 +113,25 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                     }
                     values!!.documents.forEach { documentSnapshot ->
                         run {
-                            val vacation = documentSnapshot.toObject(VacationRequest::class.java);
+                            val vacation = documentSnapshot.toObject(VacationRequest::class.java)
                             val msg: String = if (vacation!!.vacationStatus == -1)
                                 "your vacation request for ${vacation.days} days has been rejected"
                             else
                                 "your vacation request for ${vacation.days} days has been accepted"
-                            actionNotification = setupNotification(
+                            vacationStatusNotification = setupNotification(
                                 "Vacation Request Status",
                                 msg,
                                 R.drawable.ic_baseline_mail_24,
-                                ACTION_CHANNEL_ID
+                                VACATION_STATUS_CHANNEL_ID
                             )
-                            notificationManager.notify(ACTION_NOTIFICATION_ID++, actionNotification)
+                            notificationManager.notify(
+                                VACATION_STATUS_NOTIFICATION_ID++,
+                                vacationStatusNotification
+                            )
                             CONSTANTS.VACATION_COL.document(vacation.id)
-                                .update("vacationNotification", 1);
+                                .update("vacationNotification", 1)
                         }
-                    };
+                    }
                 }
             }
         //get vacation requests from your employees
@@ -132,34 +144,34 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                     }
                     values!!.documents.forEach { documentSnapshot ->
                         run {
-                            val vacation = documentSnapshot.toObject(VacationRequest::class.java);
+                            val vacation = documentSnapshot.toObject(VacationRequest::class.java)
                             val msg =
                                 "${vacation!!.employee.firstName} has requested ${vacation.days} days, starting from ${
                                     vacation.convertDateToString(
                                         vacation.startDate.time
                                     )
                                 }"
-                            receivingNotification = setupNotification(
+                            vacationRequestNotification = setupNotification(
                                 "New Vacation Request",
                                 msg,
                                 R.drawable.ic_baseline_mail_24,
-                                RECEIVING_CHANNEL_ID
+                                VACATION_REQUEST_CHANNEL_ID
                             )
                             notificationManager.notify(
-                                RECEIVING_NOTIFICATION_ID++,
-                                receivingNotification
+                                VACATION_REQUEST_NOTIFICATION_ID++,
+                                vacationRequestNotification
                             )
                             CONSTANTS.VACATION_COL.document(vacation.id)
                                 .update("vacationNotification", 0)
                         }
-                    };
+                    }
                 }
             }
 
 
         //check if their is new transfer request
-        CONSTANTS.TRANSFER_REQUESTS_COL.whereEqualTo("newProjectId", currManager!!.projectID)
-            .whereEqualTo("TransferNotification", -1)
+        CONSTANTS.TRANSFER_REQUESTS_COL.whereEqualTo("oldProjectId", currManager!!.projectID)
+            .whereEqualTo("seenByOld", false)
             .addSnapshotListener { values, error ->
                 run {
                     if (error != null) {
@@ -167,16 +179,28 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                         return@run
                     }
                     for (document in values!!.documents) {
-                        var msg = "new transfer request"
+                        val transferRequest = document.toObject(TransferRequests::class.java)
+                        val msg = "A Transfer Request for ${transferRequest!!.employee.firstName} to ${transferRequest.newProjectName}"
+                        transferRequestNotification = setupNotification(
+                            "New Transfer Request",
+                            msg,
+                            R.drawable.ic_baseline_mail_24,
+                            TRANSFER_REQUEST_CHANNEL_ID
+                        )
+
+                        notificationManager.notify(
+                            TRANSFER_REQUEST_NOTIFICATION_ID++,
+                            transferRequestNotification
+                        )
+
                         CONSTANTS.TRANSFER_REQUESTS_COL.document(document.id)
-                            .update("TransferNotification", 0)
-                        //TODO create notification using msg
+                            .update("seenByOld", true)
                     }
                 }
             }
         //check transfer request status
-        CONSTANTS.TRANSFER_REQUESTS_COL.whereEqualTo("oldProjectId", currManager!!.projectID)
-            .whereIn("TransferNotification", listOf(0, 1))
+        CONSTANTS.TRANSFER_REQUESTS_COL.whereEqualTo("newProjectId", currManager!!.projectID)
+            .whereEqualTo("seenByNew", false)
             .addSnapshotListener { values, error ->
                 run {
                     if (error != null) {
@@ -186,14 +210,25 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                     for (document in values!!.documents) {
                         if ((document.toObject(TransferRequests::class.java)!!.transferStatus == -1))
                             continue
-                        var msg =
+                        val msg =
                             if (document.toObject(TransferRequests::class.java)!!.transferStatus == 0)
-                                "transfer request for employee ${document.toObject(TransferRequests::class.java)!!.employee.firstName} is rejected"
+                                "Transfer Request for Employee ${document.toObject(TransferRequests::class.java)!!.employee.firstName} was rejected"
                             else
-                                "transfer request for employee ${document.toObject(TransferRequests::class.java)!!.employee.firstName} is accepted"
-                        //TODO create notification using msg
+                                "Transfer Request for Employee ${document.toObject(TransferRequests::class.java)!!.employee.firstName} was accepted"
+                        transferStatusNotification = setupNotification(
+                            "Transfer Request Status",
+                            msg,
+                            R.drawable.ic_baseline_mail_24,
+                            TRANSFER_STATUS_CHANNEL_ID
+                        )
+
+                        notificationManager.notify(
+                            TRANSFER_STATUS_NOTIFICATION_ID++,
+                            transferStatusNotification
+                        )
+
                         CONSTANTS.TRANSFER_REQUESTS_COL.document(document.id)
-                            .update("TransferNotification", FieldValue.increment(1))
+                            .update("seenByNew", true)
                     }
                 }
             }
@@ -224,7 +259,6 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         icon: Int,
         CHANNEL_ID: String
     ): Notification {
-        // Create an explicit intent for an Activity in your app
         val intent = Intent(this, LauncherActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
@@ -302,7 +336,7 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                         }
 
                         R.id.nav_send_vacation_request -> {
-                            binding.toolbar.title = getString(R.string.send)
+                            binding.toolbar.title = getString(R.string.send_vacation_request)
                             supportFragmentManager.beginTransaction()
                                 .replace(
                                     R.id.nav_host_fragment_content_main,
@@ -333,7 +367,7 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                         }
 
                         R.id.nav_send_transfer_request -> {
-                            binding.toolbar.title = getString(R.string.send)
+                            binding.toolbar.title = getString(R.string.send_transfer_request)
                             supportFragmentManager.beginTransaction()
                                 .replace(
                                     R.id.nav_host_fragment_content_main,

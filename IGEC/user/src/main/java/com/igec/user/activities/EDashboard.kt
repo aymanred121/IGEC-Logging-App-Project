@@ -41,8 +41,11 @@ import com.igec.user.fragments.GrossSalaryFragment
 import com.igec.user.fragments.SendVacationRequestFragment
 
 
-private const val CHANNEL_ID = "ACTION"
-private var NOTIFICATION_ID = 0
+private const val VACATION_STATUS_CHANNEL_ID = "VACATION_STATUS"
+private const val TRANSFER_STATUS_CHANNEL_ID = "TRANSFER_STATUS"
+
+private var VACATION_NOTIFICATION_ID = 0
+private var TRANSFER_NOTIFICATION_ID = 0
 
 class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private var currEmployee: Employee? = null
@@ -50,7 +53,8 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
     private lateinit var binding: ActivityEdashboardBinding
     private lateinit var navController: NavController
     private var lastTab: Int = R.id.nav_check_in_out
-    private lateinit var notification: Notification
+    private lateinit var vacationNotification: Notification
+    private lateinit var transferNotification: Notification
     private lateinit var notificationManager: NotificationManagerCompat
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -90,7 +94,11 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         binding.navView.getHeaderView(0).findViewById<TextView>(R.id.EmployeeID).text =
             currEmployee?.id
 
-        createNotificationChannel()
+        createNotificationChannel(VACATION_STATUS_CHANNEL_ID)
+        createNotificationChannel(TRANSFER_STATUS_CHANNEL_ID)
+
+        notificationManager = NotificationManagerCompat.from(this)
+
         CONSTANTS.VACATION_COL.whereEqualTo("employee.id", currEmployee!!.id)
             .whereEqualTo("vacationNotification", 0)
             .whereNotEqualTo("vacationStatus", 0)
@@ -102,26 +110,30 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                     }
                     values!!.documents.forEach { documentSnapshot ->
                         run {
-                            val vacation = documentSnapshot.toObject(VacationRequest::class.java);
+                            val vacation = documentSnapshot.toObject(VacationRequest::class.java)
                             val msg: String = if (vacation!!.vacationStatus == -1)
                                 "your vacation request for ${vacation.days} days has been rejected"
                             else
                                 "your vacation request for ${vacation.days} days has been accepted"
-                            setupNotification(
+                            vacationNotification = setupNotification(
                                 "Vacation Request Status",
                                 msg,
-                                R.drawable.ic_baseline_mail_24
+                                R.drawable.ic_baseline_mail_24,
+                                VACATION_STATUS_CHANNEL_ID
                             )
-                            notificationManager.notify(NOTIFICATION_ID++, notification)
+                            notificationManager.notify(
+                                VACATION_NOTIFICATION_ID++,
+                                vacationNotification
+                            )
                             CONSTANTS.VACATION_COL.document(vacation.id)
-                                .update("vacationNotification", 1);
+                                .update("vacationNotification", 1)
                         }
-                    };
+                    }
                 }
             }
         //check transfer request
         CONSTANTS.TRANSFER_REQUESTS_COL.whereEqualTo("employee.id", currEmployee!!.id)
-            .whereIn("TransferNotification", listOf(0, 1))
+            .whereEqualTo("seenByEmp", false)
             .addSnapshotListener { values, error ->
                 run {
                     if (error != null) {
@@ -129,31 +141,42 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                         return@run
                     }
                     for (document in values!!.documents) {
-                        if (document.toObject(TransferRequests::class.java)!!.transferStatus ==0){
+                        if (document.toObject(TransferRequests::class.java)!!.transferStatus == 0) {
                             //rejected
                             CONSTANTS.TRANSFER_REQUESTS_COL.document(document.id)
-                                .update("TransferNotification", FieldValue.increment(1))
+                                .update("transferNotification", FieldValue.increment(1))
                             continue
                         }
-                        if (document.toObject(TransferRequests::class.java)!!.transferStatus ==-1){
+                        if (document.toObject(TransferRequests::class.java)!!.transferStatus == -1) {
                             //pending
                             continue
                         }
-                        var msg =
-                            "you have been transferred to project ${
+                        val msg =
+                            "You have been transferred to project ${
                                 document.toObject(
                                     TransferRequests::class.java
                                 )!!.newProjectName
                             }"
-                        //TODO create notification using msg
+                        transferNotification = setupNotification(
+                            "Project Transfer",
+                            msg,
+                            R.drawable.ic_baseline_mail_24,
+                            TRANSFER_STATUS_CHANNEL_ID
+                        )
+
+                        notificationManager.notify(
+                            TRANSFER_NOTIFICATION_ID++,
+                            transferNotification
+                        )
+
                         CONSTANTS.TRANSFER_REQUESTS_COL.document(document.id)
-                            .update("TransferNotification", FieldValue.increment(1))
+                            .update("seenByEmp", true)
                     }
                 }
             }
     }
 
-    private fun createNotificationChannel() {
+    private fun createNotificationChannel(CHANNEL_ID: String) {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
         val name = getString(R.string.channel_name)
@@ -172,8 +195,12 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         notificationManager.createNotificationChannel(channel)
     }
 
-    private fun setupNotification(title: String, content: String, icon: Int) {
-        // Create an explicit intent for an Activity in your app
+    private fun setupNotification(
+        title: String,
+        content: String,
+        icon: Int,
+        CHANNEL_ID: String
+    ): Notification {
         val intent = Intent(this, LauncherActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
@@ -181,14 +208,13 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         val pendingIntent: PendingIntent =
             PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
 
-        notification = NotificationCompat.Builder(this, CHANNEL_ID)
+        return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(icon)
             .setContentTitle(title)
             .setContentText(content)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT).build()
-        notificationManager = NotificationManagerCompat.from(this)
     }
 
 
@@ -246,7 +272,7 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                         }
 
                         R.id.nav_send_vacation_request -> {
-                            binding.toolbar.title = getString(R.string.send)
+                            binding.toolbar.title = getString(R.string.send_vacation_request)
                             supportFragmentManager.beginTransaction()
                                 .replace(
                                     R.id.nav_host_fragment_content_main,

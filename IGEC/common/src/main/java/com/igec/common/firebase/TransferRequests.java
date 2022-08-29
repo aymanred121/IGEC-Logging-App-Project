@@ -10,7 +10,8 @@ public class TransferRequests {
             newProjectId,
             newProjectReference,
             transferId;
-    private int transferStatus = -1,TransferNotification = -1;
+    private int transferStatus = -1;
+    private boolean isSeenByOld = false, isSeenByNew = false, isSeenByEmp = false;
 
     /*
      * transferStatus:
@@ -113,11 +114,27 @@ public class TransferRequests {
         this.transferId = transferId;
     }
 
-    public int getTransferNotification() {
-        return TransferNotification;
+    public boolean isSeenByOld() {
+        return isSeenByOld;
     }
 
-    public void setTransferNotification(int transferNotification) {
-        TransferNotification = transferNotification;
+    public void setSeenByOld(boolean seenByOld) {
+        isSeenByOld = seenByOld;
+    }
+
+    public boolean isSeenByNew() {
+        return isSeenByNew;
+    }
+
+    public void setSeenByNew(boolean seenByNew) {
+        isSeenByNew = seenByNew;
+    }
+
+    public boolean isSeenByEmp() {
+        return isSeenByEmp;
+    }
+
+    public void setSeenByEmp(boolean seenByEmp) {
+        isSeenByEmp = seenByEmp;
     }
 }

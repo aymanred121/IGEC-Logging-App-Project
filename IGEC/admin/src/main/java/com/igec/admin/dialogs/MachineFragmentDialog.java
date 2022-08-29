@@ -171,7 +171,7 @@ public class MachineFragmentDialog extends DialogFragment {
         binding.registerButton.setVisibility(View.GONE);
         binding.deleteButton.setVisibility(View.VISIBLE);
         binding.updateButton.setVisibility(View.VISIBLE);
-
+        binding.deleteButton.setEnabled(!machine.getIsUsed());
         binding.idEdit.setEnabled(false);
 
         binding.serialNumberEdit.setText(machine.getReference());

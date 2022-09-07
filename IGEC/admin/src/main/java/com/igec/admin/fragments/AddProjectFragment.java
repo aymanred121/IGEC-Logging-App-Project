@@ -422,6 +422,8 @@ public class AddProjectFragment extends Fragment {
         for (Pair<TextInputLayout, EditText> v : views) {
             v.second.setText(null);
         }
+        binding.officeWorkCheckbox.setEnabled(false);
+        binding.referenceEdit.setEnabled(true);
         TeamID.clear();
         Team.clear();
         client = null;

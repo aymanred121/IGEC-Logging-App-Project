@@ -45,7 +45,7 @@ public class TransferAdapter extends RecyclerView.Adapter<TransferAdapter.Transf
     @Override
     public void onBindViewHolder(@NonNull TransferViewHolder holder, int position) {
         TransferRequests transferRequest = transfers.get(position);
-        holder.vTransferredEmployeeProject.setText(String.format("Project: IGEC%s | %s", transferRequest.getNewProjectReference(), transferRequest.getNewProjectId()));
+        holder.vTransferredEmployeeProject.setText(String.format("Project: IGEC%s | %s", transferRequest.getNewProjectReference(), transferRequest.getNewProjectName()));
         holder.vTransferredEmployeeId.setText(String.format("Employee Id: %s",transferRequest.getEmployee().getId()));
         holder.vTransferredEmployeeName.setText(String.format("Employee Name: %s %s", transferRequest.getEmployee().getFirstName(), transferRequest.getEmployee().getLastName()));
     }

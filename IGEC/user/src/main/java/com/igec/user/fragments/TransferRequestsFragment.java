@@ -112,10 +112,10 @@ public class TransferRequestsFragment extends Fragment {
 
     private void getRequests() {
         TRANSFER_REQUESTS_COL.whereEqualTo("oldProjectId", manager.getProjectID()).whereEqualTo("transferStatus", -1).addSnapshotListener((values, error) -> {
-            if (values.size() == 0)
-                return;
             requests.clear();
             adapter.notifyDataSetChanged();
+            if (values.size() == 0)
+                return;
             requests.addAll(values.toObjects(com.igec.common.firebase.TransferRequests.class));
             adapter.setTransfers(requests);
             adapter.notifyDataSetChanged();

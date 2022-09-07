@@ -22,6 +22,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.igec.user.activities.DateInaccurate;
 import com.igec.user.adapters.TransferAdapter;
@@ -48,7 +49,7 @@ public class TransferRequestsFragment extends Fragment {
     private Employee manager;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private ArrayList<TransferRequests> requests;
-    private String day,year,month;
+    private String day, year, month;
     private Project newProject;
     private WriteBatch batch = FirebaseFirestore.getInstance().batch();
 
@@ -62,6 +63,7 @@ public class TransferRequestsFragment extends Fragment {
     }
 
     private FragmentTransferRequestsBinding binding;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -81,6 +83,7 @@ public class TransferRequestsFragment extends Fragment {
         super.onResume();
         validateDate(getActivity());
     }
+
     private void validateDate(Context c) {
         if (Settings.Global.getInt(c.getContentResolver(), Settings.Global.AUTO_TIME, 0) != 1) {
             Intent intent = new Intent(getActivity(), DateInaccurate.class);
@@ -118,6 +121,7 @@ public class TransferRequestsFragment extends Fragment {
             adapter.notifyDataSetChanged();
         });
     }
+
     private void updateDate() {
         Calendar calendar = Calendar.getInstance();
         year = String.valueOf(calendar.get(Calendar.YEAR));
@@ -152,12 +156,13 @@ public class TransferRequestsFragment extends Fragment {
 
     private void updateProjectData(TransferRequests request) {
         //remove emp from old project
-        batch.update(PROJECT_COL.document(request.getOldProjectId()),"employees", FieldValue.arrayRemove(request.getEmployee()));
+        batch.update(PROJECT_COL.document(request.getOldProjectId()), "employees", FieldValue.arrayRemove(request.getEmployee()));
         //add emp to new project
         request.getEmployee().setProjectId(request.getNewProjectId());
         request.getEmployee().setManagerID(newProject.getManagerID());
-        batch.update(PROJECT_COL.document(request.getNewProjectId()),"employees", FieldValue.arrayUnion(request.getEmployee()));
+        batch.update(PROJECT_COL.document(request.getNewProjectId()), "employees", FieldValue.arrayUnion(request.getEmployee()));
     }
+
     private void updateAllowancesData(TransferRequests request, ArrayList<Allowance> projectAllowances) {
         updateDate();
         EMPLOYEE_GROSS_SALARY_COL.document(request.getEmployee().getId()).get().addOnSuccessListener(value -> {
@@ -166,36 +171,48 @@ public class TransferRequestsFragment extends Fragment {
             EmployeesGrossSalary employeesGrossSalary1 = value.toObject(EmployeesGrossSalary.class);
             employeesGrossSalary1.getAllTypes().removeIf(x -> x.getProjectId().trim().equals(request.getOldProjectId()));
             employeesGrossSalary1.getAllTypes().addAll(projectAllowances);
-            batch.update(EMPLOYEE_GROSS_SALARY_COL.document(request.getEmployee().getId()),"allTypes", employeesGrossSalary1.getAllTypes());
+            batch.update(EMPLOYEE_GROSS_SALARY_COL.document(request.getEmployee().getId()), "allTypes", employeesGrossSalary1.getAllTypes());
 
             EMPLOYEE_GROSS_SALARY_COL.document(request.getEmployee().getId()).collection(year).document(month).get().addOnSuccessListener(doc -> {
-                if (!doc.exists()){
+                if (!doc.exists()) {
                     batch.commit();
                     return;
                 }
                 EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
                 employeesGrossSalary.getBaseAllowances().removeIf(a -> a.getProjectId().trim().equals(request.getOldProjectId()));
                 employeesGrossSalary.getBaseAllowances().addAll(projectAllowances);
-                batch.update(db.document(doc.getReference().getPath()),"baseAllowances", employeesGrossSalary.getBaseAllowances());
+                batch.update(db.document(doc.getReference().getPath()), "baseAllowances", employeesGrossSalary.getBaseAllowances());
                 batch.commit();
             });
         });
 
     }
 
+    private void updateTransferRequests(TransferRequests request) {
+        // change transfer status to 0 (rejected) for all requests on this employee
+        TRANSFER_REQUESTS_COL.whereEqualTo("employee.id", request.getEmployee().getId()).get().addOnSuccessListener(values -> {
+            for (DocumentSnapshot doc : values) {
+                if (doc.getId().equals(request.getTransferId()))
+                    continue;
+                batch.update(db.document(doc.getReference().getPath()), "transferStatus", 0);
+            }
+            updateAllowancesData(request, newProject.getAllowancesList());
+        });
+    }
+
     private void updateRequestStatus(TransferRequests request, int status) {
         batch = FirebaseFirestore.getInstance().batch();
-        if(status==1){
-            PROJECT_COL.document(request.getNewProjectId()).get().addOnSuccessListener(doc->{
-                if(!doc.exists())
+        if (status == 1) {
+            PROJECT_COL.document(request.getNewProjectId()).get().addOnSuccessListener(doc -> {
+                if (!doc.exists())
                     return;
                 newProject = doc.toObject(Project.class);
-                batch.update(TRANSFER_REQUESTS_COL.document(request.getTransferId()),"transferStatus", status);
+                batch.update(TRANSFER_REQUESTS_COL.document(request.getTransferId()), "transferStatus", status);
                 updateEmployeeData(request);
                 updateProjectData(request);
-                updateAllowancesData(request, newProject.getAllowancesList());
-            });
+                updateTransferRequests(request);
 
+            });
         }
 
 

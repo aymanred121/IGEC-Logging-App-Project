@@ -122,6 +122,7 @@ public class GrossSalaryFragment extends Fragment {
             if (!value.exists()){
                 adapter.getAllowances().clear();
                 adapter.notifyDataSetChanged();
+                binding.grossSalaryText.setText("No Available Salary");
                 return;
             }
             salarySummaries.clear();

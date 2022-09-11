@@ -11,6 +11,7 @@ import static com.igec.common.CONSTANTS.SUMMARY_COL;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -32,13 +33,21 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentResultListener;
 
 import com.birjuvachhani.locus.Locus;
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingClient;
+import com.google.android.gms.location.GeofencingRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.firestore.WriteBatch;
 import com.igec.common.firebase.Allowance;
@@ -51,6 +60,7 @@ import com.igec.common.firebase.Machine_Employee;
 import com.igec.common.firebase.Project;
 import com.igec.common.firebase.Summary;
 import com.igec.common.utilities.AllowancesEnum;
+import com.igec.user.GeofenceBroadcastReceiver;
 import com.igec.user.R;
 import com.igec.user.activities.DateInaccurate;
 import com.igec.user.databinding.FragmentCheckInOutBinding;
@@ -82,6 +92,9 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     private String machineEmpId;
     private String year, month, day;
     private boolean inProjectArea;
+    private ArrayList<Geofence> geofenceList;
+    private GeofencingClient geofencingClient;
+    private PendingIntent geofencePendingIntent;
 
     public static CheckInOutFragment newInstance(Employee user) {
         Bundle args = new Bundle();
@@ -135,7 +148,69 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         binding.outsideFab.setOnClickListener(oclOutside);
     }
 
+    private GeofencingRequest getGeofencingRequest() {
+        GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
+        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_DWELL);
+        builder.addGeofences(geofenceList);
+        return builder.build();
+    }
+
+    private PendingIntent getGeofencePendingIntent() {
+        // Reuse the PendingIntent if we already have it.
+        if (geofencePendingIntent != null) {
+            return geofencePendingIntent;
+        }
+        Intent intent = new Intent(getActivity(), GeofenceBroadcastReceiver.class);
+        // We use FLAG_UPDATE_CURRENT so that we get the same pending intent back when
+        // calling addGeofences() and removeGeofences().
+        geofencePendingIntent = PendingIntent.getBroadcast(getActivity(), 0, intent, PendingIntent.
+                FLAG_UPDATE_CURRENT);
+        return geofencePendingIntent;
+    }
+
+    @SuppressLint("MissingPermission")
     private void initialize() {
+        geofenceList = new ArrayList<>();
+        geofencingClient = LocationServices.getGeofencingClient(getActivity());
+        // get Location of all projects
+        PROJECT_COL.addSnapshotListener((value, error) -> {
+            if (error != null) {
+                Toast.makeText(getActivity(), "Error getting projects", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (value == null) return;
+            geofenceList.clear();
+            List<Project> projects = value.toObjects(Project.class);
+            for (Project p : projects) {
+                geofenceList.add(new Geofence.Builder()
+                        // Set the request ID of the geofence. This is a string to identify this
+                        // geofence.
+                        .setRequestId(p.getId())
+
+                        .setCircularRegion(
+                                p.getLat(),
+                                p.getLng(),
+                                (float) p.getArea()
+                        )
+                        .setExpirationDuration(Geofence.NEVER_EXPIRE)
+                        .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER |
+                                Geofence.GEOFENCE_TRANSITION_EXIT)
+                        .build());
+            }
+            geofencingClient.addGeofences(getGeofencingRequest(), getGeofencePendingIntent())
+                    .addOnSuccessListener(getActivity(), aVoid -> {
+                        // Geofences added
+                        // ...
+                        Toast.makeText(getActivity(), "added", Toast.LENGTH_SHORT).show();
+                    })
+                    .addOnFailureListener(getActivity(), e -> {
+                        // Failed to add geofences
+                        // ...
+                        Toast.makeText(getActivity(), e.toString(), Toast.LENGTH_SHORT).show();
+
+                    });
+        });
+
         //Views
         currEmployee = (Employee) getArguments().getSerializable("user");
         fabClose = AnimationUtils.loadAnimation(getActivity(), R.anim.fab_close);
@@ -403,7 +478,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
             EmployeesGrossSalary emp = doc1.toObject(EmployeesGrossSalary.class);
             ArrayList<Allowance> allowanceArrayList = emp.getAllTypes();
             if (allowanceArrayList != null) {
-                allowanceArrayList.removeIf(x -> x.getType()==AllowancesEnum.OVERTIME.ordinal() && x.getNote().trim().equals(day));
+                allowanceArrayList.removeIf(x -> x.getType() == AllowancesEnum.OVERTIME.ordinal() && x.getNote().trim().equals(day));
             }
             allowanceArrayList.add(overTimeAllowance);
             EMPLOYEE_GROSS_SALARY_COL.document(id).collection(year).document(month).update("allTypes", allowanceArrayList);

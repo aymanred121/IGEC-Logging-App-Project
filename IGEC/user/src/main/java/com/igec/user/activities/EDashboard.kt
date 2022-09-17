@@ -29,6 +29,8 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.firestore.FieldValue
 import com.igec.common.CONSTANTS
+import com.igec.common.CONSTANTS.TRANSFER_STATUS_CHANNEL_ID
+import com.igec.common.CONSTANTS.VACATION_STATUS_CHANNEL_ID
 import com.igec.common.firebase.Employee
 import com.igec.common.firebase.TransferRequests
 import com.igec.common.firebase.VacationRequest
@@ -39,10 +41,6 @@ import com.igec.user.fragments.ChangePasswordFragment
 import com.igec.user.fragments.CheckInOutFragment
 import com.igec.user.fragments.GrossSalaryFragment
 import com.igec.user.fragments.SendVacationRequestFragment
-
-
-private const val VACATION_STATUS_CHANNEL_ID = "VACATION_STATUS"
-private const val TRANSFER_STATUS_CHANNEL_ID = "TRANSFER_STATUS"
 
 private var VACATION_NOTIFICATION_ID = 0
 private var TRANSFER_NOTIFICATION_ID = 0
@@ -94,8 +92,16 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         binding.navView.getHeaderView(0).findViewById<TextView>(R.id.EmployeeID).text =
             currEmployee?.id
 
-        createNotificationChannel(VACATION_STATUS_CHANNEL_ID)
-        createNotificationChannel(TRANSFER_STATUS_CHANNEL_ID)
+        createNotificationChannel(
+            VACATION_STATUS_CHANNEL_ID,
+            R.string.vacation_status_channel_name,
+            R.string.vacation_status_channel_description
+        )
+        createNotificationChannel(
+            TRANSFER_STATUS_CHANNEL_ID,
+            R.string.transfer_status_channel_name,
+            R.string.employee_transfer_status_channel_description
+        )
 
         notificationManager = NotificationManagerCompat.from(this)
 
@@ -176,11 +182,11 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
             }
     }
 
-    private fun createNotificationChannel(CHANNEL_ID: String) {
+    private fun createNotificationChannel(CHANNEL_ID: String, channelName: Int, channelDesc: Int) {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
-        val name = getString(R.string.channel_name)
-        val descriptionText = getString(R.string.channel_description)
+        val name = getString(channelName)
+        val descriptionText = getString(channelDesc)
         val importance = NotificationManager.IMPORTANCE_DEFAULT
         val alarmSound: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
         val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {

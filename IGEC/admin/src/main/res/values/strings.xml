@@ -89,6 +89,8 @@
     <string name="plus_code">Plus Code</string>
     <string name="diameter">Area (m²)</string>
     <string name="currency">Currency</string>
-    <string name="channel_name">channelName</string>
-    <string name="channel_description">channelDescription</string>
+
+    <string name="vacation_request_channel_name">Vacation Requests</string>
+    <string name="vacation_request_channel_description">get notified when employees send vacation requests</string>
+
 </resources>

@@ -29,19 +29,18 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.firestore.FieldValue
 import com.igec.common.CONSTANTS
+import com.igec.common.CONSTANTS.*
 import com.igec.common.firebase.Employee
 import com.igec.common.firebase.TransferRequests
 import com.igec.common.firebase.VacationRequest
 import com.igec.common.fragments.VacationRequestsFragment
 import com.igec.common.fragments.VacationsLogFragment
 import com.igec.user.R
+import com.igec.user.channelName
 import com.igec.user.databinding.ActivityMdashboardBinding
 import com.igec.user.fragments.*
 
-private const val VACATION_STATUS_CHANNEL_ID = "VACATION_STATUS"
-private const val TRANSFER_STATUS_CHANNEL_ID = "TRANSFER_STATUS"
-private const val VACATION_REQUEST_CHANNEL_ID = "VACATION_REQUEST"
-private const val TRANSFER_REQUEST_CHANNEL_ID = "TRANSFER_REQUEST"
+
 private var VACATION_REQUEST_NOTIFICATION_ID = 0
 private var VACATION_STATUS_NOTIFICATION_ID = 0
 private var TRANSFER_REQUEST_NOTIFICATION_ID = 0
@@ -95,10 +94,26 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         }
         binding.navView.getHeaderView(0).findViewById<TextView>(R.id.EmployeeID).text =
             currManager?.id
-        createNotificationChannel(VACATION_STATUS_CHANNEL_ID)
-        createNotificationChannel(VACATION_REQUEST_CHANNEL_ID)
-        createNotificationChannel(TRANSFER_STATUS_CHANNEL_ID)
-        createNotificationChannel(TRANSFER_REQUEST_CHANNEL_ID)
+        createNotificationChannel(
+            VACATION_STATUS_CHANNEL_ID,
+            R.string.vacation_status_channel_name,
+            R.string.vacation_status_channel_description
+        )
+        createNotificationChannel(
+            VACATION_REQUEST_CHANNEL_ID,
+            R.string.vacation_request_channel_name,
+            R.string.vacation_request_channel_description
+        )
+        createNotificationChannel(
+            TRANSFER_STATUS_CHANNEL_ID,
+            R.string.transfer_status_channel_name,
+            R.string.manager_transfer_status_channel_description
+        )
+        createNotificationChannel(
+            TRANSFER_REQUEST_CHANNEL_ID,
+            R.string.transfer_request_channel_name,
+            R.string.transfer_request_channel_description
+        )
 
         notificationManager = NotificationManagerCompat.from(this)
         //get your pending request status
@@ -180,7 +195,8 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                     }
                     for (document in values!!.documents) {
                         val transferRequest = document.toObject(TransferRequests::class.java)
-                        val msg = "A Transfer Request for ${transferRequest!!.employee.firstName} to ${transferRequest.newProjectName}"
+                        val msg =
+                            "A Transfer Request for ${transferRequest!!.employee.firstName} to ${transferRequest.newProjectName}"
                         transferRequestNotification = setupNotification(
                             "New Transfer Request",
                             msg,
@@ -234,11 +250,11 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
             }
     }
 
-    private fun createNotificationChannel(CHANNEL_ID: String) {
+    private fun createNotificationChannel(CHANNEL_ID: String, channelName: Int, channelDesc: Int) {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
-        val name = getString(R.string.channel_name)
-        val descriptionText = getString(R.string.channel_description)
+        val name = getString(channelName)
+        val descriptionText = getString(channelDesc)
         val importance = NotificationManager.IMPORTANCE_DEFAULT
         val alarmSound: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
         val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {

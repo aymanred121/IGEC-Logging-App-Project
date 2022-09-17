@@ -12,6 +12,10 @@ public class CONSTANTS {
     public static final String ID = "ID";
     public static final String LOGGED = "LOGGED";
     public static final String ADMIN = "adminID";
+    public static final String VACATION_STATUS_CHANNEL_ID = "VACATION_STATUS";
+    public static final String TRANSFER_STATUS_CHANNEL_ID = "TRANSFER_STATUS";
+    public static final String VACATION_REQUEST_CHANNEL_ID = "VACATION_REQUEST";
+    public static final String TRANSFER_REQUEST_CHANNEL_ID = "TRANSFER_REQUEST";
     public static final DocumentReference EMPLOYEE_OVERVIEW_REF = db.collection("EmployeeOverview").document("emp");
     public static final CollectionReference MACHINE_EMPLOYEE_COL = db.collection("Machine_Employee");
     public static final CollectionReference VACATION_COL = db.collection("Vacation");

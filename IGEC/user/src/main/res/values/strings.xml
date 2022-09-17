@@ -71,6 +71,19 @@
     <string name="company">Company</string>
     <string name="employee">Employee</string>
     <string name="defaultTime">0 Hours</string>
-    <string name="channel_name">channelName</string>
-    <string name="channel_description">channelDescription</string>
+
+    <string name="vacation_request_channel_name">Vacation Requests</string>
+    <string name="vacation_request_channel_description">get notified when employees send vacation requests</string>
+
+    <string name="vacation_status_channel_name">Vacation Status</string>
+    <string name="vacation_status_channel_description">get notified when vacation request is accepted or declined</string>
+
+    <string name="transfer_request_channel_name">Transfer Requests</string>
+    <string name="transfer_request_channel_description">get notified when managers send transfer requests</string>
+
+    <string name="transfer_status_channel_name">Transfer Status</string>
+    <string name="employee_transfer_status_channel_description">get notified when transferred to another project</string>
+    <string name="manager_transfer_status_channel_description">get notified when transfer request is accepted or declined</string>
+
+
 </resources>

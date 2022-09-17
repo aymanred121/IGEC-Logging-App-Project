@@ -43,13 +43,13 @@ import com.igec.admin.databinding.ActivityMainBinding
 import com.igec.admin.dialogs.ProjectFragmentDialog
 import com.igec.admin.fragments.*
 import com.igec.common.CONSTANTS.VACATION_COL
+import com.igec.common.CONSTANTS.VACATION_REQUEST_CHANNEL_ID
 import com.igec.common.firebase.VacationRequest
 import com.igec.common.fragments.VacationRequestsFragment
 import com.igec.common.fragments.VacationsLogFragment
 
 
-private const val CHANNEL_ID = "RECEIVING"
-private  var NOTIFICATION_ID = 0
+private var NOTIFICATION_ID = 0
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
 
@@ -114,8 +114,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
 
         createNotificationChannel()
-        VACATION_COL.whereEqualTo("manager",null)
-            .whereEqualTo("vacationNotification",-1).addSnapshotListener { values, error ->
+        VACATION_COL.whereEqualTo("manager", null)
+            .whereEqualTo("vacationNotification", -1).addSnapshotListener { values, error ->
                 run {
                     if (error != null) {
                         Log.w("error", error.toString())
@@ -125,10 +125,18 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         run {
                             val vacation = documentSnapshot.toObject(VacationRequest::class.java);
                             val msg =
-                                "${vacation!!.employee.firstName} has requested ${vacation.days} days, starting from ${vacation.convertDateToString(vacation.startDate.time)}"
-                            setupNotification("New Vacation Request", msg, R.drawable.ic_baseline_mail_24)
+                                "${vacation!!.employee.firstName} has requested ${vacation.days} days, starting from ${
+                                    vacation.convertDateToString(
+                                        vacation.startDate.time
+                                    )
+                                }"
+                            setupNotification(
+                                "New Vacation Request",
+                                msg,
+                                R.drawable.ic_baseline_mail_24
+                            )
                             notificationManager.notify(NOTIFICATION_ID++, notification)
-                            VACATION_COL.document(vacation.id).update("vacationNotification",0);
+                            VACATION_COL.document(vacation.id).update("vacationNotification", 0);
                         }
                     };
                 }
@@ -139,15 +147,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private fun createNotificationChannel() {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is new and not in the support library
-        val name = getString(R.string.channel_name)
-        val descriptionText = getString(R.string.channel_description)
+        val name = getString(R.string.vacation_request_channel_name)
+        val descriptionText = getString(R.string.vacation_request_channel_description)
         val importance = NotificationManager.IMPORTANCE_DEFAULT
         val alarmSound: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-        val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+        val channel = NotificationChannel(VACATION_REQUEST_CHANNEL_ID, name, importance).apply {
             description = descriptionText
             enableLights(true)
             lightColor = Color.GREEN
-            setSound(alarmSound,null)
+            setSound(alarmSound, null)
         }
         // Register the channel with the system
         val notificationManager: NotificationManager =
@@ -170,7 +178,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
             }
         }
-        notification = NotificationCompat.Builder(this, CHANNEL_ID)
+        notification = NotificationCompat.Builder(this, VACATION_REQUEST_CHANNEL_ID)
             .setSmallIcon(icon)
             .setContentTitle(title)
             .setContentText(content)

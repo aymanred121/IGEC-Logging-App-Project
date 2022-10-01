@@ -310,6 +310,7 @@ public class AddUserFragment extends Fragment {
                 builder.setTitle(getString(R.string.admin_register_title))
                         .setMessage(getString(R.string.AreUSure))
                         .setNegativeButton(getString(R.string.no), (dialogInterface, i) -> {
+                            binding.registerButton.setEnabled(true);
                         })
                         .setPositiveButton(getString(R.string.yes), (dialogInterface, i) -> {
                             addEmployee();

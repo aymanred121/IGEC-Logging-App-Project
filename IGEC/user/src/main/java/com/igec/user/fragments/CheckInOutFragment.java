@@ -1,6 +1,9 @@
 package com.igec.user.fragments;
 
 import static com.igec.common.CONSTANTS.CAMERA_REQUEST_CODE;
+import static com.igec.common.CONSTANTS.CHECK_IN_FROM_HOME;
+import static com.igec.common.CONSTANTS.CHECK_IN_FROM_OFFICE;
+import static com.igec.common.CONSTANTS.CHECK_IN_FROM_SITE;
 import static com.igec.common.CONSTANTS.EMPLOYEE_GROSS_SALARY_COL;
 import static com.igec.common.CONSTANTS.LOCATION_REQUEST_CODE;
 import static com.igec.common.CONSTANTS.MACHINE_COL;
@@ -81,7 +84,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     private Machine currMachine;
     private String machineEmpId;
     private String year, month, day;
-    private boolean inProjectArea;
+    private boolean inProjectArea, isRemote;
 
     public static CheckInOutFragment newInstance(Employee user) {
         Bundle args = new Bundle();
@@ -114,6 +117,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     }
 
     private void validateDate(Context c) {
+
         if (Settings.Global.getInt(c.getContentResolver(), Settings.Global.AUTO_TIME, 0) != 1) {
             Intent intent = new Intent(getActivity(), DateInaccurate.class);
             startActivity(intent);
@@ -259,7 +263,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                     PROJECT_COL.document(currEmployee.getProjectID()).get().addOnSuccessListener(doc -> {
                         if (!doc.exists())
                             return;
-                        Project project = doc.toObject(Project.class);
+                        final Project project = doc.toObject(Project.class);
                         Locus.INSTANCE.getCurrentLocation(getActivity(), result -> {
                             if (result.getError() != null) {
                                 Snackbar.make(binding.getRoot(), "can't complete the operation.", Snackbar.LENGTH_SHORT).show();
@@ -271,19 +275,35 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                             latitude = location.getLatitude();
                             double distance;
                             float[] results = new float[3];
-                            assert project != null;
                             Location.distanceBetween(latitude, longitude, project.getLat(), project.getLng(), results);
                             distance = results[0];
                             if (distance < project.getArea()) // he's in the project area
                             {
                                 inProjectArea = true;
-                                updateEmployeeSummary(latitude, longitude);
+                                updateEmployeeSummary(latitude, longitude, project);
                                 updateCheckInOutBtn();
                             } else {
                                 //check if he is in one of the offices
                                 PROJECT_COL.whereEqualTo("reference", "-99999").get().addOnSuccessListener(offices -> {
-                                    if (offices.size() == 0) {
+                                    if (offices.size() == 0) {//no offices
                                         Snackbar.make(binding.getRoot(), "You're not in the project area", Snackbar.LENGTH_SHORT).show();
+                                        PROJECT_COL.get().addOnSuccessListener(projects -> {
+                                            if (projects.size() == 0)
+                                                return;
+
+                                            for (Project p : projects.toObjects(Project.class)) {
+                                                float[] res = new float[3];
+                                                Location.distanceBetween(latitude, longitude, project.getLat(), project.getLng(), res);
+                                                if (res[0] < p.getArea()) {
+                                                    //its owr project
+                                                    isRemote = true;
+                                                    updateEmployeeSummary(latitude, longitude, p);
+                                                    updateCheckInOutBtn();
+                                                    break;
+                                                }
+                                            }
+                                        });
+
                                         return;
                                     }
                                     for (DocumentSnapshot office : offices.getDocuments()) {
@@ -291,13 +311,30 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                         if (results[0] < office.toObject(Project.class).getArea()) {
                                             inProjectArea = false;
                                             Snackbar.make(binding.getRoot(), String.format("You're in the %s office", office.toObject(Project.class).getName()), Snackbar.LENGTH_SHORT).show();
-                                            updateEmployeeSummary(latitude, longitude);
+                                            updateEmployeeSummary(latitude, longitude, office.toObject(Project.class));
                                             updateCheckInOutBtn();
                                             return;
                                         }
                                     }
                                     //he is not in one of the offices
                                     Snackbar.make(binding.getRoot(), "You're not in the project area", Snackbar.LENGTH_SHORT).show();
+                                    PROJECT_COL.get().addOnSuccessListener(projects -> {
+                                        if (projects.size() == 0)
+                                            return;
+                                        for (Project p : projects.toObjects(Project.class)) {
+                                            float[] res = new float[3];
+                                            Location.distanceBetween(latitude, longitude, p.getLat(), p.getLng(), res);
+                                            if (res[0] < p.getArea()) {
+                                                isRemote = true;
+                                                updateEmployeeSummary(latitude, longitude, p);
+                                                updateCheckInOutBtn();
+                                                return;
+                                            }
+                                        }
+                                        //from home
+                                        updateEmployeeSummary(latitude, longitude, project);
+                                        updateCheckInOutBtn();
+                                    });
                                 });
                             }
                             return null;
@@ -328,7 +365,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         }
     }
 
-    private void updateEmployeeSummary(double latitude, double longitude) {
+    private void updateEmployeeSummary(double latitude, double longitude, Project project) {
         updateDate();
         Summary summary = new Summary(latitude, longitude);
         HashMap<String, Object> checkOutDetails = new HashMap<>(summary.getGeoMap());
@@ -337,7 +374,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                 .collection(year + "-" + month).document(day)
                 .get().addOnSuccessListener(documentSnapshot -> {
                     if (!documentSnapshot.exists() || documentSnapshot.getData().size() == 0) {
-                        employeeCheckIn(summary);
+                        employeeCheckIn(summary, project);
                     } else {
                         Summary summary1 = documentSnapshot.toObject(Summary.class);
                         if (summary1.getCheckOut() == null) {
@@ -403,7 +440,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
             EmployeesGrossSalary emp = doc1.toObject(EmployeesGrossSalary.class);
             ArrayList<Allowance> allowanceArrayList = emp.getAllTypes();
             if (allowanceArrayList != null) {
-                allowanceArrayList.removeIf(x -> x.getType()==AllowancesEnum.OVERTIME.ordinal() && x.getNote().trim().equals(day));
+                allowanceArrayList.removeIf(x -> x.getType() == AllowancesEnum.OVERTIME.ordinal() && x.getNote().trim().equals(day));
             }
             allowanceArrayList.add(overTimeAllowance);
             EMPLOYEE_GROSS_SALARY_COL.document(id).collection(year).document(month).update("allTypes", allowanceArrayList);
@@ -411,15 +448,28 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     }
 
 
-    private void employeeCheckIn(Summary summary) {
+    private void employeeCheckIn(Summary summary, Project project) {
         updateDate();
         summary.setLastCheckInTime(Timestamp.now());
         HashMap<String, Object> checkInDetails = new HashMap<>(summary.getGeoMap());
         checkInDetails.put("Time", Timestamp.now());
         HashMap<String, Object> checkIn = new HashMap<>();
         checkIn.put("checkIn", checkInDetails);
-        checkIn.put("projectId", currEmployee.getProjectID());
+        if (currEmployee.getManagerID().equals("adminID") && !
+                currEmployee.getProjectID().equals(project.getId())){
+            checkIn.put("projectId", project.getId());
+        }else{
+            checkIn.put("projectId", currEmployee.getProjectID());
+        }
+
         checkIn.put("lastCheckInTime", summary.getLastCheckInTime());
+        if (inProjectArea) {
+            checkIn.put("checkInLocation", CHECK_IN_FROM_SITE);
+        } else if (isRemote) {
+            checkIn.put("checkInLocation", CHECK_IN_FROM_HOME);
+        } else {
+            checkIn.put("checkInLocation", CHECK_IN_FROM_OFFICE);
+        }
         SUMMARY_COL.document(id).collection(year + "-" + month).document(day).set(checkIn);
         EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId()).collection(year).document(month).get().addOnSuccessListener(doc -> {
             if (!doc.exists()) {
@@ -431,10 +481,31 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                     employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() != AllowancesEnum.NETSALARY.ordinal());
                     employeesGrossSalary.setBaseAllowances(allowances);
                     if (inProjectArea) {
+                        summary.setCheckInLocation(CHECK_IN_FROM_SITE);
                         for (Allowance allowance : employeesGrossSalary.getBaseAllowances()) {
                             allowance.setNote(day);
                             employeesGrossSalary.getAllTypes().add(allowance);
                         }
+                    }
+                    else if (isRemote) {
+                        summary.setCheckInLocation(CHECK_IN_FROM_HOME);
+                    }
+                    else if (currEmployee.getManagerID().equals("adminID") && !
+                            currEmployee.getProjectID().equals(project.getId())) {
+                        for (Allowance allowance : employeesGrossSalary.getBaseAllowances()) {
+                            if (allowance.getProjectId().equals(currEmployee.getProjectID()))
+                                continue;
+                            allowance.setNote(day);
+                            employeesGrossSalary.getAllTypes().add(allowance);
+
+                        }
+                        for (Allowance allowance1 : project.getAllowancesList()) {
+                            allowance1.setNote(day);
+                            employeesGrossSalary.getAllTypes().add(allowance1);
+                        }
+                    }
+                    else {
+                        summary.setCheckInLocation(CHECK_IN_FROM_OFFICE);
                     }
                     db.document(doc.getReference().getPath()).set(employeesGrossSalary, SetOptions.merge());
                 });
@@ -443,10 +514,30 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
             EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
             employeesGrossSalary.setEmployeeId(currEmployee.getId());
             if (inProjectArea) {
+                summary.setCheckInLocation(CHECK_IN_FROM_SITE);
                 for (Allowance allowance : employeesGrossSalary.getBaseAllowances()) {
                     allowance.setNote(day);
                     employeesGrossSalary.getAllTypes().add(allowance);
                 }
+            }else if (isRemote) {
+                summary.setCheckInLocation(CHECK_IN_FROM_HOME);
+
+            } else if (currEmployee.getManagerID().equals("adminID") && !
+                    currEmployee.getProjectID().equals(project.getId())) {
+                for (Allowance allowance : employeesGrossSalary.getBaseAllowances()) {
+                    if (allowance.getProjectId().equals(currEmployee.getProjectID()))
+                        continue;
+                    allowance.setNote(day);
+                    employeesGrossSalary.getAllTypes().add(allowance);
+
+                }
+                for (Allowance allowance1 : project.getAllowancesList()) {
+                    allowance1.setNote(day);
+                    employeesGrossSalary.getAllTypes().add(allowance1);
+                }
+            }
+            else {
+                summary.setCheckInLocation(CHECK_IN_FROM_OFFICE);
             }
             EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId()).collection(year).document(month).set(employeesGrossSalary, SetOptions.merge());
 

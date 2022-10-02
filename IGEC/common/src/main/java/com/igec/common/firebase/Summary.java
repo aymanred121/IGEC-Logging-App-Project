@@ -20,6 +20,7 @@ public class Summary {
     private Employee employee;
     private Timestamp lastCheckInTime;
     private String lastDayPath;
+    private String checkInLocation;
 
     public Employee getEmployee() {
         return employee;
@@ -43,6 +44,14 @@ public class Summary {
 
     public void setCheckOut(HashMap<String, Object> checkOut) {
         this.checkOut = checkOut;
+    }
+
+    public String getCheckInLocation() {
+        return checkInLocation;
+    }
+
+    public void setCheckInLocation(String checkInLocation) {
+        this.checkInLocation = checkInLocation;
     }
 
     public Summary() {

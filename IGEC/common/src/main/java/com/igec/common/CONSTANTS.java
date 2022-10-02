@@ -1,5 +1,9 @@
 package com.igec.common;
 
+import android.content.Context;
+import android.content.Intent;
+import android.provider.Settings;
+
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -16,6 +20,9 @@ public class CONSTANTS {
     public static final String TRANSFER_STATUS_CHANNEL_ID = "TRANSFER_STATUS";
     public static final String VACATION_REQUEST_CHANNEL_ID = "VACATION_REQUEST";
     public static final String TRANSFER_REQUEST_CHANNEL_ID = "TRANSFER_REQUEST";
+    public static final String CHECK_IN_FROM_OFFICE = "office";
+    public static final String CHECK_IN_FROM_SITE = "site";
+    public static final String CHECK_IN_FROM_HOME = "from_home";
     public static final DocumentReference EMPLOYEE_OVERVIEW_REF = db.collection("EmployeeOverview").document("emp");
     public static final CollectionReference MACHINE_EMPLOYEE_COL = db.collection("Machine_Employee");
     public static final CollectionReference VACATION_COL = db.collection("Vacation");
@@ -26,4 +33,4 @@ public class CONSTANTS {
     public static final CollectionReference TRANSFER_REQUESTS_COL = db.collection("TransferRequests");
     public static final CollectionReference MACHINE_DEFECT_LOG_COL = db.collection("MachineDefectsLog");
     public static final CollectionReference SUMMARY_COL = db.collection("summary");
-}
+    }

@@ -62,9 +62,6 @@ import java.util.stream.Collectors;
 public class ProjectFragmentDialog extends DialogFragment {
 
 
-    // Views
-    private EmployeeAdapter adapter;
-
     // Vars
     private String MID;
     private String lat, lng;
@@ -189,6 +186,8 @@ public class ProjectFragmentDialog extends DialogFragment {
         super.onViewCreated(view, savedInstanceState);
         initialize();
         // listeners
+        binding.employeesButton.setOnClickListener(oclEmployees);
+        binding.managerButton.setOnClickListener(oclManager);
         binding.referenceEdit.addTextChangedListener(twProjectReference);
         binding.projectAreaEdit.addTextChangedListener(twArea);
         binding.updateButton.setOnClickListener(clUpdate);
@@ -236,19 +235,13 @@ public class ProjectFragmentDialog extends DialogFragment {
         views.add(new Pair<>(binding.streetLayout, binding.streetEdit));
         views.add(new Pair<>(binding.projectAreaLayout, binding.projectAreaEdit));
         views.add(new Pair<>(binding.dateLayout, binding.dateEdit));
+        views.add(new Pair<>(binding.hoursLayout, binding.hoursEdit));
         views.add(new Pair<>(binding.contractTypeLayout, binding.contractTypeAuto));
         views.add(new Pair<>(binding.managerNameLayout, binding.managerNameEdit));
 
         binding.registerButton.setVisibility(View.GONE);
         binding.deleteButton.setVisibility(View.VISIBLE);
         binding.updateButton.setVisibility(View.VISIBLE);
-        binding.recyclerView.setHasFixedSize(true);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        adapter = new EmployeeAdapter(employees, true);
-        adapter.setMID(MID);
-        adapter.setOnItemClickListener(itclEmployeeAdapter);
-        binding.recyclerView.setLayoutManager(layoutManager);
-        binding.recyclerView.setAdapter(adapter);
         allowances.addAll(project.getAllowancesList());
         client = project.getClient();
         binding.nameEdit.setText(project.getName());
@@ -266,13 +259,15 @@ public class ProjectFragmentDialog extends DialogFragment {
         binding.areaEdit.setText(project.getLocationArea());
         binding.cityEdit.setText(project.getLocationCity());
         binding.streetEdit.setText(project.getLocationStreet());
+        //TODO
+        // binding.hoursEdit.setText(project.getHours());
         startDate = project.getStartDate().getTime();
         vTimeDatePickerBuilder.setTitleText("Time");
         vTimeDatePicker = vTimeDatePickerBuilder.setSelection(startDate).build();
         binding.dateEdit.setText(String.format("%s", convertDateToString(startDate)));
         lat = String.valueOf(project.getLat());
         lng = String.valueOf(project.getLng());
-        getEmployees();
+//        getEmployees();
         ArrayList<String> contract = new ArrayList<>();
         contract.add("lump sum");
         contract.add("timesheet");
@@ -315,7 +310,6 @@ public class ProjectFragmentDialog extends DialogFragment {
                 batch.update(EMPLOYEE_OVERVIEW_REF, empInfoMap);
         }
         batch.commit();
-        adapter.notifyItemChanged(position);
     }
 
     void getEmployees() {
@@ -400,8 +394,6 @@ public class ProjectFragmentDialog extends DialogFragment {
 
         }
         employees.sort(Comparator.comparing(EmployeeOverview::getId));
-        adapter.setEmployeeOverviewsList(employees);
-        adapter.notifyDataSetChanged();
     }
 
     private boolean generateError() {
@@ -593,6 +585,15 @@ public class ProjectFragmentDialog extends DialogFragment {
     }
 
     // Listeners
+    private final View.OnClickListener oclEmployees = v -> {
+        ProjectEmployeesDialog projectEmployeesDialog;
+        projectEmployeesDialog = new ProjectEmployeesDialog();
+        projectEmployeesDialog.show(getParentFragmentManager(), "");
+    };
+    private final View.OnClickListener oclManager = v -> {
+        ProjectManagerDialog projectManagerDialog = new ProjectManagerDialog();
+        projectManagerDialog.show(getParentFragmentManager(), "");
+    };
     private final TextWatcher twArea = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -718,8 +719,6 @@ public class ProjectFragmentDialog extends DialogFragment {
         public void onRadioClick(int position) {
             MID = employees.get(position).getId();
             binding.managerNameEdit.setText(String.format("%s %s", employees.get(position).getFirstName(), employees.get(position).getLastName()));
-            adapter.setMID(MID);
-            adapter.notifyDataSetChanged();
         }
     };
     private final View.OnClickListener oclAddAllowance = new View.OnClickListener() {

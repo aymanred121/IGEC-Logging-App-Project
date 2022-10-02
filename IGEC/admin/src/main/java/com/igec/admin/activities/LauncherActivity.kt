@@ -38,7 +38,7 @@ class LauncherActivity : Activity() {
                             startActivity(intent)
                             finish()
                         }
-                    }, 2000)
+                    }, 0)
                 }
 
                 override fun onLost(network: Network) {

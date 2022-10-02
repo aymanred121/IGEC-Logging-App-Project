@@ -23,6 +23,9 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
     private String MID = null;
     private final boolean isCheckable;
 
+    public enum type{
+        manager,employee
+    }
     public interface OnItemClickListener {
         void onItemClick(int position);
 
@@ -85,7 +88,7 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
         }
     }
 
-    public EmployeeAdapter(ArrayList<EmployeeOverview> employeeOverviewsList, boolean isCheckable) {
+    public EmployeeAdapter(ArrayList<EmployeeOverview> employeeOverviewsList, boolean isCheckable,type type) {
         this.employeeOverviewsList = employeeOverviewsList;
         this.isCheckable = isCheckable;
     }

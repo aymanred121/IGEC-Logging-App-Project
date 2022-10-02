@@ -34,6 +34,8 @@ import com.igec.admin.dialogs.AddAllowanceDialog;
 import com.igec.admin.dialogs.AddClientDialog;
 import com.igec.admin.dialogs.LocationDialog;
 import com.igec.admin.R;
+import com.igec.admin.dialogs.ProjectEmployeesDialog;
+import com.igec.admin.dialogs.ProjectManagerDialog;
 import com.igec.common.firebase.Allowance;
 import com.igec.common.firebase.Client;
 import com.igec.common.firebase.EmployeeOverview;
@@ -60,7 +62,6 @@ public class AddProjectFragment extends Fragment {
 
     // Vars
     private String day, month, year;
-    private EmployeeAdapter adapter;
     private String lat, lng;
     private ArrayList<String> contract = new ArrayList<>();
     private ArrayList<Pair<TextInputLayout, EditText>> views;
@@ -138,18 +139,6 @@ public class AddProjectFragment extends Fragment {
     // Functions
     private void setUpListeners() {
         // listeners
-        binding.managerNameLayout.setEndIconOnClickListener(view -> {
-            binding.managerNameEdit.setText(null);
-            MID = null;
-            adapter.setMID(null);
-            adapter.notifyDataSetChanged();
-        });
-        binding.managerNameLayout.setErrorIconOnClickListener(view -> {
-            binding.managerNameEdit.setText(null);
-            MID = null;
-            adapter.setMID(null);
-            adapter.notifyDataSetChanged();
-        });
         binding.referenceEdit.addTextChangedListener(twProjectReference);
         binding.projectAreaEdit.addTextChangedListener(twArea);
         binding.officeWorkCheckbox.setOnCheckedChangeListener(oclOfficeWork);
@@ -160,6 +149,8 @@ public class AddProjectFragment extends Fragment {
         binding.dateLayout.setErrorIconOnClickListener(oclTimeDate);
         vTimeDatePicker.addOnPositiveButtonClickListener(pclTimeDatePicker);
         binding.allowancesButton.setOnClickListener(oclAddAllowance);
+        binding.employeesButton.setOnClickListener(oclEmployees);
+        binding.managerButton.setOnClickListener(oclManager);
 
 
         for (Pair<TextInputLayout, EditText> v : views) {
@@ -193,21 +184,17 @@ public class AddProjectFragment extends Fragment {
         views.add(new Pair<>(binding.streetLayout, binding.streetEdit));
         views.add(new Pair<>(binding.projectAreaLayout, binding.projectAreaEdit));
         views.add(new Pair<>(binding.dateLayout, binding.dateEdit));
+        views.add(new Pair<>(binding.hoursLayout, binding.hoursEdit));
         views.add(new Pair<>(binding.contractTypeLayout, binding.contractTypeAuto));
         views.add(new Pair<>(binding.managerNameLayout, binding.managerNameEdit));
         vTimeDatePickerBuilder.setTitleText("Time");
         vTimeDatePicker = vTimeDatePickerBuilder.build();
 
 
-        binding.recyclerView.setHasFixedSize(true);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        adapter = new EmployeeAdapter(employees, true);
-        adapter.setOnItemClickListener(itclEmployeeAdapter);
-        binding.recyclerView.setLayoutManager(layoutManager);
-        binding.recyclerView.setAdapter(adapter);
         PID = PROJECT_COL.document().getId().substring(0, 5);
         binding.clientButton.setEnabled(!binding.officeWorkCheckbox.isChecked());
-        getEmployees();
+//        getEmployees();
         //TODO: remove fakeData() when all testing is finished
         fakeData();
 
@@ -247,7 +234,6 @@ public class AddProjectFragment extends Fragment {
             batch.update(EMPLOYEE_OVERVIEW_REF, empInfoMap);
         }
         batch.commit();
-        adapter.notifyItemChanged(position);
     }
 
     void getEmployees() {
@@ -412,8 +398,6 @@ public class AddProjectFragment extends Fragment {
 
         }
         employees.sort(Comparator.comparing(EmployeeOverview::getId));
-        adapter.setEmployeeOverviewsList(employees);
-        adapter.notifyDataSetChanged();
 
     }
 
@@ -472,6 +456,15 @@ public class AddProjectFragment extends Fragment {
     }
 
     // Listeners
+    private final View.OnClickListener oclEmployees = v -> {
+        ProjectEmployeesDialog projectEmployeesDialog;
+        projectEmployeesDialog = new ProjectEmployeesDialog();
+        projectEmployeesDialog.show(getParentFragmentManager(), "");
+    };
+    private final View.OnClickListener oclManager = v -> {
+        ProjectManagerDialog projectManagerDialog = new ProjectManagerDialog();
+        projectManagerDialog.show(getParentFragmentManager(), "");
+    };
     private final View.OnClickListener oclTimeDate = v -> {
         vTimeDatePicker.show(getFragmentManager(), "DATE_PICKER");
     };
@@ -483,24 +476,6 @@ public class AddProjectFragment extends Fragment {
         if (validateInputs()) {
             binding.registerButton.setEnabled(false);
             addProject();
-        }
-    };
-    private final EmployeeAdapter.OnItemClickListener itclEmployeeAdapter = new EmployeeAdapter.OnItemClickListener() {
-        @Override
-        public void onItemClick(int position) {
-        }
-
-        @Override
-        public void onCheckboxClick(int position) {
-            changeSelectedTeam(position);
-        }
-
-        @Override
-        public void onRadioClick(int position) {
-            MID = employees.get(position).getId();
-            binding.managerNameEdit.setText(String.format("%s %s", employees.get(position).getFirstName(), employees.get(position).getLastName()));
-            adapter.setMID(MID);
-            adapter.notifyDataSetChanged();
         }
     };
     private final View.OnClickListener oclAddClient = v -> {

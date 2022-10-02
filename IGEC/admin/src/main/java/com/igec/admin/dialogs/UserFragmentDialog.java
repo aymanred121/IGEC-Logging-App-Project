@@ -208,6 +208,8 @@ public class UserFragmentDialog extends DialogFragment {
         binding.passwordEdit.setText(employee.getDecryptedPassword());
         binding.phoneEdit.setText(employee.getPhoneNumber());
         binding.adminCheckbox.setChecked(employee.isAdmin());
+        //TODO
+        // binding.managerCheckbox.setChecked(employee.isManager());
         binding.temporaryCheckbox.setChecked(employee.isTemporary());
         binding.insuranceNumberEdit.setText(employee.getInsuranceNumber());
         binding.insuranceAmountEdit.setText(String.valueOf(employee.getInsuranceAmount()));

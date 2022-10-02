@@ -88,7 +88,7 @@ public class SummaryFragment extends Fragment {
         employees = new ArrayList<>();
         binding.recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
-        adapter = new EmployeeAdapter(employees, false);
+        adapter = new EmployeeAdapter(employees, false, EmployeeAdapter.type.employee);
         binding.recyclerView.setLayoutManager(layoutManager);
         binding.recyclerView.setAdapter(adapter);
         getEmployees();

@@ -92,5 +92,8 @@
 
     <string name="vacation_request_channel_name">Vacation Requests</string>
     <string name="vacation_request_channel_description">get notified when employees send vacation requests</string>
+    <string name="manager">Manager</string>
+    <string name="hours">Hours</string>
+    <string name="employees">Employees</string>
 
 </resources>

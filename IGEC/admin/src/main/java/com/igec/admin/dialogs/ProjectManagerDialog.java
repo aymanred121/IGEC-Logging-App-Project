@@ -142,8 +142,8 @@ public class ProjectManagerDialog extends DialogFragment {
             String firstName = (String) (empMap.get(key)).get(0);
             String lastName = (String) empMap.get(key).get(1);
             String title = (String) empMap.get(key).get(2);
-            String managerID =(String) empMap.get(key).get(3);
-            ArrayList<String> projectIds =(ArrayList<String>)((HashMap) empMap.get(key).get(4)).get("pids");
+            String managerID = (String) empMap.get(key).get(3);
+            ArrayList<String> projectIds = (ArrayList<String>) ((HashMap) empMap.get(key).get(4)).get("pids");
             boolean isSelected = (Boolean) empMap.get(key).get(5);
             boolean isManager = (Boolean) empMap.get(key).get(6);
 
@@ -167,6 +167,7 @@ public class ProjectManagerDialog extends DialogFragment {
         for (EmployeeOverview employeeOverview : employees) {
             if (employeeOverview.getId().equals(savedManagerId)) {
                 lastSelectedPosition = employees.indexOf(employeeOverview);
+                employeeOverview.isSelected = true;
                 break;
             }
         }
@@ -174,6 +175,10 @@ public class ProjectManagerDialog extends DialogFragment {
     }
 
     private EmployeeAdapter.OnItemClickListener onItemClickListener = position -> {
+        employees.get(position).isSelected = true;
+        if (lastSelectedPosition != -1) {
+            employees.get(lastSelectedPosition).isSelected = false;
+        }
         unSavedManagerId = employees.get(position).getId();
         unSavedManager = employees.get(position);
         adapter.setMID(employees.get(position).getId());

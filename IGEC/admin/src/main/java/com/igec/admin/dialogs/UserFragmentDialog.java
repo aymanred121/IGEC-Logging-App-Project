@@ -208,6 +208,7 @@ public class UserFragmentDialog extends DialogFragment {
         binding.passwordEdit.setText(employee.getDecryptedPassword());
         binding.phoneEdit.setText(employee.getPhoneNumber());
         binding.adminCheckbox.setChecked(employee.isAdmin());
+        binding.managerCheckbox.setEnabled(employee.getManagerID() == null);
         binding.managerCheckbox.setChecked(employee.isManager());
         binding.temporaryCheckbox.setChecked(employee.isTemporary());
         binding.insuranceNumberEdit.setText(employee.getInsuranceNumber());
@@ -219,7 +220,7 @@ public class UserFragmentDialog extends DialogFragment {
         binding.passwordLayout.setEndIconMode(END_ICON_CUSTOM);
         binding.passwordLayout.setEndIconDrawable(R.drawable.ic_baseline_autorenew_24);
         binding.passwordEdit.setEnabled(false);
-        binding.deleteButton.setEnabled((employee.getManagerID() == null || !employee.getManagerID().equals(ADMIN)) && !employee.isAdmin());
+        binding.deleteButton.setEnabled(employee.getManagerID() == null && !employee.isAdmin());
         // can't remove employee without having checkout all his machines
         MACHINE_EMPLOYEE_COL.whereEqualTo("employee.id", employee.getId()).addSnapshotListener((docs, e) -> {
             // no machines found = enabled X
@@ -330,8 +331,8 @@ public class UserFragmentDialog extends DialogFragment {
         empInfo.add((binding.secondNameEdit.getText()).toString());
         empInfo.add((binding.titleEdit.getText()).toString());
         empInfo.add((employee.getManagerID()));
-        empInfo.add(new HashMap<String,Object>(){{
-            put("pids",employee.getProjectIds());
+        empInfo.add(new HashMap<String, Object>() {{
+            put("pids", employee.getProjectIds());
         }});
         empInfo.add((employee.getManagerID() != null));
         empInfo.add(binding.managerCheckbox.isChecked());
@@ -379,7 +380,7 @@ public class UserFragmentDialog extends DialogFragment {
             return;
         }
         // update employee data in project
-        for (String pid: employee.getProjectIds()){
+        for (String pid : employee.getProjectIds()) {
             batch.update(PROJECT_COL.document(pid), "employees", FieldValue.arrayRemove(oldEmployeeOverviewData));
             if (tempEmp.getManagerID().equals(ADMIN)) {
                 batch.update(PROJECT_COL.document(pid), "managerName", tempEmp.getFirstName() + " " + tempEmp.getLastName(), "employees", FieldValue.arrayUnion(tempEmp));
@@ -397,6 +398,7 @@ public class UserFragmentDialog extends DialogFragment {
         oldNetSalary.setCurrency(employee.getCurrency());
         oldNetSalary.setName("Net salary");
         oldEmployeeOverviewData = new EmployeeOverview(employee.getFirstName(), employee.getLastName(), employee.getTitle(), employee.getId(), employee.getProjectIds(), employee.getProjectIds().size() != 0);
+        oldEmployeeOverviewData.isManager = binding.managerCheckbox.isChecked();
         oldEmployeeOverviewData.setManagerID(employee.getManagerID());
         employee.setAdmin(binding.adminCheckbox.isChecked());
         employee.setArea(binding.areaEdit.getText().toString());
@@ -430,8 +432,8 @@ public class UserFragmentDialog extends DialogFragment {
         batch.update(EMPLOYEE_OVERVIEW_REF, employee.getId(), FieldValue.delete());
 
         if (employee.getProjectIds().size() != 0)
-            for(String pid: employee.getProjectIds())
-            batch.update(PROJECT_COL.document(pid), "employees", FieldValue.arrayRemove(oldEmployeeOverviewData));
+            for (String pid : employee.getProjectIds())
+                batch.update(PROJECT_COL.document(pid), "employees", FieldValue.arrayRemove(oldEmployeeOverviewData));
 
         VACATION_COL.whereEqualTo("employee.id", employee.getId()).whereEqualTo("vacationStatus", 0).get().addOnSuccessListener(documentQuery -> {
             for (QueryDocumentSnapshot d : documentQuery) {

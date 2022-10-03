@@ -216,7 +216,7 @@ public class AddProjectFragment extends Fragment {
         }
     }
 
-    private void addProject(){
+    private void addProject() {
 
         allowances.forEach(allowance -> {
             allowance.setType(AllowancesEnum.PROJECT.ordinal());
@@ -224,10 +224,10 @@ public class AddProjectFragment extends Fragment {
         });
         team.forEach(employeeOverview -> {
             employeeOverview.setManagerID(projectManager.getId());
-           employeeOverview.getProjectIds().add(PID);
+            employeeOverview.getProjectIds().add(PID);
         });
         projectManager.setManagerID(ADMIN);
-       projectManager.getProjectIds().add(PID);
+        projectManager.getProjectIds().add(PID);
         team.add(projectManager);
 
         Project newProject = new Project(projectManager.getFirstName() + projectManager.getLastName()
@@ -250,11 +250,25 @@ public class AddProjectFragment extends Fragment {
         batch = db.batch();
         batch.set(PROJECT_COL.document(PID), newProject);
         updateEmployeesDetails(PID);
-        PID = PROJECT_COL.document().getId().substring(0, 5);
 
     }
 
     private void updateEmployeesDetails(String projectID) {
+
+        EmployeeOverview temp = null;
+        try {
+            temp = projectManager.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        temp.setProjectIds(projectManager.getProjectIds());
+        temp.getProjectIds().remove(PID);
+        for (String pid : projectManager.getProjectIds()) {
+            if (pid.equals(PID))
+                continue;
+            batch.update(PROJECT_COL.document(pid), "employees", FieldValue.arrayRemove(temp));
+            batch.update(PROJECT_COL.document(pid), "employees", FieldValue.arrayUnion(projectManager));
+        }
         final int[] counter = {0};
         team.forEach(emp -> {
             ArrayList<Object> empInfo = new ArrayList<>();
@@ -262,9 +276,9 @@ public class AddProjectFragment extends Fragment {
             empInfo.add(emp.getLastName());
             empInfo.add(emp.getTitle());
             empInfo.add(emp.getManagerID());
-           empInfo.add(new HashMap<String,Object>(){{
-               put("pids",emp.getProjectIds());
-           }});
+            empInfo.add(new HashMap<String, Object>() {{
+                put("pids", emp.getProjectIds());
+            }});
             empInfo.add(true);
             empInfo.add(emp.isManager);
             Map<String, Object> empInfoMap = new HashMap<>();
@@ -272,7 +286,7 @@ public class AddProjectFragment extends Fragment {
 
             batch.update(EMPLOYEE_OVERVIEW_REF, empInfoMap);
 
-            batch.update(EMPLOYEE_COL.document(emp.getId()), "managerID", emp.getManagerID(), "projectIds", FieldValue.arrayUnion( projectID));
+            batch.update(EMPLOYEE_COL.document(emp.getId()), "managerID", emp.getManagerID(), "projectIds", FieldValue.arrayUnion(projectID));
 
             EMPLOYEE_GROSS_SALARY_COL.document(emp.getId()).get().addOnSuccessListener((value) -> {
                 if (!value.exists())
@@ -282,30 +296,20 @@ public class AddProjectFragment extends Fragment {
                 batch.update(EMPLOYEE_GROSS_SALARY_COL.document(emp.getId()), "allTypes", employeesGrossSalary.getAllTypes());
 
                 updateDate();
-                EmployeeOverview temp = null;
-                try {
-                    temp = projectManager.clone();
-                } catch (CloneNotSupportedException e) {
-                    e.printStackTrace();
-                }
-                temp.getProjectIds().remove(PID);
-                for(String pid: projectManager.getProjectIds()){
-                    if(pid.equals(PID))
-                        continue;
-                    batch.update(PROJECT_COL.document(pid),"employees",FieldValue.arrayRemove(temp));
-                    batch.update( PROJECT_COL.document(pid),"employees",FieldValue.arrayUnion(projectManager));
-                }
+
                 EMPLOYEE_GROSS_SALARY_COL.document(emp.getId()).collection(year).document(month).get().addOnSuccessListener(documentSnapshot -> {
                     if (!documentSnapshot.exists()) {
                         if (counter[0] == team.size() - 1) {
                             batch.commit().addOnSuccessListener(unused -> {
                                 clearInputs();
+                                PID = PROJECT_COL.document().getId().substring(0, 5);
                                 fakeData();
                                 Snackbar.make(binding.getRoot(), "Registered", Snackbar.LENGTH_SHORT).show();
                                 batch = FirebaseFirestore.getInstance().batch();
                             }).addOnFailureListener(unused -> {
                                 batch = FirebaseFirestore.getInstance().batch();
                             });
+
                         }
                         counter[0]++;
                         return;
@@ -320,11 +324,13 @@ public class AddProjectFragment extends Fragment {
                         batch.commit().addOnSuccessListener(unused -> {
                             clearInputs();
                             fakeData();
+                            PID = PROJECT_COL.document().getId().substring(0, 5);
                             Snackbar.make(binding.getRoot(), "Registered", Snackbar.LENGTH_SHORT).show();
                             batch = FirebaseFirestore.getInstance().batch();
                         }).addOnFailureListener(unused -> {
                             batch = FirebaseFirestore.getInstance().batch();
                         });
+
                     }
                     counter[0]++;
                 });
@@ -358,6 +364,8 @@ public class AddProjectFragment extends Fragment {
         vTimeDatePicker = vTimeDatePickerBuilder.build();
         vTimeDatePicker.addOnPositiveButtonClickListener(pclTimeDatePicker);
         allowances.clear();
+        team.clear();
+        projectManager = null;
     }
 
     void fakeData() {

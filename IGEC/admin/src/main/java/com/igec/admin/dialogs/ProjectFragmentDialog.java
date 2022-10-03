@@ -34,6 +34,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.github.javafaker.Team;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.firestore.FieldValue;
 import com.igec.admin.adapters.EmployeeAdapter;
 import com.igec.admin.databinding.FragmentAddProjectBinding;
 import com.igec.admin.fragments.ProjectsFragment;
@@ -409,7 +410,7 @@ public class ProjectFragmentDialog extends DialogFragment {
         batch.delete(PROJECT_COL.document(project.getId()));
         project.getEmployees().forEach(member -> {
             member.setManagerID(null);
-            //member.setProjectId(null);
+            member.getProjectIds().remove(project.getId());
             member.isSelected = false;
             EMPLOYEE_GROSS_SALARY_COL.document(member.getId()).get().addOnSuccessListener(doc -> {
                 if (!doc.exists())
@@ -420,17 +421,19 @@ public class ProjectFragmentDialog extends DialogFragment {
                 employeesGrossSalary.getAllTypes().removeIf(x -> x.getType() == AllowancesEnum.NETSALARY.ordinal());
                 EMPLOYEE_GROSS_SALARY_COL.document(member.getId()).collection(year).document(month).update("baseAllowances", employeesGrossSalary.getAllTypes());
             });
-            ArrayList<String> empInfo = new ArrayList<>();
+            ArrayList<Object> empInfo = new ArrayList<>();
             empInfo.add(member.getFirstName());
             empInfo.add(member.getLastName());
             empInfo.add(member.getTitle());
-            empInfo.add(null);
-            empInfo.add(null);
-            empInfo.add("0");
+            empInfo.add(member.getManagerID());
+            empInfo.add(new HashMap<String,Object>(){{
+                put("pids",member.getProjectIds());
+            }});
+            empInfo.add(false);
             Map<String, Object> empInfoMap = new HashMap<>();
             empInfoMap.put(member.getId(), empInfo);
             batch.update(EMPLOYEE_OVERVIEW_REF, empInfoMap);
-            batch.update(EMPLOYEE_COL.document(member.getId()), "managerID", null, "projectID", null);
+            batch.update(EMPLOYEE_COL.document(member.getId()), "managerID", null, "projectIds", member.getProjectIds());
         });
         batch.commit().addOnSuccessListener(unused2 -> {
             batch = FirebaseFirestore.getInstance().batch();

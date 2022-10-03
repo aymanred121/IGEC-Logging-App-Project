@@ -21,17 +21,14 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
     private ArrayList<EmployeeOverview> employeeOverviewsList;
     private OnItemClickListener listener;
     private String MID = null;
-    private final boolean isCheckable;
+    private Type type;
 
-    public enum type{
-        manager,employee
+    public enum Type {
+        manager, employee, none
     }
+
     public interface OnItemClickListener {
         void onItemClick(int position);
-
-        void onCheckboxClick(int position);
-
-        void onRadioClick(int position);
     }
 
     public void setMID(String MID) {
@@ -50,54 +47,38 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
         public MaterialRadioButton vManager;
 
 
-        public EmployeeViewHolder(@NonNull ItemEmployeeBinding itemView, OnItemClickListener listener, boolean isCheckable) {
+        public EmployeeViewHolder(@NonNull ItemEmployeeBinding itemView, OnItemClickListener listener, Type type) {
             super(itemView.getRoot());
             vName = itemView.TextViewName;
             vID = itemView.TextViewID;
             vSelected = itemView.ImageViewEmployeeSelected;
             vManager = itemView.managerRadioButton;
-            if (!isCheckable) {
-                itemView.getRoot().setOnClickListener(v -> {
-                    if (listener != null) {
-                        int position = getAdapterPosition();
-                        if (position != RecyclerView.NO_POSITION) {
-                            listener.onItemClick(position);
-                        }
-                    }
-                });
-            }
-            vSelected.setVisibility(isCheckable ? View.VISIBLE : View.GONE);
-            vManager.setVisibility(isCheckable ? View.VISIBLE : View.GONE);
-            vSelected.setOnClickListener(v -> {
+
+            itemView.getRoot().setOnClickListener(v -> {
                 if (listener != null) {
                     int position = getAdapterPosition();
                     if (position != RecyclerView.NO_POSITION) {
-                        listener.onCheckboxClick(position);
+                        listener.onItemClick(position);
                     }
                 }
             });
-            vManager.setOnClickListener(v -> {
-                if (listener != null) {
-                    int position = getAdapterPosition();
-                    if (position != RecyclerView.NO_POSITION) {
-                        listener.onRadioClick(position);
-                    }
-                }
-            });
+
+            vSelected.setVisibility(type == Type.employee ? View.VISIBLE : View.GONE);
+            vManager.setVisibility(type == Type.manager ? View.VISIBLE : View.GONE);
 
         }
     }
 
-    public EmployeeAdapter(ArrayList<EmployeeOverview> employeeOverviewsList, boolean isCheckable,type type) {
+    public EmployeeAdapter(ArrayList<EmployeeOverview> employeeOverviewsList, Type type) {
         this.employeeOverviewsList = employeeOverviewsList;
-        this.isCheckable = isCheckable;
+        this.type = type;
     }
 
     @NonNull
     @Override
     public EmployeeViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         ItemEmployeeBinding binding = ItemEmployeeBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false);
-        return new EmployeeViewHolder(binding, listener, isCheckable);
+        return new EmployeeViewHolder(binding, listener, type);
     }
 
     @SuppressLint("SetTextI18n")
@@ -107,10 +88,8 @@ public class EmployeeAdapter extends RecyclerView.Adapter<EmployeeAdapter.Employ
         holder.vName.setText("Name: " + employee.getFirstName() + " " + employee.getLastName());
         holder.vID.setText("ID: " + employee.getId());
         holder.vSelected.setChecked(employee.isSelected);
-        holder.vManager.setVisibility(employee.isSelected ? View.VISIBLE : View.GONE);
         boolean isHeTheManager = employee.getId().equals(MID);
         holder.vManager.setChecked(isHeTheManager);
-        holder.vSelected.setEnabled(!isHeTheManager);
     }
 
     public ArrayList<EmployeeOverview> getEmployeeOverviewsList() {

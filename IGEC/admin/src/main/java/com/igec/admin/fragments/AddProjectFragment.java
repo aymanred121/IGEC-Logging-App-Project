@@ -20,6 +20,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -74,6 +75,8 @@ public class AddProjectFragment extends Fragment {
     private MaterialDatePicker.Builder<Long> vTimeDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vTimeDatePicker;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private ArrayList<EmployeeOverview> team;
+    private EmployeeOverview projectManager;
     private WriteBatch batch = FirebaseFirestore.getInstance().batch();
 
     @Override
@@ -96,6 +99,15 @@ public class AddProjectFragment extends Fragment {
         getParentFragmentManager().setFragmentResultListener("location", this, (requestKey, result) -> {
             lat = result.getString("lat");
             lng = result.getString("lng");
+        });
+        getParentFragmentManager().setFragmentResultListener("teamMembers", this, (requestKey, bundle) -> {
+            team = bundle.getParcelableArrayList("teamMembers");
+            Toast.makeText(getActivity(), String.format("%d", team.size()), Toast.LENGTH_SHORT).show();
+        });
+        getParentFragmentManager().setFragmentResultListener("manager", this, (requestKey, bundle) -> {
+            projectManager = bundle.getParcelable("manager");
+            if (projectManager != null)
+                binding.managerNameEdit.setText(String.format("%s - %s %s", projectManager.getId(), projectManager.getFirstName(), projectManager.getLastName()));
         });
     }
 
@@ -154,6 +166,7 @@ public class AddProjectFragment extends Fragment {
     }
 
     private void initialize() {
+        team = new ArrayList<>();
         views = new ArrayList<>();
         views.add(new Pair<>(binding.nameLayout, binding.nameEdit));
         views.add(new Pair<>(binding.referenceLayout, binding.referenceEdit));
@@ -204,39 +217,103 @@ public class AddProjectFragment extends Fragment {
 
     private void addProject() {
 
-//        allowances.forEach(allowance -> {
-//            allowance.setType(AllowancesEnum.PROJECT.ordinal());
-//            allowance.setProjectId(PID);
-//        });
-////        Team.forEach(employeeOverview -> {
-////            if (employeeOverview.getId().equals(MID))
-////                employeeOverview.setManagerID(ADMIN);
-////            else
-////                employeeOverview.setManagerID(MID);
-////            employeeOverview.setProjectId(PID);
-////        });
-//        Project newProject = new Project(binding.managerNameEdit.getText().toString()
-//                , MID
-//                , binding.nameEdit.getText().toString()
-//                , new Date(startDate)
-//                , Team
-//                , binding.referenceEdit.getText().toString()
-//                , binding.cityEdit.getText().toString()
-//                , binding.areaEdit.getText().toString()
-//                , binding.streetEdit.getText().toString()
-//                , Double.parseDouble(lat)
-//                , Double.parseDouble(lng)
-//                , binding.contractTypeAuto.getText().toString()
-//                , Double.parseDouble(binding.projectAreaEdit.getText().toString()));
-//
-//        newProject.setId(PID);
-//        newProject.setClient(binding.officeWorkCheckbox.isChecked() ? null : client);
-//        newProject.getAllowancesList().addAll(allowances);
-//        batch = db.batch();
-//        batch.set(PROJECT_COL.document(PID), newProject);
-//        updateEmployeesDetails(PID);
-//        PID = PROJECT_COL.document().getId().substring(0, 5);
+        allowances.forEach(allowance -> {
+            allowance.setType(AllowancesEnum.PROJECT.ordinal());
+            allowance.setProjectId(PID);
+        });
+        team.forEach(employeeOverview -> {
+            employeeOverview.setManagerID(projectManager.getId());
+            employeeOverview.setProjectId(PID);
+        });
+        projectManager.setManagerID(ADMIN);
+        projectManager.setProjectId(PID);
+        team.add(projectManager);
 
+        Project newProject = new Project(projectManager.getFirstName() + projectManager.getLastName()
+                , projectManager.getId()
+                , binding.nameEdit.getText().toString()
+                , new Date(startDate)
+                , team
+                , binding.referenceEdit.getText().toString()
+                , binding.cityEdit.getText().toString()
+                , binding.areaEdit.getText().toString()
+                , binding.streetEdit.getText().toString()
+                , Double.parseDouble(lat)
+                , Double.parseDouble(lng)
+                , binding.contractTypeAuto.getText().toString()
+                , Double.parseDouble(binding.projectAreaEdit.getText().toString()));
+
+        newProject.setId(PID);
+        newProject.setClient(binding.officeWorkCheckbox.isChecked() ? null : client);
+        newProject.getAllowancesList().addAll(allowances);
+        batch = db.batch();
+        batch.set(PROJECT_COL.document(PID), newProject);
+        updateEmployeesDetails(PID);
+        PID = PROJECT_COL.document().getId().substring(0, 5);
+
+    }
+
+    private void updateEmployeesDetails(String projectID) {
+        final int[] counter = {0};
+        team.forEach(emp -> {
+            ArrayList<String> empInfo = new ArrayList<>();
+            empInfo.add(emp.getFirstName());
+            empInfo.add(emp.getLastName());
+            empInfo.add(emp.getTitle());
+            empInfo.add(emp.getManagerID());
+            empInfo.add(emp.getProjectId() + projectID + ",");
+            empInfo.add("1");
+            empInfo.add(emp.isManager ? "1" : "0");
+            Map<String, Object> empInfoMap = new HashMap<>();
+            empInfoMap.put(emp.getId(), empInfo);
+
+            batch.update(EMPLOYEE_OVERVIEW_REF, empInfoMap);
+
+            batch.update(EMPLOYEE_COL.document(emp.getId()), "managerID", emp.getManagerID(), "projectID", projectID + ",");
+
+            EMPLOYEE_GROSS_SALARY_COL.document(emp.getId()).get().addOnSuccessListener((value) -> {
+                if (!value.exists())
+                    return;
+                EmployeesGrossSalary employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
+                employeesGrossSalary.getAllTypes().addAll(allowances);
+                batch.update(EMPLOYEE_GROSS_SALARY_COL.document(emp.getId()), "allTypes", employeesGrossSalary.getAllTypes());
+
+                updateDate();
+                EMPLOYEE_GROSS_SALARY_COL.document(emp.getId()).collection(year).document(month).get().addOnSuccessListener(documentSnapshot -> {
+                    if (!documentSnapshot.exists()) {
+                        if (counter[0] == team.size() - 1) {
+                            batch.commit().addOnSuccessListener(unused -> {
+                                clearInputs();
+                                fakeData();
+                                Snackbar.make(binding.getRoot(), "Registered", Snackbar.LENGTH_SHORT).show();
+                                batch = FirebaseFirestore.getInstance().batch();
+                            }).addOnFailureListener(unused -> {
+                                batch = FirebaseFirestore.getInstance().batch();
+                            });
+                        }
+                        counter[0]++;
+                        return;
+                    }
+                    EmployeesGrossSalary employeesGrossSalary1 = documentSnapshot.toObject(EmployeesGrossSalary.class);
+                    if (employeesGrossSalary1.getBaseAllowances() != null) {
+                        employeesGrossSalary1.getBaseAllowances().removeIf(allowance -> allowance.getType() == AllowancesEnum.PROJECT.ordinal());
+                        employeesGrossSalary1.getBaseAllowances().addAll(allowances);
+                    }
+                    batch.set(db.document(documentSnapshot.getReference().getPath()), employeesGrossSalary1, SetOptions.mergeFields("baseAllowances"));
+                    if (counter[0] == team.size() - 1) {
+                        batch.commit().addOnSuccessListener(unused -> {
+                            clearInputs();
+                            fakeData();
+                            Snackbar.make(binding.getRoot(), "Registered", Snackbar.LENGTH_SHORT).show();
+                            batch = FirebaseFirestore.getInstance().batch();
+                        }).addOnFailureListener(unused -> {
+                            batch = FirebaseFirestore.getInstance().batch();
+                        });
+                    }
+                    counter[0]++;
+                });
+            });
+        });
 
     }
 
@@ -257,7 +334,8 @@ public class AddProjectFragment extends Fragment {
         for (Pair<TextInputLayout, EditText> v : views) {
             v.second.setText(null);
         }
-        binding.officeWorkCheckbox.setEnabled(false);
+        binding.officeWorkCheckbox.setChecked(false);
+        binding.referenceLayout.setEnabled(true);
         binding.referenceEdit.setEnabled(true);
         client = null;
         vTimeDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
@@ -278,7 +356,6 @@ public class AddProjectFragment extends Fragment {
     }
 
     private boolean generateError() {
-        binding.managerNameEdit.setText("Admin");
         for (Pair<TextInputLayout, EditText> view : views) {
             if (view.second.getText().toString().trim().isEmpty()) {
                 view.first.setError("Missing");
@@ -309,11 +386,11 @@ public class AddProjectFragment extends Fragment {
     // Listeners
     private final View.OnClickListener oclEmployees = v -> {
         ProjectEmployeesDialog projectEmployeesDialog;
-        projectEmployeesDialog = new ProjectEmployeesDialog();
+        projectEmployeesDialog = ProjectEmployeesDialog.newInstance(team);
         projectEmployeesDialog.show(getParentFragmentManager(), "");
     };
     private final View.OnClickListener oclManager = v -> {
-        ProjectManagerDialog projectManagerDialog = new ProjectManagerDialog();
+        ProjectManagerDialog projectManagerDialog = ProjectManagerDialog.newInstance(projectManager);
         projectManagerDialog.show(getParentFragmentManager(), "");
     };
     private final View.OnClickListener oclTimeDate = v -> {

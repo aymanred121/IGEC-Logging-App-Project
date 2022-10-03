@@ -4,15 +4,18 @@ import com.google.firebase.firestore.Exclude;
 import com.igec.common.cryptography.RSAUtil;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.StringJoiner;
 
 public class Employee implements Serializable {
-    private String firstName, lastName, title, area, city, street,SSN,projectID,managerID,email,password,id,phoneNumber,insuranceNumber;
+    private String firstName, lastName, title, area, city, street,SSN,managerID,email,password,id,phoneNumber,insuranceNumber;
     private double salary,insuranceAmount,overTime;
     private Date hireDate;
     private int totalNumberOfVacationDays;
     private boolean isAdmin, temporary,locked , isManager;
     private String currency;
+    private ArrayList<String> projectIds = new ArrayList<>();
 
     public  Employee(){
 
@@ -105,13 +108,7 @@ public class Employee implements Serializable {
         this.street = street;
     }
 
-    public String getProjectID() {
-        return projectID;
-    }
 
-    public void setProjectID(String projectID) {
-        this.projectID = projectID;
-    }
 
     public double getSalary() {
         return salary;
@@ -236,5 +233,25 @@ public class Employee implements Serializable {
 
     public void setManager(boolean manager) {
         isManager = manager;
+    }
+
+    public ArrayList<String> getProjectIds() {
+        return projectIds;
+    }
+
+    public void setProjectIds(ArrayList<String> projectIds) {
+        this.projectIds = projectIds;
+    }
+
+    public void setProjectId(String projectId) {
+        this.projectIds.add(projectId);
+    }
+
+    public String getProjectID() {
+        StringJoiner joiner = new StringJoiner(",");
+        for (String s : projectIds) {
+            joiner.add(s);
+        }
+        return joiner.toString();
     }
 }

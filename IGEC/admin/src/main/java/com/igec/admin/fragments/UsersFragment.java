@@ -64,7 +64,7 @@ public class UsersFragment extends Fragment {
     void initialize() {
         binding.recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
-        adapter = new EmployeeAdapter(employees, false, EmployeeAdapter.type.employee);
+        adapter = new EmployeeAdapter(employees, EmployeeAdapter.Type.none);
         binding.recyclerView.setLayoutManager(layoutManager);
         binding.recyclerView.setAdapter(adapter);
         getEmployees();
@@ -113,16 +113,6 @@ public class UsersFragment extends Fragment {
                     UserFragmentDialog userFragmentDialog = UserFragmentDialog.newInstance(documentSnapshot.toObject(Employee.class));
                     userFragmentDialog.show(getParentFragmentManager(), "");
                 });
-        }
-
-        @Override
-        public void onCheckboxClick(int position) {
-
-        }
-
-        @Override
-        public void onRadioClick(int position) {
-
         }
     };
 

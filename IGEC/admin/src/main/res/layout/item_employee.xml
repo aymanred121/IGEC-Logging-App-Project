@@ -34,6 +34,9 @@
             android:id="@+id/ImageView_EmployeeSelected"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:clickable="false"
+            android:enabled="false"
+            android:buttonTint="@color/primaryColor"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -42,6 +45,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="0dp"
+            android:enabled="false"
+            android:clickable="false"
+            android:buttonTint="@color/primaryColor"
             app:layout_constraintEnd_toStartOf="@id/ImageView_EmployeeSelected"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>

@@ -216,7 +216,7 @@ public class AddProjectFragment extends Fragment {
         }
     }
 
-    private void addProject() {
+    private void addProject(){
 
         allowances.forEach(allowance -> {
             allowance.setType(AllowancesEnum.PROJECT.ordinal());
@@ -282,6 +282,19 @@ public class AddProjectFragment extends Fragment {
                 batch.update(EMPLOYEE_GROSS_SALARY_COL.document(emp.getId()), "allTypes", employeesGrossSalary.getAllTypes());
 
                 updateDate();
+                EmployeeOverview temp = null;
+                try {
+                    temp = projectManager.clone();
+                } catch (CloneNotSupportedException e) {
+                    e.printStackTrace();
+                }
+                temp.getProjectIds().remove(PID);
+                for(String pid: projectManager.getProjectIds()){
+                    if(pid.equals(PID))
+                        continue;
+                    batch.update(PROJECT_COL.document(pid),"employees",FieldValue.arrayRemove(temp));
+                    batch.update( PROJECT_COL.document(pid),"employees",FieldValue.arrayUnion(projectManager));
+                }
                 EMPLOYEE_GROSS_SALARY_COL.document(emp.getId()).collection(year).document(month).get().addOnSuccessListener(documentSnapshot -> {
                     if (!documentSnapshot.exists()) {
                         if (counter[0] == team.size() - 1) {

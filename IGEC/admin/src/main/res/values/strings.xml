@@ -95,5 +95,6 @@
     <string name="manager">Manager</string>
     <string name="hours">Hours</string>
     <string name="employees">Employees</string>
+    <string name="hours_limit">Are you sure you want to set %s hours</string>
 
 </resources>

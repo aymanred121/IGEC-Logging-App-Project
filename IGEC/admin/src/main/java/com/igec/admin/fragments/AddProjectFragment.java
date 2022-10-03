@@ -27,6 +27,8 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.github.javafaker.Team;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.igec.admin.adapters.EmployeeAdapter;
 import com.igec.admin.databinding.FragmentAddProjectBinding;
@@ -67,35 +69,12 @@ public class AddProjectFragment extends Fragment {
     private ArrayList<Pair<TextInputLayout, EditText>> views;
     private ArrayList<Allowance> allowances = new ArrayList<>();
     private Client client;
-    private String MID = null;
     private String PID;
     private long startDate;
     private MaterialDatePicker.Builder<Long> vTimeDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
     private MaterialDatePicker vTimeDatePicker;
-    private ArrayList<EmployeeOverview> employees;
-    private static ArrayList<String> TeamID = new ArrayList<>();
-    private static ArrayList<EmployeeOverview> Team = new ArrayList<>();
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private WriteBatch batch = FirebaseFirestore.getInstance().batch();
-
-    public static void clearTeam() {
-        WriteBatch batch = FirebaseFirestore.getInstance().batch();
-        for (EmployeeOverview emp : Team) {
-            ArrayList<String> empInfo = new ArrayList<>();
-            empInfo.add(emp.getFirstName());
-            empInfo.add(emp.getLastName());
-            empInfo.add(emp.getTitle());
-            empInfo.add(null);
-            empInfo.add(null);
-            empInfo.add("0");
-            Map<String, Object> empInfoMap = new HashMap<>();
-            empInfoMap.put(emp.getId(), empInfo);
-            batch.update(EMPLOYEE_OVERVIEW_REF, empInfoMap);
-        }
-        Team.clear();
-        TeamID.clear();
-        batch.commit();
-    }
 
     @Override
     public void onResume() {
@@ -175,7 +154,6 @@ public class AddProjectFragment extends Fragment {
     }
 
     private void initialize() {
-        employees = new ArrayList<>();
         views = new ArrayList<>();
         views.add(new Pair<>(binding.nameLayout, binding.nameEdit));
         views.add(new Pair<>(binding.referenceLayout, binding.referenceEdit));
@@ -194,7 +172,6 @@ public class AddProjectFragment extends Fragment {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
         PID = PROJECT_COL.document().getId().substring(0, 5);
         binding.clientButton.setEnabled(!binding.officeWorkCheckbox.isChecked());
-//        getEmployees();
         //TODO: remove fakeData() when all testing is finished
         fakeData();
 
@@ -206,112 +183,6 @@ public class AddProjectFragment extends Fragment {
         contract.add("timesheet");
         ArrayAdapter<String> ContractAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, contract);
         binding.contractTypeAuto.setAdapter(ContractAdapter);
-    }
-
-    private void changeSelectedTeam(int position) {
-
-        batch = db.batch();
-        employees.get(position).isSelected = !employees.get(position).isSelected;
-        ArrayList<String> empInfo = new ArrayList<>();
-        empInfo.add(employees.get(position).getFirstName());
-        empInfo.add(employees.get(position).getLastName());
-        empInfo.add(employees.get(position).getTitle());
-        empInfo.add(null);
-        empInfo.add(null);
-        if (employees.get(position).isSelected) {
-            Team.add(employees.get(position));
-            TeamID.add(String.valueOf(employees.get(position).getId()));
-            empInfo.add("1");
-            Map<String, Object> empInfoMap = new HashMap<>();
-            empInfoMap.put(employees.get(position).getId(), empInfo);
-            batch.update(EMPLOYEE_OVERVIEW_REF, empInfoMap);
-        } else {
-            Team.removeIf(employeeOverview -> employeeOverview.getId().equals(employees.get(position).getId()));
-            TeamID.remove(String.valueOf(employees.get(position).getId()));
-            empInfo.add("0");
-            Map<String, Object> empInfoMap = new HashMap<>();
-            empInfoMap.put(employees.get(position).getId(), empInfo);
-            batch.update(EMPLOYEE_OVERVIEW_REF, empInfoMap);
-        }
-        batch.commit();
-    }
-
-    void getEmployees() {
-        EMPLOYEE_OVERVIEW_REF
-                .addSnapshotListener((documentSnapshot, e) -> {
-                    if (e != null) {
-                        Log.w(TAG, "Listen failed.", e);
-                        return;
-                    }
-
-                    if (!documentSnapshot.exists())
-                        return;
-                    HashMap empMap = (HashMap) documentSnapshot.getData();
-                    retrieveEmployees(empMap);
-                });
-    }
-
-    private void updateEmployeesDetails(String projectID) {
-        final int[] counter = {0};
-        Team.forEach(emp -> {
-            ArrayList<String> empInfo = new ArrayList<>();
-            empInfo.add(emp.getFirstName());
-            empInfo.add(emp.getLastName());
-            empInfo.add(emp.getTitle());
-            empInfo.add(emp.getManagerID());
-            empInfo.add(projectID);
-            empInfo.add(emp.isSelected ? "1" : "0");
-            Map<String, Object> empInfoMap = new HashMap<>();
-            empInfoMap.put(emp.getId(), empInfo);
-
-            batch.update(EMPLOYEE_OVERVIEW_REF, empInfoMap);
-
-            batch.update(EMPLOYEE_COL.document(emp.getId()), "managerID", emp.getManagerID(), "projectID", projectID);
-
-            EMPLOYEE_GROSS_SALARY_COL.document(emp.getId()).get().addOnSuccessListener((value) -> {
-                if (!value.exists())
-                    return;
-                EmployeesGrossSalary employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
-                employeesGrossSalary.getAllTypes().addAll(allowances);
-                batch.update(EMPLOYEE_GROSS_SALARY_COL.document(emp.getId()), "allTypes", employeesGrossSalary.getAllTypes());
-
-                updateDate();
-                EMPLOYEE_GROSS_SALARY_COL.document(emp.getId()).collection(year).document(month).get().addOnSuccessListener(documentSnapshot -> {
-                    if (!documentSnapshot.exists()) {
-                        if (counter[0] == Team.size() - 1) {
-                            batch.commit().addOnSuccessListener(unused -> {
-                                clearInputs();
-                                fakeData();
-                                Snackbar.make(binding.getRoot(), "Registered", Snackbar.LENGTH_SHORT).show();
-                                batch = FirebaseFirestore.getInstance().batch();
-                            }).addOnFailureListener(unused -> {
-                                batch = FirebaseFirestore.getInstance().batch();
-                            });
-                        }
-                        counter[0]++;
-                        return;
-                    }
-                    EmployeesGrossSalary employeesGrossSalary1 = documentSnapshot.toObject(EmployeesGrossSalary.class);
-                    if (employeesGrossSalary1.getBaseAllowances() != null) {
-                        employeesGrossSalary1.getBaseAllowances().removeIf(allowance -> allowance.getType() == AllowancesEnum.PROJECT.ordinal());
-                        employeesGrossSalary1.getBaseAllowances().addAll(allowances);
-                    }
-                    batch.set(db.document(documentSnapshot.getReference().getPath()), employeesGrossSalary1, SetOptions.mergeFields("baseAllowances"));
-                    if (counter[0] == Team.size() - 1) {
-                        batch.commit().addOnSuccessListener(unused -> {
-                            clearInputs();
-                            fakeData();
-                            Snackbar.make(binding.getRoot(), "Registered", Snackbar.LENGTH_SHORT).show();
-                            batch = FirebaseFirestore.getInstance().batch();
-                        }).addOnFailureListener(unused -> {
-                            batch = FirebaseFirestore.getInstance().batch();
-                        });
-                    }
-                    counter[0]++;
-                });
-            });
-        });
-
     }
 
     private void updateDate() {
@@ -333,38 +204,38 @@ public class AddProjectFragment extends Fragment {
 
     private void addProject() {
 
-        allowances.forEach(allowance -> {
-            allowance.setType(AllowancesEnum.PROJECT.ordinal());
-            allowance.setProjectId(PID);
-        });
-        Team.forEach(employeeOverview -> {
-            if (employeeOverview.getId().equals(MID))
-                employeeOverview.setManagerID(ADMIN);
-            else
-                employeeOverview.setManagerID(MID);
-            employeeOverview.setProjectId(PID);
-        });
-        Project newProject = new Project(binding.managerNameEdit.getText().toString()
-                , MID
-                , binding.nameEdit.getText().toString()
-                , new Date(startDate)
-                , Team
-                , binding.referenceEdit.getText().toString()
-                , binding.cityEdit.getText().toString()
-                , binding.areaEdit.getText().toString()
-                , binding.streetEdit.getText().toString()
-                , Double.parseDouble(lat)
-                , Double.parseDouble(lng)
-                , binding.contractTypeAuto.getText().toString()
-                , Double.parseDouble(binding.projectAreaEdit.getText().toString()));
-
-        newProject.setId(PID);
-        newProject.setClient(binding.officeWorkCheckbox.isChecked() ? null : client);
-        newProject.getAllowancesList().addAll(allowances);
-        batch = db.batch();
-        batch.set(PROJECT_COL.document(PID), newProject);
-        updateEmployeesDetails(PID);
-        PID = PROJECT_COL.document().getId().substring(0, 5);
+//        allowances.forEach(allowance -> {
+//            allowance.setType(AllowancesEnum.PROJECT.ordinal());
+//            allowance.setProjectId(PID);
+//        });
+////        Team.forEach(employeeOverview -> {
+////            if (employeeOverview.getId().equals(MID))
+////                employeeOverview.setManagerID(ADMIN);
+////            else
+////                employeeOverview.setManagerID(MID);
+////            employeeOverview.setProjectId(PID);
+////        });
+//        Project newProject = new Project(binding.managerNameEdit.getText().toString()
+//                , MID
+//                , binding.nameEdit.getText().toString()
+//                , new Date(startDate)
+//                , Team
+//                , binding.referenceEdit.getText().toString()
+//                , binding.cityEdit.getText().toString()
+//                , binding.areaEdit.getText().toString()
+//                , binding.streetEdit.getText().toString()
+//                , Double.parseDouble(lat)
+//                , Double.parseDouble(lng)
+//                , binding.contractTypeAuto.getText().toString()
+//                , Double.parseDouble(binding.projectAreaEdit.getText().toString()));
+//
+//        newProject.setId(PID);
+//        newProject.setClient(binding.officeWorkCheckbox.isChecked() ? null : client);
+//        newProject.getAllowancesList().addAll(allowances);
+//        batch = db.batch();
+//        batch.set(PROJECT_COL.document(PID), newProject);
+//        updateEmployeesDetails(PID);
+//        PID = PROJECT_COL.document().getId().substring(0, 5);
 
 
     }
@@ -381,26 +252,6 @@ public class AddProjectFragment extends Fragment {
         return simpleDateFormat.format(calendar.getTime());
     }
 
-    void retrieveEmployees(Map<String, ArrayList<String>> empMap) {
-        employees.clear();
-        for (String key : empMap.keySet()) {
-            String firstName = empMap.get(key).get(0);
-            String lastName = empMap.get(key).get(1);
-            String title = empMap.get(key).get(2);
-            String managerID = empMap.get(key).get(3);
-            String projectID = empMap.get(key).get(4);
-            boolean isSelected = empMap.get(key).get(5).equals("1");
-            String id = (key);
-            boolean matchDb = TeamID.contains(id) == isSelected;
-            boolean hasNoManager = managerID == null;
-            if (matchDb && hasNoManager)
-                employees.add(new EmployeeOverview(firstName, lastName, title, id, projectID, isSelected));
-
-        }
-        employees.sort(Comparator.comparing(EmployeeOverview::getId));
-
-    }
-
     void clearInputs() {
         binding.registerButton.setEnabled(true);
         for (Pair<TextInputLayout, EditText> v : views) {
@@ -408,8 +259,6 @@ public class AddProjectFragment extends Fragment {
         }
         binding.officeWorkCheckbox.setEnabled(false);
         binding.referenceEdit.setEnabled(true);
-        TeamID.clear();
-        Team.clear();
         client = null;
         vTimeDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
         vTimeDatePicker = vTimeDatePickerBuilder.build();
@@ -429,6 +278,7 @@ public class AddProjectFragment extends Fragment {
     }
 
     private boolean generateError() {
+        binding.managerNameEdit.setText("Admin");
         for (Pair<TextInputLayout, EditText> view : views) {
             if (view.second.getText().toString().trim().isEmpty()) {
                 view.first.setError("Missing");
@@ -448,6 +298,7 @@ public class AddProjectFragment extends Fragment {
             Snackbar.make(binding.getRoot(), "Location is Missing", Snackbar.LENGTH_SHORT).show();
             return true;
         }
+
         return false;
     }
 
@@ -475,7 +326,16 @@ public class AddProjectFragment extends Fragment {
     private final View.OnClickListener clRegister = v -> {
         if (validateInputs()) {
             binding.registerButton.setEnabled(false);
-            addProject();
+            MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
+            builder.setTitle(getString(R.string.hours))
+                    .setMessage(getString(R.string.hours_limit, binding.hoursEdit.getText().toString()))
+                    .setNegativeButton(getString(R.string.no), (dialogInterface, i) -> {
+                        binding.registerButton.setEnabled(true);
+                    })
+                    .setPositiveButton(getString(R.string.yes), (dialogInterface, i) -> {
+                        addProject();
+                    })
+                    .show();
         }
     };
     private final View.OnClickListener oclAddClient = v -> {

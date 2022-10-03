@@ -331,7 +331,7 @@ public class UserFragmentDialog extends DialogFragment {
         empInfo.add((binding.titleEdit.getText()).toString());
         empInfo.add((employee.getManagerID()));
         empInfo.add(new HashMap<String,Object>(){{
-            put("pid",employee.getProjectIds());
+            put("pids",employee.getProjectIds());
         }});
         empInfo.add((employee.getManagerID() != null));
         empInfo.add(binding.managerCheckbox.isChecked());

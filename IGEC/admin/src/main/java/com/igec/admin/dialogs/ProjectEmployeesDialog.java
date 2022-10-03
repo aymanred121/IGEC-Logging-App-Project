@@ -106,14 +106,16 @@ public class ProjectEmployeesDialog extends DialogFragment {
         Map<String, Object> empInfoMap = new HashMap<>();
         for (EmployeeOverview employee : employees) {
             employee.isSelected = false;
-            ArrayList<String> empInfo = new ArrayList<>();
+            ArrayList<Object> empInfo = new ArrayList<>();
             empInfo.add(employee.getFirstName());
             empInfo.add(employee.getLastName());
             empInfo.add(employee.getTitle());
-            empInfo.add(null);
-            empInfo.add(null);
-            empInfo.add(savedTeamMembersIds.contains(employee.getId()) ? "1" : "0");
-            empInfo.add("0");
+            empInfo.add(employee.getManagerID());
+            empInfo.add(new HashMap<String,Object>(){{
+                put("pids",employee.getProjectIds());
+            }});
+            empInfo.add(savedTeamMembersIds.contains(employee.getId()));
+            empInfo.add(false);
             empInfoMap.put(employee.getId(), empInfo);
             EMPLOYEE_OVERVIEW_REF.update(empInfoMap);
         }
@@ -153,18 +155,18 @@ public class ProjectEmployeesDialog extends DialogFragment {
                 });
     }
 
-    private void filterEmployees(Map<String, ArrayList<String>> empMap) {
+    private void filterEmployees(Map<String, ArrayList<Object>> empMap) {
         employees.clear();
         // filter: no a manager, not currently working
         for (String key : empMap.keySet()) {
             String id = (key);
-            String firstName = empMap.get(key).get(0);
-            String lastName = empMap.get(key).get(1);
-            String title = empMap.get(key).get(2);
-            String managerID = empMap.get(key).get(3);
-            String projectID = empMap.get(key).get(4);
-            boolean isSelected = empMap.get(key).get(5).equals("1");
-            boolean isManager = empMap.get(key).get(6).equals("1");
+            String firstName = (String) (empMap.get(key)).get(0);
+            String lastName = (String) empMap.get(key).get(1);
+            String title = (String) empMap.get(key).get(2);
+            String managerID =(String) empMap.get(key).get(3);
+            ArrayList<String> projectIds =(ArrayList<String>)((HashMap) empMap.get(key).get(4)).get("pids");
+            boolean isSelected = (Boolean) empMap.get(key).get(5);
+            boolean isManager = (Boolean) empMap.get(key).get(6);
             boolean matchDb = (unSavedTeamMembersIds.contains(id) == isSelected);
 
             // !isManager = not a manager
@@ -176,7 +178,7 @@ public class ProjectEmployeesDialog extends DialogFragment {
                 emp.setLastName(lastName);
                 emp.setTitle(title);
                 emp.setManagerID(managerID);
-               // emp.setProjectIds(projectID);
+                emp.setProjectIds(projectIds);
                 emp.isSelected = isSelected;
                 emp.isManager = false;
                 employees.add(emp);
@@ -194,27 +196,28 @@ public class ProjectEmployeesDialog extends DialogFragment {
         employees.get(position).isSelected = !employees.get(position).isSelected;
         adapter.notifyItemChanged(position);
         Map<String, Object> empInfoMap = new HashMap<>();
-        ArrayList<String> empInfo = new ArrayList<>();
+        ArrayList<Object> empInfo = new ArrayList<>();
         empInfo.add(employees.get(position).getFirstName());
         empInfo.add(employees.get(position).getLastName());
         empInfo.add(employees.get(position).getTitle());
-        empInfo.add(null);
-        empInfo.add(null);
-
+        empInfo.add(employees.get(position).getManagerID());
+        empInfo.add(new HashMap<String,Object>(){{
+            put("pids",employees.get(position).getProjectIds());
+        }});
         if (employees.get(position).isSelected) {
             // add to team and team ids
             unSavedTeamMembers.add(employees.get(position));
             unSavedTeamMembersIds.add(employees.get(position).getId());
             // update isSelected in db
-            empInfo.add("1");
+            empInfo.add(true);
         } else {
             // remove from team and team ids
             unSavedTeamMembers.remove(employees.get(position));
             unSavedTeamMembersIds.remove(employees.get(position).getId());
             // update isSelected in db
-            empInfo.add("0");
+            empInfo.add(false);
         }
-        empInfo.add("0");
+        empInfo.add(false);
         empInfoMap.put(employees.get(position).getId(), empInfo);
         EMPLOYEE_OVERVIEW_REF.update(empInfoMap);
     };

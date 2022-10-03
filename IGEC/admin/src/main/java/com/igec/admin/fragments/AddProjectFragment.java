@@ -31,6 +31,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.github.javafaker.Team;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.firestore.FieldValue;
 import com.igec.admin.adapters.EmployeeAdapter;
 import com.igec.admin.databinding.FragmentAddProjectBinding;
 import com.igec.admin.dialogs.AddAllowanceDialog;
@@ -223,10 +224,10 @@ public class AddProjectFragment extends Fragment {
         });
         team.forEach(employeeOverview -> {
             employeeOverview.setManagerID(projectManager.getId());
-           // employeeOverview.setProjectId(PID);
+           employeeOverview.getProjectIds().add(PID);
         });
         projectManager.setManagerID(ADMIN);
-       // projectManager.setProjectId(PID);
+       projectManager.getProjectIds().add(PID);
         team.add(projectManager);
 
         Project newProject = new Project(projectManager.getFirstName() + projectManager.getLastName()
@@ -256,20 +257,22 @@ public class AddProjectFragment extends Fragment {
     private void updateEmployeesDetails(String projectID) {
         final int[] counter = {0};
         team.forEach(emp -> {
-            ArrayList<String> empInfo = new ArrayList<>();
+            ArrayList<Object> empInfo = new ArrayList<>();
             empInfo.add(emp.getFirstName());
             empInfo.add(emp.getLastName());
             empInfo.add(emp.getTitle());
             empInfo.add(emp.getManagerID());
-           // empInfo.add(emp.getProjectId() + projectID + ",");
-            empInfo.add("1");
-            empInfo.add(emp.isManager ? "1" : "0");
+           empInfo.add(new HashMap<String,Object>(){{
+               put("pids",emp.getProjectIds());
+           }});
+            empInfo.add(true);
+            empInfo.add(emp.isManager);
             Map<String, Object> empInfoMap = new HashMap<>();
             empInfoMap.put(emp.getId(), empInfo);
 
             batch.update(EMPLOYEE_OVERVIEW_REF, empInfoMap);
 
-            batch.update(EMPLOYEE_COL.document(emp.getId()), "managerID", emp.getManagerID(), "projectID", projectID + ",");
+            batch.update(EMPLOYEE_COL.document(emp.getId()), "managerID", emp.getManagerID(), "projectIds", FieldValue.arrayUnion( projectID));
 
             EMPLOYEE_GROSS_SALARY_COL.document(emp.getId()).get().addOnSuccessListener((value) -> {
                 if (!value.exists())

@@ -87,11 +87,10 @@ public class ProjectManagerDialog extends DialogFragment {
         Bundle result = new Bundle();
         if (save) {
             result.putParcelable("manager", unSavedManager);
-            getParentFragmentManager().setFragmentResult("manager", result);
         } else {
             result.putParcelable("manager", savedManager);
-            getParentFragmentManager().setFragmentResult("manager", result);
         }
+        getParentFragmentManager().setFragmentResult("manager", result);
         task.remove();
     }
 
@@ -135,18 +134,18 @@ public class ProjectManagerDialog extends DialogFragment {
                 });
     }
 
-    private void filterEmployees(Map<String, ArrayList<String>> empMap) {
+    private void filterEmployees(Map<String, ArrayList<Object>> empMap) {
         employees.clear();
         // filter: no a manager, not currently working
         for (String key : empMap.keySet()) {
             String id = (key);
-            String firstName = empMap.get(key).get(0);
-            String lastName = empMap.get(key).get(1);
-            String title = empMap.get(key).get(2);
-            String managerID = empMap.get(key).get(3);
-            String projectID = empMap.get(key).get(4);
-            boolean isSelected = empMap.get(key).get(5).equals("1");
-            boolean isManager = empMap.get(key).get(6).equals("1");
+            String firstName = (String) (empMap.get(key)).get(0);
+            String lastName = (String) empMap.get(key).get(1);
+            String title = (String) empMap.get(key).get(2);
+            String managerID =(String) empMap.get(key).get(3);
+            ArrayList<String> projectIds =(ArrayList<String>)((HashMap) empMap.get(key).get(4)).get("pids");
+            boolean isSelected = (Boolean) empMap.get(key).get(5);
+            boolean isManager = (Boolean) empMap.get(key).get(6);
 
             // !isManager = not a manager
             // matchDb = not working employees and the selected employees
@@ -157,7 +156,7 @@ public class ProjectManagerDialog extends DialogFragment {
                 emp.setLastName(lastName);
                 emp.setTitle(title);
                 emp.setManagerID(managerID);
-                //emp.setProjectId(projectID);
+                emp.setProjectIds(projectIds);
                 emp.isSelected = isSelected;
                 emp.isManager = true;
                 employees.add(emp);

@@ -139,6 +139,7 @@ public class EmployeeOverview implements Cloneable, Parcelable {
         this.projectIds.addAll(projectIds);
     }
 
+
 //    public void setProjectId(String projectId) {
 //        this.projectIds.add(projectId);
 //    }

@@ -216,7 +216,8 @@ public class AddUserFragment extends Fragment {
                 binding.insuranceNumberEdit.getText().toString(),
                 binding.temporaryCheckbox.isChecked(),
                 Double.parseDouble(binding.insuranceAmountEdit.getText().toString()),
-                binding.adminCheckbox.isChecked());
+                binding.adminCheckbox.isChecked(),
+                binding.managerCheckbox.isChecked());
     }
 
     private String encryptedPassword() {

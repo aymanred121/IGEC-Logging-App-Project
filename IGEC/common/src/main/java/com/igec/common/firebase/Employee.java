@@ -11,14 +11,14 @@ public class Employee implements Serializable {
     private double salary,insuranceAmount,overTime;
     private Date hireDate;
     private int totalNumberOfVacationDays;
-    private boolean isAdmin, temporary,locked;
+    private boolean isAdmin, temporary,locked , isManager;
     private String currency;
 
     public  Employee(){
 
     }
 
-    public Employee(String firstName, String lastName, String Title, String area, String City, String Street, double salary,String currency,double overTime, String SSN, Date hireDate, String email, String password,String phoneNumber,String insuranceNumber,boolean labourType,double insuranceAmount,boolean isAdmin) {
+    public Employee(String firstName, String lastName, String Title, String area, String City, String Street, double salary,String currency,double overTime, String SSN, Date hireDate, String email, String password,String phoneNumber,String insuranceNumber,boolean labourType,double insuranceAmount,boolean isAdmin ,boolean isManager) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.title = Title;
@@ -38,6 +38,7 @@ public class Employee implements Serializable {
         this.insuranceAmount=insuranceAmount;
         this.isAdmin=isAdmin;
         this.overTime=overTime;
+        this.isManager=isManager;
     }
 
     public boolean isLocked() {
@@ -227,5 +228,13 @@ public class Employee implements Serializable {
 
     public void setCurrency(String currency) {
         this.currency = currency;
+    }
+
+    public boolean isManager() {
+        return isManager;
+    }
+
+    public void setManager(boolean manager) {
+        isManager = manager;
     }
 }

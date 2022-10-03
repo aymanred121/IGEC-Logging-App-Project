@@ -325,14 +325,16 @@ public class UserFragmentDialog extends DialogFragment {
 
     private void updateEmployeeOverview() {
         Map<String, Object> updatedEmpOverviewMap = new HashMap<>();
-        ArrayList<String> empInfo = new ArrayList<>();
+        ArrayList<Object> empInfo = new ArrayList<>();
         empInfo.add((binding.firstNameEdit.getText()).toString());
         empInfo.add((binding.secondNameEdit.getText()).toString());
         empInfo.add((binding.titleEdit.getText()).toString());
         empInfo.add((employee.getManagerID()));
-        empInfo.add((employee.getProjectID()));
-        empInfo.add((employee.getManagerID() == null) ? "0" : "1");
-        empInfo.add(binding.managerCheckbox.isChecked() ? "1" : "0");
+        empInfo.add(new HashMap<String,Object>(){{
+            put("pid",employee.getProjectIds());
+        }});
+        empInfo.add((employee.getManagerID() != null));
+        empInfo.add(binding.managerCheckbox.isChecked());
         updatedEmpOverviewMap.put(employee.getId(), empInfo);
         batch.update(EMPLOYEE_OVERVIEW_REF, updatedEmpOverviewMap);
     }
@@ -370,18 +372,20 @@ public class UserFragmentDialog extends DialogFragment {
     }
 
     private void updateProjects() {
-        EmployeeOverview tempEmp = new EmployeeOverview(binding.firstNameEdit.getText().toString(), binding.secondNameEdit.getText().toString(), binding.titleEdit.getText().toString(), employee.getId(), employee.getProjectID(), employee.getProjectID() != null);
+        EmployeeOverview tempEmp = new EmployeeOverview(binding.firstNameEdit.getText().toString(), binding.secondNameEdit.getText().toString(), binding.titleEdit.getText().toString(), employee.getId(), employee.getProjectIds(), employee.getProjectIds().size() != 0);
         tempEmp.setManagerID(employee.getManagerID());
-        if (employee.getProjectID() == null) {
+        if (employee.getProjectIds().size() == 0) {
             updateVacation();
             return;
         }
         // update employee data in project
-        batch.update(PROJECT_COL.document(employee.getProjectID()), "employees", FieldValue.arrayRemove(oldEmployeeOverviewData));
-        if (tempEmp.getManagerID().equals(ADMIN)) {
-            batch.update(PROJECT_COL.document(employee.getProjectID()), "managerName", tempEmp.getFirstName() + " " + tempEmp.getLastName(), "employees", FieldValue.arrayUnion(tempEmp));
-        } else {
-            batch.update(PROJECT_COL.document(employee.getProjectID()), "employees", FieldValue.arrayUnion(tempEmp));
+        for (String pid: employee.getProjectIds()){
+            batch.update(PROJECT_COL.document(pid), "employees", FieldValue.arrayRemove(oldEmployeeOverviewData));
+            if (tempEmp.getManagerID().equals(ADMIN)) {
+                batch.update(PROJECT_COL.document(pid), "managerName", tempEmp.getFirstName() + " " + tempEmp.getLastName(), "employees", FieldValue.arrayUnion(tempEmp));
+            } else {
+                batch.update(PROJECT_COL.document(pid), "employees", FieldValue.arrayUnion(tempEmp));
+            }
         }
         updateVacation();
 
@@ -392,7 +396,7 @@ public class UserFragmentDialog extends DialogFragment {
         oldNetSalary.setType(AllowancesEnum.NETSALARY.ordinal());
         oldNetSalary.setCurrency(employee.getCurrency());
         oldNetSalary.setName("Net salary");
-        oldEmployeeOverviewData = new EmployeeOverview(employee.getFirstName(), employee.getLastName(), employee.getTitle(), employee.getId(), employee.getProjectID(), employee.getProjectID() != null);
+        oldEmployeeOverviewData = new EmployeeOverview(employee.getFirstName(), employee.getLastName(), employee.getTitle(), employee.getId(), employee.getProjectIds(), employee.getProjectIds().size() != 0);
         oldEmployeeOverviewData.setManagerID(employee.getManagerID());
         employee.setAdmin(binding.adminCheckbox.isChecked());
         employee.setArea(binding.areaEdit.getText().toString());
@@ -425,8 +429,9 @@ public class UserFragmentDialog extends DialogFragment {
         // employeeOverview
         batch.update(EMPLOYEE_OVERVIEW_REF, employee.getId(), FieldValue.delete());
 
-        if (employee.getProjectID() != null)
-            batch.update(PROJECT_COL.document(employee.getProjectID()), "employees", FieldValue.arrayRemove(oldEmployeeOverviewData));
+        if (employee.getProjectIds().size() != 0)
+            for(String pid: employee.getProjectIds())
+            batch.update(PROJECT_COL.document(pid), "employees", FieldValue.arrayRemove(oldEmployeeOverviewData));
 
         VACATION_COL.whereEqualTo("employee.id", employee.getId()).whereEqualTo("vacationStatus", 0).get().addOnSuccessListener(documentQuery -> {
             for (QueryDocumentSnapshot d : documentQuery) {

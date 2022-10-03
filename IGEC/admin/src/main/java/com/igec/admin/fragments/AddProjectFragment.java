@@ -223,10 +223,10 @@ public class AddProjectFragment extends Fragment {
         });
         team.forEach(employeeOverview -> {
             employeeOverview.setManagerID(projectManager.getId());
-            employeeOverview.setProjectId(PID);
+           // employeeOverview.setProjectId(PID);
         });
         projectManager.setManagerID(ADMIN);
-        projectManager.setProjectId(PID);
+       // projectManager.setProjectId(PID);
         team.add(projectManager);
 
         Project newProject = new Project(projectManager.getFirstName() + projectManager.getLastName()
@@ -261,7 +261,7 @@ public class AddProjectFragment extends Fragment {
             empInfo.add(emp.getLastName());
             empInfo.add(emp.getTitle());
             empInfo.add(emp.getManagerID());
-            empInfo.add(emp.getProjectId() + projectID + ",");
+           // empInfo.add(emp.getProjectId() + projectID + ",");
             empInfo.add("1");
             empInfo.add(emp.isManager ? "1" : "0");
             Map<String, Object> empInfoMap = new HashMap<>();

@@ -157,7 +157,7 @@ public class ProjectManagerDialog extends DialogFragment {
                 emp.setLastName(lastName);
                 emp.setTitle(title);
                 emp.setManagerID(managerID);
-                emp.setProjectId(projectID);
+                //emp.setProjectId(projectID);
                 emp.isSelected = isSelected;
                 emp.isManager = true;
                 employees.add(emp);

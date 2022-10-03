@@ -70,22 +70,22 @@ public class EmployeeOverview implements Cloneable, Parcelable {
         this.id = id;
     }
 
-    public EmployeeOverview(String firstName, String lastName, String title, String id, String projectId) {
+    public EmployeeOverview(String firstName, String lastName, String title, String id, ArrayList<String> projectIds) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.title = title;
         this.id = id;
-        if (projectId != null)
-            this.projectIds.add(projectId);
+        this.projectIds.clear();
+        this.projectIds.addAll(projectIds);
     }
 
-    public EmployeeOverview(String firstName, String lastName, String title, String id, String projectId, boolean isSelected) {
+    public EmployeeOverview(String firstName, String lastName, String title, String id, ArrayList<String> projectIds, boolean isSelected) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.title = title;
         this.id = id;
-        if (projectId != null)
-            this.projectIds.add(projectId);
+        this.projectIds.clear();
+        this.projectIds.addAll(projectIds);
         this.isSelected = isSelected;
     }
 
@@ -135,19 +135,20 @@ public class EmployeeOverview implements Cloneable, Parcelable {
     }
 
     public void setProjectIds(ArrayList<String> projectIds) {
-        this.projectIds = projectIds;
+        this.projectIds.clear();
+        this.projectIds.addAll(projectIds);
     }
 
-    public void setProjectId(String projectId) {
-        this.projectIds.add(projectId);
-    }
-
-    public String getProjectId() {
-        StringJoiner joiner = new StringJoiner(",");
-        for (String s : projectIds) {
-            joiner.add(s);
-        }
-        return joiner.toString();
-    }
+//    public void setProjectId(String projectId) {
+//        this.projectIds.add(projectId);
+//    }
+//
+//    public String getProjectId() {
+//        StringJoiner joiner = new StringJoiner(",");
+//        for (String s : projectIds) {
+//            joiner.add(s);
+//        }
+//        return joiner.toString();
+//    }
 
 }

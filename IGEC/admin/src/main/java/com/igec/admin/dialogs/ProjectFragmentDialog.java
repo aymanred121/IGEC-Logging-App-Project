@@ -409,7 +409,7 @@ public class ProjectFragmentDialog extends DialogFragment {
         batch.delete(PROJECT_COL.document(project.getId()));
         project.getEmployees().forEach(member -> {
             member.setManagerID(null);
-            member.setProjectId(null);
+            //member.setProjectId(null);
             member.isSelected = false;
             EMPLOYEE_GROSS_SALARY_COL.document(member.getId()).get().addOnSuccessListener(doc -> {
                 if (!doc.exists())

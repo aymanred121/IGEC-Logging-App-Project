@@ -161,14 +161,16 @@ public class AddUserFragment extends Fragment {
 
             // employeeOverview
             String id = db.collection("EmployeeOverview").document().getId().substring(0, 5);
-            ArrayList<String> empInfo = new ArrayList<>();
+            ArrayList<Object> empInfo = new ArrayList<>();
             empInfo.add((binding.firstNameEdit.getText()).toString());
             empInfo.add((binding.secondNameEdit.getText()).toString());
             empInfo.add((binding.titleEdit.getText()).toString());
             empInfo.add(null); // ManagerID
-            empInfo.add(null); // ProjectID
-            empInfo.add("0"); // isSelected
-            empInfo.add(binding.managerCheckbox.isChecked() ? "1" : "0"); // isManager
+            empInfo.add(new HashMap<String,Object>(){{
+                put("pids",new ArrayList<String>());
+            }}); // ProjectID
+            empInfo.add(false); // isSelected
+            empInfo.add(binding.managerCheckbox.isChecked()); // isManager
             Map<String, Object> empInfoMap = new HashMap<>();
             empInfoMap.put(id, empInfo);
             batch.set(EMPLOYEE_OVERVIEW_REF, empInfoMap, SetOptions.merge());

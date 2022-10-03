@@ -240,18 +240,19 @@ public class Employee implements Serializable {
     }
 
     public void setProjectIds(ArrayList<String> projectIds) {
-        this.projectIds = projectIds;
+        this.projectIds.clear();
+        this.projectIds.addAll(projectIds);
     }
 
-    public void setProjectId(String projectId) {
-        this.projectIds.add(projectId);
-    }
-
-    public String getProjectID() {
-        StringJoiner joiner = new StringJoiner(",");
-        for (String s : projectIds) {
-            joiner.add(s);
-        }
-        return joiner.toString();
-    }
+//    public void setProjectId(String projectId) {
+//        this.projectIds.add(projectId);
+//    }
+//
+//    public String getProjectID() {
+//        StringJoiner joiner = new StringJoiner(",");
+//        for (String s : projectIds) {
+//            joiner.add(s);
+//        }
+//        return joiner.toString();
+//    }
 }

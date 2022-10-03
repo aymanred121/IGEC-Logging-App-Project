@@ -195,8 +195,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onStop() {
         super.onStop()
-        AddProjectFragment.clearTeam()
-        ProjectFragmentDialog.clearTeam()
     }
 
     //Functions
@@ -253,9 +251,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 // This method will be called after drawer animation finishes
                 // Perform the fragment replacement
                 if (lastTab != item.itemId) {
-                    if (lastTab == R.id.nav_add_project) {
-                        AddProjectFragment.clearTeam()
-                    }
                     when (item.itemId) {
                         R.id.nav_add_user -> {
                             binding.toolbar.title = getString(R.string.add_user)

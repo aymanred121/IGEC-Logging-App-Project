@@ -168,6 +168,7 @@ public class AddUserFragment extends Fragment {
             empInfo.add(null); // ManagerID
             empInfo.add(null); // ProjectID
             empInfo.add("0"); // isSelected
+            empInfo.add(binding.managerCheckbox.isChecked() ? "1" : "0"); // isManager
             Map<String, Object> empInfoMap = new HashMap<>();
             empInfoMap.put(id, empInfo);
             batch.set(EMPLOYEE_OVERVIEW_REF, empInfoMap, SetOptions.merge());

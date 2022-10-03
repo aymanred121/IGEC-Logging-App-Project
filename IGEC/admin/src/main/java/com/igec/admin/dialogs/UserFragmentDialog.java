@@ -151,8 +151,8 @@ public class UserFragmentDialog extends DialogFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        int parent =getParentFragmentManager().getFragments().size()-1;
-        ((UsersFragment)getParentFragmentManager().getFragments().get(parent)).setOpened(false);
+        int parent = getParentFragmentManager().getFragments().size() - 1;
+        ((UsersFragment) getParentFragmentManager().getFragments().get(parent)).setOpened(false);
         binding = null;
     }
 
@@ -208,8 +208,7 @@ public class UserFragmentDialog extends DialogFragment {
         binding.passwordEdit.setText(employee.getDecryptedPassword());
         binding.phoneEdit.setText(employee.getPhoneNumber());
         binding.adminCheckbox.setChecked(employee.isAdmin());
-        //TODO
-        // binding.managerCheckbox.setChecked(employee.isManager());
+        binding.managerCheckbox.setChecked(employee.isManager());
         binding.temporaryCheckbox.setChecked(employee.isTemporary());
         binding.insuranceNumberEdit.setText(employee.getInsuranceNumber());
         binding.insuranceAmountEdit.setText(String.valueOf(employee.getInsuranceAmount()));
@@ -333,6 +332,7 @@ public class UserFragmentDialog extends DialogFragment {
         empInfo.add((employee.getManagerID()));
         empInfo.add((employee.getProjectID()));
         empInfo.add((employee.getManagerID() == null) ? "0" : "1");
+        empInfo.add(binding.managerCheckbox.isChecked() ? "1" : "0");
         updatedEmpOverviewMap.put(employee.getId(), empInfo);
         batch.update(EMPLOYEE_OVERVIEW_REF, updatedEmpOverviewMap);
     }
@@ -412,6 +412,7 @@ public class UserFragmentDialog extends DialogFragment {
         employee.setStreet(binding.streetEdit.getText().toString());
         employee.setTemporary(binding.temporaryCheckbox.isChecked());
         employee.setTitle(binding.titleEdit.getText().toString());
+        employee.setManager(binding.managerCheckbox.isChecked());
         batch.set(EMPLOYEE_COL.document(employee.getId()), employee, SetOptions.merge());
     }
 

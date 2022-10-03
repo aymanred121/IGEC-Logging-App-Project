@@ -3,8 +3,8 @@ package com.igec.common.firebase;
 
 import androidx.annotation.NonNull;
 
-public class EmployeeOverview implements Cloneable{
-    public boolean isSelected = false;
+public class EmployeeOverview implements Cloneable {
+    public boolean isSelected = false, isManager = false;
     private String firstName, lastName, title, id, managerID, projectId;
 
     public EmployeeOverview() {
@@ -30,6 +30,7 @@ public class EmployeeOverview implements Cloneable{
         this.id = id;
         this.projectId = projectId;
     }
+
     public EmployeeOverview(EmployeeOverview e) {
         this.firstName = e.getFirstName();
         this.lastName = e.getLastName();
@@ -46,6 +47,7 @@ public class EmployeeOverview implements Cloneable{
         this.projectId = projectId;
         this.isSelected = isSelected;
     }
+
     public String getFirstName() {
         return firstName;
     }
@@ -93,4 +95,6 @@ public class EmployeeOverview implements Cloneable{
     public void setProjectId(String projectId) {
         this.projectId = projectId;
     }
+
+
 }

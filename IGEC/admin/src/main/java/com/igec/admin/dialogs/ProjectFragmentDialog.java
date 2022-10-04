@@ -498,10 +498,8 @@ public class ProjectFragmentDialog extends DialogFragment {
                 if (!value.exists())
                     return;
                 EmployeesGrossSalary employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
-                if (allowances.size() != 0) {
-                    employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() == AllowancesEnum.PROJECT.ordinal());
-                    employeesGrossSalary.getAllTypes().addAll(allowances);
-                }
+                employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getProjectId().equals(project.getId()));
+                employeesGrossSalary.getAllTypes().addAll(allowances);
                 batch.update(EMPLOYEE_GROSS_SALARY_COL.document(emp.getId()), "allTypes", employeesGrossSalary.getAllTypes());
                 EMPLOYEE_GROSS_SALARY_COL.document(emp.getId()).collection(finalYear).document(finalMonth)
                         .get().addOnSuccessListener(documentSnapshot -> {
@@ -518,9 +516,9 @@ public class ProjectFragmentDialog extends DialogFragment {
                                         dismiss();
                                         binding.updateButton.setEnabled(true);
                                         batch = FirebaseFirestore.getInstance().batch();
-                                       // project.setEmployees(null);
+                                        // project.setEmployees(null);
                                         team.clear();
-                                      //  projectManager = null;
+                                        //  projectManager = null;
                                     });
                                 }
                                 counter[0]++;
@@ -530,7 +528,7 @@ public class ProjectFragmentDialog extends DialogFragment {
                             if (employeesGrossSalary1.getBaseAllowances() == null)
                                 employeesGrossSalary1.setBaseAllowances(allowances);
                             else {
-                                employeesGrossSalary1.getBaseAllowances().removeIf(allowance -> allowance.getType() == AllowancesEnum.PROJECT.ordinal());
+                                employeesGrossSalary1.getBaseAllowances().removeIf(allowance -> allowance.getProjectId().equals(project.getId()));
                                 employeesGrossSalary1.getBaseAllowances().addAll(allowances);
                             }
                             batch.update(db.document(documentSnapshot.getReference().getPath()), "baseAllowances", employeesGrossSalary1.getBaseAllowances());

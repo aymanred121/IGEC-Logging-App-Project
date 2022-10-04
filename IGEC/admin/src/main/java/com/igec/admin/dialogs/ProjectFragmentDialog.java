@@ -42,6 +42,7 @@ import com.igec.admin.fragments.ProjectsFragment;
 import com.igec.admin.R;
 import com.igec.common.firebase.Allowance;
 import com.igec.common.firebase.Client;
+import com.igec.common.firebase.Employee;
 import com.igec.common.firebase.EmployeeOverview;
 import com.igec.common.firebase.EmployeesGrossSalary;
 import com.igec.common.firebase.Project;
@@ -77,10 +78,28 @@ public class ProjectFragmentDialog extends DialogFragment {
     private WriteBatch batch = FirebaseFirestore.getInstance().batch();
     private final SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
     private ArrayList<Pair<TextInputLayout, EditText>> views;
+    private EmployeeOverview projectManager;
+    private ArrayList<EmployeeOverview> team;
+    private EmployeeOverview unSavedProjectManager;
+    private ArrayList<String> savedTeamIds;
+    private ArrayList<String> unsSavedTeamIds;
 
     public ProjectFragmentDialog(Project project) {
         this.project = project;
-        MID = project.getManagerID();
+        savedTeamIds = new ArrayList<>();
+        unsSavedTeamIds = new ArrayList<>();
+        team = new ArrayList<>();
+        for (EmployeeOverview employee : project.getEmployees()) {
+            if (employee.getManagerID().equals(ADMIN)) {
+                projectManager = employee;
+                unSavedProjectManager = new EmployeeOverview(employee);
+
+            } else {
+                team.add(employee);
+            }
+            savedTeamIds.add(employee.getId());
+            unsSavedTeamIds.add(employee.getId());
+        }
     }
 
     @Override
@@ -137,6 +156,21 @@ public class ProjectFragmentDialog extends DialogFragment {
                 lat = result.getString("lat");
                 lng = result.getString("lng");
             }
+        });
+        getParentFragmentManager().setFragmentResultListener("teamMembers", this, (requestKey, bundle) -> {
+            team = bundle.getParcelableArrayList("teamMembers");
+            Toast.makeText(getActivity(), String.format("%d", team.size()), Toast.LENGTH_SHORT).show();
+            unsSavedTeamIds.clear();
+            for (EmployeeOverview employeeOverview : team) {
+                unsSavedTeamIds.add(employeeOverview.getId());
+            }
+        });
+        getParentFragmentManager().setFragmentResultListener("manager", this, (requestKey, bundle) -> {
+            unsSavedTeamIds.remove(projectManager.getId());
+            projectManager = bundle.getParcelable("manager");
+            unsSavedTeamIds.add(projectManager.getId());
+            if (projectManager != null)
+                binding.managerNameEdit.setText(String.format("%s - %s %s", projectManager.getId(), projectManager.getFirstName(), projectManager.getLastName()));
         });
     }
 
@@ -235,7 +269,7 @@ public class ProjectFragmentDialog extends DialogFragment {
         binding.areaEdit.setText(project.getLocationArea());
         binding.cityEdit.setText(project.getLocationCity());
         binding.streetEdit.setText(project.getLocationStreet());
-        binding.hoursEdit.setText(project.getHours());
+        binding.hoursEdit.setText(String.valueOf(project.getHours()));
         startDate = project.getStartDate().getTime();
         vTimeDatePickerBuilder.setTitleText("Time");
         vTimeDatePicker = vTimeDatePickerBuilder.setSelection(startDate).build();
@@ -281,20 +315,120 @@ public class ProjectFragmentDialog extends DialogFragment {
         return !generateError();
     }
 
+
+    private void removeManagerDetails(EmployeeOverview projectManager) {
+        EmployeeOverview temp = new EmployeeOverview(projectManager);
+        temp.getProjectIds().remove(project.getId());
+        for (String pid : projectManager.getProjectIds()) {
+            if (pid.equals(project.getId()))
+                continue;
+            batch.update(PROJECT_COL.document(pid), "employees", FieldValue.arrayRemove(projectManager));
+            batch.update(PROJECT_COL.document(pid), "employees", FieldValue.arrayUnion(temp));
+        }
+    }
+
+    private void updateManagerDetails(EmployeeOverview projectManager) {
+        EmployeeOverview temp = new EmployeeOverview(projectManager);
+        temp.getProjectIds().remove(project.getId());
+        for (String pid : projectManager.getProjectIds()) {
+            if (pid.equals(project.getId()))
+                continue;
+            batch.update(PROJECT_COL.document(pid), "employees", FieldValue.arrayRemove(temp));
+            batch.update(PROJECT_COL.document(pid), "employees", FieldValue.arrayUnion(projectManager));
+        }
+    }
+
+    private void updateEmployeesDetails() {
+        String currentDateAndTime = sdf.format(new Date());
+        String month = currentDateAndTime.substring(3, 5);
+        String year = currentDateAndTime.substring(6, 10);
+        batch = FirebaseFirestore.getInstance().batch();
+        team.add(projectManager);
+        team.forEach(emp ->
+        {
+            boolean isInSaved = savedTeamIds.contains(emp.getId());
+            // added
+            if (isInSaved)
+                return;
+
+            emp.getProjectIds().add(project.getId());
+            emp.setManagerID(emp.getId().equals(projectManager.getId()) ? ADMIN : projectManager.getId());
+            ArrayList<Object> empInfo = new ArrayList<>();
+            empInfo.add(emp.getFirstName());
+            empInfo.add(emp.getLastName());
+            empInfo.add(emp.getTitle());
+            empInfo.add(emp.getManagerID());
+            empInfo.add(new HashMap<String, Object>() {{
+                put("pids", emp.getProjectIds());
+            }});
+            empInfo.add(true);
+            empInfo.add(emp.isManager);
+            Map<String, Object> empInfoMap = new HashMap<>();
+            empInfoMap.put(emp.getId(), empInfo);
+            batch.update(EMPLOYEE_OVERVIEW_REF, empInfoMap);
+            batch.update(EMPLOYEE_COL.document(emp.getId()), "managerID", projectManager.getId(), "projectIds", emp.getProjectIds());
+            if (emp.getManagerID().equals(ADMIN))
+                updateManagerDetails(emp);
+        });
+        project.getEmployees().forEach(emp -> {
+            boolean isInUnSaved = unsSavedTeamIds.contains(emp.getId());
+            if (isInUnSaved) {
+                return;
+            }
+            emp.getProjectIds().remove(project.getId());
+            if (emp.getProjectIds().size() == 0)
+                emp.setManagerID(null);
+
+            ArrayList<Object> empInfo = new ArrayList<>();
+            empInfo.add(emp.getFirstName());
+            empInfo.add(emp.getLastName());
+            empInfo.add(emp.getTitle());
+            empInfo.add(emp.getManagerID());
+            empInfo.add(new HashMap<String, Object>() {{
+                put("pids", emp.getProjectIds());
+            }});
+            empInfo.add(emp.getProjectIds().size() != 0);
+            empInfo.add(emp.isManager);
+            Map<String, Object> empInfoMap = new HashMap<>();
+            empInfoMap.put(emp.getId(), empInfo);
+            batch.update(EMPLOYEE_OVERVIEW_REF, empInfoMap);
+            batch.update(EMPLOYEE_COL.document(emp.getId()), "managerID", (emp.getProjectIds().size() == 0) ? null : emp.getManagerID(), "projectIds", emp.getProjectIds());
+            EMPLOYEE_GROSS_SALARY_COL.document(emp.getId()).get().addOnSuccessListener(doc -> {
+                if (!doc.exists())
+                    return;
+                EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
+                employeesGrossSalary.getAllTypes().removeIf(x -> x.getProjectId().equals(project.getId()));
+                db.document(doc.getReference().getPath()).update("allTypes", employeesGrossSalary.getAllTypes());
+                employeesGrossSalary.getAllTypes().removeIf(x -> x.getType() == AllowancesEnum.NETSALARY.ordinal());
+                EMPLOYEE_GROSS_SALARY_COL.document(emp.getId()).collection(year).document(month).update("baseAllowances", employeesGrossSalary.getAllTypes());
+            });
+            if (emp.getManagerID().equals(ADMIN))
+                removeManagerDetails(unSavedProjectManager);
+        });
+
+        batch.commit().addOnSuccessListener(__ -> {
+            Snackbar snackbar = Snackbar.make(binding.getRoot(), "Updated", Snackbar.LENGTH_SHORT);
+            snackbar.show();
+            dismiss();
+            binding.updateButton.setEnabled(true);
+            batch = FirebaseFirestore.getInstance().batch();
+            team.clear();
+            projectManager = null;
+        }).addOnFailureListener(e -> {
+            Snackbar snackbar = Snackbar.make(binding.getRoot(), "Failed to update", Snackbar.LENGTH_SHORT);
+            snackbar.show();
+            binding.updateButton.setEnabled(true);
+        });
+
+    }
+
     void updateProject() {
-//        updateEmployeesDetails();
-//        Team.forEach(employeeOverview -> {
-//            if (employeeOverview.getId().equals(MID))
-//                employeeOverview.setManagerID(ADMIN);
-//            else
-//                employeeOverview.setManagerID(MID);
-//            employeeOverview.setProjectId(project.getId());
-//        });
+        updateEmployeesDetails();
 //        Project newProject = new Project(binding.managerNameEdit.getText().toString()
-//                , MID
+//                , projectManager.getId()
 //                , binding.nameEdit.getText().toString()
 //                , new Date(startDate)
-//                , Team
+//                , team
 //                , binding.referenceEdit.getText().toString()
 //                , binding.cityEdit.getText().toString()
 //                , binding.areaEdit.getText().toString()
@@ -303,6 +437,7 @@ public class ProjectFragmentDialog extends DialogFragment {
 //                , Double.parseDouble(lng)
 //                , binding.contractTypeAuto.getText().toString()
 //                , Double.parseDouble(binding.projectAreaEdit.getText().toString()));
+//        newProject.setHours(Integer.parseInt(binding.hoursEdit.getText().toString()));
 //        newProject.setId(project.getId());
 //        newProject.setClient(binding.officeWorkCheckbox.isChecked() ? null : client);
 //        newProject.setMachineWorkedTime(project.getMachineWorkedTime());
@@ -314,7 +449,8 @@ public class ProjectFragmentDialog extends DialogFragment {
 //        newProject.getAllowancesList().addAll(allowances);
 //        allowances = newProject.getAllowancesList();
 //        batch.set(PROJECT_COL.document(project.getId()), newProject);
-//        final int[] counter = {0};
+
+        final int[] counter = {0};
 //        newProject.getEmployees().forEach(emp -> {
 //            String currentDateAndTime = sdf.format(new Date());
 //            String day = currentDateAndTime.substring(0, 2);
@@ -359,9 +495,8 @@ public class ProjectFragmentDialog extends DialogFragment {
 //                                        binding.updateButton.setEnabled(true);
 //                                        batch = FirebaseFirestore.getInstance().batch();
 //                                        project.setEmployees(null);
-//                                        employees.clear();
-//                                        Team.clear();
-//                                        TeamID.clear();
+//                                        team.clear();
+//                                        projectManager = null;
 //                                    });
 //                                }
 //                                counter[0]++;
@@ -384,9 +519,8 @@ public class ProjectFragmentDialog extends DialogFragment {
 //                                    binding.updateButton.setEnabled(true);
 //                                    batch = FirebaseFirestore.getInstance().batch();
 //                                    project.setEmployees(null);
-//                                    employees.clear();
-//                                    Team.clear();
-//                                    TeamID.clear();
+//                                    team.clear();
+//                                    projectManager = null;
 //                                    batch = FirebaseFirestore.getInstance().batch();
 //                                    dismiss();
 //                                }).addOnFailureListener(e -> {
@@ -398,17 +532,18 @@ public class ProjectFragmentDialog extends DialogFragment {
 //                        });
 //            });
 //        });
-
     }
 
     void deleteProject() {
+        removeManagerDetails(projectManager);
         String currentDateAndTime = sdf.format(new Date());
         String month = currentDateAndTime.substring(3, 5);
         String year = currentDateAndTime.substring(6, 10);
         batch.delete(PROJECT_COL.document(project.getId()));
         project.getEmployees().forEach(member -> {
-            member.setManagerID(null);
             member.getProjectIds().remove(project.getId());
+            if (member.getProjectIds().size() == 0)
+                member.setManagerID(null);
             member.isSelected = false;
             EMPLOYEE_GROSS_SALARY_COL.document(member.getId()).get().addOnSuccessListener(doc -> {
                 if (!doc.exists())
@@ -424,14 +559,15 @@ public class ProjectFragmentDialog extends DialogFragment {
             empInfo.add(member.getLastName());
             empInfo.add(member.getTitle());
             empInfo.add(member.getManagerID());
-            empInfo.add(new HashMap<String,Object>(){{
-                put("pids",member.getProjectIds());
+            empInfo.add(new HashMap<String, Object>() {{
+                put("pids", member.getProjectIds());
             }});
-            empInfo.add(false);
+            empInfo.add(member.getProjectIds().size() != 0);
+            empInfo.add(member.isManager);
             Map<String, Object> empInfoMap = new HashMap<>();
             empInfoMap.put(member.getId(), empInfo);
             batch.update(EMPLOYEE_OVERVIEW_REF, empInfoMap);
-            batch.update(EMPLOYEE_COL.document(member.getId()), "managerID", null, "projectIds", member.getProjectIds());
+            batch.update(EMPLOYEE_COL.document(member.getId()), "managerID", (member.getProjectIds().size() == 0) ? null : member.getManagerID(), "projectIds", member.getProjectIds());
         });
         batch.commit().addOnSuccessListener(unused2 -> {
             batch = FirebaseFirestore.getInstance().batch();
@@ -449,11 +585,11 @@ public class ProjectFragmentDialog extends DialogFragment {
     // Listeners
     private final View.OnClickListener oclEmployees = v -> {
         ProjectEmployeesDialog projectEmployeesDialog;
-        projectEmployeesDialog = new ProjectEmployeesDialog();
+        projectEmployeesDialog = ProjectEmployeesDialog.newInstance(team);
         projectEmployeesDialog.show(getParentFragmentManager(), "");
     };
     private final View.OnClickListener oclManager = v -> {
-        ProjectManagerDialog projectManagerDialog = new ProjectManagerDialog();
+        ProjectManagerDialog projectManagerDialog = ProjectManagerDialog.newInstance(projectManager);
         projectManagerDialog.show(getParentFragmentManager(), "");
     };
     private final TextWatcher twArea = new TextWatcher() {

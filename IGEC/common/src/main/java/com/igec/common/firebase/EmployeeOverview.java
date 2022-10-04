@@ -14,6 +14,17 @@ public class EmployeeOverview implements Cloneable, Parcelable {
     private String firstName, lastName, title, id, managerID;
     private ArrayList<String> projectIds = new ArrayList<>();
 
+    public EmployeeOverview(EmployeeOverview emp) {
+        this.isSelected = emp.isSelected;
+        this.isManager = emp.isManager;
+        this.firstName = emp.firstName;
+        this.lastName = emp.lastName;
+        this.title = emp.title;
+        this.id = emp.id;
+        this.managerID = emp.managerID;
+        this.projectIds.addAll(emp.projectIds);
+    }
+
     public EmployeeOverview() {
     }
 

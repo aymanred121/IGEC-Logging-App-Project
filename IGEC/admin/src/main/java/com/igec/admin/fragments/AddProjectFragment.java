@@ -122,6 +122,33 @@ public class AddProjectFragment extends Fragment {
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+        clearTeam();
+    }
+
+    private void clearTeam() {
+        Map<String, Object> empInfoMap = new HashMap<>();
+        for (EmployeeOverview employee : team) {
+            employee.isSelected = false;
+            ArrayList<Object> empInfo = new ArrayList<>();
+            empInfo.add(employee.getFirstName());
+            empInfo.add(employee.getLastName());
+            empInfo.add(employee.getTitle());
+            empInfo.add(employee.getManagerID());
+            empInfo.add(new HashMap<String,Object>(){{
+                put("pids",employee.getProjectIds());
+            }});
+            empInfo.add(employee.isSelected);
+            empInfo.add(false); // isManager
+            empInfoMap.put(employee.getId(), empInfo);
+            EMPLOYEE_OVERVIEW_REF.update(empInfoMap);
+        }
+        team.clear();
+        projectManager = null;
+    }
+
+    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         initialize();

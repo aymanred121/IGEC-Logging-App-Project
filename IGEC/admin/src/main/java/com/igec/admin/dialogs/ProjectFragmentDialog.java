@@ -73,23 +73,23 @@ public class ProjectFragmentDialog extends DialogFragment {
     private ArrayList<EmployeeOverview> team;
     private EmployeeOverview unSavedProjectManager;
     private ArrayList<String> savedTeamIds;
-    private ArrayList<String> unsSavedTeamIds;
+    private ArrayList<String> unsavedTeamIds;
 
     public ProjectFragmentDialog(Project project) {
-        this.project = project;
+        this.project = new Project(project);
         savedTeamIds = new ArrayList<>();
-        unsSavedTeamIds = new ArrayList<>();
+        unsavedTeamIds = new ArrayList<>();
         team = new ArrayList<>();
         for (EmployeeOverview employee : project.getEmployees()) {
             if (ADMIN.equals(employee.getManagerID())) {
-                projectManager = employee;
+                projectManager = new EmployeeOverview(employee);
                 unSavedProjectManager = new EmployeeOverview(employee);
 
             } else {
                 team.add(employee);
             }
             savedTeamIds.add(employee.getId());
-            unsSavedTeamIds.add(employee.getId());
+            unsavedTeamIds.add(employee.getId());
         }
     }
 
@@ -151,15 +151,16 @@ public class ProjectFragmentDialog extends DialogFragment {
         getParentFragmentManager().setFragmentResultListener("teamMembers", this, (requestKey, bundle) -> {
             team = bundle.getParcelableArrayList("teamMembers");
             Toast.makeText(getActivity(), String.format("%d", team.size()), Toast.LENGTH_SHORT).show();
-            unsSavedTeamIds.clear();
+            unsavedTeamIds.clear();
             for (EmployeeOverview employeeOverview : team) {
-                unsSavedTeamIds.add(employeeOverview.getId());
+                unsavedTeamIds.add(employeeOverview.getId());
             }
+            unsavedTeamIds.add(projectManager.getId());
         });
         getParentFragmentManager().setFragmentResultListener("manager", this, (requestKey, bundle) -> {
-            unsSavedTeamIds.remove(projectManager.getId());
+            unsavedTeamIds.remove(projectManager.getId());
             projectManager = bundle.getParcelable("manager");
-            unsSavedTeamIds.add(projectManager.getId());
+            unsavedTeamIds.add(projectManager.getId());
             if (projectManager != null)
                 binding.managerNameEdit.setText(String.format("%s - %s %s", projectManager.getId(), projectManager.getFirstName(), projectManager.getLastName()));
         });
@@ -329,6 +330,42 @@ public class ProjectFragmentDialog extends DialogFragment {
         }
     }
 
+
+    /*
+     *
+     * change manager
+     * add employee
+     * remove employee
+     * not added nor removed
+     *
+     * add employee -> not in saved -> {
+     * add project id // employeeOverview + employee
+     * change manager id // employeeOverview + employee
+     * add project allowances // employeeGrossSalary
+     * }
+     * remove employee -> not in unsaved -> {
+     * remove project id // employeeOverview + employee
+     * change manager id // employeeOverview + employee
+     * remove project allowances // employeeGrossSalary
+     * }
+     *
+     * added manager -> not in saved -> {
+     * add project id // employeeOverview + employee + projects
+     * change manager id // employeeOverview + employee + projects
+     * }
+     * removed manager -> not in unsaved -> {
+     * remove project id // employeeOverview + employee + projects
+     * change manager id // employeeOverview + employee + projects
+     * }
+     * manager not added nor removed ->{
+     *  nothing
+     * }
+     *
+     *
+     *
+     * */
+
+
     private void updateEmployeesDetails() {
         String currentDateAndTime = sdf.format(new Date());
         String month = currentDateAndTime.substring(3, 5);
@@ -337,40 +374,58 @@ public class ProjectFragmentDialog extends DialogFragment {
         team.add(projectManager);
         team.forEach(emp ->
         {
-            boolean isInSaved = savedTeamIds.contains(emp.getId());
-            // added
-            if (!isInSaved){
+            boolean isSaved = savedTeamIds.contains(emp.getId());
+            if (!isSaved) // added
+            {
+                // employee
                 emp.getProjectIds().add(project.getId());
-
+                emp.setManagerID(projectManager.getId().equals(emp.getId()) ? ADMIN : projectManager.getId());
+                // manager
+                if (emp.isManager) {
+                    updateManagerDetails(emp);
+                }
             }
-            emp.setManagerID(emp.getId().equals(projectManager.getId()) ? ADMIN : projectManager.getId());
+            emp.setManagerID(projectManager.getId().equals(emp.getId()) ? ADMIN : projectManager.getId());
             ArrayList<Object> empInfo = new ArrayList<>();
             empInfo.add(emp.getFirstName());
             empInfo.add(emp.getLastName());
             empInfo.add(emp.getTitle());
-            //beptx
             empInfo.add(emp.getManagerID());
             empInfo.add(new HashMap<String, Object>() {{
                 put("pids", emp.getProjectIds());
             }});
             empInfo.add(true);
             empInfo.add(emp.isManager);
+
             Map<String, Object> empInfoMap = new HashMap<>();
             empInfoMap.put(emp.getId(), empInfo);
             batch.update(EMPLOYEE_OVERVIEW_REF, empInfoMap);
-            batch.update(EMPLOYEE_COL.document(emp.getId()), "managerID", projectManager.getId(), "projectIds", emp.getProjectIds());
-            if (ADMIN.equals(emp.getManagerID()))
-                updateManagerDetails(emp);
+            batch.update(EMPLOYEE_COL.document(emp.getId()), "managerID", emp.getManagerID(), "projectIds", emp.getProjectIds());
         });
         project.getEmployees().forEach(emp -> {
-            boolean isInUnSaved = unsSavedTeamIds.contains(emp.getId());
-            if (isInUnSaved) {
-                return;
-            }
-            emp.getProjectIds().remove(project.getId());
-            if (emp.getProjectIds().size() == 0)
-                emp.setManagerID(null);
+            boolean isInUnsaved = unsavedTeamIds.contains(emp.getId());
+            if (!isInUnsaved)// removed
+            {
+                // manager
+                if (emp.isManager) {
+                    removeManagerDetails(emp);
+                }
+                // employee
+                emp.getProjectIds().remove(project.getId());
+                emp.setManagerID(emp.getProjectIds().size() == 0 ? null : emp.getManagerID());
+                emp.isSelected = emp.getProjectIds().size() != 0;
 
+                EMPLOYEE_GROSS_SALARY_COL.document(emp.getId()).get().addOnSuccessListener(doc -> {
+                    if (!doc.exists())
+                        return;
+                    EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
+                    employeesGrossSalary.getAllTypes().removeIf(x -> x.getProjectId().equals(project.getId()));
+                    db.document(doc.getReference().getPath()).update("allTypes", employeesGrossSalary.getAllTypes());
+                    employeesGrossSalary.getAllTypes().removeIf(x -> x.getType() == AllowancesEnum.NETSALARY.ordinal());
+                    EMPLOYEE_GROSS_SALARY_COL.document(emp.getId()).collection(year).document(month).update("baseAllowances", employeesGrossSalary.getAllTypes());
+                });
+            }
+            emp.setManagerID(emp.getProjectIds().size() == 0 ? null : emp.getManagerID());
             ArrayList<Object> empInfo = new ArrayList<>();
             empInfo.add(emp.getFirstName());
             empInfo.add(emp.getLastName());
@@ -379,23 +434,12 @@ public class ProjectFragmentDialog extends DialogFragment {
             empInfo.add(new HashMap<String, Object>() {{
                 put("pids", emp.getProjectIds());
             }});
-            empInfo.add(emp.getProjectIds().size() != 0);
+            empInfo.add(emp.isSelected);
             empInfo.add(emp.isManager);
             Map<String, Object> empInfoMap = new HashMap<>();
             empInfoMap.put(emp.getId(), empInfo);
             batch.update(EMPLOYEE_OVERVIEW_REF, empInfoMap);
-            batch.update(EMPLOYEE_COL.document(emp.getId()), "managerID", (emp.getProjectIds().size() == 0) ? null : emp.getManagerID(), "projectIds", emp.getProjectIds());
-            EMPLOYEE_GROSS_SALARY_COL.document(emp.getId()).get().addOnSuccessListener(doc -> {
-                if (!doc.exists())
-                    return;
-                EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
-                employeesGrossSalary.getAllTypes().removeIf(x -> x.getProjectId().equals(project.getId()));
-                db.document(doc.getReference().getPath()).update("allTypes", employeesGrossSalary.getAllTypes());
-                employeesGrossSalary.getAllTypes().removeIf(x -> x.getType() == AllowancesEnum.NETSALARY.ordinal());
-                EMPLOYEE_GROSS_SALARY_COL.document(emp.getId()).collection(year).document(month).update("baseAllowances", employeesGrossSalary.getAllTypes());
-            });
-            if (ADMIN.equals(emp.getManagerID()))
-                removeManagerDetails(unSavedProjectManager);
+            batch.update(EMPLOYEE_COL.document(emp.getId()), "managerID", emp.getManagerID(), "projectIds", emp.getProjectIds());
         });
 
 

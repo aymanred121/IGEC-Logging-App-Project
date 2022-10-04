@@ -20,7 +20,7 @@ public class Project {
     private double lng, lat;
     private double area;
     private int hours;
-    private ArrayList<EmployeeOverview> employees;
+    private ArrayList<EmployeeOverview> employees = new ArrayList<>();
     private HashMap<String, Object> employeeWorkedTime = new HashMap<>();
     private HashMap<String, Object> machineWorkedTime = new HashMap<>();
 
@@ -31,7 +31,27 @@ public class Project {
     public void setEmployeeWorkedTime(HashMap<String, Object> employeeWorkedTime) {
         this.employeeWorkedTime = employeeWorkedTime;
     }
-
+    public Project(Project p){
+        this.managerID = p.getManagerID();
+        this.managerName = p.getManagerName();
+        this.name = p.getName();
+        this.id = p.getId();
+        this.reference = p.getReference();
+        this.locationCity = p.getLocationCity();
+        this.locationArea = p.getLocationArea();
+        this.locationStreet = p.getLocationStreet();
+        this.contractType = p.getContractType();
+        this.allowancesList.addAll(p.getAllowancesList());
+        this.client = p.getClient();
+        this.startDate = p.getStartDate();
+        this.lat = p.getLat();
+        this.lng = p.getLng();
+        this.area = p.getArea();
+        this.hours = p.getHours();
+        this.employees.addAll(p.getEmployees());
+        this.employeeWorkedTime = p.getEmployeeWorkedTime();
+        this.machineWorkedTime = p.getMachineWorkedTime();
+    }
     public Project() {
     }
 

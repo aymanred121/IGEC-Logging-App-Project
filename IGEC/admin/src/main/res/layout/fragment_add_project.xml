@@ -251,6 +251,7 @@
         android:layout_marginTop="@dimen/mid"
         android:layout_marginEnd="@dimen/vhigh"
         app:boxBackgroundMode="outline"
+        app:endIconMode="clear_text"
         app:helperTextEnabled="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -263,7 +264,8 @@
             android:hint="@string/hours"
             android:inputType="number"
             android:padding="14dp"
-            android:singleLine="true" />
+            android:singleLine="true"
+            android:text="@string/default_hours" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -285,8 +287,8 @@
             android:id="@+id/manager_name_edit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/manager"
             android:enabled="false"
+            android:hint="@string/manager"
             android:inputType="none"
             android:padding="14dp"
             android:singleLine="true" />

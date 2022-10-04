@@ -243,7 +243,7 @@ public class AddProjectFragment extends Fragment {
                 , Double.parseDouble(lng)
                 , binding.contractTypeAuto.getText().toString()
                 , Double.parseDouble(binding.projectAreaEdit.getText().toString()));
-
+        newProject.setHours(Integer.parseInt(binding.hoursEdit.getText().toString()));
         newProject.setId(PID);
         newProject.setClient(binding.officeWorkCheckbox.isChecked() ? null : client);
         newProject.getAllowancesList().addAll(allowances);

@@ -23,6 +23,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -65,7 +66,6 @@ public class ProjectFragmentDialog extends DialogFragment {
 
 
     // Vars
-    private String MID;
     private String lat, lng;
     private ArrayList<Allowance> allowances;
     long startDate;
@@ -235,15 +235,13 @@ public class ProjectFragmentDialog extends DialogFragment {
         binding.areaEdit.setText(project.getLocationArea());
         binding.cityEdit.setText(project.getLocationCity());
         binding.streetEdit.setText(project.getLocationStreet());
-        //TODO
-        // binding.hoursEdit.setText(project.getHours());
+        binding.hoursEdit.setText(project.getHours());
         startDate = project.getStartDate().getTime();
         vTimeDatePickerBuilder.setTitleText("Time");
         vTimeDatePicker = vTimeDatePickerBuilder.setSelection(startDate).build();
         binding.dateEdit.setText(String.format("%s", convertDateToString(startDate)));
         lat = String.valueOf(project.getLat());
         lng = String.valueOf(project.getLng());
-//        getEmployees();
         ArrayList<String> contract = new ArrayList<>();
         contract.add("lump sum");
         contract.add("timesheet");

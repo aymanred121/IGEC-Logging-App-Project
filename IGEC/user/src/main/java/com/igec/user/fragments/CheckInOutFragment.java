@@ -158,6 +158,14 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
             getLocationPermissions();
         }
         //todo disable checkinbtn if from_home
+        updateDate();
+        SUMMARY_COL.document(id).collection(year + "-" + month).document(day).get().addOnSuccessListener(doc->{
+           if(!doc.exists()) return;
+           Summary summary = doc.toObject(Summary.class);
+           if(summary.getCheckInLocation().equals(CHECK_IN_FROM_HOME)){
+               //disable check-In btn
+           }
+        });
         binding.greetingText.setText(String.format("%s\n%s", getString(R.string.good_morning), currEmployee.getFirstName()));
         LocationServices.getFusedLocationProviderClient(getActivity());
     }
@@ -366,7 +374,8 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                     && !project.getReference().equals("-99999")
                             ) {
                                 //add the site allowance
-                                EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId()) //continue the expression
+                                EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId())
+                                        .collection(year).document(month)
                                         .update("allTypes",FieldValue.arrayUnion(project.getAllowancesList()));
 
                             }

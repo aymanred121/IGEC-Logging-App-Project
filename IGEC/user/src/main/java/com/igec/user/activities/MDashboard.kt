@@ -185,69 +185,79 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
 
 
         //check if their is new transfer request
-        CONSTANTS.TRANSFER_REQUESTS_COL.whereEqualTo("oldProjectId", currManager!!.projectID)
-            .whereEqualTo("seenByOld", false)
-            .addSnapshotListener { values, error ->
-                run {
-                    if (error != null) {
-                        Log.w("listen error", error.toString())
-                        return@run
-                    }
-                    for (document in values!!.documents) {
-                        val transferRequest = document.toObject(TransferRequests::class.java)
-                        val msg =
-                            "A Transfer Request for ${transferRequest!!.employee.firstName} to ${transferRequest.newProjectName}"
-                        transferRequestNotification = setupNotification(
-                            "New Transfer Request",
-                            msg,
-                            R.drawable.ic_baseline_mail_24,
-                            TRANSFER_REQUEST_CHANNEL_ID
-                        )
+        currManager!!.projectIds.forEach { projectID ->
+            CONSTANTS.TRANSFER_REQUESTS_COL.whereEqualTo("oldProjectId", projectID)
+                .whereEqualTo("seenByOld", false)
+                .addSnapshotListener { values, error ->
+                    run {
+                        if (error != null) {
+                            Log.w("listen error", error.toString())
+                            return@run
+                        }
+                        for (document in values!!.documents) {
+                            val transferRequest = document.toObject(TransferRequests::class.java)
+                            val msg =
+                                "A Transfer Request for ${transferRequest!!.employee.firstName} to ${transferRequest.newProjectName}"
+                            transferRequestNotification = setupNotification(
+                                "New Transfer Request",
+                                msg,
+                                R.drawable.ic_baseline_mail_24,
+                                TRANSFER_REQUEST_CHANNEL_ID
+                            )
 
-                        notificationManager.notify(
-                            TRANSFER_REQUEST_NOTIFICATION_ID++,
-                            transferRequestNotification
-                        )
+                            notificationManager.notify(
+                                TRANSFER_REQUEST_NOTIFICATION_ID++,
+                                transferRequestNotification
+                            )
 
-                        CONSTANTS.TRANSFER_REQUESTS_COL.document(document.id)
-                            .update("seenByOld", true)
-                    }
-                }
-            }
-        //check transfer request status
-        CONSTANTS.TRANSFER_REQUESTS_COL.whereEqualTo("newProjectId", currManager!!.projectID)
-            .whereEqualTo("seenByNew", false)
-            .addSnapshotListener { values, error ->
-                run {
-                    if (error != null) {
-                        Log.w("listen error", error.toString())
-                        return@run
-                    }
-                    for (document in values!!.documents) {
-                        if ((document.toObject(TransferRequests::class.java)!!.transferStatus == -1))
-                            continue
-                        val msg =
-                            if (document.toObject(TransferRequests::class.java)!!.transferStatus == 0)
-                                "Transfer Request for Employee ${document.toObject(TransferRequests::class.java)!!.employee.firstName} was rejected"
-                            else
-                                "Transfer Request for Employee ${document.toObject(TransferRequests::class.java)!!.employee.firstName} was accepted"
-                        transferStatusNotification = setupNotification(
-                            "Transfer Request Status",
-                            msg,
-                            R.drawable.ic_baseline_mail_24,
-                            TRANSFER_STATUS_CHANNEL_ID
-                        )
-
-                        notificationManager.notify(
-                            TRANSFER_STATUS_NOTIFICATION_ID++,
-                            transferStatusNotification
-                        )
-
-                        CONSTANTS.TRANSFER_REQUESTS_COL.document(document.id)
-                            .update("seenByNew", true)
+                            CONSTANTS.TRANSFER_REQUESTS_COL.document(document.id)
+                                .update("seenByOld", true)
+                        }
                     }
                 }
-            }
+            //check transfer request status
+            CONSTANTS.TRANSFER_REQUESTS_COL.whereEqualTo("newProjectId", projectID)
+                .whereEqualTo("seenByNew", false)
+                .addSnapshotListener { values, error ->
+                    run {
+                        if (error != null) {
+                            Log.w("listen error", error.toString())
+                            return@run
+                        }
+                        for (document in values!!.documents) {
+                            if ((document.toObject(TransferRequests::class.java)!!.transferStatus == -1))
+                                continue
+                            val msg =
+                                if (document.toObject(TransferRequests::class.java)!!.transferStatus == 0)
+                                    "Transfer Request for Employee ${
+                                        document.toObject(
+                                            TransferRequests::class.java
+                                        )!!.employee.firstName
+                                    } was rejected"
+                                else
+                                    "Transfer Request for Employee ${
+                                        document.toObject(
+                                            TransferRequests::class.java
+                                        )!!.employee.firstName
+                                    } was accepted"
+                            transferStatusNotification = setupNotification(
+                                "Transfer Request Status",
+                                msg,
+                                R.drawable.ic_baseline_mail_24,
+                                TRANSFER_STATUS_CHANNEL_ID
+                            )
+
+                            notificationManager.notify(
+                                TRANSFER_STATUS_NOTIFICATION_ID++,
+                                transferStatusNotification
+                            )
+
+                            CONSTANTS.TRANSFER_REQUESTS_COL.document(document.id)
+                                .update("seenByNew", true)
+                        }
+                    }
+                }
+        }
     }
 
     private fun createNotificationChannel(CHANNEL_ID: String, channelName: Int, channelDesc: Int) {

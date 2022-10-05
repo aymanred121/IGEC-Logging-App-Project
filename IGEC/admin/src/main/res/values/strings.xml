@@ -96,6 +96,7 @@
     <string name="hours">Hours</string>
     <string name="employees">Employees</string>
     <string name="hours_limit">Are you sure you want to set %s hours</string>
+    <string name="hours_limit_change">Are you sure you want to change hours from %s to %s</string>
     <string name="default_hours">8</string>
 
 </resources>

@@ -111,8 +111,8 @@ public class ProjectEmployeesDialog extends DialogFragment {
             empInfo.add(employee.getLastName());
             empInfo.add(employee.getTitle());
             empInfo.add(employee.getManagerID());
-            empInfo.add(new HashMap<String,Object>(){{
-                put("pids",employee.getProjectIds());
+            empInfo.add(new HashMap<String, Object>() {{
+                put("pids", employee.getProjectIds());
             }});
             empInfo.add(savedTeamMembersIds.contains(employee.getId()));
             empInfo.add(false);
@@ -163,8 +163,8 @@ public class ProjectEmployeesDialog extends DialogFragment {
             String firstName = (String) (empMap.get(key)).get(0);
             String lastName = (String) empMap.get(key).get(1);
             String title = (String) empMap.get(key).get(2);
-            String managerID =(String) empMap.get(key).get(3);
-            ArrayList<String> projectIds =(ArrayList<String>)((HashMap) empMap.get(key).get(4)).get("pids");
+            String managerID = (String) empMap.get(key).get(3);
+            ArrayList<String> projectIds = (ArrayList<String>) ((HashMap) empMap.get(key).get(4)).get("pids");
             boolean isSelected = (Boolean) empMap.get(key).get(5);
             boolean isManager = (Boolean) empMap.get(key).get(6);
             boolean matchDb = (unSavedTeamMembersIds.contains(id) == isSelected);
@@ -201,8 +201,8 @@ public class ProjectEmployeesDialog extends DialogFragment {
         empInfo.add(employees.get(position).getLastName());
         empInfo.add(employees.get(position).getTitle());
         empInfo.add(employees.get(position).getManagerID());
-        empInfo.add(new HashMap<String,Object>(){{
-            put("pids",employees.get(position).getProjectIds());
+        empInfo.add(new HashMap<String, Object>() {{
+            put("pids", employees.get(position).getProjectIds());
         }});
         if (employees.get(position).isSelected) {
             // add to team and team ids
@@ -219,7 +219,8 @@ public class ProjectEmployeesDialog extends DialogFragment {
         }
         empInfo.add(false);
         empInfoMap.put(employees.get(position).getId(), empInfo);
-        EMPLOYEE_OVERVIEW_REF.update(empInfoMap);
+        if (employees.get(position).getManagerID() == null)
+            EMPLOYEE_OVERVIEW_REF.update(empInfoMap);
     };
     private View.OnClickListener saveListener = v -> {
         save = true;

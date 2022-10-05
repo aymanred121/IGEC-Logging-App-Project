@@ -180,7 +180,31 @@ public class ProjectFragmentDialog extends DialogFragment {
         super.onDestroy();
         int parent = getParentFragmentManager().getFragments().size() - 1;
         ((ProjectsFragment) getParentFragmentManager().getFragments().get(parent)).setOpened(false);
+        clearTeam();
         binding = null;
+    }
+
+    private void clearTeam() {
+        Map<String, Object> empInfoMap = new HashMap<>();
+        for (EmployeeOverview employee : team) {
+            if (employee.getManagerID() != null)
+                continue;
+            employee.isSelected = false;
+            ArrayList<Object> empInfo = new ArrayList<>();
+            empInfo.add(employee.getFirstName());
+            empInfo.add(employee.getLastName());
+            empInfo.add(employee.getTitle());
+            empInfo.add(employee.getManagerID());
+            empInfo.add(new HashMap<String, Object>() {{
+                put("pids", employee.getProjectIds());
+            }});
+            empInfo.add(employee.isSelected);
+            empInfo.add(false); // isManager
+            empInfoMap.put(employee.getId(), empInfo);
+            EMPLOYEE_OVERVIEW_REF.update(empInfoMap);
+        }
+        team.clear();
+        projectManager = null;
     }
 
     @Override
@@ -247,7 +271,7 @@ public class ProjectFragmentDialog extends DialogFragment {
         allowances.addAll(project.getAllowancesList());
         client = project.getClient();
         binding.nameEdit.setText(project.getName());
-        binding.managerNameEdit.setText(project.getManagerName());
+        binding.managerNameEdit.setText(String.format("%s - %s", project.getManagerID(), project.getManagerName()));
         binding.projectAreaEdit.setText(String.valueOf((long) project.getArea()));
         binding.contractTypeAuto.setText(project.getContractType());
         binding.contractTypeLayout.setEnabled(true);
@@ -447,7 +471,7 @@ public class ProjectFragmentDialog extends DialogFragment {
 
     void updateProject() {
         updateEmployeesDetails();
-        Project newProject = new Project(binding.managerNameEdit.getText().toString()
+        Project newProject = new Project(projectManager.getFirstName() + projectManager.getLastName()
                 , projectManager.getId()
                 , binding.nameEdit.getText().toString()
                 , new Date(startDate)
@@ -674,16 +698,20 @@ public class ProjectFragmentDialog extends DialogFragment {
     private final View.OnClickListener clUpdate = v -> {
         if (validateInputs()) {
             binding.updateButton.setEnabled(false);
-            MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
-            builder.setTitle(getString(R.string.hours))
-                    .setMessage(getString(R.string.hours_limit, binding.hoursEdit.getText().toString()))
-                    .setNegativeButton(getString(R.string.no), (dialogInterface, i) -> {
-                        binding.updateButton.setEnabled(true);
-                    })
-                    .setPositiveButton(getString(R.string.yes), (dialogInterface, i) -> {
-                        updateProject();
-                    })
-                    .show();
+            if (project.getHours() != Integer.parseInt(binding.hoursEdit.getText().toString())) {
+                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
+                builder.setTitle(getString(R.string.hours))
+                        .setMessage(getString(R.string.hours_limit_change, String.valueOf(project.getHours()), binding.hoursEdit.getText().toString()))
+                        .setNegativeButton(getString(R.string.no), (dialogInterface, i) -> {
+                            binding.updateButton.setEnabled(true);
+                        })
+                        .setPositiveButton(getString(R.string.yes), (dialogInterface, i) -> {
+                            updateProject();
+                        })
+                        .show();
+            } else {
+                updateProject();
+            }
         }
     };
     private final View.OnClickListener clDelete = v -> {

@@ -91,6 +91,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         SUPPORT,
         OUTSIDE
     }
+
     CheckInType checkInType = CheckInType.HOME;
 
     public static CheckInOutFragment newInstance(Employee user) {
@@ -172,6 +173,8 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
             if (summary.getCheckInLocation().equals(CHECK_IN_FROM_HOME)) {
                 //disable check-In btn
                 binding.checkInOutFab.setEnabled(false);
+                binding.checkInOutFab.setText("HOME");
+                binding.checkInOutFab.setBackgroundColor(Color.GRAY);
             }
         });
         binding.greetingText.setText(String.format("%s\n%s", getString(R.string.good_morning), currEmployee.getFirstName()));
@@ -330,10 +333,13 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                             updateEmployeeSummary(latitude, longitude, new Project());
                                             updateCheckInOutBtn();
                                             binding.checkInOutFab.setEnabled(false);
+                                            binding.checkInOutFab.setText("HOME");
+                                            binding.checkInOutFab.setBackgroundColor(Color.GRAY);
                                             Snackbar.make(binding.getRoot(), "You are at home", Snackbar.LENGTH_INDEFINITE).show();
                                             break;
                                         case OUTSIDE:
                                             Snackbar.make(binding.getRoot(), "You are trying to checkIn from another site", Snackbar.LENGTH_SHORT).show();
+                                            binding.checkInOutFab.setEnabled(true);
                                             break;
                                     }
                                     return null;

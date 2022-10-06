@@ -71,7 +71,7 @@ class LauncherActivity : Activity() {
                     finish()
                 }
         }
-        }, 2000)
+        }, 0)
     }
 
     override fun onResume() {

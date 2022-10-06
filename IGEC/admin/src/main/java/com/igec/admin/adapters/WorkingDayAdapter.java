@@ -77,7 +77,7 @@ public class WorkingDayAdapter extends RecyclerView.Adapter<WorkingDayAdapter.Da
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        holder.vHours.setText(String.format("%.2f %s", workingDay.getHours(), workingDay.getHours() > 1 ? "Hours" : "Hour"));
+        holder.vHours.setText(String.format("%.2f %s", workingDay.getHours(), workingDay.getHours().size() > 1 ? "Hours" : "Hour"));
         holder.vType_text.setText(workingDay.getType());
         switch (workingDay.getType()) {
             case CHECK_IN_FROM_HOME:

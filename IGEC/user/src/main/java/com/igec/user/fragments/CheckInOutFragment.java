@@ -40,6 +40,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
@@ -83,16 +84,18 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     private Machine currMachine;
     private String machineEmpId;
     private String year, month, day;
+    private String lastProjectId;
 
     private enum CheckInType {
         HOME,
         OFFICE,
         SITE,
         SUPPORT,
-        OUTSIDE
+        OUTSIDE,
+        NONE
     }
 
-    CheckInType checkInType = CheckInType.HOME;
+    CheckInType checkInType = CheckInType.NONE;
 
     public static CheckInOutFragment newInstance(Employee user) {
         Bundle args = new Bundle();
@@ -197,7 +200,9 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                         isHere = value.getData().get("checkOut") == null;
                     }
                     Summary summary = value.toObject(Summary.class);
-                    if (summary != null && summary.getCheckInLocation().equals(CHECK_IN_FROM_HOME)) {
+                    lastProjectId = summary != null ? summary.getLastProjectId() : null;
+                    //need project id
+                    if (summary != null && summary.getProjectIds().containsKey("HOME")) {
                         //disable check-In btn
                         binding.checkInOutFab.setEnabled(false);
                         binding.checkInOutFab.setText("HOME");
@@ -264,11 +269,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     }
 
     // Listeners
-    //TODO
-    // employees can only check in/out from one place (site-home-office)
-    // if employee or manager checked out from any site or office he can't check in from home
-    // if manager checked to his sites or as a support he gets allowances for that only if he didn't check from that place before
-    @SuppressLint("MissingPermission")
+   @SuppressLint("MissingPermission")
     private final View.OnClickListener oclCheckInOut = v -> {
         binding.checkInOutFab.setEnabled(false);
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
@@ -293,12 +294,10 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                     longitude = location.getLongitude();
                                     latitude = location.getLatitude();
                                     for (Project project : projects) {
-//                                        if (!(project.getReference().equals("-99999")
-//                                                || currEmployee.getProjectIds().contains(project.getId())
-//                                                || currEmployee.isManager())) {
-//
-//                                            continue;
-//                                        }
+                                        if ((lastProjectId != null && !project.getId().equals(lastProjectId))) {
+                                            checkInType = CheckInType.NONE;
+                                            continue;
+                                        }
                                         double distance;
                                         float[] results = new float[3];
                                         Location.distanceBetween(latitude, longitude, project.getLat(), project.getLng(), results);
@@ -321,6 +320,10 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                         break;
                                     }
                                     switch (checkInType) {
+                                        case NONE:
+                                            Snackbar.make(binding.getRoot(), "You are trying to checkout from another site", Snackbar.LENGTH_SHORT).show();
+                                            binding.checkInOutFab.setEnabled(true);
+                                            break;
                                         case SITE:
                                             Snackbar.make(binding.getRoot(), "You are in the site", Snackbar.LENGTH_SHORT).show();
                                             break;
@@ -332,10 +335,6 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                             break;
                                         case HOME:
                                             updateEmployeeSummary(latitude, longitude, new Project());
-                                            binding.checkInOutFab.setEnabled(false);
-                                            binding.checkInOutFab.setText("HOME");
-                                            binding.checkInOutFab.setBackgroundColor(Color.GRAY);
-                                            Snackbar.make(binding.getRoot(), "You are at home", Snackbar.LENGTH_SHORT).show();
                                             break;
                                         case OUTSIDE:
                                             Snackbar.make(binding.getRoot(), "You are trying to checkIn from another site", Snackbar.LENGTH_SHORT).show();
@@ -380,61 +379,108 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                     if (!documentSnapshot.exists() || documentSnapshot.getData().size() == 0) {
                         //check in
                         employeeCheckIn(summary, project);
+                        if (checkInType == CheckInType.HOME) {
+                            employeeCheckOut(summary, checkOutDetails, "HOME");
+                            binding.checkInOutFab.setEnabled(false);
+                            binding.checkInOutFab.setText("HOME");
+                            binding.checkInOutFab.setBackgroundColor(Color.GRAY);
+                            Snackbar.make(binding.getRoot(), "You are at home", Snackbar.LENGTH_SHORT).show();
+                        }
                     } else {
                         Summary summary1 = documentSnapshot.toObject(Summary.class);
                         if (summary1.getCheckOut() == null) {
                             //check out
-                            employeeCheckOut(summary1, checkOutDetails);
+                            employeeCheckOut(summary1, checkOutDetails, project.getId());
                         } else {
                             //re check in
-                            summary1.setLastCheckInTime(Timestamp.now());
-                            if (!summary1.getProjectIds().contains(project.getId()))
-                                summary1.getProjectIds().add(project.getId());
-
-                            if (checkInType == CheckInType.SUPPORT
-                                    && summary1.getCheckInLocation().equals(CHECK_IN_FROM_OFFICE)) {
-                                ArrayList<Allowance> projectAllowances = new ArrayList<>();
-                                projectAllowances.addAll(project.getAllowancesList());
-                                projectAllowances.forEach(allowance -> {
-                                    allowance.setNote(day);
-                                });
-                                //add the site allowance
-                                EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId())
-                                        .collection(year).document(month)
-                                        .update("allTypes", FieldValue.arrayUnion(projectAllowances));
+                            if (project.getId() != null) {
+                                employeeReCheckIn(summary1, project, documentSnapshot);
+                                return;
                             }
-                            switch (checkInType) {
-                                case SITE:
-                                    summary1.setCheckInLocation(CHECK_IN_FROM_SITE);
-                                    break;
-                                case SUPPORT:
-                                    summary1.setCheckInLocation(CHECK_IN_FROM_SUPPORT);
-                                    break;
-                                case HOME:
-                                    summary1.setCheckInLocation(CHECK_IN_FROM_HOME);
-                                    break;
-                                case OFFICE:
-                                    summary1.setCheckInLocation(CHECK_IN_FROM_OFFICE);
-                                    break;
-                            }
-                            db.document(documentSnapshot.getReference().getPath()).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null, "projectIds", summary1.getProjectIds());
-                            Snackbar.make(binding.getRoot(), "Checked In successfully!", Toast.LENGTH_SHORT).show();
-                            binding.checkInOutFab.setEnabled(true);
+                            Snackbar.make(binding.getRoot(), "You are trying to re checkIn from home", Snackbar.LENGTH_SHORT).show();
                         }
                     }
                 });
     }
 
-    private void employeeCheckOut(Summary summary, HashMap<String, Object> checkOut) {
+    private void employeeReCheckIn(Summary summary, Project project, DocumentSnapshot documentSnapshot) {
+        summary.setLastCheckInTime(Timestamp.now());
+        if (currEmployee.isManager() && (checkInType == CheckInType.SUPPORT || checkInType == CheckInType.SITE) && !summary.getProjectIds().containsKey(project.getId())) {
+            ArrayList<Allowance> projectAllowances = new ArrayList<>();
+            projectAllowances.addAll(project.getAllowancesList());
+            projectAllowances.forEach(allowance -> {
+                allowance.setNote(day);
+            });
+            EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId()).get().addOnSuccessListener(doc->{
+                if(!doc.exists())return;
+                EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
+                ArrayList<Allowance> allTypes = new ArrayList<>();
+                ArrayList<Allowance> baseAllowances = new ArrayList<>();
+                allTypes.addAll(projectAllowances);
+                employeesGrossSalary.getAllTypes().forEach(al->{
+                    if(al.getType()==AllowancesEnum.NETSALARY.ordinal())
+                        allTypes.add(al);
+                    else{
+                        baseAllowances.add(al);
+                    }
+                });
+                EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId())
+                        .collection(year).document(month).get().addOnSuccessListener(doc1->{
+                            EmployeesGrossSalary employeesGrossSalary1 = new EmployeesGrossSalary();
+                            if(!doc1.exists()){
+                                //new month
+                                employeesGrossSalary1.setEmployeeId(employeesGrossSalary.getEmployeeId());
+                                employeesGrossSalary1.setBaseAllowances(baseAllowances);
+                                employeesGrossSalary1.setAllTypes(allTypes);
+                            }else{
+                                 employeesGrossSalary1 = doc1.toObject(EmployeesGrossSalary.class);
+                                employeesGrossSalary1.getAllTypes().addAll(projectAllowances);
+                            }
+                            EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId())
+                                    .collection(year).document(month).set(employeesGrossSalary1, SetOptions.merge());
+                        });
+            });
+        }
+        if (!summary.getProjectIds().keySet().contains(project.getId())) {
+            switch (checkInType) {
+                case SITE:
+                    summary.getProjectIds().put(project.getId(), CHECK_IN_FROM_SITE);
+                    break;
+                case SUPPORT:
+                    summary.getProjectIds().put(project.getId(), CHECK_IN_FROM_SUPPORT);
+                    break;
+                case HOME:
+                    summary.getProjectIds().put("HOME", CHECK_IN_FROM_HOME);
+                    break;
+                case OFFICE:
+                    summary.getProjectIds().put(project.getId(), CHECK_IN_FROM_OFFICE);
+                    break;
+            }
+        }
+
+        lastProjectId = project.getId();
+        db.document(documentSnapshot.getReference().getPath()).update("lastCheckInTime", summary.getLastCheckInTime(),
+                "checkOut", null,
+                "projectIds", summary.getProjectIds(),
+                "lastProjectId", project.getId());
+        Snackbar.make(binding.getRoot(), "Checked In successfully!", Toast.LENGTH_SHORT).show();
+        binding.checkInOutFab.setEnabled(true);
+    }
+
+    private void employeeCheckOut(Summary summary, HashMap<String, Object> checkOut, String projectId) {
         updateDate();
         long checkInTime = (summary.getLastCheckInTime()).getSeconds();
         long checkOutTime = Timestamp.now().getSeconds();
         long workingTime = (checkOutTime - checkInTime);
 //        //check if working time is greater than 8 hrs
         summary.setCheckOut(checkOut);
-        summary.setWorkedTime(FieldValue.increment(workingTime));
+        summary.setWorkingTime(new HashMap<String, Object>() {{
+            put(projectId, FieldValue.increment(workingTime));
+        }});
+        summary.setLastProjectId(null);
+        lastProjectId = null;
         SUMMARY_COL.document(id).collection(year + "-" + month).document(day)
-                .update("checkOut", checkOut, "workingTime", FieldValue.increment(workingTime))
+                .update("lastProjectId", null, "checkOut", checkOut, "workingTime." + projectId, FieldValue.increment(workingTime))
                 .addOnSuccessListener(unused -> {
                     //todo uncomment those lines when needed to calculate overTime
 //                    SUMMARY_COL
@@ -494,25 +540,36 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         checkInDetails.put("Time", Timestamp.now());
         HashMap<String, Object> checkIn = new HashMap<>();
         checkIn.put("checkIn", checkInDetails);
-        checkIn.put("projectIds", FieldValue.arrayUnion(project.getId()));
         checkIn.put("lastCheckInTime", summary.getLastCheckInTime());
+        checkIn.put("lastProjectId", project.getId());
+        lastProjectId = project.getId();
         switch (checkInType) {
             case HOME:
-                checkIn.put("checkInLocation", CHECK_IN_FROM_HOME);
+                checkIn.put("projectIds", new HashMap<String, String>() {{
+                    put("HOME", CHECK_IN_FROM_HOME);
+                }});
                 SUMMARY_COL.document(id).collection(year + "-" + month).document(day).set(checkIn);
                 return;
             case SITE:
-                checkIn.put("checkInLocation", CHECK_IN_FROM_SITE);
+                checkIn.put("projectIds", new HashMap<String, String>() {{
+                    put(project.getId(), CHECK_IN_FROM_SITE);
+                }});
                 break;
             case OFFICE:
-                checkIn.put("checkInLocation", CHECK_IN_FROM_OFFICE);
+                checkIn.put("projectIds", new HashMap<String, String>() {{
+                    put(project.getId(), CHECK_IN_FROM_OFFICE);
+                }});
                 SUMMARY_COL.document(id).collection(year + "-" + month).document(day).set(checkIn);
                 return;
             case SUPPORT:
-                checkIn.put("checkInLocation", CHECK_IN_FROM_SUPPORT);
+                checkIn.put("projectIds", new HashMap<String, String>() {{
+                    put(project.getId(), CHECK_IN_FROM_SUPPORT);
+                }});
                 break;
         }
-        SUMMARY_COL.document(id).collection(year + "-" + month).document(day).set(checkIn);
+
+
+        SUMMARY_COL.document(id).collection(year + "-" + month).document(day).set(checkIn, SetOptions.merge());
 
         EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId()).collection(year).document(month).get().addOnSuccessListener(doc -> {
             if (!doc.exists()) {

@@ -5,7 +5,6 @@ import com.firebase.geofire.GeoLocation;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.Exclude;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Summary {
@@ -17,12 +16,12 @@ public class Summary {
     private HashMap<String, Object> geoMap = new HashMap<>();
     private HashMap<String, Object> checkIn;
     private HashMap<String, Object> checkOut;
-    private Object workedTime;
     private Employee employee;
+    private HashMap<String,Object> WorkingTime;
     private Timestamp lastCheckInTime;
     private String lastDayPath;
-    private String checkInLocation;
-    private ArrayList<String> projectIds = new ArrayList<>();
+    private String lastProjectId;
+    private HashMap<String, String> projectIds = new HashMap<>();
 
     public Employee getEmployee() {
         return employee;
@@ -48,13 +47,6 @@ public class Summary {
         this.checkOut = checkOut;
     }
 
-    public String getCheckInLocation() {
-        return checkInLocation;
-    }
-
-    public void setCheckInLocation(String checkInLocation) {
-        this.checkInLocation = checkInLocation;
-    }
 
     public Summary() {
     }
@@ -66,6 +58,14 @@ public class Summary {
         geoMap.put("geohash", geoHash);
         geoMap.put("lat", lat);
         geoMap.put("lng", lng);
+    }
+
+    public HashMap<String, Object> getWorkingTime() {
+        return WorkingTime;
+    }
+
+    public void setWorkingTime(HashMap<String, Object> workingTime) {
+        WorkingTime = workingTime;
     }
 
     @Exclude
@@ -108,13 +108,6 @@ public class Summary {
         this.geoMap = geoMap;
     }
 
-    public Object getWorkedTime() {
-        return workedTime;
-    }
-
-    public void setWorkedTime(Object workedTime) {
-        this.workedTime = workedTime;
-    }
 
     public Timestamp getLastCheckInTime() {
         return lastCheckInTime;
@@ -132,11 +125,19 @@ public class Summary {
         this.lastDayPath = lastDayPath;
     }
 
-    public ArrayList<String> getProjectIds() {
+    public HashMap<String, String> getProjectIds() {
         return projectIds;
     }
 
-    public void setProjectIds(ArrayList<String> projectIds) {
+    public void setProjectIds(HashMap<String, String> projectIds) {
         this.projectIds = projectIds;
+    }
+
+    public String getLastProjectId() {
+        return lastProjectId;
+    }
+
+    public void setLastProjectId(String lastProjectId) {
+        this.lastProjectId = lastProjectId;
     }
 }

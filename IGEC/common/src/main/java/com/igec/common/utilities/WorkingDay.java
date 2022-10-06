@@ -3,17 +3,18 @@ package com.igec.common.utilities;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 
 public class WorkingDay {
     private String day;
     private String month, year;
-    private double hours;
+    private HashMap<String,Double> hours;
     private String name,empName;
     private LocationDetails checkIn, checkOut;
     private String projectName,projectLocation;
     private String type;
 
-    public WorkingDay(String day, String month, String year, double hours, String empName, LocationDetails checkIn, LocationDetails checkOut, String name, String projectName, String projectLocation) {
+    public WorkingDay(String day, String month, String year, HashMap<String,Double> hours, String empName , LocationDetails checkIn, LocationDetails checkOut, String projectName,String projectLocation,String type)    {
         this.day = day;
         this.hours = hours;
         this.month = month;
@@ -23,15 +24,13 @@ public class WorkingDay {
         this.checkOut = checkOut;
         this.projectName = projectName;
         this.projectLocation = projectLocation;
+        this.type = type;
     }
 
     public String getDay() {
         return day;
     }
 
-    public double getHours() {
-        return hours;
-    }
 
     public String getEmpName() {
         return empName;
@@ -59,10 +58,6 @@ public class WorkingDay {
 
     public void setYear(String year) {
         this.year = year;
-    }
-
-    public void setHours(double hours) {
-        this.hours = hours;
     }
 
     public void setName(String name) {
@@ -95,6 +90,14 @@ public class WorkingDay {
 
     public String getType() {
         return type;
+    }
+
+    public HashMap<String, Double> getHours() {
+        return hours;
+    }
+
+    public void setHours(HashMap<String, Double> hours) {
+        this.hours = hours;
     }
 
     public void setType(String type) {

@@ -322,10 +322,15 @@ public class AllowanceInfoDialog extends DialogFragment {
         public void afterTextChanged(Editable editable) {
             boolean isOther = binding.typeAuto.getText().toString().equals("Other");
             boolean isRetentionByDays = binding.typeAuto.getText().toString().equals("Retention by Days");
-            binding.mountLayout.setSuffixText(isRetentionByDays ? "Day(s)" : binding.currencyAuto.getText().toString());
+            binding.mountLayout.setSuffixText(isRetentionByDays ? "Day(s)" : "");
             binding.nameLayout.setVisibility(isOther ? View.VISIBLE : View.GONE);
             binding.currencyLayout.setVisibility(isRetentionByDays ? View.GONE : View.VISIBLE);
             binding.currencyAuto.setText(isRetentionByDays?baseCurrency:binding.currencyAuto.getText());
+            ArrayList<String> currencies = new ArrayList<>();
+            currencies.add("EGP");
+            currencies.add("SAR");
+            ArrayAdapter<String> currenciesAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, currencies);
+            binding.currencyAuto.setAdapter(currenciesAdapter);
             binding.nameEdit.setText("");
             hideError(binding.typeLayout);
         }

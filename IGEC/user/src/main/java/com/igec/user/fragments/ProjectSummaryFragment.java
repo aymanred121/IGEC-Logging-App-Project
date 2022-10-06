@@ -6,9 +6,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,6 +20,8 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.igec.user.R;
 import com.igec.user.activities.DateInaccurate;
 import com.igec.user.adapters.EmployeeAdapter;
 import com.igec.user.databinding.FragmentProjectSummaryBinding;
@@ -34,8 +40,11 @@ public class ProjectSummaryFragment extends Fragment {
     private RecyclerView.LayoutManager layoutManager;
     private ArrayList<EmployeeOverview> employeeOverviews;
     private Employee manager;
-    private Project project;
-    private ArrayList<Allowance> projectAllowance;
+    private Project selectedProject;
+    private ArrayList<Project> projects;
+    private ArrayAdapter<String> projectIdsAdapter;
+    private ArrayList<String> projectsRef;
+
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     public static ProjectSummaryFragment newInstance(Employee manager) {
@@ -65,11 +74,13 @@ public class ProjectSummaryFragment extends Fragment {
         super.onDestroy();
         binding = null;
     }
+
     @Override
     public void onResume() {
         super.onResume();
         validateDate(getActivity());
     }
+
     private void validateDate(Context c) {
         if (Settings.Global.getInt(c.getContentResolver(), Settings.Global.AUTO_TIME, 0) != 1) {
             Intent intent = new Intent(getActivity(), DateInaccurate.class);
@@ -77,6 +88,7 @@ public class ProjectSummaryFragment extends Fragment {
             getActivity().finish();
         }
     }
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -86,39 +98,67 @@ public class ProjectSummaryFragment extends Fragment {
 
     // Functions
     private void initialize() {
+        employeeOverviews = new ArrayList<>();
+        projects = new ArrayList<>();
+        projectsRef = new ArrayList<>();
+        binding.projectAuto.addTextChangedListener(twProject);
         manager = (Employee) getArguments().getSerializable("manager");
-        PROJECT_COL.document(manager.getProjectID()).addSnapshotListener((documentSnapshot, error) -> {
-            if (!documentSnapshot.exists())
+        PROJECT_COL.addSnapshotListener((queryDocumentSnapshots, error) -> {
+            if (queryDocumentSnapshots == null)
                 return;
-            project = documentSnapshot.toObject(Project.class);
-
-            employeeOverviews = new ArrayList<>();
-            employeeOverviews = project.getEmployees();
-            for (int i = 0; i < employeeOverviews.size(); i++) {
-                if (employeeOverviews.get(i).getId().equals(project.getManagerID())) {
-                    employeeOverviews.remove(i);
-                    break;
-                }
+            projects.clear();
+            projectsRef.clear();
+            for (DocumentSnapshot document : queryDocumentSnapshots.getDocuments()) {
+                Project project = document.toObject(Project.class);
+                if (!manager.getProjectIds().contains(project.getId()))
+                    continue;
+                projects.add(project);
+                projectsRef.add(String.format("IGEC%s | %s", project.getReference(), project.getName()));
             }
-            projectAllowance = new ArrayList<>();
-            projectAllowance.addAll(project.getAllowancesList());
+            projectIdsAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, projectsRef);
+            selectedProject = projects.get(0);
             binding.recyclerView.setHasFixedSize(true);
             layoutManager = new LinearLayoutManager(getActivity());
-            adapter = new EmployeeAdapter(employeeOverviews, project);
+            adapter = new EmployeeAdapter(employeeOverviews, selectedProject);
             binding.recyclerView.setLayoutManager(layoutManager);
             binding.recyclerView.setAdapter(adapter);
-            binding.projectNameEdit.setText(project.getName());
-            binding.projectReferenceEdit.setText(project.getReference());
             adapter.setOnItemClickListener(itemClickListener);
+            binding.projectAuto.setText(String.format("IGEC%s | %s", selectedProject.getReference(), selectedProject.getName()));
+            binding.projectAuto.setAdapter(projectIdsAdapter);
             binding.showProjectAllowancesButton.setOnClickListener(oclShowProjectAllowances);
         });
 
     }
 
+    private final TextWatcher twProject = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            for(Project p : projects){
+                if(String.format("IGEC%s | %s", p.getReference(), p.getName()).equals(editable.toString())){
+                    selectedProject = p;
+                    employeeOverviews.clear();
+                    employeeOverviews.addAll(p.getEmployees());
+                    employeeOverviews.removeIf(employeeOverview -> employeeOverview.isManager);
+                    Log.d("ProjectSummaryFragment", "initialize: " + employeeOverviews.size());
+                    adapter.notifyDataSetChanged();
+                }
+            }
+        }
+    };
     private final View.OnClickListener oclShowProjectAllowances = new View.OnClickListener() {
         @Override
         public void onClick(View view) {
-            AddAllowanceDialog employeeSummaryDialog = new AddAllowanceDialog(manager, (ArrayList<Allowance>) projectAllowance.clone(), false, true);
+            AddAllowanceDialog employeeSummaryDialog = new AddAllowanceDialog(selectedProject, false, true);
             employeeSummaryDialog.show(getParentFragmentManager(), "");
         }
     };

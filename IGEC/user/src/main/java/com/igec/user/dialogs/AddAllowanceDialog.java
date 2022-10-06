@@ -50,7 +50,6 @@ public class AddAllowanceDialog extends DialogFragment {
     private boolean isProject;
     private EmployeeOverview employee;
     private Project project;
-    private Employee manager;
     private String month, year;
     private Double baseSalary = (double) 0;
     private String currency;
@@ -58,12 +57,13 @@ public class AddAllowanceDialog extends DialogFragment {
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
     private ArrayList<ListenerRegistration> tasks = new ArrayList<>();
 
-    public AddAllowanceDialog(Employee manager, ArrayList<Allowance> allowances, boolean canGivePenalty, boolean canRemove) {
-        this.manager = manager;
+    public AddAllowanceDialog(Project project, boolean canGivePenalty, boolean canRemove) {
+        isProject = true;
+        this.project = new Project(project);
         this.canGivePenalty = canGivePenalty;
         this.canRemove = canRemove;
         this.allowances = new ArrayList<>();
-        allowances.forEach(allowance -> {
+        project.getAllowancesList().forEach(allowance -> {
             try {
                 this.allowances.add((Allowance) allowance.clone());
             } catch (CloneNotSupportedException e) {
@@ -73,6 +73,7 @@ public class AddAllowanceDialog extends DialogFragment {
     }
 
     public AddAllowanceDialog(EmployeeOverview employee, boolean canGivePenalty, boolean canRemove) {
+        isProject = false;
         this.employee = employee;
         this.canRemove = canRemove;
         this.canGivePenalty = canGivePenalty;
@@ -181,7 +182,6 @@ public class AddAllowanceDialog extends DialogFragment {
                 month = String.format("%02d", Integer.parseInt(month) + 1);
             }
         }
-        isProject = allowances != null;
         if (isProject) {
             adapter.setAllowances(allowances);
             binding.recyclerView.setAdapter(adapter);
@@ -261,27 +261,23 @@ public class AddAllowanceDialog extends DialogFragment {
             } else {
                 //Added projectId to each allowance that is coming from project
                 allowances.forEach(allowance -> {
-                    allowance.setProjectId(manager.getProjectID());
+                    allowance.setProjectId(project.getId());
                     allowance.setType(AllowancesEnum.PROJECT.ordinal());
                 });
-                PROJECT_COL.document(manager.getProjectID()).get().addOnSuccessListener(documentSnapshot -> {
-                    if (!documentSnapshot.exists())
-                        return;
-                    project = documentSnapshot.toObject(Project.class);
-                    ArrayList<Allowance> projectAllowances = allowances;
-                    project.setAllowancesList(projectAllowances);
-                    PROJECT_COL.document(manager.getProjectID()).update("allowancesList", project.getAllowancesList());
-                    for (EmployeeOverview employee : project.getEmployees()) {
-                        EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()).get().addOnSuccessListener((value) -> {
-                            if (!value.exists())
-                                return;
-                            EmployeesGrossSalary employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
-                            employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() == AllowancesEnum.PROJECT.ordinal() && allowance.getProjectId().equals(project.getId()));
-                            employeesGrossSalary.getAllTypes().addAll(projectAllowances);
-                            EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()).update("allTypes", employeesGrossSalary.getAllTypes());
-                            EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()).collection(year).document(month).get().addOnSuccessListener(doc -> {
-                                if (!doc.exists() || doc.getData().size() == 0) {
-                                    //new month
+                ArrayList<Allowance> projectAllowances = allowances;
+                project.setAllowancesList(projectAllowances);
+                PROJECT_COL.document(project.getId()).update("allowancesList", project.getAllowancesList());
+                for (EmployeeOverview employee : project.getEmployees()) {
+                    EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()).get().addOnSuccessListener((value) -> {
+                        if (!value.exists())
+                            return;
+                        EmployeesGrossSalary employeesGrossSalary = value.toObject(EmployeesGrossSalary.class);
+                        employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() == AllowancesEnum.PROJECT.ordinal() && allowance.getProjectId().equals(project.getId()));
+                        employeesGrossSalary.getAllTypes().addAll(projectAllowances);
+                        EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()).update("allTypes", employeesGrossSalary.getAllTypes());
+                        EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()).collection(year).document(month).get().addOnSuccessListener(doc -> {
+                            if (!doc.exists() || doc.getData().size() == 0) {
+                                //new month
 //                                    ArrayList<Allowance> allowanceArrayList = new ArrayList<>();
 //                                    for (Allowance allowance : employeesGrossSalary.getAllTypes()) {
 //                                        if (allowance.getType() == allowancesEnum.PROJECT.ordinal()) {
@@ -289,20 +285,19 @@ public class AddAllowanceDialog extends DialogFragment {
 //                                        }
 //                                    }
 //                                    employeesGrossSalary.setBaseAllowances(allowanceArrayList);
-                                    employeesGrossSalary.getBaseAllowances().addAll(projectAllowances);
-                                    employeesGrossSalary.getAllTypes().removeIf(x -> x.getType() == AllowancesEnum.PROJECT.ordinal());
-                                    EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()).collection(year).document(month).set(employeesGrossSalary, SetOptions.mergeFields("allTypes", "baseAllowances"));
-                                    return;
-                                }
-                                EmployeesGrossSalary employeesGrossSalary1 = doc.toObject(EmployeesGrossSalary.class);
-                                employeesGrossSalary1.getBaseAllowances().removeIf(x -> x.getType() == AllowancesEnum.PROJECT.ordinal() && x.getProjectId().equals(project.getId()));
-                                employeesGrossSalary1.getBaseAllowances().addAll(projectAllowances);
-                                db.document(doc.getReference().getPath()).update("baseAllowances", employeesGrossSalary1.getBaseAllowances());
-                            });
+                                employeesGrossSalary.getBaseAllowances().addAll(projectAllowances);
+                                employeesGrossSalary.getAllTypes().removeIf(x -> x.getType() == AllowancesEnum.PROJECT.ordinal());
+                                EMPLOYEE_GROSS_SALARY_COL.document(employee.getId()).collection(year).document(month).set(employeesGrossSalary, SetOptions.mergeFields("allTypes", "baseAllowances"));
+                                return;
+                            }
+                            EmployeesGrossSalary employeesGrossSalary1 = doc.toObject(EmployeesGrossSalary.class);
+                            employeesGrossSalary1.getBaseAllowances().removeIf(x -> x.getType() == AllowancesEnum.PROJECT.ordinal() && x.getProjectId().equals(project.getId()));
+                            employeesGrossSalary1.getBaseAllowances().addAll(projectAllowances);
+                            db.document(doc.getReference().getPath()).update("baseAllowances", employeesGrossSalary1.getBaseAllowances());
                         });
-                    }
-                    dismiss();
-                });
+                    });
+                }
+                dismiss();
             }
 
         }

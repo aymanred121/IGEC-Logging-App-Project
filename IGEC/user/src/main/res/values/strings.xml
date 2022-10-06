@@ -56,7 +56,8 @@
     <string name="penalty">Retention</string>
     <string name="transfer_requests">Transfer Requests</string>
     <string name="transfer_note">Transfer Note</string>
-    <string name="project_reference_name">Project Reference | Name</string>
+    <string name="to_project_reference_name">To Project Reference | Name</string>
+    <string name="from_project_reference_name">From Project Reference | Name</string>
     <string name="employee_id_name">Employee Id | Name</string>
     <string name="ChangePassword">Change Password</string>
     <string name="perDay">Per Day</string>
@@ -84,6 +85,7 @@
     <string name="transfer_status_channel_name">Transfer Status</string>
     <string name="employee_transfer_status_channel_description">get notified when transferred to another project</string>
     <string name="manager_transfer_status_channel_description">get notified when transfer request is accepted or declined</string>
+    <string name="project">Project</string>
 
 
 </resources>

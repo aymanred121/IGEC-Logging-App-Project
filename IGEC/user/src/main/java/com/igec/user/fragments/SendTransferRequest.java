@@ -22,6 +22,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.igec.user.R;
 import com.igec.common.firebase.Employee;
 import com.igec.common.firebase.EmployeeOverview;
@@ -42,25 +43,26 @@ public class SendTransferRequest extends Fragment {
 
     private Employee manager;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private final ArrayList<Project> projects = new ArrayList<>();
-    private Project thisProject, chosenProject;
+    private ArrayList<Project> allProjects;
+    private Project toProject, fromProject;
     private ArrayList<Pair<TextInputLayout, EditText>> views;
-    private ArrayList<String> employeesId = new ArrayList<>();
+    private ArrayList<String> employeesId;
     private ArrayAdapter<String> idAdapter;
     private EmployeeOverview selectedEmployee;
-    private ArrayList<String> projectsRef = new ArrayList<>();
-    private ArrayAdapter<String> refAdapter;
+    private ArrayList<String> fromProjectsRef, toProjectsRef;
+    private ArrayAdapter<String> fromRefAdapter, toRefAdapter;
 
     public static SendTransferRequest newInstance(Employee manager) {
 
         Bundle args = new Bundle();
-        args.putSerializable("manager",manager);
+        args.putSerializable("manager", manager);
         SendTransferRequest fragment = new SendTransferRequest();
         fragment.setArguments(args);
         return fragment;
     }
 
     private FragmentSendTransferRequestBinding binding;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -68,16 +70,19 @@ public class SendTransferRequest extends Fragment {
         binding = FragmentSendTransferRequestBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
         binding = null;
     }
+
     @Override
     public void onResume() {
         super.onResume();
         validateDate(getActivity());
     }
+
     private void validateDate(Context c) {
         if (Settings.Global.getInt(c.getContentResolver(), Settings.Global.AUTO_TIME, 0) != 1) {
             Intent intent = new Intent(getActivity(), DateInaccurate.class);
@@ -85,11 +90,13 @@ public class SendTransferRequest extends Fragment {
             getActivity().finish();
         }
     }
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         initialize();
-        binding.projectReferencesAuto.addTextChangedListener(twProjectRef);
+        binding.fromProjectReferencesAuto.addTextChangedListener(twFromProjectRef);
+        binding.toProjectReferencesAuto.addTextChangedListener(twToProjectRef);
         binding.employeeIdAuto.addTextChangedListener(twEmployeeID);
         binding.noteEdit.addTextChangedListener(twTransferNote);
         binding.sendButton.setOnClickListener(oclSend);
@@ -97,14 +104,19 @@ public class SendTransferRequest extends Fragment {
 
     private void initialize() {
         manager = (Employee) getArguments().getSerializable("manager");
-        projectsRef = new ArrayList<>();
-        refAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, projectsRef);
+        fromProjectsRef = new ArrayList<>();
+        toProjectsRef = new ArrayList<>();
+        allProjects = new ArrayList<>();
+        employeesId = new ArrayList<>();
         views = new ArrayList<>();
-        views.add(new Pair<>( binding.projectReferencesLayout,  binding.projectReferencesAuto));
+        views.add(new Pair<>(binding.fromProjectReferencesLayout, binding.fromProjectReferencesAuto));
         views.add(new Pair<>(binding.employeeIdLayout, binding.employeeIdAuto));
+        views.add(new Pair<>(binding.toProjectReferencesLayout, binding.toProjectReferencesAuto));
         views.add(new Pair<>(binding.noteLayout, binding.noteEdit));
+        fromRefAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, fromProjectsRef);
+        toRefAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, toProjectsRef);
         idAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, employeesId);
-        getProject();
+        getAllProjects();
     }
 
     private Task<Void> sendRequest(EmployeeOverview employee) {
@@ -112,55 +124,83 @@ public class SendTransferRequest extends Fragment {
         TransferRequests request = new TransferRequests();
         request.setTransferId(transferId);
         request.setEmployee(employee);
-        request.setNewProjectId(thisProject.getId());
-        request.setNewProjectName(thisProject.getName());
-        request.setNewProjectReference(thisProject.getReference());
-        request.setOldProjectId(chosenProject.getId());
-        request.setOldProjectName(chosenProject.getName());
-        request.setOldProjectReference(chosenProject.getReference());
+        request.setNewProjectId(toProject.getId());
+        request.setNewProjectName(toProject.getName());
+        request.setNewProjectReference(toProject.getReference());
+        request.setOldProjectId(fromProject.getId());
+        request.setOldProjectName(fromProject.getName());
+        request.setOldProjectReference(fromProject.getReference());
         request.setNote(binding.noteEdit.getText().toString());
         return TRANSFER_REQUESTS_COL.document(transferId).set(request);
     }
 
-    private void getProject() {
-        PROJECT_COL.document(manager.getProjectID()).get().addOnSuccessListener(documentSnapshot -> {
-            if (!documentSnapshot.exists())
-                return;
-            thisProject = documentSnapshot.toObject(Project.class);
-            getAllProjects(thisProject.getId());
-        });
+    private void invalidateViews() {
+        // fromProjects 1 or more -> never freezes
+        // toProjectsRef 0 or more -> freezes when 0
+        boolean disableToProjectRef = toProjectsRef.size() == 0;
+        if (disableToProjectRef)
+            binding.toProjectReferencesAuto.setText("No Available Projects");
+        // employeesId 0 or more -> freezes when 0
+        boolean disableEmployeeId = employeesId.size() == 0;
+        if (disableEmployeeId)
+            binding.employeeIdAuto.setText("No Available Employees");
+
+        binding.toProjectReferencesAuto.setEnabled(!disableToProjectRef);
+        binding.toProjectReferencesLayout.setEnabled(!disableToProjectRef);
+        binding.employeeIdAuto.setEnabled(!disableEmployeeId);
+        binding.employeeIdLayout.setEnabled(!disableEmployeeId);
+        binding.sendButton.setEnabled(!disableToProjectRef);
     }
 
-    private void freezeViews(boolean freeze) {
 
-        binding.projectReferencesAuto.setText(freeze ? "No Available Projects" : null);
-        binding.employeeIdAuto.setText(freeze ? "No Available Employee" : null);
-        binding.projectReferencesLayout.setEnabled(!freeze);
-        binding.noteLayout.setEnabled(!freeze);
-        binding.employeeIdLayout.setEnabled(!freeze);
-        binding.sendButton.setEnabled(!freeze);
-    }
+    /*
+     * manager ==> {1,2,3}
+     * toRef = {1,2,3}
+     * fromRef = {1,2,3}
+     * all projects ==> {1,2,3,4,5,6}
+     * fromProject = 1
+     * toRef = {2,3}
+     * toProject = 2
+     *
+     *
+     *
+     *
+     * */
 
-    private void getAllProjects(String projectId) {
-        PROJECT_COL.whereNotEqualTo("id", projectId).addSnapshotListener((queryDocumentSnapshots, error) -> {
 
-            if (queryDocumentSnapshots.size() == 0) {
-                freezeViews(true);
+    private void getAllProjects() {
+        PROJECT_COL.addSnapshotListener((queryDocumentSnapshots, error) -> {
+            if (error != null || queryDocumentSnapshots == null)
                 return;
+            allProjects.clear();
+            for (DocumentSnapshot document : queryDocumentSnapshots.getDocuments()) {
+                Project project = document.toObject(Project.class);
+                String ref = String.format("IGEC%s | %s", project.getReference(), project.getName());
+                allProjects.add(project);
+                // add all to fromProjectsRef and manager Projects only to toProjectsRef
+                if (manager.getProjectIds().contains(project.getId()))
+                    toProjectsRef.add(ref);
+                fromProjectsRef.add(ref);
             }
-            projectsRef.clear();
-            projects.clear();
-            projects.addAll((queryDocumentSnapshots.toObjects(Project.class)));
-            for (Project project : projects)
-                if (!project.getId().equals(thisProject.getId()))
-                    projectsRef.add("IGEC" + project.getReference() + " | " + project.getName());
-
-            chosenProject = projects.get(0);
-            binding.projectReferencesAuto.setText(String.format("IGEC%s | %s", chosenProject.getReference(), chosenProject.getName()));
-            binding.projectReferencesAuto.setAdapter(refAdapter);
-
-
-//            getAllEmployees();
+            // choose first project as from project
+            fromProject = allProjects.get(0); // arbitrary as a placeholder
+            binding.fromProjectReferencesAuto.setText(String.format("IGEC%s | %s", fromProject.getReference(), fromProject.getName()));
+            binding.fromProjectReferencesAuto.setAdapter(fromRefAdapter);
+            // if fromProject exists in toProjectsRef remove it
+            if (toProjectsRef.contains(String.format("IGEC%s | %s", fromProject.getReference(), fromProject.getName())))
+                toProjectsRef.remove(String.format("IGEC%s | %s", fromProject.getReference(), fromProject.getName()));
+            // toProject might be empty because there's only one project in the company
+            if (toProjectsRef.size() != 0) {
+                // choose the project with first ref in toProjectsRef
+                for (Project p : allProjects)
+                    if (String.format("IGEC%s | %s", p.getReference(), p.getName()).equals(toProjectsRef.get(0))) {
+                        toProject = p;
+                        break;
+                    }
+                binding.toProjectReferencesAuto.setText(String.format("IGEC%s | %s", toProject.getReference(), toProject.getName()));
+                binding.toProjectReferencesAuto.setAdapter(toRefAdapter);
+            }
+            invalidateViews();
         });
     }
 
@@ -223,7 +263,7 @@ public class SendTransferRequest extends Fragment {
 
         @Override
         public void afterTextChanged(Editable s) {
-            for (EmployeeOverview emp : chosenProject.getEmployees()) {
+            for (EmployeeOverview emp : fromProject.getEmployees()) {
                 if (binding.employeeIdAuto.getText().toString().contains(emp.getId())) {
                     selectedEmployee = emp;
                     break;
@@ -232,7 +272,7 @@ public class SendTransferRequest extends Fragment {
             binding.employeeIdLayout.setErrorEnabled(binding.employeeIdAuto.getText().toString().isEmpty());
         }
     };
-    private final TextWatcher twProjectRef = new TextWatcher() {
+    private final TextWatcher twFromProjectRef = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
@@ -245,29 +285,74 @@ public class SendTransferRequest extends Fragment {
 
         @Override
         public void afterTextChanged(Editable s) {
-            for (Project project : projects) {
-                if (binding.projectReferencesAuto.getText().toString().contains(project.getReference()) &&
-                        binding.projectReferencesAuto.getText().toString().contains(project.getName())) {
-                    chosenProject = project;
-
-                    employeesId.clear();
-                    for (EmployeeOverview employee : project.getEmployees()) {
-                        // add project employees except for the manager
-                        if (!employee.getId().equals(project.getManagerID())) {
-                            employeesId.add(String.format("%s | %s %s", employee.getId(), employee.getFirstName(), employee.getLastName()));
-                        }
-                    }
-                    // no employees can be requested
-                    boolean isThereEmployees = employeesId.size() != 0;
-                    binding.employeeIdAuto.setText(isThereEmployees ? null : "No Available Employee");
-                    binding.employeeIdLayout.setEnabled(isThereEmployees);
-                    binding.sendButton.setEnabled(isThereEmployees);
-                    binding.noteLayout.setEnabled(isThereEmployees);
-                    idAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, employeesId);
-                    binding.employeeIdAuto.setAdapter(idAdapter);
+            boolean isOldManager = manager.getProjectIds().contains(fromProject.getId());
+            boolean isNewManager = false;
+            Project newFromProject = null;
+            for (Project p : allProjects)
+                if (String.format("IGEC%s | %s", p.getReference(), p.getName()).equals(s.toString())) {
+                    isNewManager = manager.getProjectIds().contains(p.getId());
+                    newFromProject = new Project(p);
                     break;
                 }
+            // old -> new
+            // manager -> manager ==> add old to ToProjectsRef && remove new from ToProjectsRef
+            if (isNewManager && isOldManager) {
+                toProjectsRef.add(String.format("IGEC%s | %s", fromProject.getReference(), fromProject.getName()));
+                toProjectsRef.remove(String.format("IGEC%s | %s", newFromProject.getReference(), newFromProject.getName()));
             }
+            // not manager -> manager ==> remove new from ToProjectsRef
+            else if (!isOldManager && isNewManager) {
+                toProjectsRef.remove(String.format("IGEC%s | %s", newFromProject.getReference(), newFromProject.getName()));
+            }
+            // manager -> not manager ==> add old to ToProjectsRef
+            else if (isOldManager && !isNewManager) {
+                toProjectsRef.add(String.format("IGEC%s | %s", fromProject.getReference(), fromProject.getName()));
+            }
+            fromProject = newFromProject;
+            // not manager -> not manager ==> do nothing
+            // clear employees
+            employeesId.clear();
+            for (EmployeeOverview employee : fromProject.getEmployees()) {
+                // add project employees except for the manager
+                if (!employee.getId().equals(fromProject.getManagerID())) {
+                    employeesId.add(String.format("%s | %s %s", employee.getId(), employee.getFirstName(), employee.getLastName()));
+                }
+            }
+            if (employeesId.size() != 0) {
+                selectedEmployee = fromProject.getEmployees().get(0);
+                binding.employeeIdAuto.setText(String.format("%s | %s %s", selectedEmployee.getId(), selectedEmployee.getFirstName(), selectedEmployee.getLastName()));
+                idAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, employeesId);
+                binding.employeeIdAuto.setAdapter(idAdapter);
+            }
+            if (toProjectsRef.size() != 0) {
+                binding.toProjectReferencesAuto.setText(toProjectsRef.get(0));
+                toRefAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, toProjectsRef);
+                binding.toProjectReferencesAuto.setAdapter(toRefAdapter);
+            }
+            invalidateViews();
+        }
+    };
+    private final TextWatcher twToProjectRef = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            //TODO
+            // changed to Project
+            // 1- remove this project from fromProjectsRef
+            // 2- add the old project to fromProjectsRef
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            for (Project p : allProjects)
+                if (String.format("IGEC%s | %s", p.getReference(), p.getName()).equals(editable.toString())) {
+                    toProject = new Project(p);
+                    break;
+                }
         }
     };
     private final View.OnClickListener oclSend = new View.OnClickListener() {

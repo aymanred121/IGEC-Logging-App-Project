@@ -719,6 +719,7 @@ public class ProjectFragmentDialog extends DialogFragment {
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
         builder.setTitle(getString(R.string.Delete))
                 .setMessage(getString(R.string.AreUSure))
+                .setOnDismissListener(dialogInterface -> binding.deleteButton.setEnabled(true))
                 .setNegativeButton(getString(R.string.no), (dialogInterface, i) -> {
                     binding.deleteButton.setEnabled(true);
                 })

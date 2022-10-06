@@ -7,53 +7,30 @@
     tools:context=".fragments.ProjectSummaryFragment">
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/project_name_layout"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="match_parent"
+        android:id="@+id/project_layout"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="@dimen/high"
-        android:layout_marginEnd="32dp"
-        android:enabled="false"
+        android:layout_marginStart="@dimen/vhigh"
+        android:layout_marginTop="@dimen/vhigh"
+        android:layout_marginEnd="@dimen/vhigh"
+        app:boxBackgroundMode="outline"
+        app:endIconMode="dropdown_menu"
+        app:helperTextEnabled="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/project_name_edit"
+        <AutoCompleteTextView
+            android:id="@+id/project_auto"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="top"
-            android:hint="@string/project_name"
-            android:inputType="text"
+            android:hint="@string/project"
+            android:inputType="none"
             android:padding="14dp"
-            android:enabled="false"
             android:singleLine="true" />
-    </com.google.android.material.textfield.TextInputLayout>
 
 
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/project_reference_layout"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginTop="@dimen/mid"
-        android:layout_marginEnd="32dp"
-        android:enabled="false"
-        app:layout_constraintTop_toBottomOf="@id/project_name_layout"
-        app:prefixText="IGEC">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/project_reference_edit"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="top"
-            android:hint="@string/project_reference"
-            android:inputType="text"
-            android:padding="14dp"
-            android:enabled="false"
-            android:singleLine="true" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.button.MaterialButton
@@ -70,7 +47,7 @@
         app:cornerRadius="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/project_reference_layout" />
+        app:layout_constraintTop_toBottomOf="@id/project_layout" />
 
 
     <androidx.recyclerview.widget.RecyclerView

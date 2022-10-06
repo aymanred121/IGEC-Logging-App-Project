@@ -258,76 +258,76 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     // Listeners
     @SuppressLint("MissingPermission")
     private final View.OnClickListener oclCheckInOut = v -> {
-        binding.checkInOutFab.setEnabled(false);
-        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
-        builder.setTitle(getString(R.string.do_you_want_to_confirm_this_action))
-                .setNegativeButton(getString(R.string.No), (dialogInterface, i) -> {
-                    binding.checkInOutFab.setEnabled(true);
-                }).setOnDismissListener(unused -> {
-                    binding.checkInOutFab.setEnabled(true);
-                })
-                .setPositiveButton(getString(R.string.Yes), (dialogInterface, i) -> {
-                    PROJECT_COL.document(currEmployee.getProjectID()).get().addOnSuccessListener(doc -> {
-                        if (!doc.exists())
-                            return;
-                        final Project project = doc.toObject(Project.class);
-                        Locus.INSTANCE.getCurrentLocation(getActivity(), result -> {
-                            if (result.getError() != null) {
-                                Snackbar.make(binding.getRoot(), "can't complete the operation.", Snackbar.LENGTH_SHORT).show();
-                                binding.checkInOutFab.setEnabled(true);
-                                return null;
-                            }
-                            Location location = result.getLocation();
-                            longitude = location.getLongitude();
-                            latitude = location.getLatitude();
-                            double distance;
-                            float[] results = new float[3];
-                            Location.distanceBetween(latitude, longitude, project.getLat(), project.getLng(), results);
-                            distance = results[0];
-                            if (distance < project.getArea()) // he's in the project area
-                            {
-                                inProjectArea = true;
-                                updateEmployeeSummary(latitude, longitude, project);
-                                updateCheckInOutBtn();
-                            } else {
-                                //check if he is in one of the offices
-                                PROJECT_COL.whereEqualTo("reference", "-99999").get().addOnSuccessListener(offices -> {
-                                    for (DocumentSnapshot office : offices.getDocuments()) {
-                                        Location.distanceBetween(latitude, longitude, office.toObject(Project.class).getLat(), office.toObject(Project.class).getLng(), results);
-                                        if (results[0] < office.toObject(Project.class).getArea()) {
-                                            inProjectArea = false;
-                                            Snackbar.make(binding.getRoot(), String.format("You're in the %s office", office.toObject(Project.class).getName()), Snackbar.LENGTH_SHORT).show();
-                                            updateEmployeeSummary(latitude, longitude, office.toObject(Project.class));
-                                            updateCheckInOutBtn();
-                                            return;
-                                        }
-                                    }
-                                    //he is not in one of the offices
-                                    Snackbar.make(binding.getRoot(), "You're not in the project area", Snackbar.LENGTH_SHORT).show();
-                                    PROJECT_COL.get().addOnSuccessListener(projects -> {
-                                        for (Project p : projects.toObjects(Project.class)) {
-                                            float[] res = new float[3];
-                                            Location.distanceBetween(latitude, longitude, p.getLat(), p.getLng(), res);
-                                            if (res[0] < p.getArea()) {
-                                                isRemote = true;
-                                                updateEmployeeSummary(latitude, longitude, p);
-                                                updateCheckInOutBtn();
-                                                return;
-                                            }
-                                        }
-                                        //from home
-                                        updateEmployeeSummary(latitude, longitude, project);
-                                        updateCheckInOutBtn();
-                                    });
-                                });
-                            }
-                            return null;
-
-                        });
-                    });
-
-                })
-                .show();
+//        binding.checkInOutFab.setEnabled(false);
+//        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
+//        builder.setTitle(getString(R.string.do_you_want_to_confirm_this_action))
+//                .setNegativeButton(getString(R.string.No), (dialogInterface, i) -> {
+//                    binding.checkInOutFab.setEnabled(true);
+//                }).setOnDismissListener(unused -> {
+//                    binding.checkInOutFab.setEnabled(true);
+//                })
+//                .setPositiveButton(getString(R.string.Yes), (dialogInterface, i) -> {
+//                    PROJECT_COL.document(currEmployee.getProjectID()).get().addOnSuccessListener(doc -> {
+//                        if (!doc.exists())
+//                            return;
+//                        final Project project = doc.toObject(Project.class);
+//                        Locus.INSTANCE.getCurrentLocation(getActivity(), result -> {
+//                            if (result.getError() != null) {
+//                                Snackbar.make(binding.getRoot(), "can't complete the operation.", Snackbar.LENGTH_SHORT).show();
+//                                binding.checkInOutFab.setEnabled(true);
+//                                return null;
+//                            }
+//                            Location location = result.getLocation();
+//                            longitude = location.getLongitude();
+//                            latitude = location.getLatitude();
+//                            double distance;
+//                            float[] results = new float[3];
+//                            Location.distanceBetween(latitude, longitude, project.getLat(), project.getLng(), results);
+//                            distance = results[0];
+//                            if (distance < project.getArea()) // he's in the project area
+//                            {
+//                                inProjectArea = true;
+//                                updateEmployeeSummary(latitude, longitude, project);
+//                                updateCheckInOutBtn();
+//                            } else {
+//                                //check if he is in one of the offices
+//                                PROJECT_COL.whereEqualTo("reference", "-99999").get().addOnSuccessListener(offices -> {
+//                                    for (DocumentSnapshot office : offices.getDocuments()) {
+//                                        Location.distanceBetween(latitude, longitude, office.toObject(Project.class).getLat(), office.toObject(Project.class).getLng(), results);
+//                                        if (results[0] < office.toObject(Project.class).getArea()) {
+//                                            inProjectArea = false;
+//                                            Snackbar.make(binding.getRoot(), String.format("You're in the %s office", office.toObject(Project.class).getName()), Snackbar.LENGTH_SHORT).show();
+//                                            updateEmployeeSummary(latitude, longitude, office.toObject(Project.class));
+//                                            updateCheckInOutBtn();
+//                                            return;
+//                                        }
+//                                    }
+//                                    //he is not in one of the offices
+//                                    Snackbar.make(binding.getRoot(), "You're not in the project area", Snackbar.LENGTH_SHORT).show();
+//                                    PROJECT_COL.get().addOnSuccessListener(projects -> {
+//                                        for (Project p : projects.toObjects(Project.class)) {
+//                                            float[] res = new float[3];
+//                                            Location.distanceBetween(latitude, longitude, p.getLat(), p.getLng(), res);
+//                                            if (res[0] < p.getArea()) {
+//                                                isRemote = true;
+//                                                updateEmployeeSummary(latitude, longitude, p);
+//                                                updateCheckInOutBtn();
+//                                                return;
+//                                            }
+//                                        }
+//                                        //from home
+//                                        updateEmployeeSummary(latitude, longitude, project);
+//                                        updateCheckInOutBtn();
+//                                    });
+//                                });
+//                            }
+//                            return null;
+//
+//                        });
+//                    });
+//
+//                })
+//                .show();
     };
 
     private void updateCheckInOutBtn() {
@@ -395,156 +395,156 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     }
 
     private void employeeCheckOut(Summary summary, HashMap<String, Object> checkOut) {
-        updateDate();
-        long checkInTime = (summary.getLastCheckInTime()).getSeconds();
-        long checkOutTime = Timestamp.now().getSeconds();
-        long workingTime = (checkOutTime - checkInTime);
-        //check if working time is greater than 8 hrs
-        summary.setCheckOut(checkOut);
-        summary.setWorkedTime(FieldValue.increment(workingTime));
-        SUMMARY_COL.document(id).collection(year + "-" + month).document(day)
-                .update("checkOut", checkOut, "workingTime", FieldValue.increment(workingTime))
-                .addOnSuccessListener(unused -> {
-                    //todo uncomment those lines when needed to calculate overTime
-//                    SUMMARY_COL
-//                            .document(id)
-//                            .collection(year + "-" + month)
-//                            .document(day)
-//                            .get().addOnSuccessListener(doc -> {
-//                                long workingTime1 = (long) doc.getData().get("workingTime");
-//                                long overTime =(workingTime1 - 28800)<0?0:(workingTime1 - 28800)/3600;
-//                                updateOverTime(overTime,doc.getReference().getPath(),(Timestamp) (summary.getCheckIn().get("Time")));
-//                            });
-
-                    binding.checkInOutFab.setEnabled(true);
-                    PROJECT_COL.document(currEmployee.getProjectID())
-                            .update("employeeWorkedTime." + currEmployee.getId(), FieldValue.increment(workingTime));
-
-                });
-        Snackbar.make(binding.getRoot(), "Checked Out successfully!", Toast.LENGTH_SHORT).show();
+//        updateDate();
+//        long checkInTime = (summary.getLastCheckInTime()).getSeconds();
+//        long checkOutTime = Timestamp.now().getSeconds();
+//        long workingTime = (checkOutTime - checkInTime);
+//        //check if working time is greater than 8 hrs
+//        summary.setCheckOut(checkOut);
+//        summary.setWorkedTime(FieldValue.increment(workingTime));
+//        SUMMARY_COL.document(id).collection(year + "-" + month).document(day)
+//                .update("checkOut", checkOut, "workingTime", FieldValue.increment(workingTime))
+//                .addOnSuccessListener(unused -> {
+//                    //todo uncomment those lines when needed to calculate overTime
+////                    SUMMARY_COL
+////                            .document(id)
+////                            .collection(year + "-" + month)
+////                            .document(day)
+////                            .get().addOnSuccessListener(doc -> {
+////                                long workingTime1 = (long) doc.getData().get("workingTime");
+////                                long overTime =(workingTime1 - 28800)<0?0:(workingTime1 - 28800)/3600;
+////                                updateOverTime(overTime,doc.getReference().getPath(),(Timestamp) (summary.getCheckIn().get("Time")));
+////                            });
+//
+//                    binding.checkInOutFab.setEnabled(true);
+//                    PROJECT_COL.document(currEmployee.getProjectID())
+//                            .update("employeeWorkedTime." + currEmployee.getId(), FieldValue.increment(workingTime));
+//
+//                });
+//        Snackbar.make(binding.getRoot(), "Checked Out successfully!", Toast.LENGTH_SHORT).show();
     }
 
     private void updateOverTime(long overTime, String path, Timestamp time) {
-        WriteBatch batch = db.batch();
-        batch.set(db.document(path), new HashMap<String, Object>() {{
-            put("overTime", overTime);
-        }}, SetOptions.merge());
-        batch.commit();
-        Allowance overTimeAllowance = new Allowance();
-        overTimeAllowance.setAmount(overTime * currEmployee.getOverTime());
-        overTimeAllowance.setName("overTime");
-        Date checkInDate = (time).toDate();
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(checkInDate);
-        String prevDay = String.format("%02d", cal.get(Calendar.DAY_OF_MONTH));
-        overTimeAllowance.setNote(prevDay);
-        overTimeAllowance.setType(AllowancesEnum.OVERTIME.ordinal());
-        overTimeAllowance.setCurrency(currEmployee.getCurrency());
-        overTimeAllowance.setProjectId(currEmployee.getProjectID());
-        EMPLOYEE_GROSS_SALARY_COL.document(id).collection(year).document(month).get().addOnSuccessListener(doc1 -> {
-            EmployeesGrossSalary emp = doc1.toObject(EmployeesGrossSalary.class);
-            ArrayList<Allowance> allowanceArrayList = emp.getAllTypes();
-            if (allowanceArrayList != null) {
-                allowanceArrayList.removeIf(x -> x.getType() == AllowancesEnum.OVERTIME.ordinal() && x.getNote().trim().equals(day));
-            }
-            allowanceArrayList.add(overTimeAllowance);
-            EMPLOYEE_GROSS_SALARY_COL.document(id).collection(year).document(month).update("allTypes", allowanceArrayList);
-        });
+//        WriteBatch batch = db.batch();
+//        batch.set(db.document(path), new HashMap<String, Object>() {{
+//            put("overTime", overTime);
+//        }}, SetOptions.merge());
+//        batch.commit();
+//        Allowance overTimeAllowance = new Allowance();
+//        overTimeAllowance.setAmount(overTime * currEmployee.getOverTime());
+//        overTimeAllowance.setName("overTime");
+//        Date checkInDate = (time).toDate();
+//        Calendar cal = Calendar.getInstance();
+//        cal.setTime(checkInDate);
+//        String prevDay = String.format("%02d", cal.get(Calendar.DAY_OF_MONTH));
+//        overTimeAllowance.setNote(prevDay);
+//        overTimeAllowance.setType(AllowancesEnum.OVERTIME.ordinal());
+//        overTimeAllowance.setCurrency(currEmployee.getCurrency());
+//        overTimeAllowance.setProjectId(currEmployee.getProjectID());
+//        EMPLOYEE_GROSS_SALARY_COL.document(id).collection(year).document(month).get().addOnSuccessListener(doc1 -> {
+//            EmployeesGrossSalary emp = doc1.toObject(EmployeesGrossSalary.class);
+//            ArrayList<Allowance> allowanceArrayList = emp.getAllTypes();
+//            if (allowanceArrayList != null) {
+//                allowanceArrayList.removeIf(x -> x.getType() == AllowancesEnum.OVERTIME.ordinal() && x.getNote().trim().equals(day));
+//            }
+//            allowanceArrayList.add(overTimeAllowance);
+//            EMPLOYEE_GROSS_SALARY_COL.document(id).collection(year).document(month).update("allTypes", allowanceArrayList);
+//        });
     }
 
 
     private void employeeCheckIn(Summary summary, Project project) {
-        updateDate();
-        summary.setLastCheckInTime(Timestamp.now());
-        HashMap<String, Object> checkInDetails = new HashMap<>(summary.getGeoMap());
-        checkInDetails.put("Time", Timestamp.now());
-        HashMap<String, Object> checkIn = new HashMap<>();
-        checkIn.put("checkIn", checkInDetails);
-        if (currEmployee.getManagerID().equals("adminID") && !
-                currEmployee.getProjectID().equals(project.getId())) {
-            checkIn.put("projectId", project.getId());
-        } else {
-            checkIn.put("projectId", currEmployee.getProjectID());
-        }
-
-        checkIn.put("lastCheckInTime", summary.getLastCheckInTime());
-        if (inProjectArea) {
-            checkIn.put("checkInLocation", CHECK_IN_FROM_SITE);
-        } else if (isRemote) {
-            checkIn.put("checkInLocation", CHECK_IN_FROM_HOME);
-            //disable the button
-            binding.checkInOutFab.setEnabled(false);
-        } else {
-            checkIn.put("checkInLocation", CHECK_IN_FROM_OFFICE);
-        }
-        SUMMARY_COL.document(id).collection(year + "-" + month).document(day).set(checkIn);
-        EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId()).collection(year).document(month).get().addOnSuccessListener(doc -> {
-            if (!doc.exists()) {
-                //new month
-                EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId()).get().addOnSuccessListener(documentSnapshot -> {
-                    if (!documentSnapshot.exists()) return;
-                    EmployeesGrossSalary employeesGrossSalary = documentSnapshot.toObject(EmployeesGrossSalary.class);
-                    ArrayList<Allowance> allowances = employeesGrossSalary.getAllTypes().stream().filter(allowance -> allowance.getType() != AllowancesEnum.NETSALARY.ordinal()).collect(Collectors.toCollection(ArrayList::new));
-                    employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() != AllowancesEnum.NETSALARY.ordinal());
-                    employeesGrossSalary.setBaseAllowances(allowances);
-                    if (inProjectArea) {
-                        summary.setCheckInLocation(CHECK_IN_FROM_SITE);
-                        for (Allowance allowance : employeesGrossSalary.getBaseAllowances()) {
-                            allowance.setNote(day);
-                            employeesGrossSalary.getAllTypes().add(allowance);
-                        }
-                    } else if (isRemote) {
-                        summary.setCheckInLocation(CHECK_IN_FROM_HOME);
-                    } else if (currEmployee.getManagerID().equals("adminID") && !
-                            currEmployee.getProjectID().equals(project.getId())) {
-                        for (Allowance allowance : employeesGrossSalary.getBaseAllowances()) {
-                            if (allowance.getProjectId().equals(currEmployee.getProjectID()))
-                                continue;
-                            allowance.setNote(day);
-                            employeesGrossSalary.getAllTypes().add(allowance);
-
-                        }
-                        for (Allowance allowance1 : project.getAllowancesList()) {
-                            allowance1.setNote(day);
-                            employeesGrossSalary.getAllTypes().add(allowance1);
-                        }
-                    } else {
-                        summary.setCheckInLocation(CHECK_IN_FROM_OFFICE);
-                    }
-                    db.document(doc.getReference().getPath()).set(employeesGrossSalary, SetOptions.merge());
-                });
-                return;
-            }
-            EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
-            employeesGrossSalary.setEmployeeId(currEmployee.getId());
-            if (inProjectArea) {
-                summary.setCheckInLocation(CHECK_IN_FROM_SITE);
-                for (Allowance allowance : employeesGrossSalary.getBaseAllowances()) {
-                    allowance.setNote(day);
-                    employeesGrossSalary.getAllTypes().add(allowance);
-                }
-            } else if (isRemote) {
-                summary.setCheckInLocation(CHECK_IN_FROM_HOME);
-
-            } else if (currEmployee.getManagerID().equals("adminID") && !
-                    currEmployee.getProjectID().equals(project.getId())) {
-                for (Allowance allowance : employeesGrossSalary.getBaseAllowances()) {
-                    if (allowance.getProjectId().equals(currEmployee.getProjectID()))
-                        continue;
-                    allowance.setNote(day);
-                    employeesGrossSalary.getAllTypes().add(allowance);
-
-                }
-                for (Allowance allowance1 : project.getAllowancesList()) {
-                    allowance1.setNote(day);
-                    employeesGrossSalary.getAllTypes().add(allowance1);
-                }
-            } else {
-                summary.setCheckInLocation(CHECK_IN_FROM_OFFICE);
-            }
-            EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId()).collection(year).document(month).set(employeesGrossSalary, SetOptions.merge());
-
-        });
+//        updateDate();
+//        summary.setLastCheckInTime(Timestamp.now());
+//        HashMap<String, Object> checkInDetails = new HashMap<>(summary.getGeoMap());
+//        checkInDetails.put("Time", Timestamp.now());
+//        HashMap<String, Object> checkIn = new HashMap<>();
+//        checkIn.put("checkIn", checkInDetails);
+//        if (currEmployee.getManagerID().equals("adminID") && !
+//                currEmployee.getProjectID().equals(project.getId())) {
+//            checkIn.put("projectId", project.getId());
+//        } else {
+//            checkIn.put("projectId", currEmployee.getProjectID());
+//        }
+//
+//        checkIn.put("lastCheckInTime", summary.getLastCheckInTime());
+//        if (inProjectArea) {
+//            checkIn.put("checkInLocation", CHECK_IN_FROM_SITE);
+//        } else if (isRemote) {
+//            checkIn.put("checkInLocation", CHECK_IN_FROM_HOME);
+//            //disable the button
+//            binding.checkInOutFab.setEnabled(false);
+//        } else {
+//            checkIn.put("checkInLocation", CHECK_IN_FROM_OFFICE);
+//        }
+//        SUMMARY_COL.document(id).collection(year + "-" + month).document(day).set(checkIn);
+//        EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId()).collection(year).document(month).get().addOnSuccessListener(doc -> {
+//            if (!doc.exists()) {
+//                //new month
+//                EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId()).get().addOnSuccessListener(documentSnapshot -> {
+//                    if (!documentSnapshot.exists()) return;
+//                    EmployeesGrossSalary employeesGrossSalary = documentSnapshot.toObject(EmployeesGrossSalary.class);
+//                    ArrayList<Allowance> allowances = employeesGrossSalary.getAllTypes().stream().filter(allowance -> allowance.getType() != AllowancesEnum.NETSALARY.ordinal()).collect(Collectors.toCollection(ArrayList::new));
+//                    employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() != AllowancesEnum.NETSALARY.ordinal());
+//                    employeesGrossSalary.setBaseAllowances(allowances);
+//                    if (inProjectArea) {
+//                        summary.setCheckInLocation(CHECK_IN_FROM_SITE);
+//                        for (Allowance allowance : employeesGrossSalary.getBaseAllowances()) {
+//                            allowance.setNote(day);
+//                            employeesGrossSalary.getAllTypes().add(allowance);
+//                        }
+//                    } else if (isRemote) {
+//                        summary.setCheckInLocation(CHECK_IN_FROM_HOME);
+//                    } else if (currEmployee.getManagerID().equals("adminID") && !
+//                            currEmployee.getProjectID().equals(project.getId())) {
+//                        for (Allowance allowance : employeesGrossSalary.getBaseAllowances()) {
+//                            if (allowance.getProjectId().equals(currEmployee.getProjectID()))
+//                                continue;
+//                            allowance.setNote(day);
+//                            employeesGrossSalary.getAllTypes().add(allowance);
+//
+//                        }
+//                        for (Allowance allowance1 : project.getAllowancesList()) {
+//                            allowance1.setNote(day);
+//                            employeesGrossSalary.getAllTypes().add(allowance1);
+//                        }
+//                    } else {
+//                        summary.setCheckInLocation(CHECK_IN_FROM_OFFICE);
+//                    }
+//                    db.document(doc.getReference().getPath()).set(employeesGrossSalary, SetOptions.merge());
+//                });
+//                return;
+//            }
+//            EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
+//            employeesGrossSalary.setEmployeeId(currEmployee.getId());
+//            if (inProjectArea) {
+//                summary.setCheckInLocation(CHECK_IN_FROM_SITE);
+//                for (Allowance allowance : employeesGrossSalary.getBaseAllowances()) {
+//                    allowance.setNote(day);
+//                    employeesGrossSalary.getAllTypes().add(allowance);
+//                }
+//            } else if (isRemote) {
+//                summary.setCheckInLocation(CHECK_IN_FROM_HOME);
+//
+//            } else if (currEmployee.getManagerID().equals("adminID") && !
+//                    currEmployee.getProjectID().equals(project.getId())) {
+//                for (Allowance allowance : employeesGrossSalary.getBaseAllowances()) {
+//                    if (allowance.getProjectId().equals(currEmployee.getProjectID()))
+//                        continue;
+//                    allowance.setNote(day);
+//                    employeesGrossSalary.getAllTypes().add(allowance);
+//
+//                }
+//                for (Allowance allowance1 : project.getAllowancesList()) {
+//                    allowance1.setNote(day);
+//                    employeesGrossSalary.getAllTypes().add(allowance1);
+//                }
+//            } else {
+//                summary.setCheckInLocation(CHECK_IN_FROM_OFFICE);
+//            }
+//            EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId()).collection(year).document(month).set(employeesGrossSalary, SetOptions.merge());
+//
+//        });
     }
 
     private void machineCheckInOut(Client client, String note) {
@@ -566,38 +566,38 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     }
 
     private void machineCheckOut(Machine_Employee currMachineEmployee) {
-        HashMap<String, Object> checkOutDetails = new HashMap<>((new Summary(latitude, longitude)).getGeoMap());
-        double workingCost, monthlyCost = 0, weeklyCost = 0, dailyCost = 0;
-        checkOutDetails.put("Time", Timestamp.now());
-        long checkInTime = ((Timestamp) currMachineEmployee.getCheckIn().get("Time")).getSeconds();
-        long checkOutTime = Timestamp.now().getSeconds();
-        long workingTime = (checkOutTime - checkInTime);
-        long rem = workingTime;
-        monthlyCost += (int) (workingTime / 2.628e+6);
-        rem %= 2.628e+6;
-        weeklyCost += (int) (rem / 604800);
-        rem %= 604800;
-        dailyCost += (int) (rem / 86400);
-        rem %= 86400;
-        if (rem > 0)
-            dailyCost++;
-        monthlyCost *= currMachine.getMonthlyRentPrice();
-        weeklyCost *= currMachine.getWeeklyRentPrice();
-        dailyCost *= currMachine.getDailyRentPrice();
-        currMachineEmployee.setWorkedTime(workingTime);
-        currMachineEmployee.setCheckOut(checkOutDetails);
-        currMachineEmployee.setCost(monthlyCost + weeklyCost + dailyCost);
-        PROJECT_COL.document(currEmployee.getProjectID())
-                .update("machineWorkedTime." + currMachine.getReference(), FieldValue.increment(workingTime));
-        MACHINE_EMPLOYEE_COL.document(machineEmpId).set(currMachineEmployee)
-                .addOnSuccessListener(unused -> {
-                    currMachine.removeEmployeeDependency();
-                    MACHINE_COL.document(currMachine.getId()).update("isUsed", false, "employeeFirstName", "", "employeeId", "", "machineEmployeeID", "").addOnSuccessListener(vu -> {
-
-                        Snackbar.make(binding.getRoot(), "Machine: " + currMachine.getReference() + " checked Out successfully", Toast.LENGTH_SHORT).show();
-
-                    });
-                });
+//        HashMap<String, Object> checkOutDetails = new HashMap<>((new Summary(latitude, longitude)).getGeoMap());
+//        double workingCost, monthlyCost = 0, weeklyCost = 0, dailyCost = 0;
+//        checkOutDetails.put("Time", Timestamp.now());
+//        long checkInTime = ((Timestamp) currMachineEmployee.getCheckIn().get("Time")).getSeconds();
+//        long checkOutTime = Timestamp.now().getSeconds();
+//        long workingTime = (checkOutTime - checkInTime);
+//        long rem = workingTime;
+//        monthlyCost += (int) (workingTime / 2.628e+6);
+//        rem %= 2.628e+6;
+//        weeklyCost += (int) (rem / 604800);
+//        rem %= 604800;
+//        dailyCost += (int) (rem / 86400);
+//        rem %= 86400;
+//        if (rem > 0)
+//            dailyCost++;
+//        monthlyCost *= currMachine.getMonthlyRentPrice();
+//        weeklyCost *= currMachine.getWeeklyRentPrice();
+//        dailyCost *= currMachine.getDailyRentPrice();
+//        currMachineEmployee.setWorkedTime(workingTime);
+//        currMachineEmployee.setCheckOut(checkOutDetails);
+//        currMachineEmployee.setCost(monthlyCost + weeklyCost + dailyCost);
+//        PROJECT_COL.document(currEmployee.getProjectID())
+//                .update("machineWorkedTime." + currMachine.getReference(), FieldValue.increment(workingTime));
+//        MACHINE_EMPLOYEE_COL.document(machineEmpId).set(currMachineEmployee)
+//                .addOnSuccessListener(unused -> {
+//                    currMachine.removeEmployeeDependency();
+//                    MACHINE_COL.document(currMachine.getId()).update("isUsed", false, "employeeFirstName", "", "employeeId", "", "machineEmployeeID", "").addOnSuccessListener(vu -> {
+//
+//                        Snackbar.make(binding.getRoot(), "Machine: " + currMachine.getReference() + " checked Out successfully", Toast.LENGTH_SHORT).show();
+//
+//                    });
+//                });
     }
 
     private void machineCheckIn(Client client) {

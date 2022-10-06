@@ -8,7 +8,6 @@ import static com.igec.common.CONSTANTS.TRANSFER_REQUESTS_COL;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -39,7 +38,9 @@ import com.igec.user.databinding.FragmentTransferRequestsBinding;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class TransferRequestsFragment extends Fragment {
 
@@ -48,10 +49,11 @@ public class TransferRequestsFragment extends Fragment {
     private RecyclerView.LayoutManager layoutManager;
     private Employee manager;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private ArrayList<TransferRequests> requests;
+    private ArrayList<TransferRequests> allRequests;
     private String day, year, month;
     private Project newProject;
     private WriteBatch batch = FirebaseFirestore.getInstance().batch();
+    private HashSet<String> requestsIds = new HashSet<>();
 
     public static TransferRequestsFragment newInstance(Employee manager) {
 
@@ -101,24 +103,30 @@ public class TransferRequestsFragment extends Fragment {
 
     private void initialize() {
         manager = (Employee) getArguments().getSerializable("manager");
-        requests = new ArrayList<>();
+        allRequests = new ArrayList<>();
         binding.recyclerView.setHasFixedSize(true);
         layoutManager = new LinearLayoutManager(getActivity());
-        adapter = new TransferAdapter(requests);
+        adapter = new TransferAdapter(allRequests);
         binding.recyclerView.setLayoutManager(layoutManager);
         binding.recyclerView.setAdapter(adapter);
         getRequests();
     }
 
     private void getRequests() {
-        TRANSFER_REQUESTS_COL.whereEqualTo("oldProjectId", manager.getProjectID()).whereEqualTo("transferStatus", -1).addSnapshotListener((values, error) -> {
-            requests.clear();
-            adapter.notifyDataSetChanged();
-            if (values.size() == 0)
-                return;
-            requests.addAll(values.toObjects(com.igec.common.firebase.TransferRequests.class));
-            adapter.setTransfers(requests);
-            adapter.notifyDataSetChanged();
+        manager.getProjectIds().forEach(pid -> {
+            TRANSFER_REQUESTS_COL.whereEqualTo("oldProjectId", pid).whereEqualTo("transferStatus", -1).addSnapshotListener((values, error) -> {
+                if (error != null) {
+                    return;
+                }
+                for (DocumentSnapshot doc : values) {
+                    TransferRequests request = doc.toObject(TransferRequests.class);
+                    if (requestsIds.contains(request.getTransferId()))
+                        continue;
+                    allRequests.add(request);
+                    requestsIds.add(request.getTransferId());
+                }
+                adapter.notifyDataSetChanged();
+            });
         });
     }
 
@@ -138,16 +146,24 @@ public class TransferRequestsFragment extends Fragment {
     }
 
     private void updateEmployeeData(TransferRequests request) {
-        batch.update(EMPLOYEE_COL.document(request.getEmployee().getId()), "projectID", newProject.getId()
+
+        batch.update(EMPLOYEE_COL.document(request.getEmployee().getId()), "projectIds", new ArrayList<String>() {{
+                    add(newProject.getId());
+                }}
                 , "managerID", newProject.getManagerID());
 
-        ArrayList<String> empInfo = new ArrayList<>();
+        ArrayList<Object> empInfo = new ArrayList<>();
         empInfo.add(request.getEmployee().getFirstName());
         empInfo.add(request.getEmployee().getLastName());
         empInfo.add(request.getEmployee().getTitle());
         empInfo.add(newProject.getManagerID());
-        empInfo.add(newProject.getId());
-        empInfo.add("1"); // by default because already in project
+        empInfo.add(new HashMap<String, Object>() {{
+            put("pids", new ArrayList<String>() {{
+                add(newProject.getId());
+            }});
+        }});
+        empInfo.add(true); // by default because already in project
+        empInfo.add(false);
         Map<String, Object> empInfoMap = new HashMap<>();
         empInfoMap.put(request.getEmployee().getId(), empInfo);
         batch.update(EMPLOYEE_OVERVIEW_REF, empInfoMap);
@@ -158,7 +174,8 @@ public class TransferRequestsFragment extends Fragment {
         //remove emp from old project
         batch.update(PROJECT_COL.document(request.getOldProjectId()), "employees", FieldValue.arrayRemove(request.getEmployee()));
         //add emp to new project
-        request.getEmployee().setProjectId(request.getNewProjectId());
+        request.getEmployee().getProjectIds().clear();
+        request.getEmployee().getProjectIds().add(request.getNewProjectId());
         request.getEmployee().setManagerID(newProject.getManagerID());
         batch.update(PROJECT_COL.document(request.getNewProjectId()), "employees", FieldValue.arrayUnion(request.getEmployee()));
     }
@@ -221,7 +238,7 @@ public class TransferRequestsFragment extends Fragment {
     private final TransferAdapter.OnItemClickListener oclRequest = new TransferAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position) {
-            TransferRequests request = requests.get(position);
+            TransferRequests request = allRequests.get(position);
             EmployeeOverview employee = request.getEmployee();
             String content = "Employee ID: " + request.getEmployee().getId() + '\n'
                     + "Employee Name: " + employee.getFirstName() + " " + employee.getLastName() + '\n'
@@ -233,13 +250,13 @@ public class TransferRequestsFragment extends Fragment {
             builder.setTitle("Content");
             builder.setPositiveButton("Accept", (dialog, which) -> {
                 transferRequestStatus = 1;
-                requests.remove(request);
+                allRequests.remove(request);
                 adapter.notifyItemRemoved(position);
                 updateRequestStatus(request, transferRequestStatus);
             });
             builder.setNegativeButton("Reject", (dialogInterface, i) -> {
                 transferRequestStatus = 0;
-                requests.remove(request);
+                allRequests.remove(request);
                 adapter.notifyItemRemoved(position);
                 updateRequestStatus(request, transferRequestStatus);
             });

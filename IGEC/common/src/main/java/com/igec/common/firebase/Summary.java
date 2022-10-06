@@ -5,6 +5,7 @@ import com.firebase.geofire.GeoLocation;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.Exclude;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Summary {
@@ -21,6 +22,7 @@ public class Summary {
     private Timestamp lastCheckInTime;
     private String lastDayPath;
     private String checkInLocation;
+    private ArrayList<String> projectIds = new ArrayList<>();
 
     public Employee getEmployee() {
         return employee;
@@ -128,5 +130,13 @@ public class Summary {
 
     public void setLastDayPath(String lastDayPath) {
         this.lastDayPath = lastDayPath;
+    }
+
+    public ArrayList<String> getProjectIds() {
+        return projectIds;
+    }
+
+    public void setProjectIds(ArrayList<String> projectIds) {
+        this.projectIds = projectIds;
     }
 }

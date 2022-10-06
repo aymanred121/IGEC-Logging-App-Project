@@ -31,6 +31,7 @@ import com.igec.common.firebase.Employee;
 import com.igec.common.firebase.EmployeeOverview;
 import com.igec.common.firebase.EmployeesGrossSalary;
 import com.igec.common.firebase.Project;
+import com.igec.common.firebase.Summary;
 import com.igec.common.utilities.CsvWriter;
 import com.igec.common.utilities.LocationDetails;
 import com.igec.common.utilities.WorkingDay;
@@ -303,7 +304,7 @@ public class SummaryFragment extends Fragment {
                                             LocationDetails checkInLocation = new LocationDetails(checkInGeoHash, checkInLat, checkInLng);
                                             LocationDetails checkOutLocation = new LocationDetails(checkOutGeoHash, checkOutLat, checkOutLng);
                                             String projectLocation = String.format("%s, %s, %s", project.getLocationCity(), project.getLocationArea(), project.getLocationStreet());
-                                            workingDays.add(new WorkingDay(day, month, year, hours, empName, checkInLocation, checkOutLocation, project.getName(), projectLocation));
+                                            workingDays.add(new WorkingDay(day, month, year, hours, empName, checkInLocation, checkOutLocation, project.getName(), project.getName(), projectLocation));
                                             if (queryDocumentSnapshots.getDocuments().lastIndexOf(q) == queryDocumentSnapshots.getDocuments().size() - 1) {
                                                 if (opened) return;
                                                 opened = true;
@@ -340,29 +341,33 @@ public class SummaryFragment extends Fragment {
                             for (QueryDocumentSnapshot q : queryDocumentSnapshots) {
                                 if (q.getData().get("checkOut") == null)
                                     continue;
-                                PROJECT_COL.document((String) q.get("projectId")).get().addOnSuccessListener(doc -> {
-                                    if (!doc.exists())
-                                        return;
-                                    Project project = doc.toObject(Project.class);
-                                    String day = q.getId();
-                                    double hours = ((q.getData().get("workingTime") == null) ? 0 : ((long) (q.getData().get("workingTime"))) / 3600.0);
-                                    String checkInGeoHash = (String) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkIn"))).get("geohash");
-                                    double checkInLat = (double) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkIn"))).get("lat");
-                                    double checkInLng = (double) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkIn"))).get("lng");
-                                    String checkOutGeoHash = (String) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkOut"))).get("geohash");
-                                    double checkOutLat = (double) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkOut"))).get("lat");
-                                    double checkOutLng = (double) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkOut"))).get("lng");
-                                    LocationDetails checkInLocation = new LocationDetails(checkInGeoHash, checkInLat, checkInLng);
-                                    LocationDetails checkOutLocation = new LocationDetails(checkOutGeoHash, checkOutLat, checkOutLng);
-                                    String projectLocation = String.format("%s, %s, %s", project.getLocationCity(), project.getLocationArea(), project.getLocationStreet());
-                                    workingDays.add(new WorkingDay(day, month, year, hours, empName, checkInLocation, checkOutLocation, project.getName(), projectLocation));
-                                    if (queryDocumentSnapshots.getDocuments().lastIndexOf(q) == queryDocumentSnapshots.getDocuments().size() - 1) {
-                                        if (opened) return;
-                                        opened = true;
-                                        MonthSummaryDialog monthSummaryDialog = new MonthSummaryDialog(workingDays);
-                                        monthSummaryDialog.show(getParentFragmentManager(), "");
-                                    }
+                                Summary summary = q.toObject(Summary.class);
+                                summary.getProjectIds().forEach(pid -> {
+                                    PROJECT_COL.document(pid).get().addOnSuccessListener(doc -> {
+                                        if (!doc.exists())
+                                            return;
+                                        Project project = doc.toObject(Project.class);
+                                        String day = q.getId();
+                                        double hours = ((q.getData().get("workingTime") == null) ? 0 : ((long) (q.getData().get("workingTime"))) / 3600.0);
+                                        String checkInGeoHash = (String) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkIn"))).get("geohash");
+                                        double checkInLat = (double) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkIn"))).get("lat");
+                                        double checkInLng = (double) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkIn"))).get("lng");
+                                        String checkOutGeoHash = (String) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkOut"))).get("geohash");
+                                        double checkOutLat = (double) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkOut"))).get("lat");
+                                        double checkOutLng = (double) ((HashMap<String, Object>) Objects.requireNonNull(q.getData().get("checkOut"))).get("lng");
+                                        LocationDetails checkInLocation = new LocationDetails(checkInGeoHash, checkInLat, checkInLng);
+                                        LocationDetails checkOutLocation = new LocationDetails(checkOutGeoHash, checkOutLat, checkOutLng);
+                                        String projectLocation = String.format("%s, %s, %s", project.getLocationCity(), project.getLocationArea(), project.getLocationStreet());
+                                        workingDays.add(new WorkingDay(day, month, year, hours, empName, checkInLocation, checkOutLocation, project.getName(), projectLocation,summary.getCheckInLocation()));
+                                        if (queryDocumentSnapshots.getDocuments().lastIndexOf(q) == queryDocumentSnapshots.getDocuments().size() - 1) {
+                                            if (opened) return;
+                                            opened = true;
+                                            MonthSummaryDialog monthSummaryDialog = new MonthSummaryDialog(workingDays);
+                                            monthSummaryDialog.show(getParentFragmentManager(), "");
+                                        }
+                                    });
                                 });
+
                             }
                         });
             }

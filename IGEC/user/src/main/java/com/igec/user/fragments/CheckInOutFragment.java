@@ -264,6 +264,10 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     }
 
     // Listeners
+    //TODO
+    // employees can only check in/out from one place (site-home-office)
+    // if employee or manager checked out from any site or office he can't check in from home
+    // if manager checked to his sites or as a support he gets allowances for that only if he didn't check from that place before
     @SuppressLint("MissingPermission")
     private final View.OnClickListener oclCheckInOut = v -> {
         binding.checkInOutFab.setEnabled(false);
@@ -384,6 +388,9 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                         } else {
                             //re check in
                             summary1.setLastCheckInTime(Timestamp.now());
+                            if (!summary1.getProjectIds().contains(project.getId()))
+                                summary1.getProjectIds().add(project.getId());
+
                             if (checkInType == CheckInType.SUPPORT
                                     && summary1.getCheckInLocation().equals(CHECK_IN_FROM_OFFICE)) {
                                 ArrayList<Allowance> projectAllowances = new ArrayList<>();
@@ -410,7 +417,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                     summary1.setCheckInLocation(CHECK_IN_FROM_OFFICE);
                                     break;
                             }
-                            db.document(documentSnapshot.getReference().getPath()).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null);
+                            db.document(documentSnapshot.getReference().getPath()).update("lastCheckInTime", summary1.getLastCheckInTime(), "checkOut", null, "projectIds", summary1.getProjectIds());
                             Snackbar.make(binding.getRoot(), "Checked In successfully!", Toast.LENGTH_SHORT).show();
                             binding.checkInOutFab.setEnabled(true);
                         }
@@ -487,7 +494,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         checkInDetails.put("Time", Timestamp.now());
         HashMap<String, Object> checkIn = new HashMap<>();
         checkIn.put("checkIn", checkInDetails);
-        checkIn.put("projectId", project.getId());
+        checkIn.put("projectIds", FieldValue.arrayUnion(project.getId()));
         checkIn.put("lastCheckInTime", summary.getLastCheckInTime());
         switch (checkInType) {
             case HOME:

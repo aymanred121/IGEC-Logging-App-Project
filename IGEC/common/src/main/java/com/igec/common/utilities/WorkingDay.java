@@ -11,8 +11,9 @@ public class WorkingDay {
     private String name,empName;
     private LocationDetails checkIn, checkOut;
     private String projectName,projectLocation;
+    private String type;
 
-    public WorkingDay(String day, String month, String year, double hours, String empName , LocationDetails checkIn, LocationDetails checkOut, String projectName,String projectLocation) {
+    public WorkingDay(String day, String month, String year, double hours, String empName, LocationDetails checkIn, LocationDetails checkOut, String name, String projectName, String projectLocation) {
         this.day = day;
         this.hours = hours;
         this.month = month;
@@ -90,5 +91,13 @@ public class WorkingDay {
         SimpleDateFormat outFormat = new SimpleDateFormat("EEE");
         String goal = outFormat.format(date);
         return goal;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

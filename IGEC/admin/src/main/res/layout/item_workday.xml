@@ -34,6 +34,27 @@
             tools:text="20 hours" />
 
         <ImageView
+            android:id="@+id/type_image"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginEnd="@dimen/high"
+            tools:src="@drawable/ic_site"
+            app:layout_constraintBottom_toBottomOf="@id/location_image"
+            app:layout_constraintEnd_toStartOf="@id/location_image"
+            app:layout_constraintTop_toTopOf="@id/location_image"
+            app:tint="@color/primaryColor" />
+
+        <TextView
+            android:id="@+id/type_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="@id/type_image"
+            app:layout_constraintStart_toStartOf="@id/type_image"
+            app:layout_constraintTop_toBottomOf="@id/type_image"
+            tools:text="site" />
+
+        <ImageView
+            android:id="@+id/location_image"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_marginEnd="@dimen/high"

@@ -22,7 +22,7 @@ public class CONSTANTS {
     public static final String TRANSFER_REQUEST_CHANNEL_ID = "TRANSFER_REQUEST";
     public static final String CHECK_IN_FROM_OFFICE = "office";
     public static final String CHECK_IN_FROM_SITE = "site";
-    public static final String CHECK_IN_FROM_HOME = "from_home";
+    public static final String CHECK_IN_FROM_HOME = "from home";
     public static final String CHECK_IN_FROM_SUPPORT = "support";
     public static final DocumentReference EMPLOYEE_OVERVIEW_REF = db.collection("EmployeeOverview").document("emp");
     public static final CollectionReference MACHINE_EMPLOYEE_COL = db.collection("Machine_Employee");

@@ -165,18 +165,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
             //ask for permission
             getLocationPermissions();
         }
-        //todo disable checkinbtn if from_home
         updateDate();
-        SUMMARY_COL.document(id).collection(year + "-" + month).document(day).get().addOnSuccessListener(doc -> {
-            if (!doc.exists()) return;
-            Summary summary = doc.toObject(Summary.class);
-            if (summary.getCheckInLocation().equals(CHECK_IN_FROM_HOME)) {
-                //disable check-In btn
-                binding.checkInOutFab.setEnabled(false);
-                binding.checkInOutFab.setText("HOME");
-                binding.checkInOutFab.setBackgroundColor(Color.GRAY);
-            }
-        });
         binding.greetingText.setText(String.format("%s\n%s", getString(R.string.good_morning), currEmployee.getFirstName()));
         LocationServices.getFusedLocationProviderClient(getActivity());
     }
@@ -207,11 +196,19 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                     else {
                         isHere = value.getData().get("checkOut") == null;
                     }
-                    binding.checkInOutFab.setBackgroundColor((isHere) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
-                    binding.checkInOutFab.setText(isHere ? "Out" : "In");
-                    binding.addMachineFab.setClickable(isHere);
-                    if (isHere)
-                        binding.addMachineFab.startAnimation(show);
+                    Summary summary = value.toObject(Summary.class);
+                    if (summary != null && summary.getCheckInLocation().equals(CHECK_IN_FROM_HOME)) {
+                        //disable check-In btn
+                        binding.checkInOutFab.setEnabled(false);
+                        binding.checkInOutFab.setText("HOME");
+                        binding.checkInOutFab.setBackgroundColor(Color.GRAY);
+                    } else {
+                        binding.checkInOutFab.setBackgroundColor((isHere) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
+                        binding.checkInOutFab.setText(isHere ? "Out" : "In");
+                        binding.addMachineFab.setClickable(isHere);
+                        if (isHere)
+                            binding.addMachineFab.startAnimation(show);
+                    }
                 });
     }
 
@@ -321,21 +318,20 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                     }
                                     switch (checkInType) {
                                         case SITE:
-                                            Snackbar.make(binding.getRoot(), "You are in the site", Snackbar.LENGTH_INDEFINITE).show();
+                                            Snackbar.make(binding.getRoot(), "You are in the site", Snackbar.LENGTH_SHORT).show();
                                             break;
                                         case OFFICE:
-                                            Snackbar.make(binding.getRoot(), "You are at the office", Snackbar.LENGTH_INDEFINITE).show();
+                                            Snackbar.make(binding.getRoot(), "You are at the office", Snackbar.LENGTH_SHORT).show();
                                             break;
                                         case SUPPORT:
                                             Snackbar.make(binding.getRoot(), "You are now a support in this project", Snackbar.LENGTH_SHORT).show();
                                             break;
                                         case HOME:
                                             updateEmployeeSummary(latitude, longitude, new Project());
-                                            updateCheckInOutBtn();
                                             binding.checkInOutFab.setEnabled(false);
                                             binding.checkInOutFab.setText("HOME");
                                             binding.checkInOutFab.setBackgroundColor(Color.GRAY);
-                                            Snackbar.make(binding.getRoot(), "You are at home", Snackbar.LENGTH_INDEFINITE).show();
+                                            Snackbar.make(binding.getRoot(), "You are at home", Snackbar.LENGTH_SHORT).show();
                                             break;
                                         case OUTSIDE:
                                             Snackbar.make(binding.getRoot(), "You are trying to checkIn from another site", Snackbar.LENGTH_SHORT).show();

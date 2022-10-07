@@ -150,7 +150,6 @@ public class ProjectFragmentDialog extends DialogFragment {
         });
         getParentFragmentManager().setFragmentResultListener("teamMembers", this, (requestKey, bundle) -> {
             team = bundle.getParcelableArrayList("teamMembers");
-            Toast.makeText(getActivity(), String.format("%d", team.size()), Toast.LENGTH_SHORT).show();
             unsavedTeamIds.clear();
             for (EmployeeOverview employeeOverview : team) {
                 unsavedTeamIds.add(employeeOverview.getId());

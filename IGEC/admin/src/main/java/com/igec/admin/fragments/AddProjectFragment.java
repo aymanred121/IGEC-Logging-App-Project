@@ -103,12 +103,13 @@ public class AddProjectFragment extends Fragment {
         });
         getParentFragmentManager().setFragmentResultListener("teamMembers", this, (requestKey, bundle) -> {
             team = bundle.getParcelableArrayList("teamMembers");
-            Toast.makeText(getActivity(), String.format("%d", team.size()), Toast.LENGTH_SHORT).show();
         });
         getParentFragmentManager().setFragmentResultListener("manager", this, (requestKey, bundle) -> {
             projectManager = bundle.getParcelable("manager");
             if (projectManager != null)
                 binding.managerNameEdit.setText(String.format("%s - %s %s", projectManager.getId(), projectManager.getFirstName(), projectManager.getLastName()));
+                binding.managerNameLayout.setError(null);
+                binding.managerNameLayout.setErrorEnabled(false);
         });
     }
 

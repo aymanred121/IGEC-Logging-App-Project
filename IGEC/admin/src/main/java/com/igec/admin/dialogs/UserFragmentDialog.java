@@ -1,5 +1,6 @@
 package com.igec.admin.dialogs;
 
+import static android.content.ContentValues.TAG;
 import static com.igec.common.CONSTANTS.ADMIN;
 import static com.igec.common.CONSTANTS.EMPLOYEE_COL;
 import static com.igec.common.CONSTANTS.EMPLOYEE_GROSS_SALARY_COL;
@@ -220,18 +221,22 @@ public class UserFragmentDialog extends DialogFragment {
         binding.passwordLayout.setEndIconMode(END_ICON_CUSTOM);
         binding.passwordLayout.setEndIconDrawable(R.drawable.ic_baseline_autorenew_24);
         binding.passwordEdit.setEnabled(false);
-        binding.deleteButton.setEnabled(employee.getManagerID() == null && !employee.isAdmin());
+        binding.deleteButton.setEnabled(false);
         // can't remove employee without having checkout all his machines
         MACHINE_EMPLOYEE_COL.whereEqualTo("employee.id", employee.getId()).addSnapshotListener((docs, e) -> {
             // no machines found = enabled X
             // a machine without a check-out = disabled
             // all machines have been checked-out = enabled
+            if (e != null || docs.isEmpty()) {
+                binding.deleteButton.setEnabled(employee.getManagerID() == null && !employee.isAdmin()); // not working
+                return;
+            }
             for (QueryDocumentSnapshot doc : docs) {
                 if (doc.get("checkOut") == null || ((HashMap) doc.get("checkOut")).size() == 0) {
                     binding.deleteButton.setEnabled(false);
                     return;
                 }
-                binding.deleteButton.setEnabled(true);
+                binding.deleteButton.setEnabled(employee.getManagerID() == null && !employee.isAdmin()); // not working
             }
         });
     }

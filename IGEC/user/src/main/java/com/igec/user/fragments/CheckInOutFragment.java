@@ -269,7 +269,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     }
 
     // Listeners
-   @SuppressLint("MissingPermission")
+    @SuppressLint("MissingPermission")
     private final View.OnClickListener oclCheckInOut = v -> {
         binding.checkInOutFab.setEnabled(false);
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
@@ -405,49 +405,85 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
 
     private void employeeReCheckIn(Summary summary, Project project, DocumentSnapshot documentSnapshot) {
         summary.setLastCheckInTime(Timestamp.now());
-        if (currEmployee.isManager() && (checkInType == CheckInType.SUPPORT || checkInType == CheckInType.SITE) && !summary.getProjectIds().containsKey(project.getId())) {
-            ArrayList<Allowance> projectAllowances = new ArrayList<>();
-            projectAllowances.addAll(project.getAllowancesList());
-            projectAllowances.forEach(allowance -> {
-                allowance.setNote(day);
-            });
-            EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId()).get().addOnSuccessListener(doc->{
-                if(!doc.exists())return;
-                EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
-                ArrayList<Allowance> allTypes = new ArrayList<>();
-                ArrayList<Allowance> baseAllowances = new ArrayList<>();
-                allTypes.addAll(projectAllowances);
-                employeesGrossSalary.getAllTypes().forEach(al->{
-                    if(al.getType()==AllowancesEnum.NETSALARY.ordinal())
-                        allTypes.add(al);
-                    else{
-                        baseAllowances.add(al);
-                    }
-                });
-                EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId())
-                        .collection(year).document(month).get().addOnSuccessListener(doc1->{
-                            EmployeesGrossSalary employeesGrossSalary1 = new EmployeesGrossSalary();
-                            if(!doc1.exists()){
-                                //new month
-                                employeesGrossSalary1.setEmployeeId(employeesGrossSalary.getEmployeeId());
-                                employeesGrossSalary1.setBaseAllowances(baseAllowances);
-                                employeesGrossSalary1.setAllTypes(allTypes);
-                            }else{
-                                 employeesGrossSalary1 = doc1.toObject(EmployeesGrossSalary.class);
-                                employeesGrossSalary1.getAllTypes().addAll(projectAllowances);
-                            }
-                            EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId())
-                                    .collection(year).document(month).set(employeesGrossSalary1, SetOptions.merge());
-                        });
-            });
-        }
         if (!summary.getProjectIds().keySet().contains(project.getId())) {
             switch (checkInType) {
                 case SITE:
                     summary.getProjectIds().put(project.getId(), CHECK_IN_FROM_SITE);
+                    if (currEmployee.isManager()) {
+                        ArrayList<Allowance> projectAllowances = new ArrayList<>();
+                        projectAllowances.addAll(project.getAllowancesList());
+                        projectAllowances.forEach(allowance -> {
+                            allowance.setNote(day);
+                        });
+                        EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId()).get().addOnSuccessListener(doc -> {
+                            if (!doc.exists()) return;
+                            EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
+                            ArrayList<Allowance> allTypes = new ArrayList<>();
+                            ArrayList<Allowance> baseAllowances = new ArrayList<>();
+                            allTypes.addAll(projectAllowances);
+                            employeesGrossSalary.getAllTypes().forEach(al -> {
+                                if (al.getType() == AllowancesEnum.NETSALARY.ordinal())
+                                    allTypes.add(al);
+                                else {
+                                    baseAllowances.add(al);
+                                }
+                            });
+                            EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId())
+                                    .collection(year).document(month).get().addOnSuccessListener(doc1 -> {
+                                        EmployeesGrossSalary employeesGrossSalary1 = new EmployeesGrossSalary();
+                                        if (!doc1.exists()) {
+                                            //new month
+                                            employeesGrossSalary1.setEmployeeId(employeesGrossSalary.getEmployeeId());
+                                            employeesGrossSalary1.setBaseAllowances(baseAllowances);
+                                            employeesGrossSalary1.setAllTypes(allTypes);
+                                        } else {
+                                            employeesGrossSalary1 = doc1.toObject(EmployeesGrossSalary.class);
+                                            employeesGrossSalary1.getAllTypes().addAll(projectAllowances);
+                                        }
+                                        EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId())
+                                                .collection(year).document(month).set(employeesGrossSalary1, SetOptions.merge());
+                                    });
+                        });
+                    }
                     break;
                 case SUPPORT:
                     summary.getProjectIds().put(project.getId(), CHECK_IN_FROM_SUPPORT);
+                    if (currEmployee.isManager()) {
+                        ArrayList<Allowance> projectAllowances = new ArrayList<>();
+                        projectAllowances.addAll(project.getAllowancesList());
+                        projectAllowances.forEach(allowance -> {
+                            allowance.setNote(day);
+                        });
+                        EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId()).get().addOnSuccessListener(doc -> {
+                            if (!doc.exists()) return;
+                            EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
+                            ArrayList<Allowance> allTypes = new ArrayList<>();
+                            ArrayList<Allowance> baseAllowances = new ArrayList<>();
+                            allTypes.addAll(projectAllowances);
+                            employeesGrossSalary.getAllTypes().forEach(al -> {
+                                if (al.getType() == AllowancesEnum.NETSALARY.ordinal())
+                                    allTypes.add(al);
+                                else {
+                                    baseAllowances.add(al);
+                                }
+                            });
+                            EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId())
+                                    .collection(year).document(month).get().addOnSuccessListener(doc1 -> {
+                                        EmployeesGrossSalary employeesGrossSalary1 = new EmployeesGrossSalary();
+                                        if (!doc1.exists()) {
+                                            //new month
+                                            employeesGrossSalary1.setEmployeeId(employeesGrossSalary.getEmployeeId());
+                                            employeesGrossSalary1.setBaseAllowances(baseAllowances);
+                                            employeesGrossSalary1.setAllTypes(allTypes);
+                                        } else {
+                                            employeesGrossSalary1 = doc1.toObject(EmployeesGrossSalary.class);
+                                            employeesGrossSalary1.getAllTypes().addAll(projectAllowances);
+                                        }
+                                        EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId())
+                                                .collection(year).document(month).set(employeesGrossSalary1, SetOptions.merge());
+                                    });
+                        });
+                    }
                     break;
                 case HOME:
                     summary.getProjectIds().put("HOME", CHECK_IN_FROM_HOME);
@@ -578,6 +614,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                     if (!documentSnapshot.exists()) return;
                     EmployeesGrossSalary employeesGrossSalary = documentSnapshot.toObject(EmployeesGrossSalary.class);
                     ArrayList<Allowance> allowances = employeesGrossSalary.getAllTypes().stream().filter(allowance -> allowance.getType() != AllowancesEnum.NETSALARY.ordinal()).collect(Collectors.toCollection(ArrayList::new));
+                    allowances.removeIf(allowance -> allowance.getType() == AllowancesEnum.PROJECT.ordinal() && !allowance.getProjectId().equals(project.getId()));
                     employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() != AllowancesEnum.NETSALARY.ordinal());
                     employeesGrossSalary.setBaseAllowances(allowances);
                     if (checkInType == CheckInType.SITE) {
@@ -605,6 +642,8 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
             employeesGrossSalary.setEmployeeId(currEmployee.getId());
             if (checkInType == CheckInType.SITE) {
                 for (Allowance allowance : employeesGrossSalary.getBaseAllowances()) {
+                    if (allowance.getType() == AllowancesEnum.PROJECT.ordinal() && !allowance.getProjectId().equals(project.getId()))
+                        continue;
                     allowance.setNote(day);
                     employeesGrossSalary.getAllTypes().add(allowance);
                 }

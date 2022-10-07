@@ -529,7 +529,8 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
 //                                updateOverTime(overTime,doc.getReference().getPath(),(Timestamp) (summary.getCheckIn().get("Time")));
 //                            });
 
-                    binding.checkInOutFab.setEnabled(true);
+                    if (checkInType != CheckInType.HOME)
+                        binding.checkInOutFab.setEnabled(true);
                     if (checkInType == CheckInType.SITE) {
                         for (String pid : currEmployee.getProjectIds()) {
                             PROJECT_COL.document(pid)

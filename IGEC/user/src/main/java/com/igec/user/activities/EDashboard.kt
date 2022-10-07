@@ -124,7 +124,7 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                             vacationNotification = setupNotification(
                                 "Vacation Request Status",
                                 msg,
-                                R.drawable.ic_baseline_mail_24,
+                                R.drawable.ic_stat_name,
                                 VACATION_STATUS_CHANNEL_ID
                             )
                             notificationManager.notify(
@@ -166,7 +166,7 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                         transferNotification = setupNotification(
                             "Project Transfer",
                             msg,
-                            R.drawable.ic_baseline_mail_24,
+                            R.drawable.ic_stat_name,
                             TRANSFER_STATUS_CHANNEL_ID
                         )
 

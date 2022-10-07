@@ -133,7 +133,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                             setupNotification(
                                 "New Vacation Request",
                                 msg,
-                                R.drawable.ic_baseline_mail_24
+                                R.drawable.ic_stat_name
                             )
                             notificationManager.notify(NOTIFICATION_ID++, notification)
                             VACATION_COL.document(vacation.id).update("vacationNotification", 0);

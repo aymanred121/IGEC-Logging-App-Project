@@ -136,7 +136,7 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                             vacationStatusNotification = setupNotification(
                                 "Vacation Request Status",
                                 msg,
-                                R.drawable.ic_baseline_mail_24,
+                                R.drawable.ic_stat_name,
                                 VACATION_STATUS_CHANNEL_ID
                             )
                             notificationManager.notify(
@@ -169,7 +169,7 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                             vacationRequestNotification = setupNotification(
                                 "New Vacation Request",
                                 msg,
-                                R.drawable.ic_baseline_mail_24,
+                                R.drawable.ic_stat_name,
                                 VACATION_REQUEST_CHANNEL_ID
                             )
                             notificationManager.notify(
@@ -201,7 +201,7 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                             transferRequestNotification = setupNotification(
                                 "New Transfer Request",
                                 msg,
-                                R.drawable.ic_baseline_mail_24,
+                                R.drawable.ic_stat_name,
                                 TRANSFER_REQUEST_CHANNEL_ID
                             )
 
@@ -243,7 +243,7 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                             transferStatusNotification = setupNotification(
                                 "Transfer Request Status",
                                 msg,
-                                R.drawable.ic_baseline_mail_24,
+                                R.drawable.ic_stat_name,
                                 TRANSFER_STATUS_CHANNEL_ID
                             )
 

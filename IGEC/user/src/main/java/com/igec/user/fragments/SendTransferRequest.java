@@ -339,6 +339,7 @@ public class SendTransferRequest extends Fragment {
             // changed to Project
             // 1- remove this project from fromProjectsRef
             // 2- add the old project to fromProjectsRef
+            // isDone?
         }
 
         @Override

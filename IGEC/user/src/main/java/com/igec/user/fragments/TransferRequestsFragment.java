@@ -205,7 +205,7 @@ public class TransferRequestsFragment extends Fragment {
 
     }
 
-    private void updateTransferRequests(TransferRequests request) {
+    private void updateTransferRequests(@NonNull TransferRequests request) {
         // change transfer status to 0 (rejected) for all requests on this employee
         TRANSFER_REQUESTS_COL.whereEqualTo("employee.id", request.getEmployee().getId()).get().addOnSuccessListener(values -> {
             for (DocumentSnapshot doc : values) {
@@ -231,7 +231,10 @@ public class TransferRequestsFragment extends Fragment {
 
             });
         }
-
+        else{
+            batch.update(TRANSFER_REQUESTS_COL.document(request.getTransferId()), "transferStatus", status);
+            batch.commit();
+        }
 
     }
 

@@ -1,7 +1,6 @@
 package com.igec.admin.fragments;
 
 import static android.content.ContentValues.TAG;
-
 import static com.igec.common.CONSTANTS.EMPLOYEE_COL;
 import static com.igec.common.CONSTANTS.EMPLOYEE_GROSS_SALARY_COL;
 import static com.igec.common.CONSTANTS.EMPLOYEE_OVERVIEW_REF;
@@ -10,6 +9,10 @@ import static com.igec.common.CONSTANTS.SUMMARY_COL;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,12 +20,8 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.igec.admin.adapters.EmployeeAdapter;
 import com.igec.admin.databinding.FragmentSummaryBinding;
 import com.igec.admin.dialogs.MonthSummaryDialog;
@@ -32,11 +31,10 @@ import com.igec.common.firebase.EmployeeOverview;
 import com.igec.common.firebase.EmployeesGrossSalary;
 import com.igec.common.firebase.Project;
 import com.igec.common.firebase.Summary;
+import com.igec.common.utilities.AllowancesEnum;
 import com.igec.common.utilities.CsvWriter;
 import com.igec.common.utilities.LocationDetails;
 import com.igec.common.utilities.WorkingDay;
-import com.igec.common.utilities.AllowancesEnum;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.whiteelephant.monthpicker.MonthPickerDialog;
 
 import java.io.IOException;
@@ -45,7 +43,6 @@ import java.util.Calendar;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 public class SummaryFragment extends Fragment {
     // Vars
@@ -290,16 +287,22 @@ public class SummaryFragment extends Fragment {
                                         if (q.getData().get("checkOut") == null)
                                             continue;
                                         Summary summary = q.toObject(Summary.class);
-                                        summary.getProjectIds().keySet().forEach(pid->{
+                                        summary.getProjectIds().keySet().forEach(pid -> {
                                             PROJECT_COL.document(pid).get().addOnSuccessListener(doc -> {
-                                                if (!doc.exists())
-                                                    return;
-                                                Project project = doc.toObject(Project.class);
+                                                Project project = new Project();
+                                                if (!doc.exists()) {
+                                                    if (!pid.equals("HOME"))
+                                                        return;
+                                                    project.setName("Home");
+                                                    project.setLocationArea("");
+                                                    project.setLocationCity("");
+                                                    project.setLocationStreet("");
+                                                } else {
+                                                    project = doc.toObject(Project.class);
+                                                }
                                                 String day = q.getId();
-                                                HashMap<String,Double>hours = new HashMap<>();
-                                                summary.getWorkingTime().forEach((k,v)->{
-                                                    hours.put(k, v != null ? (double) v / 3600.0 : 0.0);
-                                                });
+                                                // HashMap<String, Double> hours = new HashMap<>();
+                                                Double hours = summary.getWorkingTime() != null ? (Long) summary.getWorkingTime().get(pid) / 3600.0 : 0.0;
                                                 String checkInGeoHash = (String) summary.getCheckIn().get("geohash");
                                                 double checkInLat = (double) summary.getCheckIn().get("lat");
                                                 double checkInLng = (double) summary.getCheckIn().get("lng");
@@ -309,7 +312,7 @@ public class SummaryFragment extends Fragment {
                                                 LocationDetails checkInLocation = new LocationDetails(checkInGeoHash, checkInLat, checkInLng);
                                                 LocationDetails checkOutLocation = new LocationDetails(checkOutGeoHash, checkOutLat, checkOutLng);
                                                 String projectLocation = String.format("%s, %s, %s", project.getLocationCity(), project.getLocationArea(), project.getLocationStreet());
-                                                workingDays.add(new WorkingDay(day, month, year, hours, empName, checkInLocation, checkOutLocation, project.getName(), projectLocation,summary.getProjectIds().get(pid)));
+                                                workingDays.add(new WorkingDay(day, month, year, hours, empName, checkInLocation, checkOutLocation, project.getName(), projectLocation, summary.getProjectIds().get(pid)));
                                                 if (queryDocumentSnapshots.getDocuments().lastIndexOf(q) == queryDocumentSnapshots.getDocuments().size() - 1) {
                                                     if (opened) return;
                                                     opened = true;
@@ -351,15 +354,19 @@ public class SummaryFragment extends Fragment {
                                 Summary summary = q.toObject(Summary.class);
                                 summary.getProjectIds().keySet().forEach(pid -> {
                                     PROJECT_COL.document(pid).get().addOnSuccessListener(doc -> {
-                                        if (!doc.exists())
-                                            return;
-                                        Project project = doc.toObject(Project.class);
+                                        Project project = new Project();
+                                        if (!doc.exists()) {
+                                            if (!pid.equals("HOME"))
+                                                return;
+                                            project.setName("Home");
+                                            project.setLocationArea("");
+                                            project.setLocationCity("");
+                                            project.setLocationStreet("");
+                                        } else {
+                                            project = doc.toObject(Project.class);
+                                        }
                                         String day = q.getId();
-
-                                        HashMap<String,Double>hours = new HashMap<>();
-                                        summary.getWorkingTime().forEach((k,v)->{
-                                            hours.put(k, v != null ? (double) v / 3600.0 : 0.0);
-                                        });
+                                        Double hours = summary.getWorkingTime() != null ? (Long) summary.getWorkingTime().get(pid) / 3600.0 : 0.0;
                                         String checkInGeoHash = (String) summary.getCheckIn().get("geohash");
                                         double checkInLat = (double) summary.getCheckIn().get("lat");
                                         double checkInLng = (double) summary.getCheckIn().get("lng");
@@ -369,7 +376,7 @@ public class SummaryFragment extends Fragment {
                                         LocationDetails checkInLocation = new LocationDetails(checkInGeoHash, checkInLat, checkInLng);
                                         LocationDetails checkOutLocation = new LocationDetails(checkOutGeoHash, checkOutLat, checkOutLng);
                                         String projectLocation = String.format("%s, %s, %s", project.getLocationCity(), project.getLocationArea(), project.getLocationStreet());
-                                        workingDays.add(new WorkingDay(day, month, year, hours, empName, checkInLocation, checkOutLocation, project.getName(), projectLocation,summary.getProjectIds().get(pid)));
+                                        workingDays.add(new WorkingDay(day, month, year, hours, empName, checkInLocation, checkOutLocation, project.getName(), projectLocation, summary.getProjectIds().get(pid)));
                                         if (queryDocumentSnapshots.getDocuments().lastIndexOf(q) == queryDocumentSnapshots.getDocuments().size() - 1) {
                                             if (opened) return;
                                             opened = true;

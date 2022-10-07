@@ -8,13 +8,13 @@ import java.util.HashMap;
 public class WorkingDay {
     private String day;
     private String month, year;
-    private HashMap<String,Double> hours;
+    private double hours;
     private String name,empName;
     private LocationDetails checkIn, checkOut;
     private String projectName,projectLocation;
     private String type;
 
-    public WorkingDay(String day, String month, String year, HashMap<String,Double> hours, String empName , LocationDetails checkIn, LocationDetails checkOut, String projectName,String projectLocation,String type)    {
+    public WorkingDay(String day, String month, String year, double hours, String empName , LocationDetails checkIn, LocationDetails checkOut, String projectName,String projectLocation,String type)    {
         this.day = day;
         this.hours = hours;
         this.month = month;
@@ -92,11 +92,11 @@ public class WorkingDay {
         return type;
     }
 
-    public HashMap<String, Double> getHours() {
+    public double getHours() {
         return hours;
     }
 
-    public void setHours(HashMap<String, Double> hours) {
+    public void setHours(double hours) {
         this.hours = hours;
     }
 

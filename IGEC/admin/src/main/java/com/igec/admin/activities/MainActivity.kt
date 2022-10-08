@@ -2,6 +2,7 @@ package com.igec.admin.activities
 
 import android.Manifest.permission.READ_EXTERNAL_STORAGE
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -42,8 +43,7 @@ import com.igec.admin.R
 import com.igec.admin.databinding.ActivityMainBinding
 import com.igec.admin.dialogs.ProjectFragmentDialog
 import com.igec.admin.fragments.*
-import com.igec.common.CONSTANTS.VACATION_COL
-import com.igec.common.CONSTANTS.VACATION_REQUEST_CHANNEL_ID
+import com.igec.common.CONSTANTS.*
 import com.igec.common.firebase.VacationRequest
 import com.igec.common.fragments.VacationRequestsFragment
 import com.igec.common.fragments.VacationsLogFragment
@@ -59,6 +59,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private var lastTab: Int = R.id.nav_add_user
     private lateinit var notification: Notification
     private lateinit var notificationManager: NotificationManagerCompat
+    @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val connectivityManager =
@@ -136,7 +137,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                                 R.drawable.ic_stat_name
                             )
                             notificationManager.notify(NOTIFICATION_ID++, notification)
-                            VACATION_COL.document(vacation.id).update("vacationNotification", 0);
+                            VACATION_COL.document(vacation.id).update("vacationNotification", PENDING);
                         }
                     };
                 }

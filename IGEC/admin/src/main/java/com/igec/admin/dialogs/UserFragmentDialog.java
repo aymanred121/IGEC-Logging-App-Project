@@ -6,6 +6,7 @@ import static com.igec.common.CONSTANTS.EMPLOYEE_COL;
 import static com.igec.common.CONSTANTS.EMPLOYEE_GROSS_SALARY_COL;
 import static com.igec.common.CONSTANTS.EMPLOYEE_OVERVIEW_REF;
 import static com.igec.common.CONSTANTS.MACHINE_EMPLOYEE_COL;
+import static com.igec.common.CONSTANTS.PENDING;
 import static com.igec.common.CONSTANTS.PROJECT_COL;
 import static com.igec.common.CONSTANTS.VACATION_COL;
 import static com.igec.common.cryptography.RSAUtil.encrypt;
@@ -440,7 +441,7 @@ public class UserFragmentDialog extends DialogFragment {
             for (String pid : employee.getProjectIds())
                 batch.update(PROJECT_COL.document(pid), "employees", FieldValue.arrayRemove(oldEmployeeOverviewData));
 
-        VACATION_COL.whereEqualTo("employee.id", employee.getId()).whereEqualTo("vacationStatus", 0).get().addOnSuccessListener(documentQuery -> {
+        VACATION_COL.whereEqualTo("employee.id", employee.getId()).whereEqualTo("vacationStatus", PENDING).get().addOnSuccessListener(documentQuery -> {
             for (QueryDocumentSnapshot d : documentQuery) {
                 batch.delete(VACATION_COL.document(d.getId()));
             }

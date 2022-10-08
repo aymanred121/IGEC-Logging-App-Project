@@ -24,6 +24,9 @@ public class CONSTANTS {
     public static final String CHECK_IN_FROM_SITE = "site";
     public static final String CHECK_IN_FROM_HOME = "from home";
     public static final String CHECK_IN_FROM_SUPPORT = "support";
+    public static final int ACCEPTED = 1;
+    public static final int REJECTED = -1;
+    public static final int PENDING = 0;
     public static final DocumentReference EMPLOYEE_OVERVIEW_REF = db.collection("EmployeeOverview").document("emp");
     public static final CollectionReference MACHINE_EMPLOYEE_COL = db.collection("Machine_Employee");
     public static final CollectionReference VACATION_COL = db.collection("Vacation");

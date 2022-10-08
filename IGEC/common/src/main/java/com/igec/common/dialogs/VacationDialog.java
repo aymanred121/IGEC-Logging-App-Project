@@ -1,7 +1,9 @@
 package com.igec.common.dialogs;
 
+import static com.igec.common.CONSTANTS.ACCEPTED;
 import static com.igec.common.CONSTANTS.EMPLOYEE_COL;
 import static com.igec.common.CONSTANTS.EMPLOYEE_GROSS_SALARY_COL;
+import static com.igec.common.CONSTANTS.REJECTED;
 import static com.igec.common.CONSTANTS.VACATION_COL;
 
 import android.annotation.SuppressLint;
@@ -140,7 +142,7 @@ public class VacationDialog extends DialogFragment {
         calendar.add(Calendar.DATE, vacationDays);
         Date newEndDate = calendar.getTime();
         vacationRequest.setEndDate(newEndDate);
-        vacationRequest.setVacationStatus(1);
+        vacationRequest.setVacationStatus(ACCEPTED);
         VACATION_COL.document(vacationRequest.getId())
                 .set(vacationRequest, SetOptions.merge());
         EMPLOYEE_COL.document(vacationRequest.getEmployee().getId())
@@ -288,7 +290,7 @@ public class VacationDialog extends DialogFragment {
         public void onClick(View view) {
             VACATION_COL
                     .document(vacationRequest.getId())
-                    .update("vacationStatus", -1).addOnSuccessListener(v -> dismiss());
+                    .update("vacationStatus", REJECTED).addOnSuccessListener(v -> dismiss());
         }
     };
 }

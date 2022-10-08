@@ -119,7 +119,7 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         //get your pending request status
         CONSTANTS.VACATION_COL.whereEqualTo("employee.id", currManager!!.id)
             .whereEqualTo("vacationNotification", 0)
-            .whereNotEqualTo("vacationStatus", 0)
+            .whereNotEqualTo("vacationStatus", PENDING)
             .addSnapshotListener { values, error ->
                 run {
                     if (error != null) {

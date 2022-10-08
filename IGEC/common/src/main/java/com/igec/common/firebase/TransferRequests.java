@@ -1,5 +1,7 @@
 package com.igec.common.firebase;
 
+import static com.igec.common.CONSTANTS.PENDING;
+
 public class TransferRequests {
     private EmployeeOverview employee;
     private String note,
@@ -10,15 +12,9 @@ public class TransferRequests {
             newProjectId,
             newProjectReference,
             transferId;
-    private int transferStatus = -1;
+    private int transferStatus = PENDING;
     private boolean isSeenByOld = false, isSeenByNew = false, isSeenByEmp = false;
 
-    /*
-     * transferStatus:
-     * -1 means pending
-     * 0 means rejected
-     * 1 means accepted
-     */
 
     public TransferRequests() {
     }

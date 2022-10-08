@@ -1,5 +1,7 @@
 package com.igec.common.firebase;
 
+import static com.igec.common.CONSTANTS.PENDING;
+
 import android.annotation.SuppressLint;
 
 import com.google.firebase.database.Exclude;
@@ -31,7 +33,7 @@ public class VacationRequest implements Serializable {
         this.manager = manager;
         this.employee = employee;
         this.vacationNote = vacationNote;
-        vacationStatus=0;
+        vacationStatus=PENDING;
     }
 
     public String getId() {

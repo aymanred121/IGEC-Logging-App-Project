@@ -29,8 +29,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.firestore.FieldValue
 import com.igec.common.CONSTANTS
-import com.igec.common.CONSTANTS.TRANSFER_STATUS_CHANNEL_ID
-import com.igec.common.CONSTANTS.VACATION_STATUS_CHANNEL_ID
+import com.igec.common.CONSTANTS.*
 import com.igec.common.firebase.Employee
 import com.igec.common.firebase.TransferRequests
 import com.igec.common.firebase.VacationRequest
@@ -107,7 +106,7 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
 
         CONSTANTS.VACATION_COL.whereEqualTo("employee.id", currEmployee!!.id)
             .whereEqualTo("vacationNotification", 0)
-            .whereNotEqualTo("vacationStatus", 0)
+            .whereNotEqualTo("vacationStatus", PENDING)
             .addSnapshotListener { values, error ->
                 run {
                     if (error != null) {

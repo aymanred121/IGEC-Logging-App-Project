@@ -1,9 +1,12 @@
 package com.igec.user.fragments;
 
+import static com.igec.common.CONSTANTS.ACCEPTED;
 import static com.igec.common.CONSTANTS.EMPLOYEE_COL;
 import static com.igec.common.CONSTANTS.EMPLOYEE_GROSS_SALARY_COL;
 import static com.igec.common.CONSTANTS.EMPLOYEE_OVERVIEW_REF;
+import static com.igec.common.CONSTANTS.PENDING;
 import static com.igec.common.CONSTANTS.PROJECT_COL;
+import static com.igec.common.CONSTANTS.REJECTED;
 import static com.igec.common.CONSTANTS.TRANSFER_REQUESTS_COL;
 
 import android.app.AlertDialog;
@@ -44,7 +47,6 @@ import java.util.Set;
 
 public class TransferRequestsFragment extends Fragment {
 
-    private int transferRequestStatus;
     private TransferAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
     private Employee manager;
@@ -53,7 +55,6 @@ public class TransferRequestsFragment extends Fragment {
     private String day, year, month;
     private Project newProject;
     private WriteBatch batch = FirebaseFirestore.getInstance().batch();
-    private HashSet<String> requestsIds = new HashSet<>();
 
     public static TransferRequestsFragment newInstance(Employee manager) {
 
@@ -113,20 +114,16 @@ public class TransferRequestsFragment extends Fragment {
     }
 
     private void getRequests() {
-        manager.getProjectIds().forEach(pid -> {
-            TRANSFER_REQUESTS_COL.whereEqualTo("oldProjectId", pid).whereEqualTo("transferStatus", -1).addSnapshotListener((values, error) -> {
-                if (error != null) {
-                    return;
-                }
-                for (DocumentSnapshot doc : values) {
-                    TransferRequests request = doc.toObject(TransferRequests.class);
-                    if (requestsIds.contains(request.getTransferId()))
-                        continue;
-                    allRequests.add(request);
-                    requestsIds.add(request.getTransferId());
-                }
-                adapter.notifyDataSetChanged();
-            });
+        TRANSFER_REQUESTS_COL.whereIn("oldProjectId", manager.getProjectIds()).whereEqualTo("transferStatus", PENDING).addSnapshotListener((values, error) -> {
+            allRequests.clear();
+            if (error != null) {
+                return;
+            }
+            for (DocumentSnapshot doc : values) {
+                TransferRequests request = doc.toObject(TransferRequests.class);
+                allRequests.add(request);
+            }
+            adapter.notifyDataSetChanged();
         });
     }
 
@@ -206,12 +203,11 @@ public class TransferRequestsFragment extends Fragment {
     }
 
     private void updateTransferRequests(@NonNull TransferRequests request) {
-        // change transfer status to 0 (rejected) for all requests on this employee
         TRANSFER_REQUESTS_COL.whereEqualTo("employee.id", request.getEmployee().getId()).get().addOnSuccessListener(values -> {
             for (DocumentSnapshot doc : values) {
-                if (doc.getId().equals(request.getTransferId()))
+                if (doc.toObject(TransferRequests.class).getTransferStatus() != PENDING || doc.getId().equals(request.getTransferId()))
                     continue;
-                batch.update(db.document(doc.getReference().getPath()), "transferStatus", 0);
+                batch.update(db.document(doc.getReference().getPath()), "transferStatus", REJECTED);
             }
             updateAllowancesData(request, newProject.getAllowancesList());
         });
@@ -252,16 +248,14 @@ public class TransferRequestsFragment extends Fragment {
             builder.setMessage(content);
             builder.setTitle("Content");
             builder.setPositiveButton("Accept", (dialog, which) -> {
-                transferRequestStatus = 1;
                 allRequests.remove(request);
                 adapter.notifyItemRemoved(position);
-                updateRequestStatus(request, transferRequestStatus);
+                updateRequestStatus(request, ACCEPTED);
             });
             builder.setNegativeButton("Reject", (dialogInterface, i) -> {
-                transferRequestStatus = 0;
                 allRequests.remove(request);
                 adapter.notifyItemRemoved(position);
-                updateRequestStatus(request, transferRequestStatus);
+                updateRequestStatus(request, REJECTED);
             });
             builder.setNeutralButton("Cancel", (dialogInterface, i) -> {
 

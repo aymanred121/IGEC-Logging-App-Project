@@ -28,7 +28,6 @@ import com.igec.common.firebase.Employee;
 import com.igec.common.firebase.EmployeeOverview;
 import com.igec.common.firebase.Project;
 import com.igec.common.firebase.TransferRequests;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -314,12 +313,12 @@ public class SendTransferRequest extends Fragment {
             employeesId.clear();
             for (EmployeeOverview employee : fromProject.getEmployees()) {
                 // add project employees except for the manager
-                if (!employee.getId().equals(fromProject.getManagerID())) {
+                if (!employee.isManager) {
                     employeesId.add(String.format("%s | %s %s", employee.getId(), employee.getFirstName(), employee.getLastName()));
+                    selectedEmployee = employee;
                 }
             }
             if (employeesId.size() != 0) {
-                selectedEmployee = fromProject.getEmployees().get(0);
                 binding.employeeIdAuto.setText(String.format("%s | %s %s", selectedEmployee.getId(), selectedEmployee.getFirstName(), selectedEmployee.getLastName()));
                 idAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, employeesId);
                 binding.employeeIdAuto.setAdapter(idAdapter);
@@ -335,11 +334,6 @@ public class SendTransferRequest extends Fragment {
     private final TextWatcher twToProjectRef = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            //TODO
-            // changed to Project
-            // 1- remove this project from fromProjectsRef
-            // 2- add the old project to fromProjectsRef
-            // isDone?
         }
 
         @Override
@@ -360,12 +354,9 @@ public class SendTransferRequest extends Fragment {
         @Override
         public void onClick(View view) {
             if (validateInput()) {
-                sendRequest(selectedEmployee).addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void unused) {
-                        Snackbar.make(binding.getRoot(), "Request Sent", Snackbar.LENGTH_SHORT).show();
-                        clearInput();
-                    }
+                sendRequest(selectedEmployee).addOnSuccessListener(unused -> {
+                    Snackbar.make(binding.getRoot(), "Request Sent", Snackbar.LENGTH_SHORT).show();
+                    clearInput();
                 });
             }
         }

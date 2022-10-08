@@ -3,6 +3,7 @@ package com.igec.common.fragments;
 import static android.content.ContentValues.TAG;
 
 import static com.igec.common.CONSTANTS.ADMIN;
+import static com.igec.common.CONSTANTS.PENDING;
 import static com.igec.common.CONSTANTS.VACATION_COL;
 
 import android.annotation.SuppressLint;
@@ -86,7 +87,7 @@ public class VacationRequestsFragment extends Fragment {
         if (currManager != null) {
             VACATION_COL
                     .whereEqualTo("manager.id", currManager.getId())
-                    .whereEqualTo("vacationStatus", 0)
+                    .whereEqualTo("vacationStatus", PENDING)
                     .addSnapshotListener((queryDocumentSnapshots, e) -> {
                         if (e != null) {
                             Log.w(TAG, "Listen failed.", e);
@@ -103,7 +104,7 @@ public class VacationRequestsFragment extends Fragment {
         } else {
             VACATION_COL
                     .whereEqualTo("employee.managerID", ADMIN)
-                    .whereEqualTo("vacationStatus", 0)
+                    .whereEqualTo("vacationStatus", PENDING)
                     .addSnapshotListener((queryDocumentSnapshots, e) -> {
                         if (e != null) {
                             Log.w(TAG, "Listen failed.", e);

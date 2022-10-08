@@ -24,12 +24,12 @@ import androidx.fragment.app.DialogFragment;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
+import com.igec.common.R;
+import com.igec.common.databinding.DialogVacationBinding;
 import com.igec.common.firebase.Allowance;
 import com.igec.common.firebase.EmployeesGrossSalary;
 import com.igec.common.firebase.VacationRequest;
 import com.igec.common.utilities.AllowancesEnum;
-import com.igec.common.R;
-import com.igec.common.databinding.DialogVacationBinding;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -86,14 +86,14 @@ public class VacationDialog extends DialogFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        int accepted = Integer.parseInt(vacationRequest.getDays());
-        int remaining = vacationRequest.getEmployee().getTotalNumberOfVacationDays();
+        int acceptedDays = Integer.parseInt(vacationRequest.getDays());
+        int remainingDays = vacationRequest.getEmployee().getTotalNumberOfVacationDays();
         binding.TextInputAcceptedAmount.setText(String.format("%s", vacationRequest.getDays()));
         binding.textInputLayoutAcceptedAmount.setSuffixText(String.format("of %s", vacationRequest.getDays()));
         binding.textInputLayoutUnpaid.setSuffixText(String.format("of %s", vacationRequest.getDays()));
         binding.TextViewVacationStatus.setText(String.format("%s\nNote: %s", vacationNote, vacationRequest.getVacationNote()));
-        if (remaining < accepted)
-            binding.TextInputUnpaid.setText(String.format(Locale.getDefault(),"%d", accepted - remaining));
+        if (remainingDays < acceptedDays)
+            binding.TextInputUnpaid.setText(String.format(Locale.getDefault(), "%d", acceptedDays - remainingDays));
         binding.TextInputAcceptedAmount.addTextChangedListener(twAcceptedAmount);
         binding.TextInputUnpaid.addTextChangedListener(twUnpaid);
         binding.ButtonAccept.setOnClickListener(oclAccept);
@@ -129,14 +129,14 @@ public class VacationDialog extends DialogFragment {
         Calendar calendar = Calendar.getInstance();
         Date requestStartDate = vacationRequest.getStartDate();
         calendar.setTime(requestStartDate);
-        month = String.format(Locale.getDefault(),"%02d", calendar.get(Calendar.MONTH) + 1);
+        month = String.format(Locale.getDefault(), "%02d", calendar.get(Calendar.MONTH) + 1);
         year = String.valueOf(calendar.get(Calendar.YEAR));
         if (calendar.get(Calendar.DAY_OF_MONTH) > 25) {
             if (calendar.get(Calendar.MONTH) == Calendar.DECEMBER) {
                 month = "01";
-                year = String.format(Locale.getDefault(),"%02d", calendar.get(Calendar.YEAR) + 1);
+                year = String.format(Locale.getDefault(), "%02d", calendar.get(Calendar.YEAR) + 1);
             } else {
-                month = String.format(Locale.getDefault(),"%02d", calendar.get(Calendar.MONTH) + 2);
+                month = String.format(Locale.getDefault(), "%02d", calendar.get(Calendar.MONTH) + 2);
             }
         }
         calendar.add(Calendar.DATE, vacationDays);
@@ -147,17 +147,17 @@ public class VacationDialog extends DialogFragment {
                 .set(vacationRequest, SetOptions.merge());
         EMPLOYEE_COL.document(vacationRequest.getEmployee().getId())
                 .update("totalNumberOfVacationDays", FieldValue.increment(-vacationDays));
-        if(unPaidDays==0)
+        if (unPaidDays == 0)
             return;
         EMPLOYEE_GROSS_SALARY_COL.document(vacationRequest.getEmployee().getId()).collection(year).document(month).get().addOnSuccessListener(documentSnapshot -> {
             if (!documentSnapshot.exists()) {
-                EMPLOYEE_GROSS_SALARY_COL.document(vacationRequest.getEmployee().getId()).get().addOnSuccessListener(doc->{
-                    if(!doc.exists())
+                EMPLOYEE_GROSS_SALARY_COL.document(vacationRequest.getEmployee().getId()).get().addOnSuccessListener(doc -> {
+                    if (!doc.exists())
                         return;
                     EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
                     assert employeesGrossSalary != null;
                     ArrayList<Allowance> allTypes = employeesGrossSalary.getAllTypes();
-                    for (Allowance allowance:allTypes) {
+                    for (Allowance allowance : allTypes) {
                         if (allowance.getType() != AllowancesEnum.NETSALARY.ordinal()) {
                             employeesGrossSalary.getBaseAllowances().add(allowance);
                             employeesGrossSalary.getAllTypes().remove(allowance);
@@ -169,7 +169,7 @@ public class VacationDialog extends DialogFragment {
                     unPaidAllowance.setName("unpaid");
                     unPaidAllowance.setNote(String.format("%d", unPaidDays));
                     employeesGrossSalary.getAllTypes().add(unPaidAllowance);
-                    db.document(documentSnapshot.getReference().getPath()).set(employeesGrossSalary,SetOptions.merge());
+                    db.document(documentSnapshot.getReference().getPath()).set(employeesGrossSalary, SetOptions.merge());
                 });
 
             } else {
@@ -178,7 +178,7 @@ public class VacationDialog extends DialogFragment {
                 unPaidAllowance.setType(AllowancesEnum.RETENTION.ordinal());
                 unPaidAllowance.setName("unpaid");
                 unPaidAllowance.setNote(String.format("%d", unPaidDays));
-                db.document(documentSnapshot.getReference().getPath()).update("allTypes",FieldValue.arrayUnion(unPaidAllowance));
+                db.document(documentSnapshot.getReference().getPath()).update("allTypes", FieldValue.arrayUnion(unPaidAllowance));
             }
         });
     }
@@ -255,19 +255,31 @@ public class VacationDialog extends DialogFragment {
         @Override
         public void afterTextChanged(Editable editable) {
             boolean isEmpty = Objects.requireNonNull(binding.TextInputUnpaid.getText()).toString().trim().isEmpty();
+            int unpaid = 0;
+            int accepted=0;
+            if (binding.TextInputAcceptedAmount.getText().toString().trim().length() != 0)
+                accepted = Integer.parseInt(binding.TextInputAcceptedAmount.getText().toString());
+            int remaining = vacationRequest.getEmployee().getTotalNumberOfVacationDays();
+            boolean errorFlag = false;
             if (!isEmpty) {
-                int unpaid = Integer.parseInt(binding.TextInputUnpaid.getText().toString());
-                int accepted = Integer.parseInt(Objects.requireNonNull(binding.TextInputAcceptedAmount.getText()).toString());
-                int remaining = vacationRequest.getEmployee().getTotalNumberOfVacationDays();
+                unpaid = Integer.parseInt(binding.TextInputUnpaid.getText().toString());
                 if (unpaid > accepted) {
                     binding.textInputLayoutUnpaid.setError(String.format("Can't be more than %d", accepted));
+                    errorFlag = true;
                 } else if (remaining < accepted && unpaid < accepted - remaining) {
                     binding.textInputLayoutUnpaid.setError("Has to be at least " + (accepted - remaining) + " Days");
+                    errorFlag = true;
                 } else {
                     binding.textInputLayoutUnpaid.setError(null);
                     binding.textInputLayoutUnpaid.setErrorEnabled(false);
                 }
-            } else {
+            } else if (isEmpty) {
+                if (remaining < accepted) {
+                    binding.textInputLayoutUnpaid.setError("Has to be at least " + (accepted - remaining) + " Days");
+                    errorFlag = true;
+                }
+            }
+            if (!errorFlag) {
                 binding.textInputLayoutUnpaid.setErrorEnabled(false);
                 binding.textInputLayoutUnpaid.setError(null);
             }

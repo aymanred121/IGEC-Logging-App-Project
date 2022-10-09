@@ -108,8 +108,8 @@ public class AddProjectFragment extends Fragment {
             projectManager = bundle.getParcelable("manager");
             if (projectManager != null)
                 binding.managerNameEdit.setText(String.format("%s - %s %s", projectManager.getId(), projectManager.getFirstName(), projectManager.getLastName()));
-                binding.managerNameLayout.setError(null);
-                binding.managerNameLayout.setErrorEnabled(false);
+            binding.managerNameLayout.setError(null);
+            binding.managerNameLayout.setErrorEnabled(false);
         });
     }
 
@@ -137,8 +137,8 @@ public class AddProjectFragment extends Fragment {
             empInfo.add(employee.getLastName());
             empInfo.add(employee.getTitle());
             empInfo.add(employee.getManagerID());
-            empInfo.add(new HashMap<String,Object>(){{
-                put("pids",employee.getProjectIds());
+            empInfo.add(new HashMap<String, Object>() {{
+                put("pids", employee.getProjectIds());
             }});
             empInfo.add(employee.isSelected);
             empInfo.add(false); // isManager
@@ -215,7 +215,7 @@ public class AddProjectFragment extends Fragment {
         PID = PROJECT_COL.document().getId().substring(0, 5);
         binding.clientButton.setEnabled(!binding.officeWorkCheckbox.isChecked());
         //TODO: remove fakeData() when all testing is finished
-        fakeData();
+//        fakeData();
 
     }
 
@@ -331,7 +331,7 @@ public class AddProjectFragment extends Fragment {
                             batch.commit().addOnSuccessListener(unused -> {
                                 clearInputs();
                                 PID = PROJECT_COL.document().getId().substring(0, 5);
-                                fakeData();
+//                                fakeData();
                                 Snackbar.make(binding.getRoot(), "Registered", Snackbar.LENGTH_SHORT).show();
                                 batch = FirebaseFirestore.getInstance().batch();
                             }).addOnFailureListener(unused -> {
@@ -351,7 +351,7 @@ public class AddProjectFragment extends Fragment {
                     if (counter[0] == team.size() - 1) {
                         batch.commit().addOnSuccessListener(unused -> {
                             clearInputs();
-                            fakeData();
+//                            fakeData();
                             PID = PROJECT_COL.document().getId().substring(0, 5);
                             Snackbar.make(binding.getRoot(), "Registered", Snackbar.LENGTH_SHORT).show();
                             batch = FirebaseFirestore.getInstance().batch();
@@ -387,6 +387,7 @@ public class AddProjectFragment extends Fragment {
         binding.officeWorkCheckbox.setChecked(false);
         binding.referenceLayout.setEnabled(true);
         binding.referenceEdit.setEnabled(true);
+        binding.hoursEdit.setText("8");
         client = null;
         vTimeDatePickerBuilder = MaterialDatePicker.Builder.datePicker();
         vTimeDatePicker = vTimeDatePickerBuilder.build();

@@ -141,7 +141,7 @@ public class AddUserFragment extends Fragment {
 
 
         //TODO: remove fakeData() when all testing is finished
-        fakeData();
+//        fakeData();
     }
 
     private String convertDateToString(long selection) {
@@ -192,7 +192,7 @@ public class AddUserFragment extends Fragment {
 
             batch.commit().addOnSuccessListener(unused -> {
                 clearInputs();
-                fakeData();
+//                fakeData();
                 Snackbar.make(binding.getRoot(), "Registered", Snackbar.LENGTH_SHORT).show();
                 batch = FirebaseFirestore.getInstance().batch();
             });

@@ -188,7 +188,7 @@ public class AddProjectFragment extends Fragment {
 
                     @Override
                     public void afterTextChanged(Editable editable) {
-                        hideError(binding.dateLayout);
+                        hideError(v.first);
                     }
                 });
         }

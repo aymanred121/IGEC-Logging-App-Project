@@ -80,7 +80,7 @@ public class WorkingDayAdapter extends RecyclerView.Adapter<WorkingDayAdapter.Da
         int hours = (int) workingDay.getHours();
         int minutes = (int) ((workingDay.getHours() - hours) * 60);
         holder.vHours.setText(String.format("%d %s %d %s", hours, hours > 1 ? "Hrs" : "Hr",minutes,"Min"));
-        holder.vType_text.setText(workingDay.getType());
+        holder.vType_text.setText(workingDay.getProjectName());
         switch (workingDay.getType()) {
             case CHECK_IN_FROM_HOME:
                 holder.vType_image.setImageResource(R.drawable.ic_home_work);

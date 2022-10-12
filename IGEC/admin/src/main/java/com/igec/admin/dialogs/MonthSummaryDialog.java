@@ -100,7 +100,7 @@ public class MonthSummaryDialog extends DialogFragment {
         int monthNumber = Integer.parseInt(month);
         StringJoiner header = new StringJoiner(",");
         String[] dataRow;
-        header.add("Name");
+        header.add("Day");
         /*
         we know that months with 31 days are 1 3 5 7 8 10 12
         and when we use those numbers to shift left 1 we get

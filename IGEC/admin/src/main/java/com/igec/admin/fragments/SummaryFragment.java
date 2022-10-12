@@ -128,9 +128,10 @@ public class SummaryFragment extends Fragment {
         final Calendar today = Calendar.getInstance();
         MonthPickerDialog.Builder builder = new MonthPickerDialog.Builder(getActivity(),
                 (selectedMonth, selectedYear) -> {
+                    selectedMonth += 1;
                     binding.monthLayout.setError(null);
                     binding.monthLayout.setErrorEnabled(false);
-                    binding.monthEdit.setText(String.format("%d/%d", selectedMonth + 1, selectedYear));
+                    binding.monthEdit.setText(String.format("%d/%d", selectedMonth, selectedYear));
                     year = String.format("%d", selectedYear);
                     month = String.format("%02d", selectedMonth);
 
@@ -259,9 +260,10 @@ public class SummaryFragment extends Fragment {
             @SuppressLint("DefaultLocale")
             MonthPickerDialog.Builder builder = new MonthPickerDialog.Builder(getActivity(),
                     (selectedMonth, selectedYear) -> {
+                        selectedMonth += 1;
                         binding.monthLayout.setError(null);
                         binding.monthLayout.setErrorEnabled(false);
-                        binding.monthEdit.setText(String.format("%d/%d", selectedMonth + 1, selectedYear));
+                        binding.monthEdit.setText(String.format("%d/%d", selectedMonth, selectedYear));
                         String[] selectedDate = binding.monthEdit.getText().toString().split("/");
                         year = selectedDate[1];
                         month = selectedDate[0];

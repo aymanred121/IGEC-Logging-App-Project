@@ -91,11 +91,10 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         OFFICE,
         SITE,
         SUPPORT,
-        OUTSIDE,
-        NONE
     }
 
-    CheckInType checkInType = CheckInType.NONE;
+    CheckInType checkInType = CheckInType.HOME;
+    boolean canCheckFromHome = true;
 
     public static CheckInOutFragment newInstance(Employee user) {
         Bundle args = new Bundle();
@@ -201,6 +200,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                     }
                     Summary summary = value.toObject(Summary.class);
                     lastProjectId = summary != null ? summary.getLastProjectId() : null;
+                    canCheckFromHome = summary != null && summary.getProjectIds().size() == 0;
                     //need project id
                     if (summary != null && summary.getProjectIds().containsKey("HOME")) {
                         //disable check-In btn
@@ -293,9 +293,22 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                     Location location = result.getLocation();
                                     longitude = location.getLongitude();
                                     latitude = location.getLatitude();
+                                    checkInType = CheckInType.HOME;
+                                    /*
+                                     *
+                                     * check-in given lastProjectId == null
+                                     * employee -> home / project / office
+                                     * manager -> home/ project / office / support
+                                     * check-out given lastProjectId != null && canCheckFromHome == false
+                                     * employee or manager -> same Project only
+                                     * recheck in given lastProjectId == null && canCheckFromHome == false
+                                     * employee -> project/ office
+                                     * manager --> project /office /support
+                                     * */
                                     for (Project project : projects) {
                                         if ((lastProjectId != null && !project.getId().equals(lastProjectId))) {
-                                            checkInType = CheckInType.NONE;
+                                            // if the user is not in the last project
+                                            // to prevent user from checking out from another project
                                             continue;
                                         }
                                         double distance;
@@ -303,7 +316,6 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                         Location.distanceBetween(latitude, longitude, project.getLat(), project.getLng(), results);
                                         distance = results[0];
                                         if (distance > project.getArea()) {
-                                            checkInType = CheckInType.HOME;
                                             continue;
                                         } else if (currEmployee.getProjectIds().contains(project.getId())) {
                                             checkInType = CheckInType.SITE;
@@ -311,19 +323,12 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                             checkInType = CheckInType.OFFICE;
                                         } else if (currEmployee.isManager()) {
                                             checkInType = CheckInType.SUPPORT;
-                                        } else {
-                                            checkInType = CheckInType.OUTSIDE;
-                                            continue;
                                         }
                                         updateEmployeeSummary(latitude, longitude, project);
                                         updateCheckInOutBtn();
                                         break;
                                     }
                                     switch (checkInType) {
-                                        case NONE:
-                                            Snackbar.make(binding.getRoot(), "You are trying to checkout from another site", Snackbar.LENGTH_SHORT).show();
-                                            binding.checkInOutFab.setEnabled(true);
-                                            break;
                                         case SITE:
                                             Snackbar.make(binding.getRoot(), "You are in the site", Snackbar.LENGTH_SHORT).show();
                                             break;
@@ -334,11 +339,14 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                             Snackbar.make(binding.getRoot(), "You are now a support in this project", Snackbar.LENGTH_SHORT).show();
                                             break;
                                         case HOME:
-                                            updateEmployeeSummary(latitude, longitude, new Project());
-                                            break;
-                                        case OUTSIDE:
-                                            Snackbar.make(binding.getRoot(), "You are trying to checkIn from another site", Snackbar.LENGTH_SHORT).show();
-                                            binding.checkInOutFab.setEnabled(true);
+                                            if (canCheckFromHome)
+                                                updateEmployeeSummary(latitude, longitude, new Project());
+                                            else {
+                                                if (lastProjectId != null)
+                                                    Snackbar.make(binding.getRoot(), "You can't check-out from outside the project", Snackbar.LENGTH_SHORT).show();
+                                                else
+                                                    Snackbar.make(binding.getRoot(), "You can't recheck-in from home", Snackbar.LENGTH_SHORT).show();
+                                            }
                                             break;
                                     }
                                     return null;
@@ -378,6 +386,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                 .get().addOnSuccessListener(documentSnapshot -> {
                     if (!documentSnapshot.exists() || documentSnapshot.getData().size() == 0) {
                         //check in
+                        canCheckFromHome = false;
                         employeeCheckIn(summary, project);
                         if (checkInType == CheckInType.HOME) {
                             employeeCheckOut(summary, checkOutDetails, "HOME");
@@ -393,11 +402,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                             employeeCheckOut(summary1, checkOutDetails, project.getId());
                         } else {
                             //re check in
-                            if (project.getId() != null) {
-                                employeeReCheckIn(summary1, project, documentSnapshot);
-                                return;
-                            }
-                            Snackbar.make(binding.getRoot(), "You are trying to re checkIn from home", Snackbar.LENGTH_SHORT).show();
+                            employeeReCheckIn(summary1, project, documentSnapshot);
                         }
                     }
                 });

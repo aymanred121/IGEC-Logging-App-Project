@@ -200,7 +200,15 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                     }
                     Summary summary = value.toObject(Summary.class);
                     lastProjectId = summary != null ? summary.getLastProjectId() : null;
-                    canCheckFromHome = summary != null && summary.getProjectIds().size() == 0;
+                    /*
+                     * summary == null --> canCheckFromHome = true
+                     * summary != null --> summary.getProjectIds().size() == 0 ==> canCheckFromHome
+                     * */
+                    if (summary == null)
+                        canCheckFromHome = true;
+                    else
+                        canCheckFromHome = summary.getProjectIds().size() == 0;
+                    binding.greetingText.setText(lastProjectId != null ? String.format("In %s", lastProjectId) : binding.greetingText.getText());
                     //need project id
                     if (summary != null && summary.getProjectIds().containsKey("HOME")) {
                         //disable check-In btn
@@ -323,6 +331,9 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                             checkInType = CheckInType.OFFICE;
                                         } else if (currEmployee.isManager()) {
                                             checkInType = CheckInType.SUPPORT;
+                                        } else {
+                                            // inside a project but not in the employee's project list
+                                            continue;
                                         }
                                         updateEmployeeSummary(latitude, longitude, project);
                                         updateCheckInOutBtn();
@@ -394,15 +405,18 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                             binding.checkInOutFab.setText("HOME");
                             binding.checkInOutFab.setBackgroundColor(Color.GRAY);
                             Snackbar.make(binding.getRoot(), "You are at home", Snackbar.LENGTH_SHORT).show();
-                        }
+                        } else
+                            binding.greetingText.setText(project.getId() != null ? String.format("In %s", project.getId()) : binding.greetingText.getText());
                     } else {
                         Summary summary1 = documentSnapshot.toObject(Summary.class);
                         if (summary1.getCheckOut() == null) {
                             //check out
                             employeeCheckOut(summary1, checkOutDetails, project.getId());
+                            binding.greetingText.setText(String.format("%s\n%s", getString(R.string.good_morning), currEmployee.getFirstName()));
                         } else {
                             //re check in
                             employeeReCheckIn(summary1, project, documentSnapshot);
+                            binding.greetingText.setText(String.format("In %s", project.getId()));
                         }
                     }
                 });

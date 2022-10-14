@@ -41,18 +41,9 @@ class LauncherActivity : Activity() {
                     if (!documentSnapshot.exists()) return@addOnSuccessListener
                     val employee = documentSnapshot.toObject(Employee::class.java)
                     val intent: Intent
-                    assert(employee != null)
-                    if (employee!!.managerID == null) {
-                        Toast.makeText(
-                            this@LauncherActivity,
-                            "You're not assigned to any project yet",
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        finish()
-                    }
                     // not used by another device but still logged here
                     // meaning that the account has been unlocked while the account is still open in a device
-                    if (!employee.isLocked) {
+                    if (!employee!!.isLocked) {
                         intent = Intent(this@LauncherActivity, LoginActivity::class.java)
                         Toast.makeText(
                             this@LauncherActivity,

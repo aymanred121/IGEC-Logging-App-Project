@@ -181,14 +181,6 @@ class LoginActivity : AppCompatActivity() {
                         .set(currEmployee, SetOptions.merge())
                         .addOnSuccessListener EmployeeColListener@{
                             val intent: Intent = when (currEmployee.managerID) {
-                                null -> {
-                                    Snackbar.make(
-                                        binding!!.root,
-                                        "you are not assigned to any project yet",
-                                        Snackbar.LENGTH_SHORT
-                                    ).show()
-                                    return@EmployeeColListener
-                                }
                                 CONSTANTS.ADMIN -> {
                                     Intent(this@LoginActivity, MDashboard::class.java)
                                 }

@@ -327,10 +327,11 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                             continue;
                                         } else if (currEmployee.getProjectIds().contains(project.getId())) {
                                             checkInType = CheckInType.SITE;
-                                        } else if (project.getReference().equals("-99999")) {
-                                            checkInType = CheckInType.OFFICE;
                                         } else if (currEmployee.isManager()) {
-                                            checkInType = CheckInType.SUPPORT;
+                                            if (project.getReference().equals("-99999"))
+                                                checkInType = CheckInType.OFFICE;
+                                            else
+                                                checkInType = CheckInType.SUPPORT;
                                         } else {
                                             // inside a project but not in the employee's project list
                                             continue;
@@ -422,7 +423,8 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                 });
     }
 
-    private void employeeReCheckIn(Summary summary, Project project, DocumentSnapshot documentSnapshot) {
+    private void employeeReCheckIn(Summary summary, Project project, DocumentSnapshot
+            documentSnapshot) {
         summary.setLastCheckInTime(Timestamp.now());
         if (!summary.getProjectIds().keySet().contains(project.getId())) {
             switch (checkInType) {
@@ -522,7 +524,8 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         binding.checkInOutFab.setEnabled(true);
     }
 
-    private void employeeCheckOut(Summary summary, HashMap<String, Object> checkOut, String projectId) {
+    private void employeeCheckOut(Summary summary, HashMap<String, Object> checkOut, String
+            projectId) {
         updateDate();
         long checkInTime = (summary.getLastCheckInTime()).getSeconds();
         long checkOutTime = Timestamp.now().getSeconds();

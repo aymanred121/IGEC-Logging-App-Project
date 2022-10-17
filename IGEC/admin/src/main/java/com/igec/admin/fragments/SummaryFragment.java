@@ -111,6 +111,12 @@ public class SummaryFragment extends Fragment {
                         if (summary.getCheckOut() == null) {
                             if (Calendar.getInstance().get(Calendar.DAY_OF_MONTH) == Integer.parseInt(day)) {
                                 Snackbar.make(binding.getRoot(), "this Employee is still working", Snackbar.LENGTH_SHORT).show();
+                                if (docs.getDocuments().lastIndexOf(q) == docs.getDocuments().size() - 1) {
+                                    if (opened) return;
+                                    opened = true;
+                                    MonthSummaryDialog monthSummaryDialog = new MonthSummaryDialog(workingDays);
+                                    monthSummaryDialog.show(getParentFragmentManager(), "");
+                                }
                                 continue;
                             }
                             /*

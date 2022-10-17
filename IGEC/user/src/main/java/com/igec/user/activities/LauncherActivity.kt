@@ -52,7 +52,7 @@ class LauncherActivity : Activity() {
                         ).show()
                     } else {
                         // not used -> Open suitable dashboard
-                        intent = if (employee.managerID == CONSTANTS.ADMIN) Intent(
+                        intent = if (employee.isManager) Intent(
                             this@LauncherActivity,
                             MDashboard::class.java
                         ) else Intent(this@LauncherActivity, EDashboard::class.java)

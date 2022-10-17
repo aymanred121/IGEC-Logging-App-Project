@@ -77,7 +77,7 @@ public class VacationsLogFragment extends Fragment {
 
         if (user == null)// admin
             loadVacations("manager", null);
-        else if (user.getManagerID().equals(ADMIN)) // manager
+        else if (ADMIN.equals(user.getManagerID())) // manager
         {
             loadOwn = true;
             loadVacations("manager.id", user.getId());

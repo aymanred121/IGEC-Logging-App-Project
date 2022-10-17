@@ -68,8 +68,7 @@ public class TransferRequestsFragment extends Fragment {
     private FragmentTransferRequestsBinding binding;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         binding = FragmentTransferRequestsBinding.inflate(inflater, container, false);
         return binding.getRoot();
@@ -114,6 +113,7 @@ public class TransferRequestsFragment extends Fragment {
     }
 
     private void getRequests() {
+        if (manager.getProjectIds().size() == 0) return;
         TRANSFER_REQUESTS_COL.whereIn("oldProjectId", manager.getProjectIds()).whereEqualTo("transferStatus", PENDING).addSnapshotListener((values, error) -> {
             allRequests.clear();
             if (error != null) {
@@ -145,9 +145,8 @@ public class TransferRequestsFragment extends Fragment {
     private void updateEmployeeData(TransferRequests request) {
 
         batch.update(EMPLOYEE_COL.document(request.getEmployee().getId()), "projectIds", new ArrayList<String>() {{
-                    add(newProject.getId());
-                }}
-                , "managerID", newProject.getManagerID());
+            add(newProject.getId());
+        }}, "managerID", newProject.getManagerID());
 
         ArrayList<Object> empInfo = new ArrayList<>();
         empInfo.add(request.getEmployee().getFirstName());
@@ -180,8 +179,7 @@ public class TransferRequestsFragment extends Fragment {
     private void updateAllowancesData(TransferRequests request, ArrayList<Allowance> projectAllowances) {
         updateDate();
         EMPLOYEE_GROSS_SALARY_COL.document(request.getEmployee().getId()).get().addOnSuccessListener(value -> {
-            if (!value.exists())
-                return;
+            if (!value.exists()) return;
             EmployeesGrossSalary employeesGrossSalary1 = value.toObject(EmployeesGrossSalary.class);
             employeesGrossSalary1.getAllTypes().removeIf(x -> x.getProjectId().trim().equals(request.getOldProjectId()));
             employeesGrossSalary1.getAllTypes().addAll(projectAllowances);
@@ -217,8 +215,7 @@ public class TransferRequestsFragment extends Fragment {
         batch = FirebaseFirestore.getInstance().batch();
         if (status == 1) {
             PROJECT_COL.document(request.getNewProjectId()).get().addOnSuccessListener(doc -> {
-                if (!doc.exists())
-                    return;
+                if (!doc.exists()) return;
                 newProject = doc.toObject(Project.class);
                 batch.update(TRANSFER_REQUESTS_COL.document(request.getTransferId()), "transferStatus", status);
                 updateEmployeeData(request);
@@ -226,8 +223,7 @@ public class TransferRequestsFragment extends Fragment {
                 updateTransferRequests(request);
 
             });
-        }
-        else{
+        } else {
             batch.update(TRANSFER_REQUESTS_COL.document(request.getTransferId()), "transferStatus", status);
             batch.commit();
         }
@@ -239,11 +235,7 @@ public class TransferRequestsFragment extends Fragment {
         public void onItemClick(int position) {
             TransferRequests request = allRequests.get(position);
             EmployeeOverview employee = request.getEmployee();
-            String content = "Employee ID: " + request.getEmployee().getId() + '\n'
-                    + "Employee Name: " + employee.getFirstName() + " " + employee.getLastName() + '\n'
-                    + "Project reference: IGEC" + request.getOldProjectReference() + '\n'
-                    + "Project name: " + request.getOldProjectName() + '\n'
-                    + "Comment: " + request.getNote();
+            String content = "Employee ID: " + request.getEmployee().getId() + '\n' + "Employee Name: " + employee.getFirstName() + " " + employee.getLastName() + '\n' + "Project reference: IGEC" + request.getOldProjectReference() + '\n' + "Project name: " + request.getOldProjectName() + '\n' + "Comment: " + request.getNote();
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setMessage(content);
             builder.setTitle("Content");

@@ -115,6 +115,7 @@ public class ProjectSummaryFragment extends Fragment {
                 projects.add(project);
                 projectsRef.add(String.format("IGEC%s | %s", project.getReference(), project.getName()));
             }
+            if(projects.size() == 0) return;
             projectIdsAdapter = new ArrayAdapter<>(getActivity(), R.layout.item_dropdown, projectsRef);
             selectedProject = projects.get(0);
             binding.recyclerView.setHasFixedSize(true);

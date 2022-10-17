@@ -1,5 +1,6 @@
 package com.igec.user.fragments;
 
+import static com.igec.common.CONSTANTS.ADMIN;
 import static com.igec.common.CONSTANTS.EMPLOYEE_COL;
 import static com.igec.common.CONSTANTS.VACATION_COL;
 
@@ -154,12 +155,13 @@ public class SendVacationRequestFragment extends Fragment implements DatePickerD
         }
         Calendar[] disabledDays = weekends.toArray(new Calendar[weekends.size()]);
         dpd.setDisabledDays(disabledDays);
+        dpd.setMinDate(Calendar.getInstance());
     }
 
     private void uploadVacationRequest() {
         String vacationID = VACATION_COL.document().getId().substring(0, 5);
         EMPLOYEE_COL
-                .document(currEmployee.getManagerID())
+                .document(currEmployee.getManagerID() == null ? ADMIN : currEmployee.getManagerID())
                 .addSnapshotListener((value, error) -> {
                     days = ((long) Integer.parseInt(binding.daysEdit.getText().toString()) * 24 * 3600 * 1000) + startDate;
                     vacationRequest = new VacationRequest(

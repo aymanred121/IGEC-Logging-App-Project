@@ -104,6 +104,7 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
 
         notificationManager = NotificationManagerCompat.from(this)
 
+        val vacationRequests: MutableSet<String> = mutableSetOf()
         CONSTANTS.VACATION_COL.whereEqualTo("employee.id", currEmployee!!.id)
             .whereEqualTo("vacationNotification", 0)
             .whereNotEqualTo("vacationStatus", PENDING)
@@ -116,7 +117,9 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                     values!!.documents.forEach { documentSnapshot ->
                         run {
                             val vacation = documentSnapshot.toObject(VacationRequest::class.java)
-                            val msg: String = if (vacation!!.vacationStatus == -1)
+                            if (vacationRequests.contains(vacation!!.id)) return@run
+                            vacationRequests.add(vacation.id)
+                            val msg: String = if (vacation!!.vacationStatus == REJECTED)
                                 "your vacation request for ${vacation.days} days has been rejected"
                             else
                                 "your vacation request for ${vacation.days} days has been accepted"
@@ -137,6 +140,7 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                 }
             }
         //check transfer request
+        val transferRequests: MutableSet<String> = mutableSetOf()
         CONSTANTS.TRANSFER_REQUESTS_COL.whereEqualTo("employee.id", currEmployee!!.id)
             .whereEqualTo("seenByEmp", false)
             .addSnapshotListener { values, error ->
@@ -146,21 +150,22 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                         return@run
                     }
                     for (document in values!!.documents) {
-                        if (document.toObject(TransferRequests::class.java)!!.transferStatus == 0) {
+                        val transfer = document.toObject(TransferRequests::class.java)
+                        if (transferRequests.contains(transfer!!.transferId)) return@run
+                        transferRequests.add(transfer.transferId)
+                        if (transfer!!.transferStatus == REJECTED) {
                             //rejected
                             CONSTANTS.TRANSFER_REQUESTS_COL.document(document.id)
                                 .update("transferNotification", FieldValue.increment(1))
                             continue
                         }
-                        if (document.toObject(TransferRequests::class.java)!!.transferStatus == -1) {
+                        if (transfer!!.transferStatus == PENDING) {
                             //pending
                             continue
                         }
                         val msg =
                             "You have been transferred to project ${
-                                document.toObject(
-                                    TransferRequests::class.java
-                                )!!.newProjectName
+                                transfer!!.newProjectName
                             }"
                         transferNotification = setupNotification(
                             "Project Transfer",

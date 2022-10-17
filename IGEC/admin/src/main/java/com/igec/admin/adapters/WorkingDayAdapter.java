@@ -4,6 +4,7 @@ import static com.igec.common.CONSTANTS.CHECK_IN_FROM_HOME;
 import static com.igec.common.CONSTANTS.CHECK_IN_FROM_OFFICE;
 import static com.igec.common.CONSTANTS.CHECK_IN_FROM_SITE;
 import static com.igec.common.CONSTANTS.CHECK_IN_FROM_SUPPORT;
+import static com.igec.common.CONSTANTS.OFFICE_REF;
 
 import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
@@ -79,7 +80,7 @@ public class WorkingDayAdapter extends RecyclerView.Adapter<WorkingDayAdapter.Da
         }
         int hours = (int) workingDay.getHours();
         int minutes = (int) ((workingDay.getHours() - hours) * 60);
-        holder.vHours.setText(String.format("%d %s %d %s", hours, hours > 1 ? "Hrs" : "Hr",minutes,"Min"));
+        holder.vHours.setText(String.format("%d %s %d %s", hours, hours > 1 ? "Hrs" : "Hr", minutes, "Min"));
         holder.vType_text.setText(workingDay.getProjectName());
         switch (workingDay.getType()) {
             case CHECK_IN_FROM_HOME:
@@ -89,7 +90,10 @@ public class WorkingDayAdapter extends RecyclerView.Adapter<WorkingDayAdapter.Da
                 holder.vType_image.setImageResource(R.drawable.ic_office);
                 break;
             case CHECK_IN_FROM_SITE:
-                holder.vType_image.setImageResource(R.drawable.ic_site);
+                if (workingDay.getProjectReference().equals(OFFICE_REF))
+                    holder.vType_image.setImageResource(R.drawable.ic_office);
+                else
+                    holder.vType_image.setImageResource(R.drawable.ic_site);
                 break;
             case CHECK_IN_FROM_SUPPORT:
                 holder.vType_image.setImageResource(R.drawable.ic_support);

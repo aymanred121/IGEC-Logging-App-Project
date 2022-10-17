@@ -10,6 +10,7 @@ import static com.igec.common.CONSTANTS.LOCATION_REQUEST_CODE;
 import static com.igec.common.CONSTANTS.MACHINE_COL;
 import static com.igec.common.CONSTANTS.MACHINE_DEFECT_LOG_COL;
 import static com.igec.common.CONSTANTS.MACHINE_EMPLOYEE_COL;
+import static com.igec.common.CONSTANTS.OFFICE_REF;
 import static com.igec.common.CONSTANTS.PROJECT_COL;
 import static com.igec.common.CONSTANTS.SUMMARY_COL;
 
@@ -328,7 +329,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                                         } else if (currEmployee.getProjectIds().contains(project.getId())) {
                                             checkInType = CheckInType.SITE;
                                         } else if (currEmployee.isManager()) {
-                                            if (project.getReference().equals("-99999"))
+                                            if (project.getReference().equals(OFFICE_REF))
                                                 checkInType = CheckInType.OFFICE;
                                             else
                                                 checkInType = CheckInType.SUPPORT;

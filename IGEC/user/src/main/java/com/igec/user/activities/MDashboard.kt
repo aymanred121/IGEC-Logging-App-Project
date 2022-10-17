@@ -27,7 +27,6 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
-import com.google.firebase.firestore.FieldValue
 import com.igec.common.CONSTANTS
 import com.igec.common.CONSTANTS.*
 import com.igec.common.firebase.Employee
@@ -36,7 +35,6 @@ import com.igec.common.firebase.VacationRequest
 import com.igec.common.fragments.VacationRequestsFragment
 import com.igec.common.fragments.VacationsLogFragment
 import com.igec.user.R
-import com.igec.user.channelName
 import com.igec.user.databinding.ActivityMdashboardBinding
 import com.igec.user.fragments.*
 
@@ -117,7 +115,8 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
 
         notificationManager = NotificationManagerCompat.from(this)
         //get your pending request status
-        CONSTANTS.VACATION_COL.whereEqualTo("employee.id", currManager!!.id)
+        val vacationRequests: MutableSet<String> = mutableSetOf()
+        VACATION_COL.whereEqualTo("employee.id", currManager!!.id)
             .whereEqualTo("vacationNotification", 0)
             .whereNotEqualTo("vacationStatus", PENDING)
             .addSnapshotListener { values, error ->
@@ -127,30 +126,33 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                         return@run
                     }
                     values!!.documents.forEach { documentSnapshot ->
-                        run {
-                            val vacation = documentSnapshot.toObject(VacationRequest::class.java)
-                            val msg: String = if (vacation!!.vacationStatus == -1)
-                                "your vacation request for ${vacation.days} days has been rejected"
-                            else
-                                "your vacation request for ${vacation.days} days has been accepted"
-                            vacationStatusNotification = setupNotification(
-                                "Vacation Request Status",
-                                msg,
-                                R.drawable.ic_stat_name,
-                                VACATION_STATUS_CHANNEL_ID
-                            )
-                            notificationManager.notify(
-                                VACATION_STATUS_NOTIFICATION_ID++,
-                                vacationStatusNotification
-                            )
-                            CONSTANTS.VACATION_COL.document(vacation.id)
-                                .update("vacationNotification", 1)
-                        }
+
+                        val vacation = documentSnapshot.toObject(VacationRequest::class.java)
+                        if (vacationRequests.contains(vacation!!.id)) return@run
+                        vacationRequests.add(vacation.id)
+                        val msg: String = if (vacation.vacationStatus == REJECTED)
+                            "your vacation request for ${vacation.days} days has been rejected"
+                        else
+                            "your vacation request for ${vacation.days} days has been accepted"
+                        vacationStatusNotification = setupNotification(
+                            "Vacation Request Status",
+                            msg,
+                            R.drawable.ic_stat_name,
+                            VACATION_STATUS_CHANNEL_ID
+                        )
+                        notificationManager.notify(
+                            VACATION_STATUS_NOTIFICATION_ID++,
+                            vacationStatusNotification
+                        )
+                        VACATION_COL.document(vacation.id)
+                            .update("vacationNotification", 1)
+
                     }
                 }
             }
         //get vacation requests from your employees
-        CONSTANTS.VACATION_COL.whereEqualTo("manager.id", currManager!!.id)
+        val vacationRequestsFromEmployees: MutableSet<String> = mutableSetOf()
+        VACATION_COL.whereEqualTo("manager.id", currManager!!.id)
             .whereEqualTo("vacationNotification", -1).addSnapshotListener { values, error ->
                 run {
                     if (error != null) {
@@ -158,35 +160,38 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                         return@run
                     }
                     values!!.documents.forEach { documentSnapshot ->
-                        run {
-                            val vacation = documentSnapshot.toObject(VacationRequest::class.java)
-                            val msg =
-                                "${vacation!!.employee.firstName} has requested ${vacation.days} days, starting from ${
-                                    vacation.convertDateToString(
-                                        vacation.startDate.time
-                                    )
-                                }"
-                            vacationRequestNotification = setupNotification(
-                                "New Vacation Request",
-                                msg,
-                                R.drawable.ic_stat_name,
-                                VACATION_REQUEST_CHANNEL_ID
-                            )
-                            notificationManager.notify(
-                                VACATION_REQUEST_NOTIFICATION_ID++,
-                                vacationRequestNotification
-                            )
-                            CONSTANTS.VACATION_COL.document(vacation.id)
-                                .update("vacationNotification", 0)
-                        }
+
+                        val vacation = documentSnapshot.toObject(VacationRequest::class.java)
+                        if (vacationRequestsFromEmployees.contains(vacation!!.id)) return@run
+                        vacationRequestsFromEmployees.add(vacation.id)
+                        val msg =
+                            "${vacation.employee.firstName} has requested ${vacation.days} days, starting from ${
+                                vacation.convertDateToString(
+                                    vacation.startDate.time
+                                )
+                            }"
+                        vacationRequestNotification = setupNotification(
+                            "New Vacation Request",
+                            msg,
+                            R.drawable.ic_stat_name,
+                            VACATION_REQUEST_CHANNEL_ID
+                        )
+                        notificationManager.notify(
+                            VACATION_REQUEST_NOTIFICATION_ID++,
+                            vacationRequestNotification
+                        )
+                        VACATION_COL.document(vacation.id)
+                            .update("vacationNotification", 0)
+
                     }
                 }
             }
 
 
         //check if their is new transfer request
+        val transferRequests: MutableSet<String> = mutableSetOf()
         currManager!!.projectIds.forEach { projectID ->
-            CONSTANTS.TRANSFER_REQUESTS_COL.whereEqualTo("oldProjectId", projectID)
+            TRANSFER_REQUESTS_COL.whereEqualTo("oldProjectId", projectID)
                 .whereEqualTo("seenByOld", false)
                 .addSnapshotListener { values, error ->
                     run {
@@ -196,8 +201,10 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                         }
                         for (document in values!!.documents) {
                             val transferRequest = document.toObject(TransferRequests::class.java)
+                            if (transferRequests.contains(transferRequest!!.transferId)) return@run
+                            transferRequests.add(transferRequest.transferId)
                             val msg =
-                                "A Transfer Request for ${transferRequest!!.employee.firstName} to ${transferRequest.newProjectName}"
+                                "A Transfer Request for ${transferRequest.employee.firstName} to ${transferRequest.newProjectName}"
                             transferRequestNotification = setupNotification(
                                 "New Transfer Request",
                                 msg,
@@ -210,13 +217,14 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                                 transferRequestNotification
                             )
 
-                            CONSTANTS.TRANSFER_REQUESTS_COL.document(document.id)
+                            TRANSFER_REQUESTS_COL.document(document.id)
                                 .update("seenByOld", true)
                         }
                     }
                 }
             //check transfer request status
-            CONSTANTS.TRANSFER_REQUESTS_COL.whereEqualTo("newProjectId", projectID)
+            val transferStatus: MutableSet<String> = mutableSetOf()
+            TRANSFER_REQUESTS_COL.whereEqualTo("newProjectId", projectID)
                 .whereEqualTo("seenByNew", false)
                 .addSnapshotListener { values, error ->
                     run {
@@ -225,20 +233,19 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                             return@run
                         }
                         for (document in values!!.documents) {
-                            if ((document.toObject(TransferRequests::class.java)!!.transferStatus == -1))
+                            val transferRequest = document.toObject(TransferRequests::class.java)
+                            if (transferStatus.contains(transferRequest!!.transferId)) return@run
+                            transferStatus.add(transferRequest.transferId)
+                            if (transferRequest.transferStatus == PENDING)
                                 continue
                             val msg =
-                                if (document.toObject(TransferRequests::class.java)!!.transferStatus == 0)
+                                if (transferRequest.transferStatus == REJECTED)
                                     "Transfer Request for Employee ${
-                                        document.toObject(
-                                            TransferRequests::class.java
-                                        )!!.employee.firstName
+                                        transferRequest.employee.firstName
                                     } was rejected"
                                 else
                                     "Transfer Request for Employee ${
-                                        document.toObject(
-                                            TransferRequests::class.java
-                                        )!!.employee.firstName
+                                        transferRequest.employee.firstName
                                     } was accepted"
                             transferStatusNotification = setupNotification(
                                 "Transfer Request Status",
@@ -252,7 +259,7 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                                 transferStatusNotification
                             )
 
-                            CONSTANTS.TRANSFER_REQUESTS_COL.document(document.id)
+                            TRANSFER_REQUESTS_COL.document(document.id)
                                 .update("seenByNew", true)
                         }
                     }

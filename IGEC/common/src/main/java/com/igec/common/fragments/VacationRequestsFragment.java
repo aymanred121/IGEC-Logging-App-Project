@@ -103,7 +103,7 @@ public class VacationRequestsFragment extends Fragment {
                     });
         } else {
             VACATION_COL
-                    .whereEqualTo("employee.managerID", ADMIN)
+                    .whereEqualTo("manager", null)
                     .whereEqualTo("vacationStatus", PENDING)
                     .addSnapshotListener((queryDocumentSnapshots, e) -> {
                         if (e != null) {

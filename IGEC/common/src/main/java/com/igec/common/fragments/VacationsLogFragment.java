@@ -76,7 +76,7 @@ public class VacationsLogFragment extends Fragment {
         binding.recyclerView.setAdapter(adapter);
 
         if (user == null)// admin
-            loadVacations("employee.managerID", ADMIN);
+            loadVacations("manager", null);
         else if (user.getManagerID().equals(ADMIN)) // manager
         {
             loadOwn = true;

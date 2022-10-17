@@ -59,6 +59,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private var lastTab: Int = R.id.nav_add_user
     private lateinit var notification: Notification
     private lateinit var notificationManager: NotificationManagerCompat
+
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -115,6 +116,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
 
         createNotificationChannel()
+        val vacationRequests: MutableSet<String> = mutableSetOf()
         VACATION_COL.whereEqualTo("manager", null)
             .whereEqualTo("vacationNotification", -1).addSnapshotListener { values, error ->
                 run {
@@ -123,22 +125,24 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         return@run
                     }
                     values!!.documents.forEach { documentSnapshot ->
-                        run {
-                            val vacation = documentSnapshot.toObject(VacationRequest::class.java);
-                            val msg =
-                                "${vacation!!.employee.firstName} has requested ${vacation.days} days, starting from ${
-                                    vacation.convertDateToString(
-                                        vacation.startDate.time
-                                    )
-                                }"
-                            setupNotification(
-                                "New Vacation Request",
-                                msg,
-                                R.drawable.ic_stat_name
-                            )
-                            notificationManager.notify(NOTIFICATION_ID++, notification)
-                            VACATION_COL.document(vacation.id).update("vacationNotification", PENDING);
-                        }
+                        val vacation = documentSnapshot.toObject(VacationRequest::class.java);
+                        if (vacationRequests.contains(vacation!!.id))
+                            return@forEach
+                        vacationRequests.add(vacation.id)
+                        val msg =
+                            "${vacation!!.employee.firstName} has requested ${vacation.days} days, starting from ${
+                                vacation.convertDateToString(
+                                    vacation.startDate.time
+                                )
+                            }"
+                        setupNotification(
+                            "New Vacation Request",
+                            msg,
+                            R.drawable.ic_stat_name
+                        )
+                        notificationManager.notify(NOTIFICATION_ID++, notification)
+                        VACATION_COL.document(vacation.id).update("vacationNotification", PENDING);
+
                     };
                 }
             }

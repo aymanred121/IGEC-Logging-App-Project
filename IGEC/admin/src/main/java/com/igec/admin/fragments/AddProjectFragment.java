@@ -6,6 +6,7 @@ import static com.igec.common.CONSTANTS.ADMIN;
 import static com.igec.common.CONSTANTS.EMPLOYEE_GROSS_SALARY_COL;
 import static com.igec.common.CONSTANTS.EMPLOYEE_OVERVIEW_REF;
 import static com.igec.common.CONSTANTS.EMPLOYEE_COL;
+import static com.igec.common.CONSTANTS.OFFICE_REF;
 import static com.igec.common.CONSTANTS.PROJECT_COL;
 
 import android.annotation.SuppressLint;
@@ -478,7 +479,7 @@ public class AddProjectFragment extends Fragment {
         binding.referenceEdit.setEnabled(!office);
         binding.referenceLayout.setEnabled(!office);
         if (office) {
-            binding.referenceEdit.setText("-99999");
+            binding.referenceEdit.setText(OFFICE_REF);
         } else {
             binding.referenceEdit.setText(null);
         }

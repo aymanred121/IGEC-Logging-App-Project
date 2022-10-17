@@ -27,6 +27,7 @@ public class CONSTANTS {
     public static final int ACCEPTED = 1;
     public static final int REJECTED = -1;
     public static final int PENDING = 0;
+    public static final String OFFICE_REF = "-99999";
     public static final DocumentReference EMPLOYEE_OVERVIEW_REF = db.collection("EmployeeOverview").document("emp");
     public static final CollectionReference MACHINE_EMPLOYEE_COL = db.collection("Machine_Employee");
     public static final CollectionReference VACATION_COL = db.collection("Vacation");

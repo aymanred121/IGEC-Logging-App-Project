@@ -4,7 +4,7 @@
     "type": "APK",
     "kind": "Directory"
   },
-  "applicationId": "com.igec.user",
+  "applicationId": "com.igec.admin",
   "variantName": "release",
   "elements": [
     {
@@ -12,8 +12,8 @@
       "filters": [],
       "attributes": [],
       "versionCode": 1,
-      "versionName": "1.0.1",
-      "outputFile": "user-release.apk"
+      "versionName": "1.0.2",
+      "outputFile": "admin-release.apk"
     }
   ],
   "elementType": "File"

@@ -9,12 +9,12 @@ public class WorkingDay {
     private String day;
     private String month, year;
     private double hours;
-    private String name,empName;
+    private String empName;
     private LocationDetails checkIn, checkOut;
-    private String projectName,projectLocation;
+    private String projectName,projectLocation, projectReference;
     private String type;
 
-    public WorkingDay(String day, String month, String year, double hours, String empName , LocationDetails checkIn, LocationDetails checkOut, String projectName,String projectLocation,String type)    {
+    public WorkingDay(String day, String month, String year, double hours, String empName , LocationDetails checkIn, LocationDetails checkOut, String projectName,String projectReference,String projectLocation,String type)    {
         this.day = day;
         this.hours = hours;
         this.month = month;
@@ -23,6 +23,7 @@ public class WorkingDay {
         this.checkIn = checkIn;
         this.checkOut = checkOut;
         this.projectName = projectName;
+        this.projectReference = projectReference;
         this.projectLocation = projectLocation;
         this.type = type;
     }
@@ -60,9 +61,6 @@ public class WorkingDay {
         this.year = year;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
 
     public LocationDetails getCheckIn() {
         return checkIn;
@@ -102,5 +100,13 @@ public class WorkingDay {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getProjectReference() {
+        return projectReference;
+    }
+
+    public void setProjectReference(String projectReference) {
+        this.projectReference = projectReference;
     }
 }

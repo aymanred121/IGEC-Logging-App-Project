@@ -4,6 +4,7 @@ import static com.igec.common.CONSTANTS.ADMIN;
 import static com.igec.common.CONSTANTS.EMPLOYEE_COL;
 import static com.igec.common.CONSTANTS.EMPLOYEE_GROSS_SALARY_COL;
 import static com.igec.common.CONSTANTS.EMPLOYEE_OVERVIEW_REF;
+import static com.igec.common.CONSTANTS.OFFICE_REF;
 import static com.igec.common.CONSTANTS.PROJECT_COL;
 
 import android.annotation.SuppressLint;
@@ -275,7 +276,7 @@ public class ProjectFragmentDialog extends DialogFragment {
         binding.contractTypeAuto.setText(project.getContractType());
         binding.contractTypeLayout.setEnabled(true);
         binding.contractTypeAuto.setEnabled(false);
-        boolean isOfficeWork = project.getReference().equals("-99999");
+        boolean isOfficeWork = project.getReference().equals(OFFICE_REF);
         binding.referenceEdit.setText(project.getReference());
         binding.officeWorkCheckbox.setChecked(isOfficeWork);
         binding.clientButton.setEnabled(!isOfficeWork);
@@ -755,7 +756,7 @@ public class ProjectFragmentDialog extends DialogFragment {
             binding.referenceEdit.setEnabled(!binding.officeWorkCheckbox.isChecked());
             binding.referenceLayout.setEnabled(!binding.officeWorkCheckbox.isChecked());
             if (binding.officeWorkCheckbox.isChecked()) {
-                binding.referenceEdit.setText("-99999");
+                binding.referenceEdit.setText(OFFICE_REF);
             } else {
                 binding.referenceEdit.setText(null);
             }

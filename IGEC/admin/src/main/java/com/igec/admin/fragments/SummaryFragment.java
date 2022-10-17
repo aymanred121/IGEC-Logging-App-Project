@@ -111,13 +111,7 @@ public class SummaryFragment extends Fragment {
                         if (summary.getCheckOut() == null) {
                             if (Calendar.getInstance().get(Calendar.DAY_OF_MONTH) == Integer.parseInt(day)) {
                                 Snackbar.make(binding.getRoot(), "this Employee is still working", Snackbar.LENGTH_SHORT).show();
-                                if (docs.getDocuments().lastIndexOf(q) == docs.getDocuments().size() - 1) {
-                                    if (opened) return;
-                                    opened = true;
-                                    MonthSummaryDialog monthSummaryDialog = new MonthSummaryDialog(workingDays);
-                                    monthSummaryDialog.show(getParentFragmentManager(), "");
-                                }
-                                continue;
+                                // continue;
                             }
                             /*
                              * if the employee forgot to checkout
@@ -148,7 +142,7 @@ public class SummaryFragment extends Fragment {
                             } else {
                                 project = doc.toObject(Project.class);
                             }
-                            double hours = summary.getWorkingTime() == null ||!summary.getWorkingTime().containsKey(pid)  ? 0.0 :(Long)summary.getWorkingTime().get(pid)  / 3600.0;
+                            double hours = summary.getWorkingTime() == null || !summary.getWorkingTime().containsKey(pid) ? 0.0 : (Long) summary.getWorkingTime().get(pid) / 3600.0;
                             String checkInGeoHash = (String) summary.getCheckIn().get("geohash");
                             double checkInLat = (double) summary.getCheckIn().get("lat");
                             double checkInLng = (double) summary.getCheckIn().get("lng");
@@ -158,10 +152,17 @@ public class SummaryFragment extends Fragment {
                             LocationDetails checkInLocation = new LocationDetails(checkInGeoHash, checkInLat, checkInLng);
                             LocationDetails checkOutLocation = new LocationDetails(checkOutGeoHash, checkOutLat, checkOutLng);
                             String projectLocation = String.format("%s, %s, %s", project.getLocationCity(), project.getLocationArea(), project.getLocationStreet());
-                            workingDays.add(new WorkingDay(day, month, year, hours, empName, checkInLocation, checkOutLocation, project.getName(), project.getReference(), projectLocation, summary.getProjectIds().get(pid)));
+                            if (Calendar.getInstance().get(Calendar.DAY_OF_MONTH) != Integer.parseInt(day))
+                                workingDays.add(new WorkingDay(day, month, year, hours, empName, checkInLocation, checkOutLocation, project.getName(), project.getReference(), projectLocation, summary.getProjectIds().get(pid)));
                             if (docs.getDocuments().lastIndexOf(q) == docs.getDocuments().size() - 1) {
                                 if (opened) return;
                                 opened = true;
+                                //sort working days by date
+                                workingDays.sort((o1, o2) -> {
+                                    int o1Day = Integer.parseInt(o1.getDay());
+                                    int o2Day = Integer.parseInt(o2.getDay());
+                                    return o1Day - o2Day;
+                                });
                                 MonthSummaryDialog monthSummaryDialog = new MonthSummaryDialog(workingDays);
                                 monthSummaryDialog.show(getParentFragmentManager(), "");
                             }

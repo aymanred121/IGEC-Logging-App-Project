@@ -209,7 +209,14 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                         canCheckFromHome = true;
                     else
                         canCheckFromHome = summary.getProjectIds().size() == 0;
-                    binding.greetingText.setText(lastProjectId != null ? String.format("In %s", lastProjectId) : binding.greetingText.getText());
+                    if(lastProjectId !=null){
+                        PROJECT_COL.document(lastProjectId).get().addOnSuccessListener((value1) -> {
+                            Project project = value1.toObject(Project.class);
+                            if(project != null){
+                                binding.greetingText.setText(String.format("you are currently \n In %s", project.getName()));
+                            }
+                        });
+                    }
                     //need project id
                     if (summary != null && summary.getProjectIds().containsKey("HOME")) {
                         //disable check-In btn
@@ -408,7 +415,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                             binding.checkInOutFab.setBackgroundColor(Color.GRAY);
                             Snackbar.make(binding.getRoot(), "You are at home", Snackbar.LENGTH_SHORT).show();
                         } else
-                            binding.greetingText.setText(project.getId() != null ? String.format("In %s", project.getId()) : binding.greetingText.getText());
+                            binding.greetingText.setText(project.getId() != null ? String.format("you are currently \n In %s", project.getName()) : binding.greetingText.getText());
                     } else {
                         Summary summary1 = documentSnapshot.toObject(Summary.class);
                         if (summary1.getCheckOut() == null) {
@@ -418,7 +425,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                         } else {
                             //re check in
                             employeeReCheckIn(summary1, project, documentSnapshot);
-                            binding.greetingText.setText(String.format("In %s", project.getId()));
+                            binding.greetingText.setText(String.format("you are currently \n In %s", project.getName()));
                         }
                     }
                 });

@@ -239,12 +239,13 @@ public class SummaryFragment extends Fragment {
                     .addOnSuccessListener(queryDocumentSnapshots -> {
                         final String[] header = {"Name", "Basic", "over time", "Cuts", "Transportation", "accommodation", "site", "remote", "food", "other", "personal", "Next month", "current month", "previous month"};
                         CsvWriter csvWriter = new CsvWriter(header);
+                        final int[] counter = new int[1];
                         for (QueryDocumentSnapshot queryDocumentSnapshot : queryDocumentSnapshots) {
                             month = String.format(Locale.getDefault(), "%02d", Integer.parseInt(month));
                             EMPLOYEE_GROSS_SALARY_COL.document(queryDocumentSnapshot.getId()).collection(prevYear).document(prevMonth).get().addOnSuccessListener(doc -> {
                                 EMPLOYEE_GROSS_SALARY_COL.document(queryDocumentSnapshot.getId()).collection(year).document(month).get().addOnSuccessListener(documentSnapshot1 -> {
                                     if (!documentSnapshot1.exists()) {
-                                        if (queryDocumentSnapshots.getDocuments().get(queryDocumentSnapshots.getDocuments().size() - 1) == queryDocumentSnapshot) {
+                                        if (counter[0] == queryDocumentSnapshots.size() - 1) {
                                             try {
                                                 csvWriter.build(year + "-" + month);
                                                 Snackbar.make(binding.getRoot(), "CSV file created", Snackbar.LENGTH_SHORT).show();
@@ -253,6 +254,7 @@ public class SummaryFragment extends Fragment {
                                                 e.printStackTrace();
                                             }
                                         }
+                                        counter[0]++;
                                         return;
                                     }
                                     Employee emp = queryDocumentSnapshot.toObject(Employee.class);
@@ -311,7 +313,7 @@ public class SummaryFragment extends Fragment {
                                         }
                                     }
                                     csvWriter.addDataRow(String.format("%s %s", emp.getFirstName(), emp.getLastName()), String.valueOf(emp.getSalary()), String.valueOf(overTime), String.valueOf(cuts), String.valueOf(transportation), String.valueOf(accommodation), String.valueOf(site), String.valueOf(remote), String.valueOf(food), String.valueOf(other), String.valueOf(personal), String.valueOf(nextMonth), String.valueOf(currentMonth), String.valueOf(previousMonth));
-                                    if (queryDocumentSnapshots.getDocuments().get(queryDocumentSnapshots.getDocuments().size() - 1) == queryDocumentSnapshot) {
+                                    if (counter[0] == queryDocumentSnapshots.size() - 1) {
                                         try {
                                             csvWriter.build(year + "-" + month);
                                             Snackbar.make(binding.getRoot(), "CSV file created", Snackbar.LENGTH_SHORT).show();
@@ -319,6 +321,7 @@ public class SummaryFragment extends Fragment {
                                             e.printStackTrace();
                                         }
                                     }
+                                    counter[0]++;
                                 });
 
                             });

@@ -321,6 +321,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                                 .addToBackStack(null)
                                 .commit()
                         }
+                        R.id.nav_accountant -> {
+                            binding.toolbar.title = getString(R.string.accountant)
+                            supportFragmentManager.beginTransaction()
+                                .replace(
+                                    R.id.nav_host_fragment_content_main,
+                                    AccountantFragment.newInstance()
+                                )
+                                .addToBackStack(null)
+                                .commit()
+                        }
                         R.id.nav_summary -> {
                             binding.toolbar.title = getString(R.string.summary)
                             supportFragmentManager.beginTransaction()

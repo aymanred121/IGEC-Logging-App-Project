@@ -12,6 +12,7 @@ public class CONSTANTS {
     private static final FirebaseFirestore db = FirebaseFirestore.getInstance();
     public static final int CAMERA_REQUEST_CODE = 123;
     public static final int LOCATION_REQUEST_CODE = 155;
+    public static final String HOLIDAYS = "Holidays";
     public static final String IGEC = "IGEC";
     public static final String ID = "ID";
     public static final String LOGGED = "LOGGED";
@@ -38,4 +39,5 @@ public class CONSTANTS {
     public static final CollectionReference TRANSFER_REQUESTS_COL = db.collection("TransferRequests");
     public static final CollectionReference MACHINE_DEFECT_LOG_COL = db.collection("MachineDefectsLog");
     public static final CollectionReference SUMMARY_COL = db.collection("summary");
+    public static final CollectionReference HOLIDAYS_COL = db.collection("Holidays");
     }

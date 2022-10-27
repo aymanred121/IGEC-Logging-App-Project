@@ -28,8 +28,6 @@
             android:id="@+id/nav_machines"
             android:icon="@drawable/ic_baseline_construction_24"
             android:title="@string/machines" />
-
-
         <item
             android:id="@+id/nav_vacation_requests"
             android:icon="@drawable/ic_baseline_mail_24"
@@ -38,6 +36,10 @@
             android:id="@+id/nav_vacations_log"
             android:icon="@drawable/ic_round_history_24"
             android:title="@string/vacations_log" />
+        <item
+            android:id="@+id/nav_accountant"
+            android:icon="@drawable/ic_accountant"
+            android:title="@string/accountant" />
         <item
             android:id="@+id/nav_summary"
             android:icon="@drawable/ic_baseline_feed_24"

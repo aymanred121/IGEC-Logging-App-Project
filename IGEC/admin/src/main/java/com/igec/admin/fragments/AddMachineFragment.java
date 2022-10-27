@@ -319,6 +319,7 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
                     }
 
                 }).addOnFailureListener(e -> {
+                    binding.registerButton.setEnabled(true);
                     alertDialog.dismiss();
                     Snackbar.make(binding.getRoot(), "Failed to upload, check your internet", Snackbar.LENGTH_SHORT).show();
                 });

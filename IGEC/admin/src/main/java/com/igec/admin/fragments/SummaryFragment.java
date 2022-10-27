@@ -19,6 +19,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.work.WorkInfo;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -44,6 +45,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.StringJoiner;
+import java.util.stream.IntStream;
 
 public class SummaryFragment extends Fragment {
     // Vars
@@ -81,6 +84,7 @@ public class SummaryFragment extends Fragment {
         binding.monthLayout.setErrorIconOnClickListener(oclMonthPicker);
         adapter.setOnItemClickListener(oclEmployee);
         binding.createFab.setOnClickListener(oclCSV);
+        binding.allFab.setOnClickListener(oclAll);
     }
 
     // Functions
@@ -95,7 +99,155 @@ public class SummaryFragment extends Fragment {
 
     }
 
-    private void loadWorkingDays(int position) {
+    private void generateCSV(ArrayList<WorkingDay> workingDays) {
+        String month = workingDays.get(0).getMonth();
+        String year = workingDays.get(0).getYear();
+        String empName = workingDays.get(0).getEmpName();
+        int yearNumber = Integer.parseInt(year);
+        int monthNumber = Integer.parseInt(month);
+        StringJoiner header = new StringJoiner(",");
+        String[] dataRow;
+        header.add("Day");
+        /*
+        we know that months with 31 days are 1 3 5 7 8 10 12
+        and when we use those numbers to shift left 1 we get
+        2,8,32,128,256,1024,4096
+        each of them represent a single 1 at different locations when transform into binary
+        0b0000000000010
+        0b0000000001000
+        0b0000000100000
+        0b0000010000000
+        0b0000100000000
+        0b0010000000000
+        0b1000000000000
+        so we could bitwise and with
+        0b0101001010101
+        we will always get 0 and otherwise with other numbers
+         */
+        int MONTH31DAYS = 0xA55;
+        if ((1 << (monthNumber) & MONTH31DAYS) == 0) {
+            //create header with 31 days
+            for (int i = 1; i <= 31; i++) {
+                header.add(String.valueOf(i));
+            }
+            dataRow = new String[32];
+        } else if (monthNumber == 2) {
+            if (yearNumber % 400 == 0 || (yearNumber % 100 != 0) && (yearNumber % 4 == 0)) {
+                //create header with 29 days
+                for (int i = 1; i <= 29; i++) {
+                    header.add(String.valueOf(i));
+                }
+                dataRow = new String[30];
+            } else {
+                //create header with 28 days
+                for (int i = 1; i <= 28; i++) {
+                    header.add(String.valueOf(i));
+                }
+                dataRow = new String[29];
+            }
+
+        } else {
+            //create header with 30 days
+            for (int i = 1; i <= 30; i++) {
+                header.add(String.valueOf(i));
+            }
+            dataRow = new String[31];
+        }
+        dataRow[0] = empName;
+        CsvWriter csvWriter = new CsvWriter(header.toString().split(","));
+        for (WorkingDay w : workingDays) {
+            dataRow[Integer.parseInt(w.getDay())] = String.valueOf(w.getHours());
+        }
+        IntStream.range(1, dataRow.length).filter(i -> dataRow[i] == null).forEach(i -> dataRow[i] = "0");
+        csvWriter.addDataRow(dataRow);
+        dataRow[0] = "project name";
+        for (WorkingDay w : workingDays) {
+            dataRow[Integer.parseInt(w.getDay())] = String.valueOf(w.getProjectName());
+        }
+        IntStream.range(1, dataRow.length).filter(i -> dataRow[i] == null).forEach(i -> dataRow[i] = "0");
+        csvWriter.addDataRow(dataRow);
+
+        try {
+            csvWriter.build(empName + "-" + year + "-" + month);
+            Snackbar.make(binding.getRoot(), "csv Saved!", Snackbar.LENGTH_SHORT).show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadWorkingDays(EmployeeOverview employee) {
+        ArrayList<WorkingDay> workingDays = new ArrayList<>();
+        String empName = employee.getFirstName() + " " + employee.getLastName();
+        SUMMARY_COL.document(employee.getId()).collection(year + "-" + month)
+                .get().addOnSuccessListener(docs -> {
+                    if (docs.size() == 0) {
+                        return;
+                    }
+                    for (QueryDocumentSnapshot q : docs) {
+                        String day = q.getId();
+                        Summary summary = q.toObject(Summary.class);
+                        if (summary.getCheckOut() == null) {
+                            if (Calendar.getInstance().get(Calendar.DAY_OF_MONTH) == Integer.parseInt(day)) {
+                                Snackbar.make(binding.getRoot(), "this Employee is still working", Snackbar.LENGTH_SHORT).show();
+                                // continue;
+                            }
+                            /*
+                             * if the employee forgot to checkout
+                             * check the time spent on all projects
+                             * add the remainder of 8 hrs to the lastProjectId
+                             * set checkOut to checkIn
+                             */
+                            summary.setCheckOut(summary.getCheckIn());
+                            long workingTimeInSeconds = summary.getWorkingTime() != null ? summary.getWorkingTime().values().stream().mapToLong(v -> (long) v).sum() : 0;
+                            workingTimeInSeconds = EIGHT_HOURS - workingTimeInSeconds < 0 ? 0 : EIGHT_HOURS - workingTimeInSeconds;
+                            if (summary.getWorkingTime() != null) {
+                                summary.getWorkingTime().merge(summary.getLastProjectId(), workingTimeInSeconds, (a, b) -> (long) a + (long) b);
+                            } else {
+                                summary.setWorkingTime(new HashMap<>());
+                                summary.getWorkingTime().put(summary.getLastProjectId(), workingTimeInSeconds);
+                            }
+                        }
+                        summary.getProjectIds().keySet().forEach(pid -> PROJECT_COL.document(pid).get().addOnSuccessListener(doc -> {
+                            Project project = new Project();
+                            if (!doc.exists()) {
+                                if (!pid.equals("HOME"))
+                                    return;
+                                project.setName("Home");
+                                project.setReference("");
+                                project.setLocationArea("");
+                                project.setLocationCity("");
+                                project.setLocationStreet("");
+                            } else {
+                                project = doc.toObject(Project.class);
+                            }
+                            double hours = summary.getWorkingTime() == null || !summary.getWorkingTime().containsKey(pid) ? 0.0 : (Long) summary.getWorkingTime().get(pid) / 3600.0;
+                            String checkInGeoHash = (String) summary.getCheckIn().get("geohash");
+                            double checkInLat = (double) summary.getCheckIn().get("lat");
+                            double checkInLng = (double) summary.getCheckIn().get("lng");
+                            String checkOutGeoHash = (String) summary.getCheckOut().get("geohash");
+                            double checkOutLat = (double) summary.getCheckOut().get("lat");
+                            double checkOutLng = (double) summary.getCheckOut().get("lng");
+                            LocationDetails checkInLocation = new LocationDetails(checkInGeoHash, checkInLat, checkInLng);
+                            LocationDetails checkOutLocation = new LocationDetails(checkOutGeoHash, checkOutLat, checkOutLng);
+                            String projectLocation = String.format("%s, %s, %s", project.getLocationCity(), project.getLocationArea(), project.getLocationStreet());
+//                            if (Calendar.getInstance().get(Calendar.DAY_OF_MONTH) != Integer.parseInt(day))
+                            workingDays.add(new WorkingDay(day, month, year, hours, empName, checkInLocation, checkOutLocation, project.getName(), project.getReference(), projectLocation, summary.getProjectIds().get(pid)));
+                            if (docs.getDocuments().lastIndexOf(q) == docs.getDocuments().size() - 1) {
+                                //sort working days by date
+                                workingDays.sort((o1, o2) -> {
+                                    int o1Day = Integer.parseInt(o1.getDay());
+                                    int o2Day = Integer.parseInt(o2.getDay());
+                                    return o1Day - o2Day;
+                                });
+                                generateCSV((ArrayList<WorkingDay>) workingDays.clone());
+                            }
+                        }));
+
+                    }
+                });
+    }
+
+    private void openMonthSummaryDialog(int position) {
         EmployeeOverview employee = employees.get(position);
         ArrayList<WorkingDay> workingDays = new ArrayList<>();
         String empName = employee.getFirstName() + " " + employee.getLastName();
@@ -230,6 +382,17 @@ public class SummaryFragment extends Fragment {
 
     };
 
+
+    private View.OnClickListener oclAll = v -> {
+        if (binding.monthEdit.getText().toString().isEmpty()) {
+            binding.monthLayout.setError("Please select a month");
+        } else {
+            for (EmployeeOverview emp : employees) {
+                loadWorkingDays(emp);
+            }
+        }
+
+    };
     private final View.OnClickListener oclCSV = v -> {
         if (binding.monthEdit.getText().toString().isEmpty()) {
             binding.monthLayout.setError("Please select a month");
@@ -353,7 +516,7 @@ public class SummaryFragment extends Fragment {
                             prevYear = year;
                         }
                         prevMonth = String.format("%02d", Integer.parseInt(prevMonth));
-                        loadWorkingDays(position);
+                        openMonthSummaryDialog(position);
 
                     }, today.get(Calendar.YEAR), today.get(Calendar.MONTH));
             MonthPickerDialog monthPickerDialog = builder.setActivatedMonth(today.get(Calendar.MONTH))
@@ -369,7 +532,7 @@ public class SummaryFragment extends Fragment {
                 year = selectedDate[1];
                 month = selectedDate[0];
                 month = String.format("%02d", Integer.parseInt(month));
-                loadWorkingDays(position);
+                openMonthSummaryDialog(position);
             }
 
         }

@@ -80,7 +80,6 @@ public class MonthSummaryDialog extends DialogFragment {
         super.onViewCreated(view, savedInstanceState);
         initialize();
         adapter.setOnItemClickListener(oclWorkingDay);
-        binding.createFab.setOnClickListener(oclCSV);
     }
 
     void initialize() {

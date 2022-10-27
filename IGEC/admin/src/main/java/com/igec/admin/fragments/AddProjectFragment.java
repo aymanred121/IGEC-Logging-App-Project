@@ -1,7 +1,5 @@
 package com.igec.admin.fragments;
 
-import static android.content.ContentValues.TAG;
-
 import static com.igec.common.CONSTANTS.ADMIN;
 import static com.igec.common.CONSTANTS.EMPLOYEE_GROSS_SALARY_COL;
 import static com.igec.common.CONSTANTS.EMPLOYEE_OVERVIEW_REF;
@@ -13,7 +11,6 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,7 +18,6 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -29,11 +25,9 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.github.javafaker.Team;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.firestore.FieldValue;
-import com.igec.admin.adapters.EmployeeAdapter;
 import com.igec.admin.databinding.FragmentAddProjectBinding;
 import com.igec.admin.dialogs.AddAllowanceDialog;
 import com.igec.admin.dialogs.AddClientDialog;
@@ -58,7 +52,6 @@ import com.google.firebase.firestore.WriteBatch;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -66,6 +59,7 @@ import java.util.Map;
 public class AddProjectFragment extends Fragment {
 
     // Vars
+    boolean testing = true;
     private String day, month, year;
     private String lat, lng;
     private ArrayList<String> contract = new ArrayList<>();
@@ -215,8 +209,8 @@ public class AddProjectFragment extends Fragment {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
         PID = PROJECT_COL.document().getId().substring(0, 5);
         binding.clientButton.setEnabled(!binding.officeWorkCheckbox.isChecked());
-        //TODO: remove fakeData() when all testing is finished
-//        fakeData();
+        if (testing)
+            fakeData();
 
     }
 
@@ -332,7 +326,8 @@ public class AddProjectFragment extends Fragment {
                             batch.commit().addOnSuccessListener(unused -> {
                                 clearInputs();
                                 PID = PROJECT_COL.document().getId().substring(0, 5);
-//                                fakeData();
+                                if (testing)
+                                    fakeData();
                                 Snackbar.make(binding.getRoot(), "Registered", Snackbar.LENGTH_SHORT).show();
                                 batch = FirebaseFirestore.getInstance().batch();
                             }).addOnFailureListener(unused -> {
@@ -352,7 +347,8 @@ public class AddProjectFragment extends Fragment {
                     if (counter[0] == team.size() - 1) {
                         batch.commit().addOnSuccessListener(unused -> {
                             clearInputs();
-//                            fakeData();
+                            if (testing)
+                                fakeData();
                             PID = PROJECT_COL.document().getId().substring(0, 5);
                             Snackbar.make(binding.getRoot(), "Registered", Snackbar.LENGTH_SHORT).show();
                             batch = FirebaseFirestore.getInstance().batch();

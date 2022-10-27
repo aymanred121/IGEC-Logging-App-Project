@@ -55,6 +55,7 @@ public class AddUserFragment extends Fragment {
     private ArrayList<Pair<TextInputLayout, EditText>> views;
 
     // Vars
+    boolean testing = true;
     long hireDate;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     private WriteBatch batch = FirebaseFirestore.getInstance().batch();
@@ -140,8 +141,8 @@ public class AddUserFragment extends Fragment {
         views.add(new Pair<>(binding.nationalIdLayout, binding.nationalIdEdit));
 
 
-        //TODO: remove fakeData() when all testing is finished
-//        fakeData();
+        if (testing)
+            fakeData();
     }
 
     private String convertDateToString(long selection) {
@@ -166,8 +167,8 @@ public class AddUserFragment extends Fragment {
             empInfo.add((binding.secondNameEdit.getText()).toString());
             empInfo.add((binding.titleEdit.getText()).toString());
             empInfo.add(null); // ManagerID
-            empInfo.add(new HashMap<String,Object>(){{
-                put("pids",new ArrayList<String>());
+            empInfo.add(new HashMap<String, Object>() {{
+                put("pids", new ArrayList<String>());
             }}); // ProjectID
             empInfo.add(false); // isSelected
             empInfo.add(binding.managerCheckbox.isChecked()); // isManager
@@ -192,7 +193,8 @@ public class AddUserFragment extends Fragment {
 
             batch.commit().addOnSuccessListener(unused -> {
                 clearInputs();
-//                fakeData();
+                if (testing)
+                    fakeData();
                 Snackbar.make(binding.getRoot(), "Registered", Snackbar.LENGTH_SHORT).show();
                 batch = FirebaseFirestore.getInstance().batch();
             });

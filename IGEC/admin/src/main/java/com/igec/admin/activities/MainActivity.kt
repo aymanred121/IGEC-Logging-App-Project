@@ -128,7 +128,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                             return@forEach
                         vacationRequests.add(vacation.id)
                         val msg =
-                            "${vacation!!.employee.firstName} has requested ${vacation.days} days, starting from ${
+                            "${vacation!!.employee.firstName} has requested ${vacation.requestedDaysString} days, starting from ${
                                 vacation.formattedStartDate()
                             }"
                         setupNotification(

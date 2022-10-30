@@ -120,9 +120,9 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                             if (vacationRequests.contains(vacation!!.id)) return@run
                             vacationRequests.add(vacation.id)
                             val msg: String = if (vacation!!.vacationStatus == REJECTED)
-                                "your vacation request for ${vacation.days} days has been rejected"
+                                "your vacation request for ${vacation.requestedDaysString} days has been rejected"
                             else
-                                "your vacation request for ${vacation.days} days has been accepted"
+                                "your vacation request for ${vacation.requestedDaysString} days has been accepted"
                             vacationNotification = setupNotification(
                                 "Vacation Request Status",
                                 msg,

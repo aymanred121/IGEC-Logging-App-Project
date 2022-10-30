@@ -13,16 +13,17 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
 
 import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.android.material.datepicker.MaterialDatePicker;
 import com.igec.user.R;
 import com.igec.common.firebase.Employee;
 import com.igec.common.firebase.VacationRequest;
@@ -43,20 +44,21 @@ import java.util.Date;
 import java.util.List;
 
 
-public class SendVacationRequestFragment extends Fragment implements DatePickerDialog.OnDateSetListener {
+public class SendVacationRequestFragment extends Fragment {
 
     //Views
     private ArrayList<Pair<TextInputLayout, TextInputEditText>> views;
-    private DatePickerDialog dpd;
+    private MaterialDatePicker.Builder<Pair<Long, Long>> vDatePickerBuilder = MaterialDatePicker.Builder.dateRangePicker();
+    private MaterialDatePicker vDatePicker;
     //Vars
-    private int remainingDays, daysAfterVacationIsTaken;
-    private long days, startDate;
+    private long endDate, startDate;
     private Employee currEmployee;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private VacationRequest vacationRequest;
 
     //Overrides
     private FragmentSendVacationRequestBinding binding;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -75,6 +77,7 @@ public class SendVacationRequestFragment extends Fragment implements DatePickerD
         super.onResume();
         validateDate(getActivity());
     }
+
     private void validateDate(Context c) {
         if (Settings.Global.getInt(c.getContentResolver(), Settings.Global.AUTO_TIME, 0) != 1) {
             Intent intent = new Intent(getActivity(), DateInaccurate.class);
@@ -82,6 +85,7 @@ public class SendVacationRequestFragment extends Fragment implements DatePickerD
             getActivity().finish();
         }
     }
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -90,7 +94,6 @@ public class SendVacationRequestFragment extends Fragment implements DatePickerD
         binding.dateLayout.setEndIconOnClickListener(oclVacationDate);
         binding.dateLayout.setErrorIconOnClickListener(oclVacationDate);
         binding.sendButton.setOnClickListener(oclSendRequest);
-        binding.daysEdit.addTextChangedListener(twVacationDays);
         binding.dateEdit.addTextChangedListener(twVacationDate);
         binding.noteEdit.addTextChangedListener(twVacationNote);
     }
@@ -98,7 +101,7 @@ public class SendVacationRequestFragment extends Fragment implements DatePickerD
     public static SendVacationRequestFragment newInstance(Employee currEmployee) {
 
         Bundle args = new Bundle();
-        args.putSerializable("currEmployee",currEmployee);
+        args.putSerializable("currEmployee", currEmployee);
         SendVacationRequestFragment fragment = new SendVacationRequestFragment();
         fragment.setArguments(args);
         return fragment;
@@ -114,79 +117,63 @@ public class SendVacationRequestFragment extends Fragment implements DatePickerD
 
         views = new ArrayList<>();
         views.add(new Pair<>(binding.dateLayout, binding.dateEdit));
-        views.add(new Pair<>(binding.daysLayout, binding.daysEdit));
         views.add(new Pair<>(binding.noteLayout, binding.noteEdit));
 
         CalendarConstraints.Builder builder = new CalendarConstraints.Builder();
         builder.setValidator(DateValidatorPointForward.now());
-        remainingDays = currEmployee.getTotalNumberOfVacationDays();
-        binding.daysLayout.setHelperText(String.format("%d days Remaining", remainingDays));
         datePickerSetup();
-
-
     }
 
     private void datePickerSetup() {
-        Calendar now = Calendar.getInstance();
-        dpd = DatePickerDialog.newInstance(
-                this,
-                now.get(Calendar.YEAR),
-                now.get(Calendar.MONTH),
-                now.get(Calendar.DAY_OF_MONTH)
-        );
-        dpd.setTitle("Vacation Date");
-        dpd.setOkText("Set");
-        dpd.setOkColor(getResources().getColor(R.color.green));
-        dpd.setCancelColor(getResources().getColor(R.color.red));
-        //dpd.setMinDate(Calendar.getInstance());
-        Calendar nextYear = Calendar.getInstance();
-        nextYear.add(Calendar.YEAR, 2);
-        nextYear.add(Calendar.MONTH, -nextYear.get(Calendar.MONTH));
-        nextYear.add(Calendar.DAY_OF_YEAR, -nextYear.get(Calendar.DAY_OF_YEAR));
-        dpd.setMaxDate(nextYear);
-        // Calendar friday;
-        Calendar friday;
-        List<Calendar> weekends = new ArrayList<>();
-        int weeks = 104;
-        for (int i = 0; i < (weeks * 7); i += 7) {
-            friday = Calendar.getInstance();
-            friday.add(Calendar.DAY_OF_YEAR, (Calendar.FRIDAY - friday.get(Calendar.DAY_OF_WEEK) + i));
-            weekends.add(friday);
-        }
-        Calendar[] disabledDays = weekends.toArray(new Calendar[weekends.size()]);
-        dpd.setDisabledDays(disabledDays);
-        dpd.setMinDate(Calendar.getInstance());
+        vDatePickerBuilder.setTitleText("Vacation Days");
+        vDatePicker = vDatePickerBuilder.build();
+        vDatePicker.addOnPositiveButtonClickListener(selection -> {
+            Pair<Long, Long> selectedDates = (Pair<Long, Long>) selection;
+            startDate = selectedDates.first;
+            endDate = selectedDates.second;
+            binding.dateEdit.setText(convertDateToString(selectedDates.first) + " - " + convertDateToString(selectedDates.second));
+        });
     }
 
+    private boolean isDateValid(long start, long end) {
+        return start > System.currentTimeMillis() && !isFriday(start, end);
+    }
+
+    private boolean isFriday(long start, long end) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date(start));
+        return calendar.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY && start == end;
+    }
     private void uploadVacationRequest() {
         String vacationID = VACATION_COL.document().getId().substring(0, 5);
         EMPLOYEE_COL
                 .document(currEmployee.getManagerID() == null ? ADMIN : currEmployee.getManagerID())
                 .addSnapshotListener((value, error) -> {
-                    days = ((long) Integer.parseInt(binding.daysEdit.getText().toString()) * 24 * 3600 * 1000) + startDate;
-                    vacationRequest = new VacationRequest(
-                            new Date(startDate),
-                            new Date(days),
-                            (new Date()),
-                            value.toObject(Employee.class),
-                            currEmployee,
-                            binding.noteEdit.getText().toString()
-                    );
-                    vacationRequest.setId(vacationID);
-                    VACATION_COL.document(vacationID).set(vacationRequest).addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void unused) {
-                            binding.sendButton.setEnabled(true);
-                            clearInputs();
-                        }
-                    });
+                    EMPLOYEE_COL.document(currEmployee.getId()).get().addOnSuccessListener(d -> {
+                        currEmployee = d.toObject(Employee.class);
 
+                        vacationRequest = new VacationRequest(
+                                new Date(startDate),
+                                new Date(endDate),
+                                (new Date()),
+                                value.toObject(Employee.class),
+                                currEmployee,
+                                binding.noteEdit.getText().toString()
+                        );
+                        vacationRequest.setId(vacationID);
+                        VACATION_COL.document(vacationID).set(vacationRequest).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unused) {
+                                binding.sendButton.setEnabled(true);
+                                clearInputs();
+                            }
+                        });
+                    });
                 });
     }
 
     private void clearInputs() {
         binding.dateEdit.setText(null);
-        binding.daysEdit.setText(null);
         binding.noteEdit.setText(null);
     }
 
@@ -211,39 +198,15 @@ public class SendVacationRequestFragment extends Fragment implements DatePickerD
 
 
     private boolean validateInputs() {
-        return !generateError();
+        if (!isDateValid(startDate, endDate))
+            binding.dateLayout.setError("Invalid Date");
+        else
+            hideError(binding.dateLayout);
+        return !generateError() && isDateValid(startDate, endDate);
     }
 
 
-
     // Listeners
-    private TextWatcher twVacationDays = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-        }
-
-        @SuppressLint("DefaultLocale")
-        @Override
-        public void afterTextChanged(Editable editable) {
-            daysAfterVacationIsTaken = binding.daysEdit.getText().toString().trim().equals("") ? remainingDays : remainingDays - Integer.parseInt(binding.daysEdit.getText().toString());
-            if (daysAfterVacationIsTaken < 0) {
-                binding.daysLayout.setHelperText(String.format("Exceeds remaining by %d", -daysAfterVacationIsTaken));
-            } else if (daysAfterVacationIsTaken == remainingDays && !binding.daysEdit.getText().toString().trim().isEmpty()) {
-                binding.daysLayout.setError("Invalid Value");
-            } else {
-                binding.daysLayout.setHelperText(String.format("%d days Remaining", daysAfterVacationIsTaken));
-                binding.daysLayout.setError(null);
-            }
-
-            hideError(binding.daysLayout);
-        }
-    };
     private TextWatcher twVacationDate = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -285,36 +248,12 @@ public class SendVacationRequestFragment extends Fragment implements DatePickerD
     private View.OnClickListener oclSendRequest = v -> {
         if (validateInputs()) {
             binding.sendButton.setEnabled(false);
-            if (daysAfterVacationIsTaken < 0) {
-                MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
-                builder.setTitle("Days exceeded by " + daysAfterVacationIsTaken * -1 + " ...")
-                        .setMessage(daysAfterVacationIsTaken * -1 + " Days at least will be considered as Unpaid")
-                        .setCancelable(true)
-                        .setPositiveButton("ok, send", (dialogInterface, i) -> {
-                            uploadVacationRequest();
-                            dialogInterface.dismiss();
-                        })
-                        .setNegativeButton("No", (dialogInterface, i) -> {
-                            dialogInterface.dismiss();
-                        });
-                AlertDialog alertDialog = builder.create();
-                alertDialog.show();
-            } else {
-                uploadVacationRequest();
-            }
-
+            uploadVacationRequest();
         }
 
     };
     private View.OnClickListener oclVacationDate = v -> {
-        dpd.show(getParentFragmentManager(), "DATE_PICKER");
+        vDatePicker.show(getParentFragmentManager(), "DATE_PICKER");
     };
 
-    @Override
-    public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
-        Calendar vacation = Calendar.getInstance();
-        vacation.set(year, monthOfYear, dayOfMonth);
-        binding.dateEdit.setText(convertDateToString(vacation.getTime().getTime()));
-        startDate = vacation.getTime().getTime();
-    }
 }

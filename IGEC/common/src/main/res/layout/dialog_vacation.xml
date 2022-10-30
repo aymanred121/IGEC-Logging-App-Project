@@ -16,7 +16,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/total_accepted_days_layout"
+            android:id="@+id/total_requested_days_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -29,10 +29,10 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/total_accepted_days_edit"
+                android:id="@+id/total_requested_days_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/accepted_days"
+                android:hint="@string/requested_days"
                 android:inputType="number"
                 android:padding="14dp"
                 android:singleLine="true" />
@@ -50,7 +50,7 @@
             app:helperTextEnabled="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/total_accepted_days_layout">
+            app:layout_constraintTop_toBottomOf="@id/total_requested_days_layout">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/vacation_days_edit"

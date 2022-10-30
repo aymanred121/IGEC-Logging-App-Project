@@ -11,6 +11,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 
 public class CONSTANTS {
     private static final FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -51,4 +52,17 @@ public class CONSTANTS {
         calendar.setTimeInMillis(selection);
         return simpleDateFormat.format(calendar.getTime());
     }
+
+    public static boolean isThereAFriday(long startDate, long endDate) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(startDate);
+        while (calendar.getTimeInMillis() < endDate) {
+            if (calendar.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
+                return true;
+            }
+            calendar.add(Calendar.DAY_OF_MONTH, 1);
+        }
+        return false;
+    }
+
 }

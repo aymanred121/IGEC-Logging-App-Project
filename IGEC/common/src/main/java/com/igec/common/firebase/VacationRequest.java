@@ -1,6 +1,7 @@
 package com.igec.common.firebase;
 
 import static com.igec.common.CONSTANTS.PENDING;
+import static com.igec.common.CONSTANTS.isThereAFriday;
 
 import android.annotation.SuppressLint;
 
@@ -16,6 +17,8 @@ public class VacationRequest implements Serializable {
     private Employee manager, employee;
     private String vacationNote, id;
     private int vacationStatus;
+    private int vacationDays, unpaidDays, sickDays;
+    private String feedback = "";
     /*
     vacationNotification:
     -1  = no one read it
@@ -102,20 +105,24 @@ public class VacationRequest implements Serializable {
     }
 
     @Exclude
-    public String getDays() {
+    public String getRequestedDaysString() {
         long days = endDate.getTime() - startDate.getTime();
         days /= (24 * 3600 * 1000);
+        if(!isThereAFriday(startDate.getTime(), endDate.getTime())) days++;
         return String.valueOf(days);
     }
+
     @Exclude
     public long getRequestedDays() {
         long days = endDate.getTime() - startDate.getTime();
         days /= (24 * 3600 * 1000);
+        if(!isThereAFriday(startDate.getTime(), endDate.getTime())) days++;
         return days;
     }
+
     @Exclude
     public long getRemainingDays() {
-       return employee.getTotalNumberOfVacationDays();
+        return employee.getTotalNumberOfVacationDays();
     }
 
     @Exclude
@@ -140,5 +147,37 @@ public class VacationRequest implements Serializable {
 
     public void setVacationNotification(int vacationNotification) {
         this.vacationNotification = vacationNotification;
+    }
+
+    public int getVacationDays() {
+        return vacationDays;
+    }
+
+    public void setVacationDays(int vacationDays) {
+        this.vacationDays = vacationDays;
+    }
+
+    public int getUnpaidDays() {
+        return unpaidDays;
+    }
+
+    public void setUnpaidDays(int unpaidDays) {
+        this.unpaidDays = unpaidDays;
+    }
+
+    public int getSickDays() {
+        return sickDays;
+    }
+
+    public void setSickDays(int sickDays) {
+        this.sickDays = sickDays;
+    }
+
+    public String getFeedback() {
+        return feedback;
+    }
+
+    public void setFeedback(String feedback) {
+        this.feedback = feedback;
     }
 }

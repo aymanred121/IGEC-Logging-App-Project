@@ -62,7 +62,7 @@ public class VacationAdapter extends RecyclerView.Adapter<VacationAdapter.Vacati
             default:
                 holder.layout.setCardBackgroundColor(Color.GRAY);
         }
-        holder.vVacationDays.setText(String.format("for : %s days", vacation.getDays()));
+        holder.vVacationDays.setText(String.format("for : %s days", vacation.getRequestedDaysString()));
     }
 
     private String formatDate(Date Date) {

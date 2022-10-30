@@ -130,9 +130,9 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                         if (vacationRequests.contains(vacation!!.id)) return@run
                         vacationRequests.add(vacation.id)
                         val msg: String = if (vacation.vacationStatus == REJECTED)
-                            "your vacation request for ${vacation.days} days has been rejected"
+                            "your vacation request for ${vacation.requestedDaysString} days has been rejected"
                         else
-                            "your vacation request for ${vacation.days} days has been accepted"
+                            "your vacation request for ${vacation.requestedDaysString} days has been accepted"
                         vacationStatusNotification = setupNotification(
                             "Vacation Request Status",
                             msg,
@@ -164,7 +164,7 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                         if (vacationRequestsFromEmployees.contains(vacation!!.id)) return@run
                         vacationRequestsFromEmployees.add(vacation.id)
                         val msg =
-                            "${vacation.employee.firstName} has requested ${vacation.days} days, starting from ${
+                            "${vacation.employee.firstName} has requested ${vacation.requestedDaysString} days, starting from ${
                                 vacation.formattedStartDate()
                             }"
                         vacationRequestNotification = setupNotification(

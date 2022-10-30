@@ -40,7 +40,7 @@ import java.util.Objects;
 public class VacationDialog extends DialogFragment {
     private final VacationRequest vacationRequest;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private boolean displayOnly = false;
+    private boolean displayOnly;
 
     public VacationDialog(VacationRequest vacationRequest, boolean displayOnly) {
         this.vacationRequest = vacationRequest;
@@ -84,6 +84,10 @@ public class VacationDialog extends DialogFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        binding.totalRequestedDaysEdit.setText(vacationRequest.getRequestedDaysString());
+        binding.vacationNoteText.setText(String.format("Note: %s", vacationRequest.getVacationNote()));
+        binding.vacationStartDateText.setText(String.format("Starts on: %s", vacationRequest.formattedStartDate()));
+        binding.vacationEndDateText.setText(String.format("Ends on :%s", vacationRequest.formattedEndDate()));
         if (displayOnly) {
             binding.rejectButton.setVisibility(View.GONE);
             binding.acceptButton.setVisibility(View.GONE);
@@ -96,29 +100,34 @@ public class VacationDialog extends DialogFragment {
             binding.okButton.setOnClickListener(v -> dismiss());
 
             // disable all fields
-            binding.totalAcceptedDaysEdit.setEnabled(false);
+            binding.totalRequestedDaysEdit.setEnabled(false);
             binding.vacationDaysEdit.setEnabled(false);
             binding.sickLeaveDaysEdit.setEnabled(false);
             binding.unpaidDaysEdit.setEnabled(false);
             binding.noteEdit.setEnabled(false);
-            binding.totalAcceptedDaysEdit.setText(!binding.totalAcceptedDaysEdit.getText().toString().isEmpty() ? binding.totalAcceptedDaysEdit.getText() : "Can't be edited");
-            binding.vacationDaysEdit.setText(!binding.vacationDaysEdit.getText().toString().isEmpty() ? binding.vacationDaysEdit.getText() : "Can't be edited");
-            binding.sickLeaveDaysEdit.setText(!binding.sickLeaveDaysEdit.getText().toString().isEmpty() ? binding.sickLeaveDaysEdit.getText() : "Can't be edited");
-            binding.unpaidDaysEdit.setText(!binding.unpaidDaysEdit.getText().toString().isEmpty() ? binding.unpaidDaysEdit.getText() : "Can't be edited");
-            binding.noteEdit.setText(!binding.noteEdit.getText().toString().isEmpty() ? binding.noteEdit.getText() : "Can't be edited");
+            binding.vacationDaysEdit.setText(vacationRequest.getVacationDays() != 0 ? String.format(Locale.getDefault(), "%d", vacationRequest.getVacationDays()) : "Can't be edited");
+            binding.sickLeaveDaysEdit.setText(vacationRequest.getSickDays() != 0 ? String.format(Locale.getDefault(), "%d", vacationRequest.getSickDays()) : "Can't be edited");
+            binding.unpaidDaysEdit.setText(vacationRequest.getUnpaidDays() != 0 ? String.format(Locale.getDefault(), "%d", vacationRequest.getUnpaidDays()) : "Can't be edited");
+            binding.noteEdit.setText(vacationRequest.getFeedback());
+            return;
         }
-
-
-        binding.totalAcceptedDaysEdit.setText(String.format("%s", vacationRequest.getDays()));
-        binding.vacationNoteText.setText(String.format("Note: %s", vacationRequest.getVacationNote()));
-        binding.vacationStartDateText.setText(String.format("Starts on: %s", vacationRequest.formattedStartDate()));
-        binding.vacationEndDateText.setText(String.format("Ends on :%s", vacationRequest.formattedEndDate()));
-        if (vacationRequest.getRemainingDays() < vacationRequest.getRequestedDays())
-            binding.unpaidDaysEdit.setText(String.format(Locale.getDefault(), "%d", vacationRequest.getRequestedDays() - vacationRequest.getRemainingDays()));
-        binding.totalAcceptedDaysEdit.addTextChangedListener(twAcceptedAmount);
+        binding.vacationDaysLayout.setSuffixText(String.format(Locale.getDefault(), " of %d", vacationRequest.getRemainingDays()));
+        distributeVacation(vacationRequest.getRequestedDays());
+        binding.totalRequestedDaysEdit.addTextChangedListener(twAcceptedAmount);
+        binding.vacationDaysEdit.addTextChangedListener(twVacationDays);
         binding.unpaidDaysEdit.addTextChangedListener(twUnpaid);
+        binding.sickLeaveDaysEdit.addTextChangedListener(twSickLeave);
         binding.acceptButton.setOnClickListener(oclAccept);
         binding.rejectButton.setOnClickListener(oclReject);
+    }
+
+    private void distributeVacation(long requested) {
+        if (requested <= vacationRequest.getRemainingDays()) {
+            binding.vacationDaysEdit.setText(String.format(Locale.getDefault(), "%d", requested));
+        } else {
+            binding.vacationDaysEdit.setText(String.format(Locale.getDefault(), "%d", vacationRequest.getRemainingDays()));
+            binding.unpaidDaysEdit.setText(String.format(Locale.getDefault(), "%d", requested - vacationRequest.getRemainingDays()));
+        }
     }
 
     @Override
@@ -129,16 +138,24 @@ public class VacationDialog extends DialogFragment {
 
     private boolean isInputValid() {
 
-        if (Objects.requireNonNull(binding.totalAcceptedDaysEdit.getText()).toString().trim().isEmpty()) {
-            binding.totalAcceptedDaysLayout.setError("Missing");
+        if (Objects.requireNonNull(binding.totalRequestedDaysEdit.getText()).toString().trim().isEmpty()) {
+            binding.totalRequestedDaysLayout.setError("Missing");
             return false;
         }
-
-        return binding.totalAcceptedDaysLayout.getError() == null && binding.unpaidDaysLayout.getError() == null;
+        int acceptedDays = Objects.requireNonNull(binding.totalRequestedDaysEdit.getText()).toString().trim().isEmpty() ? 0 : Integer.parseInt(binding.totalRequestedDaysEdit.getText().toString());
+        int unPaidDays = Objects.requireNonNull(binding.unpaidDaysEdit.getText()).toString().trim().isEmpty() ? 0 : Integer.parseInt(binding.unpaidDaysEdit.getText().toString().trim());
+        int vacationDays = Objects.requireNonNull(binding.vacationDaysEdit.getText()).toString().trim().isEmpty() ? 0 : Integer.parseInt(binding.vacationDaysEdit.getText().toString().trim());
+        int sickLeaveDays = Objects.requireNonNull(binding.sickLeaveDaysEdit.getText()).toString().trim().isEmpty() ? 0 : Integer.parseInt(binding.sickLeaveDaysEdit.getText().toString().trim());
+        boolean valid = acceptedDays == vacationDays + sickLeaveDays + unPaidDays;
+        if (!valid)
+            binding.totalRequestedDaysLayout.setError("Total accepted days must be equal to the sum of vacation days, sick leave days and unpaid days");
+        else
+            binding.totalRequestedDaysLayout.setError(null);
+        return valid;
     }
 
     @SuppressLint("DefaultLocale")
-    private void updateVacationEndDate(VacationRequest vacationRequest, int vacationDays, int unPaidDays) {
+    private void updateVacationEndDate(VacationRequest vacationRequest, int totalAcceptedDays, int unPaidDays, int sickLeaveDays, int vacationDays) {
         String month, year;
         Calendar calendar = Calendar.getInstance();
         Date requestStartDate = vacationRequest.getStartDate();
@@ -153,9 +170,13 @@ public class VacationDialog extends DialogFragment {
                 month = String.format(Locale.getDefault(), "%02d", calendar.get(Calendar.MONTH) + 2);
             }
         }
-        calendar.add(Calendar.DATE, vacationDays);
+        calendar.add(Calendar.DATE, totalAcceptedDays);
         Date newEndDate = calendar.getTime();
         vacationRequest.setEndDate(newEndDate);
+        vacationRequest.setVacationDays(vacationDays);
+        vacationRequest.setSickDays(sickLeaveDays);
+        vacationRequest.setUnpaidDays(unPaidDays);
+        vacationRequest.setFeedback(binding.noteEdit.getText().toString());
         vacationRequest.setVacationStatus(ACCEPTED);
         VACATION_COL.document(vacationRequest.getId())
                 .set(vacationRequest, SetOptions.merge());
@@ -211,26 +232,78 @@ public class VacationDialog extends DialogFragment {
         @SuppressLint("DefaultLocale")
         @Override
         public void afterTextChanged(Editable editable) {
-            boolean isEmpty = Objects.requireNonNull(binding.totalAcceptedDaysEdit.getText()).toString().trim().isEmpty();
-            binding.unpaidDaysEdit.setEnabled(isEmpty);
+            boolean isEmpty = Objects.requireNonNull(binding.totalRequestedDaysEdit.getText()).toString().trim().isEmpty();
+            binding.unpaidDaysEdit.setEnabled(!isEmpty);
+            binding.vacationNoteText.setEnabled(!isEmpty);
+            binding.sickLeaveDaysEdit.setEnabled(!isEmpty);
             if (!isEmpty) {
-                int requested = Integer.parseInt(vacationRequest.getDays());
-                int accepted = Integer.parseInt(binding.totalAcceptedDaysEdit.getText().toString());
-                if (accepted > requested) {
-                    binding.totalAcceptedDaysLayout.setErrorEnabled(false);
-                    binding.totalAcceptedDaysLayout.setError(String.format("Can't accept more than %d", requested));
+                int accepted = Integer.parseInt(binding.totalRequestedDaysEdit.getText().toString());
+                if (accepted > vacationRequest.getRequestedDays()) {
+                    binding.totalRequestedDaysLayout.setErrorEnabled(false);
+                    binding.totalRequestedDaysLayout.setError(String.format("Can't accept more than %d", vacationRequest.getRequestedDays()));
                 } else if (accepted == 0) {
-                    binding.totalAcceptedDaysLayout.setErrorEnabled(false);
-                    binding.totalAcceptedDaysLayout.setError("Invalid value");
+                    binding.totalRequestedDaysLayout.setErrorEnabled(false);
+                    binding.totalRequestedDaysLayout.setError("Invalid value");
                 } else {
-                    binding.totalAcceptedDaysLayout.setError(null);
-                    binding.totalAcceptedDaysLayout.setErrorEnabled(false);
+                    binding.totalRequestedDaysLayout.setError(null);
+                    binding.totalRequestedDaysLayout.setErrorEnabled(false);
+                    // choose lesser or equal to the requested days
+                    if (accepted != vacationRequest.getRequestedDays()) {
+                        distributeVacation(accepted);
+                    }
                 }
 
             } else {
-                binding.totalAcceptedDaysLayout.setErrorEnabled(false);
-                binding.totalAcceptedDaysLayout.setError(null);
+                binding.totalRequestedDaysLayout.setErrorEnabled(false);
+                binding.totalRequestedDaysLayout.setError(null);
             }
+        }
+    };
+    private final TextWatcher twVacationDays = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            boolean isEmpty = Objects.requireNonNull(binding.vacationDaysEdit.getText()).toString().trim().isEmpty();
+            if (!isEmpty) {
+                int vacationDays = Integer.parseInt(binding.vacationDaysEdit.getText().toString());
+                if (vacationDays > vacationRequest.getRequestedDays()) {
+                    binding.vacationDaysLayout.setErrorEnabled(false);
+                    binding.vacationDaysLayout.setError(String.format(Locale.getDefault(), "Can't be more than %d", vacationRequest.getRequestedDays()));
+                } else {
+                    binding.vacationDaysLayout.setError(null);
+                    binding.vacationDaysLayout.setErrorEnabled(false);
+                }
+            } else {
+                binding.vacationDaysLayout.setErrorEnabled(false);
+                binding.vacationDaysLayout.setError(null);
+            }
+            isInputValid();
+
+        }
+    };
+    private final TextWatcher twSickLeave = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+            isInputValid();
         }
     };
     private final TextWatcher twUnpaid = new TextWatcher() {
@@ -247,35 +320,7 @@ public class VacationDialog extends DialogFragment {
         @SuppressLint("DefaultLocale")
         @Override
         public void afterTextChanged(Editable editable) {
-            boolean isEmpty = Objects.requireNonNull(binding.unpaidDaysEdit.getText()).toString().trim().isEmpty();
-            int unpaid = 0;
-            int accepted = 0;
-            if (binding.totalAcceptedDaysEdit.getText().toString().trim().length() != 0)
-                accepted = Integer.parseInt(binding.totalAcceptedDaysEdit.getText().toString());
-            int remaining = vacationRequest.getEmployee().getTotalNumberOfVacationDays();
-            boolean errorFlag = false;
-            if (!isEmpty) {
-                unpaid = Integer.parseInt(binding.unpaidDaysEdit.getText().toString());
-                if (unpaid > accepted) {
-                    binding.unpaidDaysLayout.setError(String.format("Can't be more than %d", accepted));
-                    errorFlag = true;
-                } else if (remaining < accepted && unpaid < accepted - remaining) {
-                    binding.unpaidDaysLayout.setError("Has to be at least " + (accepted - remaining) + " Days");
-                    errorFlag = true;
-                } else {
-                    binding.unpaidDaysLayout.setError(null);
-                    binding.unpaidDaysLayout.setErrorEnabled(false);
-                }
-            } else if (isEmpty) {
-                if (remaining < accepted) {
-                    binding.unpaidDaysLayout.setError("Has to be at least " + (accepted - remaining) + " Days");
-                    errorFlag = true;
-                }
-            }
-            if (!errorFlag) {
-                binding.unpaidDaysLayout.setErrorEnabled(false);
-                binding.unpaidDaysLayout.setError(null);
-            }
+            isInputValid();
         }
     };
     private final View.OnClickListener oclAccept = new View.OnClickListener() {
@@ -283,9 +328,11 @@ public class VacationDialog extends DialogFragment {
         public void onClick(View view) {
 
             if (isInputValid()) {
-                int acceptedDays = Objects.requireNonNull(binding.totalAcceptedDaysEdit.getText()).toString().trim().isEmpty() ? 0 : Integer.parseInt(binding.totalAcceptedDaysEdit.getText().toString());
+                int acceptedDays = Objects.requireNonNull(binding.totalRequestedDaysEdit.getText()).toString().trim().isEmpty() ? 0 : Integer.parseInt(binding.totalRequestedDaysEdit.getText().toString());
                 int unPaidDays = Objects.requireNonNull(binding.unpaidDaysEdit.getText()).toString().trim().isEmpty() ? 0 : Integer.parseInt(binding.unpaidDaysEdit.getText().toString().trim());
-                updateVacationEndDate(vacationRequest, acceptedDays, unPaidDays);
+                int vacationDays = Objects.requireNonNull(binding.vacationDaysEdit.getText()).toString().trim().isEmpty() ? 0 : Integer.parseInt(binding.vacationDaysEdit.getText().toString().trim());
+                int sickLeaveDays = Objects.requireNonNull(binding.sickLeaveDaysEdit.getText()).toString().trim().isEmpty() ? 0 : Integer.parseInt(binding.sickLeaveDaysEdit.getText().toString().trim());
+                updateVacationEndDate(vacationRequest, acceptedDays, unPaidDays, sickLeaveDays, vacationDays);
                 dismiss();
             }
         }
@@ -295,7 +342,7 @@ public class VacationDialog extends DialogFragment {
         public void onClick(View view) {
             VACATION_COL
                     .document(vacationRequest.getId())
-                    .update("vacationStatus", REJECTED).addOnSuccessListener(v -> dismiss());
+                    .update("vacationStatus", REJECTED, "feedback", binding.noteEdit.getText().toString()).addOnSuccessListener(v -> dismiss());
         }
     };
 }

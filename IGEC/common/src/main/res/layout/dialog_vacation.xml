@@ -16,7 +16,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout_acceptedAmount"
+            android:id="@+id/total_accepted_days_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -29,7 +29,7 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/TextInput_acceptedAmount"
+                android:id="@+id/total_accepted_days_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/accepted_days"
@@ -38,9 +38,8 @@
                 android:singleLine="true" />
         </com.google.android.material.textfield.TextInputLayout>
 
-
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/textInputLayout_Unpaid"
+            android:id="@+id/vacation_days_layout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -51,10 +50,59 @@
             app:helperTextEnabled="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textInputLayout_acceptedAmount">
+            app:layout_constraintTop_toBottomOf="@id/total_accepted_days_layout">
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/TextInput_Unpaid"
+                android:id="@+id/vacation_days_edit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/vacation"
+                android:inputType="number"
+                android:padding="14dp"
+                android:singleLine="true" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/sick_leave_days_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/vhigh"
+            android:layout_marginTop="@dimen/mid"
+            android:layout_marginEnd="@dimen/vhigh"
+            app:boxBackgroundMode="outline"
+            app:helperTextEnabled="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/vacation_days_layout">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/sick_leave_days_edit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/sick_leave"
+                android:inputType="number"
+                android:padding="14dp"
+                android:singleLine="true" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/unpaid_days_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/vhigh"
+            android:layout_marginTop="@dimen/mid"
+            android:layout_marginEnd="@dimen/vhigh"
+            app:boxBackgroundMode="outline"
+            app:helperTextEnabled="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/sick_leave_days_layout">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/unpaid_days_edit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/unpaid"
@@ -65,19 +113,67 @@
 
 
         <TextView
-            android:id="@+id/TextView_VacationStatus"
+            android:id="@+id/vacation_start_date_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/vhigh"
             android:layout_marginTop="@dimen/mid"
             android:textColor="@color/black"
-            android:text="vacation start:\nvacation end:"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/textInputLayout_Unpaid" />
+            app:layout_constraintTop_toBottomOf="@id/unpaid_days_layout"
+            tools:text="starts:" />
+
+        <TextView
+            android:id="@+id/vacation_end_date_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/vhigh"
+            android:layout_marginTop="@dimen/mid"
+            android:textColor="@color/black"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/vacation_start_date_text"
+            tools:text="ends:" />
+
+        <TextView
+            android:id="@+id/vacation_note_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/vhigh"
+            android:layout_marginTop="@dimen/mid"
+            android:textColor="@color/black"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/vacation_end_date_text"
+            tools:text="note:" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/note_layout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="230dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="@dimen/mid"
+            android:layout_marginEnd="32dp"
+            app:boxBackgroundMode="outline"
+            app:counterEnabled="true"
+            app:counterMaxLength="250"
+            app:helperTextEnabled="true"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/vacation_note_text">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/note_edit"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:gravity="top"
+                android:hint="@string/note"
+                android:inputType="textMultiLine"
+                android:padding="14dp" />
+        </com.google.android.material.textfield.TextInputLayout>
 
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/Button_Reject"
+            android:id="@+id/reject_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/vhigh"
@@ -88,10 +184,10 @@
             android:textSize="16sp"
             app:cornerRadius="8dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/TextView_VacationStatus" />
+            app:layout_constraintTop_toBottomOf="@id/note_layout" />
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/Button_Accept"
+            android:id="@+id/accept_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/high"
@@ -102,6 +198,6 @@
             android:textSize="16sp"
             app:cornerRadius="8dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/TextView_VacationStatus" />
+            app:layout_constraintTop_toBottomOf="@id/note_layout" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

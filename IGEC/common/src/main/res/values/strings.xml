@@ -4,4 +4,7 @@
     <string name="accept">Accept</string>
     <string name="unpaid">Unpaid</string>
     <string name="accepted_days">Accepted Days</string>
+    <string name="vacation">Vacation</string>
+    <string name="sick_leave">Sick Leave</string>
+    <string name="note">Note</string>
 </resources>

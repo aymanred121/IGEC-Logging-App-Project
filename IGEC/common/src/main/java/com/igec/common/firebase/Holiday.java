@@ -89,10 +89,18 @@ public class Holiday implements Parcelable {
     }
 
     @Exclude
-    public String convertDateToString(Date date) {
+    public String formattedStartDate() {
         @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(date.getTime());
+        calendar.setTimeInMillis(start.getTime());
+        return simpleDateFormat.format(calendar.getTime());
+    }
+
+    @Exclude
+    public String formattedEndDate() {
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(end.getTime());
         return simpleDateFormat.format(calendar.getTime());
     }
 }

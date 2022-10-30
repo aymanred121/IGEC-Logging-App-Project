@@ -6,6 +6,7 @@ import static com.igec.common.CONSTANTS.EMPLOYEE_GROSS_SALARY_COL;
 import static com.igec.common.CONSTANTS.EMPLOYEE_OVERVIEW_REF;
 import static com.igec.common.CONSTANTS.OFFICE_REF;
 import static com.igec.common.CONSTANTS.PROJECT_COL;
+import static com.igec.common.CONSTANTS.convertDateToString;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
@@ -299,12 +300,7 @@ public class ProjectFragmentDialog extends DialogFragment {
         binding.contractTypeAuto.setAdapter(ContractAdapter);
     }
 
-    String convertDateToString(long selection) {
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(selection);
-        return simpleDateFormat.format(calendar.getTime());
-    }
+
 
     private boolean generateError() {
         for (Pair<TextInputLayout, EditText> view : views) {

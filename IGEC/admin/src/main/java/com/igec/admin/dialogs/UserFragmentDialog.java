@@ -9,6 +9,7 @@ import static com.igec.common.CONSTANTS.MACHINE_EMPLOYEE_COL;
 import static com.igec.common.CONSTANTS.PENDING;
 import static com.igec.common.CONSTANTS.PROJECT_COL;
 import static com.igec.common.CONSTANTS.VACATION_COL;
+import static com.igec.common.CONSTANTS.convertDateToString;
 import static com.igec.common.cryptography.RSAUtil.encrypt;
 import static com.google.android.material.textfield.TextInputLayout.END_ICON_CUSTOM;
 
@@ -468,12 +469,7 @@ public class UserFragmentDialog extends DialogFragment {
         }
     }
 
-    private String convertDateToString(long selection) {
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(selection);
-        return simpleDateFormat.format(calendar.getTime());
-    }
+
 
     // Listeners
     private View.OnClickListener clUpdate = v -> {

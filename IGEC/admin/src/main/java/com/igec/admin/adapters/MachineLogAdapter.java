@@ -1,5 +1,7 @@
 package com.igec.admin.adapters;
 
+import static com.igec.common.CONSTANTS.convertDateToString;
+
 import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -42,14 +44,6 @@ public class MachineLogAdapter extends RecyclerView.Adapter<MachineLogAdapter.Ma
             holder.vEndDate.setText(convertDateToString((long) ((Timestamp) employeeMachine.getCheckOut().get("Time")).getSeconds() * 1000));
         holder.vCost.setText(String.format("%.2f EGP", employeeMachine.getCost()));
     }
-
-    private String convertDateToString(long selection) {
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(selection);
-        return simpleDateFormat.format(calendar.getTime());
-    }
-
     @Override
     public int getItemCount() {
         return machineEmployees.size();

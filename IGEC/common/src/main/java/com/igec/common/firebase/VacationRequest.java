@@ -12,9 +12,9 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class VacationRequest implements Serializable {
-    private Date startDate, endDate,requestDate;
-    private Employee manager,employee;
-    private String vacationNote,id;
+    private Date startDate, endDate, requestDate;
+    private Employee manager, employee;
+    private String vacationNote, id;
     private int vacationStatus;
     /*
     vacationNotification:
@@ -23,6 +23,7 @@ public class VacationRequest implements Serializable {
      1  = employee had read it
      */
     private int vacationNotification = -1;
+
     public VacationRequest() {
     }
 
@@ -33,7 +34,7 @@ public class VacationRequest implements Serializable {
         this.manager = manager;
         this.employee = employee;
         this.vacationNote = vacationNote;
-        vacationStatus=PENDING;
+        vacationStatus = PENDING;
     }
 
     public String getId() {
@@ -99,20 +100,40 @@ public class VacationRequest implements Serializable {
     public void setVacationStatus(int vacationStatus) {
         this.vacationStatus = vacationStatus;
     }
+
     @Exclude
     public String getDays() {
         long days = endDate.getTime() - startDate.getTime();
         days /= (24 * 3600 * 1000);
         return String.valueOf(days);
     }
+    @Exclude
+    public long getRequestedDays() {
+        long days = endDate.getTime() - startDate.getTime();
+        days /= (24 * 3600 * 1000);
+        return days;
+    }
+    @Exclude
+    public long getRemainingDays() {
+       return employee.getTotalNumberOfVacationDays();
+    }
 
     @Exclude
-    public String convertDateToString(long selection) {
+    public String formattedStartDate() {
         @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(selection);
+        calendar.setTimeInMillis(startDate.getTime());
         return simpleDateFormat.format(calendar.getTime());
     }
+
+    @Exclude
+    public String formattedEndDate() {
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(endDate.getTime());
+        return simpleDateFormat.format(calendar.getTime());
+    }
+
     public int getVacationNotification() {
         return vacationNotification;
     }

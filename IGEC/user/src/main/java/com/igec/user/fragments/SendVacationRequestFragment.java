@@ -3,6 +3,7 @@ package com.igec.user.fragments;
 import static com.igec.common.CONSTANTS.ADMIN;
 import static com.igec.common.CONSTANTS.EMPLOYEE_COL;
 import static com.igec.common.CONSTANTS.VACATION_COL;
+import static com.igec.common.CONSTANTS.convertDateToString;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -214,12 +215,7 @@ public class SendVacationRequestFragment extends Fragment implements DatePickerD
         return !generateError();
     }
 
-    private String convertDateToString(long selection) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(selection);
-        return simpleDateFormat.format(calendar.getTime());
-    }
+
 
     // Listeners
     private TextWatcher twVacationDays = new TextWatcher() {

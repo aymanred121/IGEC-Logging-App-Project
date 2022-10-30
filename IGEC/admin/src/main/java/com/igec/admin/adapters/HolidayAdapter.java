@@ -3,8 +3,10 @@ package com.igec.admin.adapters;
 import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.igec.admin.databinding.HolidayItemBinding;
 import com.igec.common.firebase.Holiday;
 
@@ -56,8 +58,8 @@ public class HolidayAdapter extends RecyclerView.Adapter<HolidayAdapter.HolidayV
     public void onBindViewHolder(@NonNull HolidayViewHolder holder, int position) {
         Holiday holiday = holidays.get(position);
         holder.binding.nameText.setText(holiday.getName());
-        holder.binding.startDateText.setText(String.format("Starts on %s", holiday.convertDateToString(holiday.getStart())));
-        holder.binding.endDateText.setText(String.format("Ends on %s", holiday.convertDateToString(holiday.getEnd())));
+        holder.binding.startDateText.setText(String.format("Starts on %s", holiday.formattedStartDate()));
+        holder.binding.endDateText.setText(String.format("Ends on %s", holiday.formattedEndDate()));
     }
 
     @Override

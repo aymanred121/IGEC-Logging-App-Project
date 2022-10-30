@@ -6,6 +6,7 @@ import static com.igec.common.CONSTANTS.EMPLOYEE_OVERVIEW_REF;
 import static com.igec.common.CONSTANTS.EMPLOYEE_COL;
 import static com.igec.common.CONSTANTS.OFFICE_REF;
 import static com.igec.common.CONSTANTS.PROJECT_COL;
+import static com.igec.common.CONSTANTS.convertDateToString;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
@@ -367,13 +368,6 @@ public class AddProjectFragment extends Fragment {
     private void hideError(TextInputLayout layout) {
         layout.setError(null);
         layout.setErrorEnabled(false);
-    }
-
-    private String convertDateToString(long selection) {
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(selection);
-        return simpleDateFormat.format(calendar.getTime());
     }
 
     void clearInputs() {

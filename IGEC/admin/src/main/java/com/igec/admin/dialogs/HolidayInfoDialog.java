@@ -92,8 +92,8 @@ public class HolidayInfoDialog extends DialogFragment {
         holiday = getArguments().getParcelable("holiday");
 
         binding.nameEdit.setText(holiday.getName());
-        binding.startDateEdit.setText(holiday.convertDateToString(holiday.getStart()));
-        binding.endDateEdit.setText(holiday.convertDateToString(holiday.getEnd()));
+        binding.startDateEdit.setText(holiday.formattedStartDate());
+        binding.endDateEdit.setText(holiday.formattedEndDate());
         startDate = holiday.getStart();
         endDate = holiday.getEnd();
 

@@ -87,7 +87,7 @@
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:gravity="top"
-            android:hint="@string/vacation_reason"
+            android:hint="@string/note"
             android:inputType="textMultiLine"
             android:padding="14dp" />
     </com.google.android.material.textfield.TextInputLayout>

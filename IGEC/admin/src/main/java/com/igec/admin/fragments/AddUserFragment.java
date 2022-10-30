@@ -3,6 +3,7 @@ package com.igec.admin.fragments;
 import static com.igec.common.CONSTANTS.EMPLOYEE_COL;
 import static com.igec.common.CONSTANTS.EMPLOYEE_GROSS_SALARY_COL;
 import static com.igec.common.CONSTANTS.EMPLOYEE_OVERVIEW_REF;
+import static com.igec.common.CONSTANTS.convertDateToString;
 import static com.igec.common.cryptography.RSAUtil.encrypt;
 
 import android.os.Bundle;
@@ -145,12 +146,7 @@ public class AddUserFragment extends Fragment {
             fakeData();
     }
 
-    private String convertDateToString(long selection) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(selection);
-        return simpleDateFormat.format(calendar.getTime());
-    }
+
 
     void addEmployee() {
         EMPLOYEE_COL.whereEqualTo("email", binding.emailEdit.getText().toString().trim()).get().addOnSuccessListener(documents -> {

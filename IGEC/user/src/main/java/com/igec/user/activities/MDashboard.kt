@@ -27,7 +27,6 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
-import com.igec.common.CONSTANTS
 import com.igec.common.CONSTANTS.*
 import com.igec.common.firebase.Employee
 import com.igec.common.firebase.TransferRequests
@@ -166,9 +165,7 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                         vacationRequestsFromEmployees.add(vacation.id)
                         val msg =
                             "${vacation.employee.firstName} has requested ${vacation.days} days, starting from ${
-                                vacation.convertDateToString(
-                                    vacation.startDate.time
-                                )
+                                vacation.formattedStartDate()
                             }"
                         vacationRequestNotification = setupNotification(
                             "New Vacation Request",

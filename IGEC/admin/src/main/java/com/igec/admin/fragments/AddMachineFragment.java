@@ -4,6 +4,7 @@ import static android.app.Activity.RESULT_OK;
 
 import static com.igec.common.CONSTANTS.CAMERA_REQUEST_CODE;
 import static com.igec.common.CONSTANTS.MACHINE_COL;
+import static com.igec.common.CONSTANTS.convertDateToString;
 
 import android.Manifest;
 import android.content.Intent;
@@ -267,12 +268,7 @@ public class AddMachineFragment extends Fragment implements EasyPermissions.Perm
         return !generateError();
     }
 
-    private String convertDateToString(long selection) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(selection);
-        return simpleDateFormat.format(calendar.getTime());
-    }
+
 
     // Listeners
     private final View.OnClickListener oclDate = v -> {

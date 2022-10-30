@@ -11,7 +11,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
-import android.media.AudioAttributes
 import android.media.RingtoneManager
 import android.net.ConnectivityManager
 import android.net.Network
@@ -41,7 +40,6 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
 import com.igec.admin.R
 import com.igec.admin.databinding.ActivityMainBinding
-import com.igec.admin.dialogs.ProjectFragmentDialog
 import com.igec.admin.fragments.*
 import com.igec.common.CONSTANTS.*
 import com.igec.common.firebase.VacationRequest
@@ -131,9 +129,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         vacationRequests.add(vacation.id)
                         val msg =
                             "${vacation!!.employee.firstName} has requested ${vacation.days} days, starting from ${
-                                vacation.convertDateToString(
-                                    vacation.startDate.time
-                                )
+                                vacation.formattedStartDate()
                             }"
                         setupNotification(
                             "New Vacation Request",

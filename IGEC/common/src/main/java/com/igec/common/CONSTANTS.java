@@ -1,5 +1,6 @@
 package com.igec.common;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.provider.Settings;
@@ -7,6 +8,9 @@ import android.provider.Settings;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 public class CONSTANTS {
     private static final FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -40,4 +44,11 @@ public class CONSTANTS {
     public static final CollectionReference MACHINE_DEFECT_LOG_COL = db.collection("MachineDefectsLog");
     public static final CollectionReference SUMMARY_COL = db.collection("summary");
     public static final CollectionReference HOLIDAYS_COL = db.collection("Holidays");
+
+    public static String convertDateToString(long selection) {
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(selection);
+        return simpleDateFormat.format(calendar.getTime());
     }
+}

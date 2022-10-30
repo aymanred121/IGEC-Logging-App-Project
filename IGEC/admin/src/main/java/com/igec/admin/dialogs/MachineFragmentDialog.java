@@ -4,6 +4,7 @@ import static android.app.Activity.RESULT_OK;
 
 import static com.igec.common.CONSTANTS.MACHINE_COL;
 import static com.igec.common.CONSTANTS.MACHINE_EMPLOYEE_COL;
+import static com.igec.common.CONSTANTS.convertDateToString;
 
 import android.annotation.SuppressLint;
 import android.app.Dialog;
@@ -372,12 +373,7 @@ public class MachineFragmentDialog extends DialogFragment {
         return true;
     }
 
-    private String convertDateToString(long selection) {
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(selection);
-        return simpleDateFormat.format(calendar.getTime());
-    }
+
 
     // Listeners
     private final View.OnClickListener oclDate = new View.OnClickListener() {

@@ -2,6 +2,7 @@ package com.igec.admin.fragments;
 
 import static com.igec.common.CONSTANTS.MACHINE_COL;
 import static com.igec.common.CONSTANTS.MACHINE_DEFECT_LOG_COL;
+import static com.igec.common.CONSTANTS.convertDateToString;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -86,12 +87,7 @@ public class MachinesFragment extends Fragment {
 
     }
 
-    private String convertDateToString(long selection) {
-        @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm a");
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(selection);
-        return simpleDateFormat.format(calendar.getTime());
-    }
+
 
     private final MachineAdapter.OnItemClickListener itclMachineAdapter = new MachineAdapter.OnItemClickListener() {
         @RequiresApi(api = Build.VERSION_CODES.R)

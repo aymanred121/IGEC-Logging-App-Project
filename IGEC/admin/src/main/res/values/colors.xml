@@ -11,5 +11,5 @@
     <color name="primaryTextColor">#ffffff</color>
     <color name="secondaryTextColor">#ffffff</color>
     <color name="Green">#009900</color>
-    <color name="Red" >#990000</color>
+    <color name="red" >#990000</color>
 </resources>

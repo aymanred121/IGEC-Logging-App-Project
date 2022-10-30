@@ -16,7 +16,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.ArrayAdapter;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -32,21 +31,20 @@ import com.igec.common.firebase.EmployeesGrossSalary;
 import com.igec.common.firebase.VacationRequest;
 import com.igec.common.utilities.AllowancesEnum;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
 public class VacationDialog extends DialogFragment {
     private final VacationRequest vacationRequest;
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private boolean displayOnly = false;
 
-
-    public VacationDialog(VacationRequest vacationRequest) {
+    public VacationDialog(VacationRequest vacationRequest, boolean displayOnly) {
         this.vacationRequest = vacationRequest;
+        this.displayOnly = displayOnly;
     }
 
     @NonNull
@@ -86,6 +84,30 @@ public class VacationDialog extends DialogFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        if (displayOnly) {
+            binding.rejectButton.setVisibility(View.GONE);
+            binding.acceptButton.setVisibility(View.GONE);
+            binding.okButton.setVisibility(View.VISIBLE);
+            if (vacationRequest.getVacationStatus() == ACCEPTED) {
+                binding.okButton.setBackgroundColor(getResources().getColor(R.color.green));
+            } else if (vacationRequest.getVacationStatus() == REJECTED) {
+                binding.okButton.setBackgroundColor(getResources().getColor(R.color.red));
+            }
+            binding.okButton.setOnClickListener(v -> dismiss());
+
+            // disable all fields
+            binding.totalAcceptedDaysEdit.setEnabled(false);
+            binding.vacationDaysEdit.setEnabled(false);
+            binding.sickLeaveDaysEdit.setEnabled(false);
+            binding.unpaidDaysEdit.setEnabled(false);
+            binding.noteEdit.setEnabled(false);
+            binding.totalAcceptedDaysEdit.setText(!binding.totalAcceptedDaysEdit.getText().toString().isEmpty() ? binding.totalAcceptedDaysEdit.getText() : "Can't be edited");
+            binding.vacationDaysEdit.setText(!binding.vacationDaysEdit.getText().toString().isEmpty() ? binding.vacationDaysEdit.getText() : "Can't be edited");
+            binding.sickLeaveDaysEdit.setText(!binding.sickLeaveDaysEdit.getText().toString().isEmpty() ? binding.sickLeaveDaysEdit.getText() : "Can't be edited");
+            binding.unpaidDaysEdit.setText(!binding.unpaidDaysEdit.getText().toString().isEmpty() ? binding.unpaidDaysEdit.getText() : "Can't be edited");
+            binding.noteEdit.setText(!binding.noteEdit.getText().toString().isEmpty() ? binding.noteEdit.getText() : "Can't be edited");
+        }
+
 
         binding.totalAcceptedDaysEdit.setText(String.format("%s", vacationRequest.getDays()));
         binding.vacationNoteText.setText(String.format("Note: %s", vacationRequest.getVacationNote()));
@@ -104,6 +126,7 @@ public class VacationDialog extends DialogFragment {
         super.onDestroyView();
         binding = null;
     }
+
     private boolean isInputValid() {
 
         if (Objects.requireNonNull(binding.totalAcceptedDaysEdit.getText()).toString().trim().isEmpty()) {
@@ -113,6 +136,7 @@ public class VacationDialog extends DialogFragment {
 
         return binding.totalAcceptedDaysLayout.getError() == null && binding.unpaidDaysLayout.getError() == null;
     }
+
     @SuppressLint("DefaultLocale")
     private void updateVacationEndDate(VacationRequest vacationRequest, int vacationDays, int unPaidDays) {
         String month, year;
@@ -172,6 +196,7 @@ public class VacationDialog extends DialogFragment {
             }
         });
     }
+
     private final TextWatcher twAcceptedAmount = new TextWatcher() {
         @Override
         public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {

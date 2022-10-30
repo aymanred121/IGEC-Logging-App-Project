@@ -74,7 +74,7 @@ public class VacationRequestsFragment extends Fragment {
         vacationRequests = new ArrayList<>();
         binding.recyclerView.setHasFixedSize(true);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        adapter = new VacationAdapter(vacationRequests,true);
+        adapter = new VacationAdapter(vacationRequests, true);
         binding.recyclerView.setLayoutManager(layoutManager);
         binding.recyclerView.setAdapter(adapter);
         loadVacations();
@@ -122,7 +122,7 @@ public class VacationRequestsFragment extends Fragment {
     }
 
     VacationAdapter.OnItemClickListener itclVacationAdapter = position -> {
-        VacationDialog vacationDialog = new VacationDialog(vacationRequests.get(position));
+        VacationDialog vacationDialog = new VacationDialog(vacationRequests.get(position), false);
         vacationDialog.show(getParentFragmentManager(), "");
     };
 

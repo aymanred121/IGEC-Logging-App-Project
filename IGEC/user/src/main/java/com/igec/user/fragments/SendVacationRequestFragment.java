@@ -37,7 +37,6 @@ import com.igec.user.activities.DateInaccurate;
 import com.igec.user.databinding.FragmentSendVacationRequestBinding;
 import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -138,7 +137,7 @@ public class SendVacationRequestFragment extends Fragment implements DatePickerD
         dpd.setTitle("Vacation Date");
         dpd.setOkText("Set");
         dpd.setOkColor(getResources().getColor(R.color.green));
-        dpd.setCancelColor(getResources().getColor(R.color.Red));
+        dpd.setCancelColor(getResources().getColor(R.color.red));
         //dpd.setMinDate(Calendar.getInstance());
         Calendar nextYear = Calendar.getInstance();
         nextYear.add(Calendar.YEAR, 2);

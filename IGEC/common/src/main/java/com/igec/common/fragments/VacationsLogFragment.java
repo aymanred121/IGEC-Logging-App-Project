@@ -24,6 +24,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.Query;
 import com.igec.common.adapters.VacationAdapter;
 import com.igec.common.databinding.FragmentVacationsLogBinding;
+import com.igec.common.dialogs.VacationDialog;
 import com.igec.common.firebase.Employee;
 import com.igec.common.firebase.VacationRequest;
 
@@ -71,9 +72,10 @@ public class VacationsLogFragment extends Fragment {
 
         binding.recyclerView.setHasFixedSize(true);
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        adapter = new VacationAdapter(vacations, false);
+        adapter = new VacationAdapter(vacations, true);
         binding.recyclerView.setLayoutManager(layoutManager);
         binding.recyclerView.setAdapter(adapter);
+        adapter.setOnItemClickListener(itclVacationAdapter);
 
         if (user == null)// admin
             loadVacations("manager", null);
@@ -134,5 +136,10 @@ public class VacationsLogFragment extends Fragment {
                     adapter.notifyDataSetChanged();
                 });
     }
+
+    VacationAdapter.OnItemClickListener itclVacationAdapter = position -> {
+        VacationDialog vacationDialog = new VacationDialog(vacations.get(position), true);
+        vacationDialog.show(getParentFragmentManager(), "");
+    };
 
 }

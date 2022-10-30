@@ -38,7 +38,7 @@
             android:layout_height="@dimen/vhigh"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:backgroundTint="@color/Red"
+            android:backgroundTint="@color/red"
             app:borderWidth="0dp"
             android:textSize="32sp"
             app:fabCustomSize="@dimen/vhigh"

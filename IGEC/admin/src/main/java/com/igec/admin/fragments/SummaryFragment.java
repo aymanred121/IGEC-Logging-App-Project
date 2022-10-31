@@ -19,7 +19,6 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.work.WorkInfo;
 
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -56,6 +55,9 @@ public class SummaryFragment extends Fragment {
     private ArrayList<EmployeeOverview> employees;
     private boolean opened = false;
     private final long EIGHT_HOURS = 28800;
+    private CsvWriter csvWriter;
+    private String[] dataRow;
+    int counter = 0 ;
 
     public void setOpened(boolean opened) {
         this.opened = opened;
@@ -99,15 +101,7 @@ public class SummaryFragment extends Fragment {
 
     }
 
-    private void generateCSV(ArrayList<WorkingDay> workingDays) {
-        String month = workingDays.get(0).getMonth();
-        String year = workingDays.get(0).getYear();
-        String empName = workingDays.get(0).getEmpName();
-        int yearNumber = Integer.parseInt(year);
-        int monthNumber = Integer.parseInt(month);
-        StringJoiner header = new StringJoiner(",");
-        String[] dataRow;
-        header.add("Day");
+    private void UpdateCSV(ArrayList<WorkingDay> workingDays, String empName) {
         /*
         we know that months with 31 days are 1 3 5 7 8 10 12
         and when we use those numbers to shift left 1 we get
@@ -124,37 +118,7 @@ public class SummaryFragment extends Fragment {
         0b0101001010101
         we will always get 0 and otherwise with other numbers
          */
-        int MONTH31DAYS = 0xA55;
-        if ((1 << (monthNumber) & MONTH31DAYS) == 0) {
-            //create header with 31 days
-            for (int i = 1; i <= 31; i++) {
-                header.add(String.valueOf(i));
-            }
-            dataRow = new String[32];
-        } else if (monthNumber == 2) {
-            if (yearNumber % 400 == 0 || (yearNumber % 100 != 0) && (yearNumber % 4 == 0)) {
-                //create header with 29 days
-                for (int i = 1; i <= 29; i++) {
-                    header.add(String.valueOf(i));
-                }
-                dataRow = new String[30];
-            } else {
-                //create header with 28 days
-                for (int i = 1; i <= 28; i++) {
-                    header.add(String.valueOf(i));
-                }
-                dataRow = new String[29];
-            }
-
-        } else {
-            //create header with 30 days
-            for (int i = 1; i <= 30; i++) {
-                header.add(String.valueOf(i));
-            }
-            dataRow = new String[31];
-        }
         dataRow[0] = empName;
-        CsvWriter csvWriter = new CsvWriter(header.toString().split(","));
         for (WorkingDay w : workingDays) {
             dataRow[Integer.parseInt(w.getDay())] = String.valueOf(w.getHours());
         }
@@ -166,21 +130,24 @@ public class SummaryFragment extends Fragment {
         }
         IntStream.range(1, dataRow.length).filter(i -> dataRow[i] == null).forEach(i -> dataRow[i] = "0");
         csvWriter.addDataRow(dataRow);
-
-        try {
-            csvWriter.build(empName + "-" + year + "-" + month);
-            Snackbar.make(binding.getRoot(), "csv Saved!", Snackbar.LENGTH_SHORT).show();
-        } catch (IOException e) {
-            e.printStackTrace();
+        counter++;
+        if(counter == employees.size() ){
+            try {
+                csvWriter.build("all_emp-" + year + "-" + month);
+                Snackbar.make(binding.getRoot(), "csv Saved!", Snackbar.LENGTH_SHORT).show();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+
     }
 
-    private void loadWorkingDays(EmployeeOverview employee) {
+    private void loadWorkingDays(EmployeeOverview employee ,String empName) {
         ArrayList<WorkingDay> workingDays = new ArrayList<>();
-        String empName = employee.getFirstName() + " " + employee.getLastName();
         SUMMARY_COL.document(employee.getId()).collection(year + "-" + month)
                 .get().addOnSuccessListener(docs -> {
                     if (docs.size() == 0) {
+                        UpdateCSV(workingDays, empName);
                         return;
                     }
                     for (QueryDocumentSnapshot q : docs) {
@@ -239,7 +206,7 @@ public class SummaryFragment extends Fragment {
                                     int o2Day = Integer.parseInt(o2.getDay());
                                     return o1Day - o2Day;
                                 });
-                                generateCSV((ArrayList<WorkingDay>) workingDays.clone());
+                                UpdateCSV((ArrayList<WorkingDay>) workingDays.clone(), empName);
                             }
                         }));
 
@@ -384,12 +351,49 @@ public class SummaryFragment extends Fragment {
 
 
     private View.OnClickListener oclAll = v -> {
+        counter = 0;
         if (binding.monthEdit.getText().toString().isEmpty()) {
             binding.monthLayout.setError("Please select a month");
         } else {
-            for (EmployeeOverview emp : employees) {
-                loadWorkingDays(emp);
+            StringJoiner header = new StringJoiner(",");
+            header.add("Day");
+            int yearNumber = Integer.parseInt(year);
+            int monthNumber = Integer.parseInt(month);
+            int MONTH31DAYS = 0xA55;
+            if ((1 << (monthNumber) & MONTH31DAYS) == 0) {
+                //create header with 31 days
+                for (int i = 1; i <= 31; i++) {
+                    header.add(String.valueOf(i));
+                }
+                dataRow = new String[32];
+            } else if (monthNumber == 2) {
+                if (yearNumber % 400 == 0 || (yearNumber % 100 != 0) && (yearNumber % 4 == 0)) {
+                    //create header with 29 days
+                    for (int i = 1; i <= 29; i++) {
+                        header.add(String.valueOf(i));
+                    }
+                    dataRow = new String[30];
+                } else {
+                    //create header with 28 days
+                    for (int i = 1; i <= 28; i++) {
+                        header.add(String.valueOf(i));
+                    }
+                    dataRow = new String[29];
+                }
+            } else {
+                //create header with 30 days
+                for (int i = 1; i <= 30; i++) {
+                    header.add(String.valueOf(i));
+                }
+                dataRow = new String[31];
             }
+            csvWriter = new CsvWriter(header.toString().split(","));
+            for (EmployeeOverview emp : employees) {
+                String empName = emp.getFirstName()+ " " + emp.getLastName();
+                dataRow[0]= empName;
+                loadWorkingDays(emp ,empName);
+            }
+
         }
 
     };

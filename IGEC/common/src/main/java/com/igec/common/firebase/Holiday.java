@@ -76,6 +76,12 @@ public class Holiday implements Parcelable {
         return start;
     }
 
+    public Calendar getStartCalendar() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(start);
+        return calendar;
+    }
+
     public void setStart(Date start) {
         this.start = start;
     }
@@ -84,6 +90,11 @@ public class Holiday implements Parcelable {
         return end;
     }
 
+    public Calendar getEndCalendar() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(end);
+        return calendar;
+    }
     public void setEnd(Date end) {
         this.end = end;
     }

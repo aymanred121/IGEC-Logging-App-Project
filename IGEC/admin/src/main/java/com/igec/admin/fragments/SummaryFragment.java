@@ -4,8 +4,11 @@ import static android.content.ContentValues.TAG;
 import static com.igec.common.CONSTANTS.EMPLOYEE_COL;
 import static com.igec.common.CONSTANTS.EMPLOYEE_GROSS_SALARY_COL;
 import static com.igec.common.CONSTANTS.EMPLOYEE_OVERVIEW_REF;
+import static com.igec.common.CONSTANTS.HOLIDAYS;
+import static com.igec.common.CONSTANTS.HOLIDAYS_COL;
 import static com.igec.common.CONSTANTS.PROJECT_COL;
 import static com.igec.common.CONSTANTS.SUMMARY_COL;
+import static com.igec.common.CONSTANTS.VACATION_COL;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
@@ -29,8 +32,10 @@ import com.igec.common.firebase.Allowance;
 import com.igec.common.firebase.Employee;
 import com.igec.common.firebase.EmployeeOverview;
 import com.igec.common.firebase.EmployeesGrossSalary;
+import com.igec.common.firebase.Holiday;
 import com.igec.common.firebase.Project;
 import com.igec.common.firebase.Summary;
+import com.igec.common.firebase.VacationRequest;
 import com.igec.common.utilities.AllowancesEnum;
 import com.igec.common.utilities.CsvWriter;
 import com.igec.common.utilities.LocationDetails;
@@ -38,9 +43,12 @@ import com.igec.common.utilities.WorkingDay;
 import com.whiteelephant.monthpicker.MonthPickerDialog;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -57,7 +65,8 @@ public class SummaryFragment extends Fragment {
     private final long EIGHT_HOURS = 28800;
     private CsvWriter csvWriter;
     private String[] dataRow;
-    int counter = 0 ;
+    private int dataRowSize = 0;
+    int counter = 0;
 
     public void setOpened(boolean opened) {
         this.opened = opened;
@@ -101,7 +110,7 @@ public class SummaryFragment extends Fragment {
 
     }
 
-    private void UpdateCSV(ArrayList<WorkingDay> workingDays, String empName) {
+    private void UpdateCSV(ArrayList<WorkingDay> workingDays, String empName, String id) {
         /*
         we know that months with 31 days are 1 3 5 7 8 10 12
         and when we use those numbers to shift left 1 we get
@@ -118,36 +127,169 @@ public class SummaryFragment extends Fragment {
         0b0101001010101
         we will always get 0 and otherwise with other numbers
          */
-        dataRow[0] = empName;
-        for (WorkingDay w : workingDays) {
-            dataRow[Integer.parseInt(w.getDay())] = String.valueOf(w.getHours());
-        }
-        IntStream.range(1, dataRow.length).filter(i -> dataRow[i] == null).forEach(i -> dataRow[i] = "0");
-        csvWriter.addDataRow(dataRow);
-        dataRow[0] = "project name";
-        for (WorkingDay w : workingDays) {
-            dataRow[Integer.parseInt(w.getDay())] = String.valueOf(w.getProjectName());
-        }
-        IntStream.range(1, dataRow.length).filter(i -> dataRow[i] == null).forEach(i -> dataRow[i] = "0");
-        csvWriter.addDataRow(dataRow);
-        counter++;
-        if(counter == employees.size() ){
-            try {
-                csvWriter.build("all_emp-" + year + "-" + month);
-                Snackbar.make(binding.getRoot(), "csv Saved!", Snackbar.LENGTH_SHORT).show();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        HOLIDAYS_COL.document(HOLIDAYS).get().addOnSuccessListener(doc -> {
+
+            VACATION_COL
+                    .whereEqualTo("vacationStatus", 1)
+                    .whereEqualTo("employee.id", id).get().addOnSuccessListener(queryDocumentSnapshots -> {
+                        dataRow = new String[dataRowSize];
+                        dataRow[0] = empName;
+                        for (WorkingDay w : workingDays) {
+                            dataRow[Integer.parseInt(w.getDay())] = String.valueOf(w.getHours());
+                        }
+                        IntStream.range(1, dataRow.length).filter(i -> dataRow[i] == null).forEach(i -> dataRow[i] = "0");
+                        csvWriter.addDataRow(dataRow);
+                        dataRow[0] = "project name";
+                        for (WorkingDay w : workingDays) {
+                            dataRow[Integer.parseInt(w.getDay())] = String.valueOf(w.getProjectName());
+                        }
+                        IntStream.range(1, dataRow.length).filter(i -> dataRow[i] == null).forEach(i -> dataRow[i] = "0");
+                        ArrayList<VacationRequest> vacationRequests = new ArrayList<>();
+                        ArrayList<Holiday> holidays = new ArrayList<>();
+                        addingFridays();
+
+
+                        // holidays
+                        holidays.clear();
+                        if (doc.exists()) {
+                            if (doc.contains(year)) {
+                                if (doc.getData().get(year) != null) {
+                                    // loop over hashmap
+                                    for (Object o : ((ArrayList<Object>) doc.getData().get(year))) {
+                                        holidays.add(new Holiday((HashMap) o));
+                                    }
+
+
+                                    for (int i = 1; i < dataRow.length; i++) {
+                                        Calendar calendar = Calendar.getInstance();
+                                        calendar.set(Integer.parseInt(year), Integer.parseInt(month) - 1, i);
+                                        if (isHoliday(holidays, calendar)) {
+                                            if (!dataRow[i].equals("0") && !dataRow[i].equals("Home"))
+                                                dataRow[i] = dataRow[i] + " (holiday)";
+                                            else
+                                                dataRow[i] = "holiday";
+                                        }
+                                    }
+
+                                }
+                            }
+                        }
+
+
+                        // vacations
+                        if (queryDocumentSnapshots.getDocuments().size() != 0) {
+                            for (QueryDocumentSnapshot d : queryDocumentSnapshots) {
+                                vacationRequests.add(d.toObject(VacationRequest.class));
+                            }
+                            Calendar it = Calendar.getInstance();
+                            Calendar end = Calendar.getInstance();
+                            vacationRequests.forEach(v -> {
+                                String vacationLabels[] = new String[(int) v.getRequestedDays()];
+                                addVacationLabels(v.getVacationDays(), vacationLabels, "vacation");
+                                addVacationLabels(v.getSickDays(), vacationLabels, "sick leave");
+                                addVacationLabels(v.getUnpaidDays(), vacationLabels, "unpaid");
+                                int labelIndex = 0;
+                                if (v.getStartDate().getMonth() != Integer.parseInt(month) - 1) {
+                                    if (v.getEndDate().getMonth() != Integer.parseInt(month) - 1)
+                                        return;
+                                    else {
+                                        // set it to be the start of the month in endDate
+                                        it.setTime(v.getEndDate());
+                                        // subtract days from it to reach the start of the month
+                                        it.add(Calendar.DAY_OF_MONTH, -it.get(Calendar.DAY_OF_MONTH) + 1);
+
+                                        // count days between startDate and it
+                                        int days = (int) ((it.getTimeInMillis() - v.getStartDate().getTime()) / (1000 * 60 * 60 * 24));
+                                        // add days to labelIndex
+                                        labelIndex += days;
+                                    }
+                                } else {
+                                    it.setTime(v.getStartDate());
+                                }
+                                end.setTime(v.getEndDate());
+                                end.add(Calendar.DAY_OF_MONTH, 1);
+                                while (it.before(end)) {
+                                    // skip if it's friday
+                                    int index = Integer.parseInt(String.valueOf(it.get(Calendar.DAY_OF_MONTH)));
+                                    if (it.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
+                                        it.add(Calendar.DAY_OF_MONTH, 1);
+                                        continue;
+                                    }
+                                    dataRow[index] = vacationLabels[labelIndex];
+                                    labelIndex++;
+                                    it.add(Calendar.DAY_OF_MONTH, 1);
+                                    if (it.get(Calendar.DAY_OF_MONTH) == 1) {
+                                        break;
+                                    }
+                                }
+                            });
+                        }
+                        csvWriter.addDataRow(dataRow);
+                        counter++;
+                        if (counter == employees.size()) {
+                            try {
+                                csvWriter.build("all_emp-" + year + "-" + month);
+                                Snackbar.make(binding.getRoot(), "csv Saved!", Snackbar.LENGTH_SHORT).show();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
+
+        });
+
 
     }
 
-    private void loadWorkingDays(EmployeeOverview employee ,String empName) {
+    private boolean isHoliday(ArrayList<Holiday> holidays, Calendar day) {
+        final boolean[] isHoliday = {false};
+        holidays.forEach(holiday -> {
+            // check if day is between start and end in holiday without using after and before without caring about hours
+            if (day.get(Calendar.YEAR) == holiday.getStartCalendar().get(Calendar.YEAR) &&
+                    day.get(Calendar.MONTH) == holiday.getStartCalendar().get(Calendar.MONTH) &&
+                    day.get(Calendar.DAY_OF_MONTH) >= holiday.getStartCalendar().get(Calendar.DAY_OF_MONTH) &&
+                    day.get(Calendar.YEAR) == holiday.getEndCalendar().get(Calendar.YEAR) &&
+                    day.get(Calendar.MONTH) == holiday.getEndCalendar().get(Calendar.MONTH) &&
+                    day.get(Calendar.DAY_OF_MONTH) <= holiday.getEndCalendar().get(Calendar.DAY_OF_MONTH)) {
+                isHoliday[0] = true;
+            }
+        });
+
+        return isHoliday[0];
+    }
+
+    private void addingFridays() {
+        for (int i = 1; i < dataRow.length; i++) {
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Integer.parseInt(year), Integer.parseInt(month) - 1, i);
+            if (calendar.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
+                if (!dataRow[i].equals("0") && !dataRow[i].equals("Home"))
+                    dataRow[i] = dataRow[i] + " (off)";
+                else
+                    dataRow[i] = "off";
+            }
+        }
+    }
+
+    private void addVacationLabels(int days, String[] vacationLabels, String label) {
+        int index = 0;
+        for (int i = 0; i < vacationLabels.length; i++) {
+            if (vacationLabels[i] != null)
+                index++;
+            else
+                break;
+        }
+        for (int i = index; i < index + days; i++) {
+            vacationLabels[i] = label;
+        }
+    }
+
+    private void loadWorkingDays(EmployeeOverview employee, String empName) {
         ArrayList<WorkingDay> workingDays = new ArrayList<>();
         SUMMARY_COL.document(employee.getId()).collection(year + "-" + month)
                 .get().addOnSuccessListener(docs -> {
                     if (docs.size() == 0) {
-                        UpdateCSV(workingDays, empName);
+                        UpdateCSV(workingDays, empName, employee.getId());
                         return;
                     }
                     for (QueryDocumentSnapshot q : docs) {
@@ -198,7 +340,12 @@ public class SummaryFragment extends Fragment {
                             LocationDetails checkOutLocation = new LocationDetails(checkOutGeoHash, checkOutLat, checkOutLng);
                             String projectLocation = String.format("%s, %s, %s", project.getLocationCity(), project.getLocationArea(), project.getLocationStreet());
 //                            if (Calendar.getInstance().get(Calendar.DAY_OF_MONTH) != Integer.parseInt(day))
-                            workingDays.add(new WorkingDay(day, month, year, hours, empName, checkInLocation, checkOutLocation, project.getName(), project.getReference(), projectLocation, summary.getProjectIds().get(pid)));
+                            String projectName;
+                            if (summary.getProjectIds().get(pid).equals("office")) {
+                                projectName = "office";
+                            } else
+                                projectName = project.getName();
+                            workingDays.add(new WorkingDay(day, month, year, hours, empName, checkInLocation, checkOutLocation, projectName, project.getReference(), projectLocation, summary.getProjectIds().get(pid)));
                             if (docs.getDocuments().lastIndexOf(q) == docs.getDocuments().size() - 1) {
                                 //sort working days by date
                                 workingDays.sort((o1, o2) -> {
@@ -206,7 +353,7 @@ public class SummaryFragment extends Fragment {
                                     int o2Day = Integer.parseInt(o2.getDay());
                                     return o1Day - o2Day;
                                 });
-                                UpdateCSV((ArrayList<WorkingDay>) workingDays.clone(), empName);
+                                UpdateCSV((ArrayList<WorkingDay>) workingDays.clone(), empName, employee.getId());
                             }
                         }));
 
@@ -365,33 +512,34 @@ public class SummaryFragment extends Fragment {
                 for (int i = 1; i <= 31; i++) {
                     header.add(String.valueOf(i));
                 }
-                dataRow = new String[32];
+                dataRowSize = 32;
             } else if (monthNumber == 2) {
                 if (yearNumber % 400 == 0 || (yearNumber % 100 != 0) && (yearNumber % 4 == 0)) {
                     //create header with 29 days
                     for (int i = 1; i <= 29; i++) {
                         header.add(String.valueOf(i));
                     }
-                    dataRow = new String[30];
+                    dataRowSize = 30;
                 } else {
                     //create header with 28 days
                     for (int i = 1; i <= 28; i++) {
                         header.add(String.valueOf(i));
                     }
-                    dataRow = new String[29];
+                    dataRowSize = 29;
                 }
             } else {
                 //create header with 30 days
                 for (int i = 1; i <= 30; i++) {
                     header.add(String.valueOf(i));
                 }
-                dataRow = new String[31];
+                dataRowSize = 31;
             }
+            dataRow = new String[dataRowSize];
             csvWriter = new CsvWriter(header.toString().split(","));
             for (EmployeeOverview emp : employees) {
-                String empName = emp.getFirstName()+ " " + emp.getLastName();
-                dataRow[0]= empName;
-                loadWorkingDays(emp ,empName);
+                String empName = emp.getFirstName() + " " + emp.getLastName();
+                dataRow[0] = empName;
+                loadWorkingDays(emp, empName);
             }
 
         }

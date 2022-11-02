@@ -184,7 +184,7 @@ public class SummaryFragment extends Fragment {
                     thisMonthCalendar.set(Integer.parseInt(year), 0, 25);
                     prevMonthCalendar.set(Integer.parseInt(prevYear), 11, 26);
                 } else {
-                    thisMonthCalendar.set(Integer.parseInt(year), Integer.parseInt(month) - 25);
+                    thisMonthCalendar.set(Integer.parseInt(year), Integer.parseInt(month) - 1, 25);
                     prevMonthCalendar.set(Integer.parseInt(year), Integer.parseInt(prevMonth) - 1, 26);
                 }
 
@@ -197,9 +197,7 @@ public class SummaryFragment extends Fragment {
                 if (isEqualOrLater(vacationStart, prevMonthCalendar) && isEqualOrEarlier(vacationEnd, thisMonthCalendar)) {
                     it.setTime(v.getStartDate());
                     end.setTime(v.getEndDate());
-                    end.add(Calendar.DAY_OF_MONTH, 1);
-                    while (it.before(end)) {
-
+                    while (isEqualOrEarlier(it, end)) {
                         // skip if it's friday
                         int index = Integer.parseInt(String.valueOf(it.get(Calendar.DAY_OF_MONTH)));
                         if (it.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
@@ -209,35 +207,45 @@ public class SummaryFragment extends Fragment {
                         dataRow[index] = vacationLabels[labelIndex];
                         labelIndex++;
                         it.add(Calendar.DAY_OF_MONTH, 1);
-                        // break if it reaches 26th day
-                        if (it.get(Calendar.DAY_OF_MONTH) == 26)
-                            break;
                     }
                 }
                 // intersects with the start of acceptable bounds
                 // vacations that start on 26/prev or earlier and end on 25/this
                 else if (isEqualOrEarlier(vacationStart, prevMonthCalendar) && isEqualOrEarlier(vacationEnd, thisMonthCalendar)) {
-
+                    // cut the vacation to the acceptable bounds
+                    it.setTime(prevMonthCalendar.getTime());
+                    // add difference between prev month and vacation start to the label index
+                    labelIndex += (int) (prevMonthCalendar.getTimeInMillis() - vacationStart.getTimeInMillis()) / (86400000);
+                    end.setTime(v.getEndDate());
+                    while (isEqualOrEarlier(it, end)) {
+                        // skip if it's friday
+                        int index = Integer.parseInt(String.valueOf(it.get(Calendar.DAY_OF_MONTH)));
+                        if (it.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
+                            it.add(Calendar.DAY_OF_MONTH, 1);
+                            continue;
+                        }
+                        dataRow[index] = vacationLabels[labelIndex];
+                        labelIndex++;
+                        it.add(Calendar.DAY_OF_MONTH, 1);
+                    }
                 }
                 // intersects with the end of acceptable bounds
                 // vacations that start on 25/this or earlier and end after that
-                else if(isEqualOrEarlier(vacationStart, thisMonthCalendar) && isEqualOrLater(vacationEnd, thisMonthCalendar)) {
-
+                else if (isEqualOrEarlier(vacationStart, thisMonthCalendar) && isEqualOrLater(vacationEnd, thisMonthCalendar)) {
+                    it.setTime(v.getStartDate());
+                    end.setTime(thisMonthCalendar.getTime());
+                    while (isEqualOrEarlier(it, end)) {
+                        // skip if it's friday
+                        int index = Integer.parseInt(String.valueOf(it.get(Calendar.DAY_OF_MONTH)));
+                        if (it.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
+                            it.add(Calendar.DAY_OF_MONTH, 1);
+                            continue;
+                        }
+                        dataRow[index] = vacationLabels[labelIndex];
+                        labelIndex++;
+                        it.add(Calendar.DAY_OF_MONTH, 1);
+                    }
                 }
-
-                /*
-                * given month 6 , vacation start on 26/5 and end on 1/6
-                * acceptable bounds 26/5 - 25/6
-                * we take = 26/5 - 25/6
-                *
-                * given month = 5 ,vacation start on 24/4 and end 27/4
-                * acceptable bounds = 26/4 - 25/5
-                * we take = 26/4 - 27/4
-                *
-                * given month = 4, vacation start on 24/4 and end 27/4
-                * acceptable bounds = 26/3 - 25/4
-                * we take = 24/4 - 25/4
-                * */
             }
         }
     }

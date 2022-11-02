@@ -22,6 +22,7 @@ public class CONSTANTS {
     public static final String ID = "ID";
     public static final String LOGGED = "LOGGED";
     public static final String ADMIN = "adminID";
+    public static final String ABSENT = "absent";
     public static final String VACATION_STATUS_CHANNEL_ID = "VACATION_STATUS";
     public static final String TRANSFER_STATUS_CHANNEL_ID = "TRANSFER_STATUS";
     public static final String VACATION_REQUEST_CHANNEL_ID = "VACATION_REQUEST";

@@ -1,6 +1,7 @@
 package com.igec.admin.fragments;
 
 import static android.content.ContentValues.TAG;
+import static com.igec.common.CONSTANTS.ABSENT;
 import static com.igec.common.CONSTANTS.EMPLOYEE_COL;
 import static com.igec.common.CONSTANTS.EMPLOYEE_GROSS_SALARY_COL;
 import static com.igec.common.CONSTANTS.EMPLOYEE_OVERVIEW_REF;
@@ -24,7 +25,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.igec.admin.adapters.EmployeeAdapter;
 import com.igec.admin.databinding.FragmentSummaryBinding;
 import com.igec.admin.dialogs.MonthSummaryDialog;
@@ -44,6 +47,7 @@ import com.whiteelephant.monthpicker.MonthPickerDialog;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -64,6 +68,8 @@ public class SummaryFragment extends Fragment {
     private String[] dataRow;
     private int dataRowSize = 0;
     int counter = 0;
+    final Calendar selected = Calendar.getInstance();
+
 
     public void setOpened(boolean opened) {
         this.opened = opened;
@@ -113,108 +119,33 @@ public class SummaryFragment extends Fragment {
             VACATION_COL
                     .whereEqualTo("vacationStatus", 1)
                     .whereEqualTo("employee.id", id).get().addOnSuccessListener(queryDocumentSnapshots -> {
-                        dataRow = new String[dataRowSize + 1];
+                        dataRow = new String[dataRowSize];
                         dataRow[0] = empName;
                         for (WorkingDay w : workingDays) {
                             dataRow[Integer.parseInt(w.getDay())] = String.valueOf(w.getHours());
                         }
-                        IntStream.range(1, dataRow.length).filter(i -> dataRow[i] == null).forEach(i -> dataRow[i] = "0");
+                        IntStream.range(1, dataRow.length).filter(i -> dataRow[i] == null).forEach(i -> dataRow[i] = ABSENT);
+                        ArrayList<VacationRequest> vacationRequests = new ArrayList<>();
+                        ArrayList<Holiday> holidays = new ArrayList<>();
+                        addFridays();
+                        addHolidays(doc, holidays);
+                        addVacations(queryDocumentSnapshots, vacationRequests);
+
+
+                        ArrayList<String> temp = new ArrayList<>();
+                        temp.add(dataRow[0]);
+                        temp.addAll(Arrays.asList(dataRow).subList(26, dataRow.length));
+                        temp.addAll(Arrays.asList(dataRow).subList(1, 26));
+                        dataRow = temp.toArray(new String[dataRowSize]);
+
                         csvWriter.addDataRow(dataRow);
+                        dataRow = new String[dataRowSize];
                         dataRow[0] = "project name";
                         for (WorkingDay w : workingDays) {
                             dataRow[Integer.parseInt(w.getDay())] = String.valueOf(w.getProjectName());
                         }
-                        IntStream.range(1, dataRow.length).filter(i -> dataRow[i] == null).forEach(i -> dataRow[i] = "0");
-                        ArrayList<VacationRequest> vacationRequests = new ArrayList<>();
-                        ArrayList<Holiday> holidays = new ArrayList<>();
-                        addingFridays();
+                        IntStream.range(1, dataRow.length).filter(i -> dataRow[i] == null).forEach(i -> dataRow[i] = "---");
 
-                        // holidays
-                        holidays.clear();
-                        prevYear = String.valueOf(Integer.parseInt(year) - 1);
-                        prevMonth = String.valueOf(Integer.parseInt(month) - 1);
-                        if (doc.exists() && (doc.contains(year) || doc.contains(prevYear))) {
-                            if (doc.getData().get(year) != null) {
-                                // loop over hashmap
-                                for (Object o : ((ArrayList<Object>) doc.getData().get(year))) {
-                                    holidays.add(new Holiday((HashMap) o));
-                                }
-                                if (doc.getData().get(prevYear) != null) {
-                                    for (Object o : ((ArrayList<Object>) doc.getData().get(prevYear))) {
-                                        holidays.add(new Holiday((HashMap) o));
-                                    }
-                                }
-                                for (int i = 1; i < dataRow.length; i++) {
-                                    Calendar thisMonthCalendar = Calendar.getInstance();
-                                    Calendar prevMonthCalendar = Calendar.getInstance();
-                                    if (Integer.parseInt(month) == 1) {
-                                        thisMonthCalendar.set(Integer.parseInt(year), 0, i);
-                                        prevMonthCalendar.set(Integer.parseInt(prevYear), 11, i);
-                                    } else {
-                                        thisMonthCalendar.set(Integer.parseInt(year), Integer.parseInt(month) - 1, i);
-                                        prevMonthCalendar.set(Integer.parseInt(year), Integer.parseInt(prevMonth) - 1, i);
-                                    }
-                                    if (isHoliday(holidays, thisMonthCalendar) || isHoliday(holidays, prevMonthCalendar)) {
-                                        if (dataRow[i].equals("0") || dataRow[i].equals("Home")) {
-                                            dataRow[i] = "holiday";
-                                        } else {
-                                            dataRow[i] = dataRow[i] + " (holiday)";
-                                        }
-                                    }
-                                }
-
-                            }
-                        }
-
-
-                        // vacations
-                        if (queryDocumentSnapshots.getDocuments().size() != 0) {
-                            for (QueryDocumentSnapshot d : queryDocumentSnapshots) {
-                                vacationRequests.add(d.toObject(VacationRequest.class));
-                            }
-                            Calendar it = Calendar.getInstance();
-                            Calendar end = Calendar.getInstance();
-                            vacationRequests.forEach(v -> {
-                                String vacationLabels[] = new String[(int) v.getRequestedDays()];
-                                addVacationLabels(v.getVacationDays(), vacationLabels, "vacation");
-                                addVacationLabels(v.getSickDays(), vacationLabels, "sick leave");
-                                addVacationLabels(v.getUnpaidDays(), vacationLabels, "unpaid");
-                                int labelIndex = 0;
-                                if (v.getStartDate().getMonth() != Integer.parseInt(month) - 1) {
-                                    if (v.getEndDate().getMonth() != Integer.parseInt(month) - 1)
-                                        return;
-                                    else {
-                                        // set it to be the start of the month in endDate
-                                        it.setTime(v.getEndDate());
-                                        // subtract days from it to reach the start of the month
-                                        it.add(Calendar.DAY_OF_MONTH, -it.get(Calendar.DAY_OF_MONTH) + 1);
-
-                                        // count days between startDate and it
-                                        int days = (int) ((it.getTimeInMillis() - v.getStartDate().getTime()) / (1000 * 60 * 60 * 24));
-                                        // add days to labelIndex
-                                        labelIndex += days;
-                                    }
-                                } else {
-                                    it.setTime(v.getStartDate());
-                                }
-                                end.setTime(v.getEndDate());
-                                end.add(Calendar.DAY_OF_MONTH, 1);
-                                while (it.before(end)) {
-                                    // skip if it's friday
-                                    int index = Integer.parseInt(String.valueOf(it.get(Calendar.DAY_OF_MONTH)));
-                                    if (it.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
-                                        it.add(Calendar.DAY_OF_MONTH, 1);
-                                        continue;
-                                    }
-                                    dataRow[index] = vacationLabels[labelIndex];
-                                    labelIndex++;
-                                    it.add(Calendar.DAY_OF_MONTH, 1);
-                                    if (it.get(Calendar.DAY_OF_MONTH) == 1) {
-                                        break;
-                                    }
-                                }
-                            });
-                        }
                         csvWriter.addDataRow(dataRow);
                         counter++;
                         if (counter == employees.size()) {
@@ -232,15 +163,138 @@ public class SummaryFragment extends Fragment {
 
     }
 
+    private void addVacations(QuerySnapshot queryDocumentSnapshots, ArrayList<VacationRequest> vacationRequests) {
+        if (queryDocumentSnapshots.getDocuments().size() != 0) {
+            for (QueryDocumentSnapshot d : queryDocumentSnapshots) {
+                vacationRequests.add(d.toObject(VacationRequest.class));
+            }
+            Calendar it = Calendar.getInstance();
+            Calendar end = Calendar.getInstance();
+            for (VacationRequest v : vacationRequests) {
+                String vacationLabels[] = new String[(int) v.getRequestedDays()];
+                addVacationLabels(v.getVacationDays(), vacationLabels, "vacation");
+                addVacationLabels(v.getSickDays(), vacationLabels, "sick leave");
+                addVacationLabels(v.getUnpaidDays(), vacationLabels, "unpaid");
+                int labelIndex = 0;
+
+                // acceptable bounds
+                Calendar thisMonthCalendar = Calendar.getInstance();
+                Calendar prevMonthCalendar = Calendar.getInstance();
+                if (Integer.parseInt(month) == 1) {
+                    thisMonthCalendar.set(Integer.parseInt(year), 0, 25);
+                    prevMonthCalendar.set(Integer.parseInt(prevYear), 11, 26);
+                } else {
+                    thisMonthCalendar.set(Integer.parseInt(year), Integer.parseInt(month) - 25);
+                    prevMonthCalendar.set(Integer.parseInt(year), Integer.parseInt(prevMonth) - 1, 26);
+                }
+
+                Calendar vacationStart = Calendar.getInstance();
+                vacationStart.setTime(v.getStartDate());
+                Calendar vacationEnd = Calendar.getInstance();
+                vacationEnd.setTime(v.getEndDate());
+                // exits in the acceptable bounds
+                // vacations that start and end on that range 26/prev - 25/this
+                if (isEqualOrLater(vacationStart, prevMonthCalendar) && isEqualOrEarlier(vacationEnd, thisMonthCalendar)) {
+                    it.setTime(v.getStartDate());
+                    end.setTime(v.getEndDate());
+                    end.add(Calendar.DAY_OF_MONTH, 1);
+                    while (it.before(end)) {
+
+                        // skip if it's friday
+                        int index = Integer.parseInt(String.valueOf(it.get(Calendar.DAY_OF_MONTH)));
+                        if (it.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
+                            it.add(Calendar.DAY_OF_MONTH, 1);
+                            continue;
+                        }
+                        dataRow[index] = vacationLabels[labelIndex];
+                        labelIndex++;
+                        it.add(Calendar.DAY_OF_MONTH, 1);
+                        // break if it reaches 26th day
+                        if (it.get(Calendar.DAY_OF_MONTH) == 26)
+                            break;
+                    }
+                }
+                // intersects with the start of acceptable bounds
+                // vacations that start on 26/prev or earlier and end on 25/this
+                else if (isEqualOrEarlier(vacationStart, prevMonthCalendar) && isEqualOrEarlier(vacationEnd, thisMonthCalendar)) {
+
+                }
+                // intersects with the end of acceptable bounds
+                // vacations that start on 25/this or earlier and end after that
+                else if(isEqualOrEarlier(vacationStart, thisMonthCalendar) && isEqualOrLater(vacationEnd, thisMonthCalendar)) {
+
+                }
+
+                /*
+                * given month 6 , vacation start on 26/5 and end on 1/6
+                * acceptable bounds 26/5 - 25/6
+                * we take = 26/5 - 25/6
+                *
+                * given month = 5 ,vacation start on 24/4 and end 27/4
+                * acceptable bounds = 26/4 - 25/5
+                * we take = 26/4 - 27/4
+                *
+                * given month = 4, vacation start on 24/4 and end 27/4
+                * acceptable bounds = 26/3 - 25/4
+                * we take = 24/4 - 25/4
+                * */
+            }
+        }
+    }
+
+    private void addHolidays(DocumentSnapshot doc, ArrayList<Holiday> holidays) {
+        holidays.clear();
+        prevYear = String.valueOf(Integer.parseInt(year) - 1);
+        prevMonth = String.valueOf(Integer.parseInt(month) - 1);
+        if (doc.exists() && (doc.contains(year) || doc.contains(prevYear))) {
+            if (doc.getData().get(year) != null) {
+                // loop over hashmap
+                for (Object o : ((ArrayList<Object>) doc.getData().get(year))) {
+                    holidays.add(new Holiday((HashMap) o));
+                }
+                if (doc.getData().get(prevYear) != null) {
+                    for (Object o : ((ArrayList<Object>) doc.getData().get(prevYear))) {
+                        holidays.add(new Holiday((HashMap) o));
+                    }
+                }
+                for (int i = 1; i < dataRow.length; i++) {
+                    Calendar thisMonthCalendar = Calendar.getInstance();
+                    Calendar prevMonthCalendar = Calendar.getInstance();
+                    if (Integer.parseInt(month) == 1) {
+                        thisMonthCalendar.set(Integer.parseInt(year), 0, i);
+                        prevMonthCalendar.set(Integer.parseInt(prevYear), 11, i);
+                    } else {
+                        thisMonthCalendar.set(Integer.parseInt(year), Integer.parseInt(month) - 1, i);
+                        prevMonthCalendar.set(Integer.parseInt(year), Integer.parseInt(prevMonth) - 1, i);
+                    }
+                    if (i < 26) {
+                        if (isHoliday(holidays, thisMonthCalendar)) {
+                            if (dataRow[i].equals(ABSENT) || dataRow[i].equals("Home")) {
+                                dataRow[i] = "holiday";
+                            } else {
+                                dataRow[i] = dataRow[i] + " (holiday)";
+                            }
+                        }
+                    } else {
+                        if (isHoliday(holidays, prevMonthCalendar)) {
+                            if (dataRow[i].equals(ABSENT) || dataRow[i].equals("Home") || dataRow[i].equals("off")) {
+                                dataRow[i] = "holiday";
+                            } else {
+                                dataRow[i] = dataRow[i] + " (holiday)";
+                            }
+                        }
+                    }
+
+                }
+
+            }
+        }
+    }
+
     private boolean isHoliday(ArrayList<Holiday> holidays, Calendar day) {
         boolean isHoliday = false;
-        for (Holiday holiday : holidays) {// check if day is between start and end in holiday without using after and before without caring about hours
-            if (day.get(Calendar.YEAR) == holiday.getStartCalendar().get(Calendar.YEAR) &&
-                    day.get(Calendar.MONTH) == holiday.getStartCalendar().get(Calendar.MONTH) &&
-                    day.get(Calendar.DAY_OF_MONTH) >= holiday.getStartCalendar().get(Calendar.DAY_OF_MONTH) &&
-                    day.get(Calendar.YEAR) == holiday.getEndCalendar().get(Calendar.YEAR) &&
-                    day.get(Calendar.MONTH) == holiday.getEndCalendar().get(Calendar.MONTH) &&
-                    day.get(Calendar.DAY_OF_MONTH) <= holiday.getEndCalendar().get(Calendar.DAY_OF_MONTH)) {
+        for (Holiday holiday : holidays) {
+            if (isEqualOrLater(day, holiday.getStartCalendar()) && isEqualOrEarlier(day, holiday.getEndCalendar())) {
                 isHoliday = true;
             }
         }
@@ -248,15 +302,51 @@ public class SummaryFragment extends Fragment {
         return isHoliday;
     }
 
-    private void addingFridays() {
+    private boolean isEqualOrLater(Calendar first, Calendar second) {
+        if (first.get(Calendar.YEAR) > second.get(Calendar.YEAR))
+            return true;
+        else if (first.get(Calendar.YEAR) == second.get(Calendar.YEAR)) {
+            if (first.get(Calendar.MONTH) > second.get(Calendar.MONTH))
+                return true;
+            else if (first.get(Calendar.MONTH) == second.get(Calendar.MONTH)) {
+                return first.get(Calendar.DAY_OF_MONTH) >= second.get(Calendar.DAY_OF_MONTH);
+            }
+        }
+        return false;
+    }
+
+    private boolean isEqualOrEarlier(Calendar first, Calendar second) {
+        if (first.get(Calendar.YEAR) < second.get(Calendar.YEAR))
+            return true;
+        else if (first.get(Calendar.YEAR) == second.get(Calendar.YEAR)) {
+            if (first.get(Calendar.MONTH) < second.get(Calendar.MONTH))
+                return true;
+            else if (first.get(Calendar.MONTH) == second.get(Calendar.MONTH)) {
+                return first.get(Calendar.DAY_OF_MONTH) <= second.get(Calendar.DAY_OF_MONTH);
+            }
+        }
+        return false;
+    }
+
+
+    private void addFridays() {
+        Calendar it = Calendar.getInstance();
+        // set it to be the start of the month
+        it.set(Integer.parseInt(year), Integer.parseInt(month) - 1, 1);
         for (int i = 1; i < dataRow.length; i++) {
-            Calendar calendar = Calendar.getInstance();
-            calendar.set(Integer.parseInt(year), Integer.parseInt(month) - 1, i);
-            if (calendar.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
-                if (!dataRow[i].equals("0") && !dataRow[i].equals("Home"))
-                    dataRow[i] = dataRow[i] + " (off)";
-                else
+            if (it.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
+                if (dataRow[i].equals(ABSENT) || dataRow[i].equals("Home")) {
                     dataRow[i] = "off";
+                } else {
+                    dataRow[i] = dataRow[i] + " (off)";
+                }
+            }
+            it.add(Calendar.DAY_OF_MONTH, 1);
+            if (it.get(Calendar.DAY_OF_MONTH) == 26) {
+                if (month.equals("1"))
+                    it.set(Integer.parseInt(prevYear), Integer.parseInt(month) - 1, 1);
+                else
+                    it.set(Integer.parseInt(year), Integer.parseInt(prevMonth) - 1, 26);
             }
         }
     }
@@ -477,9 +567,10 @@ public class SummaryFragment extends Fragment {
                         prevMonth = String.format("%02d", selectedMonth - 1);
                         prevYear = year;
                     }
+                    selected.set(selectedYear, selectedMonth - 1, 1);
                 }, today.get(Calendar.YEAR), today.get(Calendar.MONTH));
-        builder.setActivatedMonth(today.get(Calendar.MONTH))
-                .setActivatedYear(today.get(Calendar.YEAR))
+        builder.setActivatedMonth(selected.get(Calendar.MONTH))
+                .setActivatedYear(selected.get(Calendar.YEAR))
                 .setMaxYear(today.get(Calendar.YEAR))
                 .setTitle("Select Month")
                 .build().show();
@@ -503,8 +594,11 @@ public class SummaryFragment extends Fragment {
                 yearNumber--;
             }
             calendar.set(yearNumber, monthNumber - 1, 1);
-            dataRowSize = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-            for (int i = 1; i <= dataRowSize; i++) {
+            dataRowSize = calendar.getActualMaximum(Calendar.DAY_OF_MONTH) + 1;
+            for (int i = 26; i < dataRowSize; i++) {
+                header.add(String.format("%d", i));
+            }
+            for (int i = 1; i <= 25; i++) {
                 header.add(String.format("%d", i));
             }
 

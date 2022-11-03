@@ -115,7 +115,6 @@ public class SummaryFragment extends Fragment {
 
     private void UpdateCSV(ArrayList<WorkingDay> workingDays, String empName, String id) {
         HOLIDAYS_COL.document(HOLIDAYS).get().addOnSuccessListener(doc -> {
-
             VACATION_COL
                     .whereEqualTo("vacationStatus", 1)
                     .whereEqualTo("employee.id", id).get().addOnSuccessListener(queryDocumentSnapshots -> {
@@ -145,7 +144,11 @@ public class SummaryFragment extends Fragment {
                             dataRow[Integer.parseInt(w.getDay())] = String.valueOf(w.getProjectName());
                         }
                         IntStream.range(1, dataRow.length).filter(i -> dataRow[i] == null).forEach(i -> dataRow[i] = "---");
-
+                        temp = new ArrayList<>();
+                        temp.add(dataRow[0]);
+                        temp.addAll(Arrays.asList(dataRow).subList(26, dataRow.length));
+                        temp.addAll(Arrays.asList(dataRow).subList(1, 26));
+                        dataRow = temp.toArray(new String[dataRowSize]);
                         csvWriter.addDataRow(dataRow);
                         counter++;
                         if (counter == employees.size()) {

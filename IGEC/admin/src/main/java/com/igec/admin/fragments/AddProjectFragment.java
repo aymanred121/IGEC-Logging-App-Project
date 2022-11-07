@@ -456,6 +456,9 @@ public class AddProjectFragment extends Fragment {
                     .setPositiveButton(getString(R.string.yes), (dialogInterface, i) -> {
                         addProject();
                     })
+                    .setOnDismissListener(dialogInterface -> {
+                        binding.registerButton.setEnabled(true);
+                    })
                     .show();
         }
     };

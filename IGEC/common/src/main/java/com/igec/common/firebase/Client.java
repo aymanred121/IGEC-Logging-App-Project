@@ -3,11 +3,10 @@ package com.igec.common.firebase;
 import java.io.Serializable;
 
 public class Client implements Serializable {
-    private String name , Email , phoneNumber , note ;
-    private double defaultPrice  , overTimePrice , FridaysPrice;
+    private String name = "", Email = "", phoneNumber = "", note = "";
+    private double defaultPrice = 0, overTimePrice = 0, FridaysPrice = 0;
 
-    public Client()
-    {
+    public Client() {
 
     }
 
@@ -16,6 +15,7 @@ public class Client implements Serializable {
         this.Email = Email;
         this.phoneNumber = phoneNumber;
     }
+
     public Client(String name, String email, String phoneNumber, String note, double defaultPrice, double overTimePrice, double fridaysPrice) {
         this.name = name;
         Email = email;

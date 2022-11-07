@@ -317,6 +317,9 @@ public class AddUserFragment extends Fragment {
                         .setPositiveButton(getString(R.string.yes), (dialogInterface, i) -> {
                             addEmployee();
                         })
+                        .setOnDismissListener(dialogInterface -> {
+                            binding.registerButton.setEnabled(true);
+                        })
                         .show();
             }
         }

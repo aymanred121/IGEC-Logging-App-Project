@@ -23,6 +23,9 @@ import androidx.fragment.app.DialogFragment;
 import com.igec.admin.R;
 import com.igec.admin.databinding.DialogLocationBinding;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
@@ -33,7 +36,7 @@ public class LocationDialog extends DialogFragment {
         public void doUpdateVisitedHistory(WebView view, String url, boolean isReload) {
             super.doUpdateVisitedHistory(view, url, isReload);
             currentUrl = url;
-            if(currentUrl.contains("!3d"))
+            if (currentUrl.contains("!3d"))
                 binding.submitFab.setEnabled(true);
         }
     };
@@ -84,10 +87,11 @@ public class LocationDialog extends DialogFragment {
     }
 
     private DialogLocationBinding binding;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        binding = DialogLocationBinding.inflate(inflater,container,false);
+        binding = DialogLocationBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
 
@@ -124,7 +128,7 @@ public class LocationDialog extends DialogFragment {
         binding.webView.getSettings().setBuiltInZoomControls(true);
         binding.webView.getSettings().setPluginState(WebSettings.PluginState.ON);
         binding.webView.setWebViewClient(webViewClient);
-        binding.webView.setWebChromeClient(new WebChromeClient(){
+        binding.webView.setWebChromeClient(new WebChromeClient() {
 
             @Override
             public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
@@ -142,10 +146,21 @@ public class LocationDialog extends DialogFragment {
         binding.submitFab.setOnClickListener(v -> {
             if (!currentUrl.contains("!3d"))
                 return;
+            double lat = 0, lang = 0;
             String sub = currentUrl.substring(currentUrl.indexOf("!3d"));
+            Pattern decimal = Pattern.compile("(\\d*\\.)?\\d+");
+            Matcher matcher;
             String[] cords = sub.split("![3-4]d");
-            double lat = Double.parseDouble(cords[cords.length - 2]);
-            double lang = Double.parseDouble(cords[cords.length - 1]);
+            matcher = decimal.matcher(cords[1]);
+            if(matcher.find())
+                lat = Double.parseDouble(matcher.group());
+            else
+                return;
+            matcher = decimal.matcher(cords[2]);
+            if(matcher.find())
+                lang = Double.parseDouble(matcher.group());
+            else
+                return;
             Bundle result = new Bundle();
             result.putString("lat", String.format("%.6f", lat));
             result.putString("lng", String.format("%.6f", lang));

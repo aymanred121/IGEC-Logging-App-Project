@@ -23,13 +23,13 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class AddClientDialog extends DialogFragment {
 
     //Views
     private Client client;
-    private ArrayList<Pair<TextInputLayout, TextInputEditText>> views;
 
     public AddClientDialog(Client client) {
         this.client = client;
@@ -87,14 +87,7 @@ public class AddClientDialog extends DialogFragment {
     }
 
     private void initialize() {
-        views = new ArrayList<>();
-        views.add(new Pair<>(binding.nameLayout, binding.nameEdit));
-        views.add(new Pair<>(binding.emailLayout, binding.emailEdit));
-        views.add(new Pair<>(binding.phoneLayout, binding.phoneEdit));
-        views.add(new Pair<>(binding.noteLayout, binding.noteEdit));
-        views.add(new Pair<>(binding.perHourLayout, binding.perHourEdit));
-        views.add(new Pair<>(binding.overTimeLayout, binding.overTimeEdit));
-        views.add(new Pair<>(binding.perFridayLayout, binding.perFridayEdit));
+
         if (client != null) {
             binding.nameEdit.setText(client.getName());
             binding.emailEdit.setText(client.getEmail());
@@ -107,42 +100,29 @@ public class AddClientDialog extends DialogFragment {
 
     }
 
-    private boolean generateError() {
-        for (Pair<TextInputLayout, TextInputEditText> view : views) {
-            if (view.second.getText().toString().trim().isEmpty()) {
-                view.first.setError("Missing");
-                return true;
-            }
-            if (view.first.getError() != null) {
-                return true;
-            }
-        }
-        return false;
-    }
 
-    private boolean validateInput() {
-        return !generateError();
-    }
+
 
     private View.OnClickListener oclDone = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            if (validateInput()) {
+
                 binding.doneFab.setEnabled(false);
                 Client client = new Client(
                         binding.nameEdit.getText().toString(),
                         binding.emailEdit.getText().toString(),
                         binding.phoneEdit.getText().toString(),
                         binding.noteEdit.getText().toString(),
-                        Double.parseDouble(binding.perHourEdit.getText().toString()),
-                        Double.parseDouble(binding.overTimeEdit.getText().toString()),
-                        Double.parseDouble(binding.perFridayEdit.getText().toString()));
+                        Objects.requireNonNull(binding.perHourEdit.getText()).toString().trim().isEmpty() ? 0.0 : Double.parseDouble(binding.perHourEdit.getText().toString()),
+                        Objects.requireNonNull(binding.overTimeEdit.getText()).toString().trim().isEmpty() ? 0.0 : Double.parseDouble(binding.overTimeEdit.getText().toString()),
+                        Objects.requireNonNull(binding.perFridayEdit.getText()).toString().trim().isEmpty() ? 0.0 : Double.parseDouble(binding.perFridayEdit.getText().toString())
+                        );
                 Bundle result = new Bundle();
                 result.putSerializable("client", client);
                 getParentFragmentManager().setFragmentResult("client", result);
                 binding.doneFab.setEnabled(true);
                 dismiss();
-            }
+
         }
     };
     private TextWatcher twEmail = new TextWatcher() {

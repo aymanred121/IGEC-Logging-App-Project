@@ -8,7 +8,6 @@ import static com.igec.common.CONSTANTS.OFFICE_REF;
 import static com.igec.common.CONSTANTS.PROJECT_COL;
 import static com.igec.common.CONSTANTS.convertDateToString;
 
-import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -23,7 +22,6 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -49,8 +47,8 @@ import com.igec.common.firebase.Project;
 import com.igec.common.utilities.AllowancesEnum;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -698,9 +696,7 @@ public class ProjectFragmentDialog extends DialogFragment {
                 MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
                 builder.setTitle(getString(R.string.hours))
                         .setMessage(getString(R.string.hours_limit_change, String.valueOf(project.getHours()), binding.hoursEdit.getText().toString()))
-                        .setNegativeButton(getString(R.string.no), (dialogInterface, i) -> {
-                            binding.updateButton.setEnabled(true);
-                        })
+                        .setNegativeButton(getString(R.string.no), (dialogInterface, i) -> binding.updateButton.setEnabled(true))
                         .setPositiveButton(getString(R.string.yes), (dialogInterface, i) -> {
                             updateProject();
                         })

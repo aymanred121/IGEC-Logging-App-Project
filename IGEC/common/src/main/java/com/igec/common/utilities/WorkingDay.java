@@ -26,6 +26,15 @@ public class WorkingDay {
         this.projectReference = projectReference;
         this.projectLocation = projectLocation;
         this.type = type;
+        if(Integer.parseInt(day) > 25){
+            if(Integer.parseInt(month) == 12){
+                this.month = "01";
+                this.year = String.valueOf(Integer.parseInt(year) - 1);
+            }
+            else{
+                this.month = String.valueOf(Integer.parseInt(month) - 1);
+            }
+        }
     }
 
     public String getDay() {

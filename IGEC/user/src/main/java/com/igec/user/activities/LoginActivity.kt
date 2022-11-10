@@ -35,7 +35,7 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         setContentView(binding!!.root)
-        validateDate(this)
+        //validateDate(this)
         initialize()
         // Listeners
         binding!!.emailEdit.addTextChangedListener(twEmail)
@@ -44,7 +44,7 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        validateDate(this)
+        //validateDate(this)
     }
 
     private fun validateDate(c: Context) {

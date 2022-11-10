@@ -57,7 +57,7 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         super.onCreate(savedInstanceState)
         binding = ActivityEdashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        validateDate(this)
+        //validateDate(this)
         currEmployee = intent.getSerializableExtra("user") as Employee?
         setSupportActionBar(binding.toolbar)
 

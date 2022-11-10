@@ -15,7 +15,7 @@ class LauncherActivity : Activity() {
     private var logged = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        validateDate(this)
+        //validateDate(this)
         // for splash screen
         Handler().postDelayed({
             val preferences = getSharedPreferences(CONSTANTS.IGEC, MODE_PRIVATE)
@@ -67,7 +67,7 @@ class LauncherActivity : Activity() {
 
     override fun onResume() {
         super.onResume()
-        validateDate(this)
+        //validateDate(this)
     }
     private fun validateDate(c: Context) {
         if (Settings.Global.getInt(c.contentResolver, Settings.Global.AUTO_TIME, 0) != 1) {

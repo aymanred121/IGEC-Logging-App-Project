@@ -1,10 +1,13 @@
 package com.igec.user.fragments;
 
 import static com.igec.common.CONSTANTS.CAMERA_REQUEST_CODE;
+import static com.igec.common.CONSTANTS.CHECK_IN;
 import static com.igec.common.CONSTANTS.CHECK_IN_FROM_HOME;
 import static com.igec.common.CONSTANTS.CHECK_IN_FROM_OFFICE;
 import static com.igec.common.CONSTANTS.CHECK_IN_FROM_SITE;
 import static com.igec.common.CONSTANTS.CHECK_IN_FROM_SUPPORT;
+import static com.igec.common.CONSTANTS.CHECK_OUT;
+import static com.igec.common.CONSTANTS.EMPLOYEE_GROSS_SALARY;
 import static com.igec.common.CONSTANTS.EMPLOYEE_GROSS_SALARY_COL;
 import static com.igec.common.CONSTANTS.LOCATION_REQUEST_CODE;
 import static com.igec.common.CONSTANTS.MACHINE_COL;
@@ -18,6 +21,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -45,6 +49,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
+import com.google.gson.Gson;
 import com.igec.common.firebase.Allowance;
 import com.igec.common.firebase.Client;
 import com.igec.common.firebase.Employee;
@@ -209,10 +214,10 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                         canCheckFromHome = true;
                     else
                         canCheckFromHome = summary.getProjectIds().size() == 0;
-                    if(lastProjectId !=null){
+                    if (lastProjectId != null) {
                         PROJECT_COL.document(lastProjectId).get().addOnSuccessListener((value1) -> {
                             Project project = value1.toObject(Project.class);
-                            if(project != null){
+                            if (project != null) {
                                 binding.greetingText.setText(String.format("you are currently \n In %s", project.getName()));
                             }
                         });
@@ -431,8 +436,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                 });
     }
 
-    private void employeeReCheckIn(Summary summary, Project project, DocumentSnapshot
-            documentSnapshot) {
+    private void employeeReCheckIn(Summary summary, Project project, DocumentSnapshot documentSnapshot) {
         summary.setLastCheckInTime(Timestamp.now());
         if (!summary.getProjectIds().keySet().contains(project.getId())) {
             switch (checkInType) {
@@ -522,23 +526,24 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                     break;
             }
         }
-
         lastProjectId = project.getId();
+        summary.setCheckOut(null);
         db.document(documentSnapshot.getReference().getPath()).update("lastCheckInTime", summary.getLastCheckInTime(),
                 "checkOut", null,
                 "projectIds", summary.getProjectIds(),
                 "lastProjectId", project.getId());
+        //delete checkout shared pref
+        setReCheckInPref(summary);
         Snackbar.make(binding.getRoot(), "Checked In successfully!", Toast.LENGTH_SHORT).show();
         binding.checkInOutFab.setEnabled(true);
     }
 
-    private void employeeCheckOut(Summary summary, HashMap<String, Object> checkOut, String
-            projectId) {
+    private void employeeCheckOut(Summary summary, HashMap<String, Object> checkOut, String projectId) {
         updateDate();
         long checkInTime = (summary.getLastCheckInTime()).getSeconds();
         long checkOutTime = Timestamp.now().getSeconds();
         long workingTime = (checkOutTime - checkInTime);
-//        //check if working time is greater than 8 hrs
+        //check if working time is greater than 8 hrs
         summary.setCheckOut(checkOut);
         summary.setWorkingTime(new HashMap<String, Object>() {{
             put(projectId, FieldValue.increment(workingTime));
@@ -563,13 +568,15 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                         binding.checkInOutFab.setEnabled(true);
                     if (checkInType == CheckInType.SITE) {
                         for (String pid : currEmployee.getProjectIds()) {
-                            PROJECT_COL.document(pid)
-                                    .update("employeeWorkedTime." + currEmployee.getId(), FieldValue.increment(workingTime));
+                            PROJECT_COL.document(pid).update("employeeWorkedTime." + currEmployee.getId(), FieldValue.increment(workingTime));
                         }
                     }
                 });
+        //save summary into shared preferences
+        setCheckOutSharedPref(summary);
         Snackbar.make(binding.getRoot(), "Checked Out successfully!", Toast.LENGTH_SHORT).show();
     }
+
 
     private void updateOverTime(long overTime, String path, Timestamp time) {
 //        WriteBatch batch = db.batch();
@@ -603,8 +610,10 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     private void employeeCheckIn(Summary summary, Project project) {
         updateDate();
         summary.setLastCheckInTime(Timestamp.now());
+        summary.setLastProjectId(project.getId());
         HashMap<String, Object> checkInDetails = new HashMap<>(summary.getGeoMap());
         checkInDetails.put("Time", Timestamp.now());
+        summary.setCheckIn(checkInDetails);
         HashMap<String, Object> checkIn = new HashMap<>();
         checkIn.put("checkIn", checkInDetails);
         checkIn.put("lastCheckInTime", summary.getLastCheckInTime());
@@ -634,10 +643,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                 }});
                 break;
         }
-
-
         SUMMARY_COL.document(id).collection(year + "-" + month).document(day).set(checkIn, SetOptions.merge());
-
         EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId()).collection(year).document(month).get().addOnSuccessListener(doc -> {
             if (!doc.exists()) {
                 //new month
@@ -666,6 +672,8 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                         }
                     }
                     db.document(doc.getReference().getPath()).set(employeesGrossSalary, SetOptions.merge());
+                    //create shared pref
+                    setCheckInSharedPref(summary, employeesGrossSalary);
                 });
                 return;
             }
@@ -691,8 +699,29 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                 }
             }
             EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId()).collection(year).document(month).set(employeesGrossSalary, SetOptions.merge());
+            //create shared pref
+            setCheckInSharedPref(summary, employeesGrossSalary);
 
         });
+    }
+
+    private void setReCheckInPref(Summary summary) {
+        SharedPreferences.Editor editor = getActivity().getPreferences(Context.MODE_PRIVATE).edit();
+        editor.remove(CHECK_OUT);
+        editor.putString(CHECK_IN, new Gson().toJson(summary));
+        editor.apply();
+    }
+
+    private void setCheckInSharedPref(Summary checkIn, EmployeesGrossSalary employeesGrossSalary) {
+        SharedPreferences.Editor editor = getActivity().getPreferences(Context.MODE_PRIVATE).edit();
+        editor.putString(CHECK_IN, new Gson().toJson(checkIn));
+        editor.putString(EMPLOYEE_GROSS_SALARY, new Gson().toJson(employeesGrossSalary));
+        editor.apply();
+    }
+    private void setCheckOutSharedPref(Summary summary) {
+        SharedPreferences.Editor editor = getActivity().getPreferences(Context.MODE_PRIVATE).edit();
+        editor.putString(CHECK_OUT, new Gson().toJson(summary));
+        editor.apply();
     }
 
     private void machineCheckInOut(Client client, String note) {

@@ -31,6 +31,9 @@ public class CONSTANTS {
     public static final String CHECK_IN_FROM_SITE = "site";
     public static final String CHECK_IN_FROM_HOME = "from home";
     public static final String CHECK_IN_FROM_SUPPORT = "support";
+    public static final String CHECK_IN = "checkIn";
+    public static final String CHECK_OUT = "checkOut";
+    public static final String EMPLOYEE_GROSS_SALARY = "employeeGrossSalary";
     public static final int ACCEPTED = 1;
     public static final int REJECTED = -1;
     public static final int PENDING = 0;

@@ -87,5 +87,8 @@
     <string name="manager_transfer_status_channel_description">get notified when transfer request is accepted or declined</string>
     <string name="project">Project</string>
 
+    <string name="shift_notification">Shift end</string>
+    <string name="shift_notification_channel_description">notify users to checkout from their projects</string>
+
 
 </resources>

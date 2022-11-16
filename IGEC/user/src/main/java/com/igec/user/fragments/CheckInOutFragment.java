@@ -293,93 +293,102 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     @SuppressLint("MissingPermission")
     private final View.OnClickListener oclCheckInOut = v -> {
         binding.checkInOutFab.setEnabled(false);
-        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(getActivity());
-        builder.setTitle(getString(R.string.do_you_want_to_confirm_this_action))
-                .setNegativeButton(getString(R.string.No), (dialogInterface, i) -> {
+        PROJECT_COL.get().addOnSuccessListener(docs -> {
+            if (docs.size() == 0)
+                return;
+            List<Project> projects = docs.toObjects(Project.class);
+            Locus.INSTANCE.getCurrentLocation(getActivity(), result -> {
+                        if (result.getError() != null) {
+                            Snackbar.make(binding.getRoot(), "can't complete the operation.", Snackbar.LENGTH_SHORT).show();
+                            binding.checkInOutFab.setEnabled(true);
+                            return null;
+                        }
+                        Location location = result.getLocation();
+                        longitude = location.getLongitude();
+                        latitude = location.getLatitude();
+                        checkInType = CheckInType.HOME;
+                        /*
+                         *
+                         * check-in given lastProjectId == null
+                         * employee -> home / project / office
+                         * manager -> home/ project / office / support
+                         * check-out given lastProjectId != null && canCheckFromHome == false
+                         * employee or manager -> same Project only
+                         * recheck in given lastProjectId == null && canCheckFromHome == false
+                         * employee -> project/ office
+                         * manager --> project /office /support
+                         * */
+                        for (Project project : projects) {
+                            if ((lastProjectId != null && !project.getId().equals(lastProjectId))) {
+                                // if the user is not in the last project
+                                // to prevent user from checking out from another project
+                                continue;
+                            }
+                            double distance;
+                            float[] results = new float[3];
+                            Location.distanceBetween(latitude, longitude, project.getLat(), project.getLng(), results);
+                            distance = results[0];
+                            if (distance > project.getArea()) {
+                                continue;
+                            } else if (currEmployee.getProjectIds().contains(project.getId())) {
+                                checkInType = CheckInType.SITE;
+                            } else if (currEmployee.isManager()) {
+                                if (project.getReference().equals(OFFICE_REF))
+                                    checkInType = CheckInType.OFFICE;
+                                else
+                                    checkInType = CheckInType.SUPPORT;
+                            } else {
+                                // inside a project but not in the employee's project list
+                                continue;
+                            }
+                            updateEmployeeSummary(latitude, longitude, project);
+                            break;
+                        }
+                        if (checkInType == CheckInType.HOME) {
+                            notifyLocation();
+                        }
+                        return null;
+                    }
+            );
+        });
+    };
+
+    private void notifyLocation() {
+        switch (checkInType) {
+            case SITE:
+                Snackbar.make(binding.getRoot(), "You are in the site", Snackbar.LENGTH_SHORT).show();
+                break;
+            case OFFICE:
+                Snackbar.make(binding.getRoot(), "You are at the office", Snackbar.LENGTH_SHORT).show();
+                break;
+            case SUPPORT:
+                Snackbar.make(binding.getRoot(), "You are now a support in this project", Snackbar.LENGTH_SHORT).show();
+                break;
+            case HOME:
+                if (canCheckFromHome)
+                    updateEmployeeSummary(latitude, longitude, new Project());
+                else {
+                    if (lastProjectId != null)
+                        Snackbar.make(binding.getRoot(), "You can't check-out from outside the project", Snackbar.LENGTH_SHORT).show();
+                    else
+                        Snackbar.make(binding.getRoot(), "You can't recheck-in from home", Snackbar.LENGTH_SHORT).show();
                     binding.checkInOutFab.setEnabled(true);
-                }).setOnDismissListener(unused -> {
+                }
+                break;
+        }
+    }
+
+    private MaterialAlertDialogBuilder showAlertOfTheCheckingInLocation(String message) {
+        MaterialAlertDialogBuilder alert = new MaterialAlertDialogBuilder(getActivity());
+        alert.setTitle(message)
+                .setNegativeButton("No", (dialogInterface12, i12) -> {
                     binding.checkInOutFab.setEnabled(true);
                 })
-                .setPositiveButton(getString(R.string.Yes), (dialogInterface, i) -> {
-                    PROJECT_COL.get().addOnSuccessListener(docs -> {
-                        if (docs.size() == 0)
-                            return;
-                        List<Project> projects = docs.toObjects(Project.class);
-                        Locus.INSTANCE.getCurrentLocation(getActivity(), result -> {
-                                    if (result.getError() != null) {
-                                        Snackbar.make(binding.getRoot(), "can't complete the operation.", Snackbar.LENGTH_SHORT).show();
-                                        binding.checkInOutFab.setEnabled(true);
-                                        return null;
-                                    }
-                                    Location location = result.getLocation();
-                                    longitude = location.getLongitude();
-                                    latitude = location.getLatitude();
-                                    checkInType = CheckInType.HOME;
-                                    /*
-                                     *
-                                     * check-in given lastProjectId == null
-                                     * employee -> home / project / office
-                                     * manager -> home/ project / office / support
-                                     * check-out given lastProjectId != null && canCheckFromHome == false
-                                     * employee or manager -> same Project only
-                                     * recheck in given lastProjectId == null && canCheckFromHome == false
-                                     * employee -> project/ office
-                                     * manager --> project /office /support
-                                     * */
-                                    for (Project project : projects) {
-                                        if ((lastProjectId != null && !project.getId().equals(lastProjectId))) {
-                                            // if the user is not in the last project
-                                            // to prevent user from checking out from another project
-                                            continue;
-                                        }
-                                        double distance;
-                                        float[] results = new float[3];
-                                        Location.distanceBetween(latitude, longitude, project.getLat(), project.getLng(), results);
-                                        distance = results[0];
-                                        if (distance > project.getArea()) {
-                                            continue;
-                                        } else if (currEmployee.getProjectIds().contains(project.getId())) {
-                                            checkInType = CheckInType.SITE;
-                                        } else if (currEmployee.isManager()) {
-                                            if (project.getReference().equals(OFFICE_REF))
-                                                checkInType = CheckInType.OFFICE;
-                                            else
-                                                checkInType = CheckInType.SUPPORT;
-                                        } else {
-                                            // inside a project but not in the employee's project list
-                                            continue;
-                                        }
-                                        updateEmployeeSummary(latitude, longitude, project);
-                                        updateCheckInOutBtn();
-                                        break;
-                                    }
-                                    switch (checkInType) {
-                                        case SITE:
-                                            Snackbar.make(binding.getRoot(), "You are in the site", Snackbar.LENGTH_SHORT).show();
-                                            break;
-                                        case OFFICE:
-                                            Snackbar.make(binding.getRoot(), "You are at the office", Snackbar.LENGTH_SHORT).show();
-                                            break;
-                                        case SUPPORT:
-                                            Snackbar.make(binding.getRoot(), "You are now a support in this project", Snackbar.LENGTH_SHORT).show();
-                                            break;
-                                        case HOME:
-                                            if (canCheckFromHome)
-                                                updateEmployeeSummary(latitude, longitude, new Project());
-                                            else {
-                                                if (lastProjectId != null)
-                                                    Snackbar.make(binding.getRoot(), "You can't check-out from outside the project", Snackbar.LENGTH_SHORT).show();
-                                                else
-                                                    Snackbar.make(binding.getRoot(), "You can't recheck-in from home", Snackbar.LENGTH_SHORT).show();
-                                            }
-                                            break;
-                                    }
-                                    return null;
-                                }
-                        );
-                    });
-                }).show();
-    };
+                .setOnDismissListener(
+                        dialogInterface -> binding.checkInOutFab.setEnabled(true)
+                );
+        return alert;
+    }
 
 
     private void updateCheckInOutBtn() {
@@ -411,26 +420,38 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                 .get().addOnSuccessListener(documentSnapshot -> {
                     if (!documentSnapshot.exists() || documentSnapshot.getData().size() == 0) {
                         //check in
-                        canCheckFromHome = false;
-                        employeeCheckIn(summary, project);
-                        if (checkInType == CheckInType.HOME) {
-                            employeeCheckOut(summary, checkOutDetails, "HOME");
-                            binding.checkInOutFab.setEnabled(false);
-                            binding.checkInOutFab.setText("HOME");
-                            binding.checkInOutFab.setBackgroundColor(Color.GRAY);
-                            Snackbar.make(binding.getRoot(), "You are at home", Snackbar.LENGTH_SHORT).show();
-                        } else
-                            binding.greetingText.setText(project.getId() != null ? String.format("you are currently \n In %s", project.getName()) : binding.greetingText.getText());
+                        showAlertOfTheCheckingInLocation(getString(R.string.you_are_checking_in_to_that_do_you_want_to_confirm_this_action, checkInType == CheckInType.HOME ? "Home" : project.getName())).setPositiveButton("Yes", (dialogInterface1, i1) -> {
+                            canCheckFromHome = false;
+                            employeeCheckIn(summary, project);
+                            if (checkInType == CheckInType.HOME) {
+                                employeeCheckOut(summary, checkOutDetails, "HOME");
+                                binding.checkInOutFab.setEnabled(false);
+                                binding.checkInOutFab.setText("HOME");
+                                binding.checkInOutFab.setBackgroundColor(Color.GRAY);
+                                Snackbar.make(binding.getRoot(), "You are at home", Snackbar.LENGTH_SHORT).show();
+                            } else
+                                binding.greetingText.setText(project.getId() != null ? String.format("you are currently \n In %s", project.getName()) : binding.greetingText.getText());
+                            updateCheckInOutBtn();
+                            notifyLocation();
+                        }).show();
                     } else {
                         Summary summary1 = documentSnapshot.toObject(Summary.class);
                         if (summary1.getCheckOut() == null) {
                             //check out
-                            employeeCheckOut(summary1, checkOutDetails, project.getId());
-                            binding.greetingText.setText(String.format("%s\n%s", getString(R.string.good_morning), currEmployee.getFirstName()));
+                            showAlertOfTheCheckingInLocation(getString(R.string.you_are_checking_out_to_that_do_you_want_to_confirm_this_action, project.getName())).setPositiveButton("Yes", ((dialogInterface, i) -> {
+                                employeeCheckOut(summary1, checkOutDetails, project.getId());
+                                binding.greetingText.setText(String.format("%s\n%s", getString(R.string.good_morning), currEmployee.getFirstName()));
+                                updateCheckInOutBtn();
+                            })).show();
                         } else {
                             //re check in
-                            employeeReCheckIn(summary1, project, documentSnapshot);
-                            binding.greetingText.setText(String.format("you are currently \n In %s", project.getName()));
+                            showAlertOfTheCheckingInLocation(getString(R.string.you_are_rechecking_in_to_that_do_you_want_to_confirm_this_action, project.getName())).setPositiveButton("Yes", (dialogInterface1, i1) -> {
+                                        employeeReCheckIn(summary1, project, documentSnapshot);
+                                        binding.greetingText.setText(String.format("you are currently \n In %s", project.getName()));
+                                        updateCheckInOutBtn();
+                                        notifyLocation();
+                                    }
+                            ).show();
                         }
                     }
                 });
@@ -718,6 +739,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         editor.putString(EMPLOYEE_GROSS_SALARY, new Gson().toJson(employeesGrossSalary));
         editor.apply();
     }
+
     private void setCheckOutSharedPref(Summary summary) {
         SharedPreferences.Editor editor = getActivity().getPreferences(Context.MODE_PRIVATE).edit();
         editor.putString(CHECK_OUT, new Gson().toJson(summary));

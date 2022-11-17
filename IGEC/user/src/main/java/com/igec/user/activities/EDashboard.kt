@@ -363,6 +363,10 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
             if (document.exists()) return@addOnSuccessListener
             if(document.metadata.isFromCache) return@addOnSuccessListener
             SUMMARY_COL.document(path).collection("$year-$month").document(day).set(summary,SetOptions.merge())
+            for(pid in summary.projectIds){
+                if(pid.value== CHECK_IN_FROM_SITE)
+                    PROJECT_COL.document(pid.key).update("employeeWorkedTime." + currEmployee!!.id, FieldValue.increment(summary.workingTime[pid.key] as Long))
+            }
             mPrefs.edit().remove(CHECK_OUT).apply()
         }
     }

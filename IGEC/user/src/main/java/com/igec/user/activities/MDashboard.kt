@@ -30,6 +30,8 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
 import com.google.gson.Gson
 import com.igec.common.CONSTANTS.*
@@ -448,6 +450,7 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         return true
     }
     private fun updateCheckInChanges() {
+        val db = FirebaseFirestore.getInstance()
         val mPrefs: SharedPreferences = getPreferences(MODE_PRIVATE)
         val calendar = Calendar.getInstance()
         updateDate()
@@ -481,6 +484,10 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
             if (document.exists()) return@addOnSuccessListener
             if(document.metadata.isFromCache) return@addOnSuccessListener
             SUMMARY_COL.document(path).collection("$year-$month").document(day).set(summary, SetOptions.merge())
+            for(pid in summary.projectIds){
+                if(pid.value== CHECK_IN_FROM_SITE)
+                    PROJECT_COL.document(pid.key).update("employeeWorkedTime." + currManager!!.id, FieldValue.increment(summary.workingTime[pid.key] as Long))
+            }
             mPrefs.edit().remove(CHECK_OUT).apply()
         }
     }

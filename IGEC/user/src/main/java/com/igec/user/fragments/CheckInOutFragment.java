@@ -549,6 +549,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         }
         lastProjectId = project.getId();
         summary.setCheckOut(null);
+        summary.setLastProjectId(project.getId());
         db.document(documentSnapshot.getReference().getPath()).update("lastCheckInTime", summary.getLastCheckInTime(),
                 "checkOut", null,
                 "projectIds", summary.getProjectIds(),
@@ -596,35 +597,6 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         //save summary into shared preferences
         setCheckOutSharedPref(summary);
         Snackbar.make(binding.getRoot(), "Checked Out successfully!", Toast.LENGTH_SHORT).show();
-    }
-
-
-    private void updateOverTime(long overTime, String path, Timestamp time) {
-//        WriteBatch batch = db.batch();
-//        batch.set(db.document(path), new HashMap<String, Object>() {{
-//            put("overTime", overTime);
-//        }}, SetOptions.merge());
-//        batch.commit();
-//        Allowance overTimeAllowance = new Allowance();
-//        overTimeAllowance.setAmount(overTime * currEmployee.getOverTime());
-//        overTimeAllowance.setName("overTime");
-//        Date checkInDate = (time).toDate();
-//        Calendar cal = Calendar.getInstance();
-//        cal.setTime(checkInDate);
-//        String prevDay = String.format("%02d", cal.get(Calendar.DAY_OF_MONTH));
-//        overTimeAllowance.setNote(prevDay);
-//        overTimeAllowance.setType(AllowancesEnum.OVERTIME.ordinal());
-//        overTimeAllowance.setCurrency(currEmployee.getCurrency());
-//        overTimeAllowance.setProjectId(currEmployee.getProjectID());
-//        EMPLOYEE_GROSS_SALARY_COL.document(id).collection(year).document(month).get().addOnSuccessListener(doc1 -> {
-//            EmployeesGrossSalary emp = doc1.toObject(EmployeesGrossSalary.class);
-//            ArrayList<Allowance> allowanceArrayList = emp.getAllTypes();
-//            if (allowanceArrayList != null) {
-//                allowanceArrayList.removeIf(x -> x.getType() == AllowancesEnum.OVERTIME.ordinal() && x.getNote().trim().equals(day));
-//            }
-//            allowanceArrayList.add(overTimeAllowance);
-//            EMPLOYEE_GROSS_SALARY_COL.document(id).collection(year).document(month).update("allTypes", allowanceArrayList);
-//        });
     }
 
 
@@ -725,6 +697,35 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
 
         });
     }
+
+    private void updateOverTime(long overTime, String path, Timestamp time) {
+//        WriteBatch batch = db.batch();
+//        batch.set(db.document(path), new HashMap<String, Object>() {{
+//            put("overTime", overTime);
+//        }}, SetOptions.merge());
+//        batch.commit();
+//        Allowance overTimeAllowance = new Allowance();
+//        overTimeAllowance.setAmount(overTime * currEmployee.getOverTime());
+//        overTimeAllowance.setName("overTime");
+//        Date checkInDate = (time).toDate();
+//        Calendar cal = Calendar.getInstance();
+//        cal.setTime(checkInDate);
+//        String prevDay = String.format("%02d", cal.get(Calendar.DAY_OF_MONTH));
+//        overTimeAllowance.setNote(prevDay);
+//        overTimeAllowance.setType(AllowancesEnum.OVERTIME.ordinal());
+//        overTimeAllowance.setCurrency(currEmployee.getCurrency());
+//        overTimeAllowance.setProjectId(currEmployee.getProjectID());
+//        EMPLOYEE_GROSS_SALARY_COL.document(id).collection(year).document(month).get().addOnSuccessListener(doc1 -> {
+//            EmployeesGrossSalary emp = doc1.toObject(EmployeesGrossSalary.class);
+//            ArrayList<Allowance> allowanceArrayList = emp.getAllTypes();
+//            if (allowanceArrayList != null) {
+//                allowanceArrayList.removeIf(x -> x.getType() == AllowancesEnum.OVERTIME.ordinal() && x.getNote().trim().equals(day));
+//            }
+//            allowanceArrayList.add(overTimeAllowance);
+//            EMPLOYEE_GROSS_SALARY_COL.document(id).collection(year).document(month).update("allTypes", allowanceArrayList);
+//        });
+    }
+
 
     private void setReCheckInPref(Summary summary) {
         SharedPreferences.Editor editor = getActivity().getPreferences(Context.MODE_PRIVATE).edit();

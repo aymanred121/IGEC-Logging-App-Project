@@ -6,7 +6,9 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Color
+import android.icu.util.Calendar
 import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Bundle
@@ -27,12 +29,13 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.navigation.NavigationView
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.SetOptions
+import com.google.gson.Gson
 import com.igec.common.CONSTANTS
 import com.igec.common.CONSTANTS.*
-import com.igec.common.firebase.Employee
-import com.igec.common.firebase.TransferRequests
-import com.igec.common.firebase.VacationRequest
+import com.igec.common.firebase.*
 import com.igec.common.fragments.VacationsLogFragment
 import com.igec.user.R
 import com.igec.user.databinding.ActivityEdashboardBinding
@@ -46,6 +49,9 @@ private var TRANSFER_NOTIFICATION_ID = 0
 
 class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private var currEmployee: Employee? = null
+    private lateinit var year: String
+    private lateinit var month: String
+    private lateinit var day: String
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityEdashboardBinding
     private lateinit var navController: NavController
@@ -322,6 +328,74 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
             binding.drawerLayout.closeDrawer(GravityCompat.START)
         else
             finish()
+    }
+
+    private fun updateCheckInChanges() {
+        val mPrefs: SharedPreferences = getPreferences(MODE_PRIVATE)
+        val calendar = Calendar.getInstance()
+        updateDate()
+        val summary: Summary = Gson().fromJson( mPrefs.getString(CHECK_IN,null)!!, Summary::class.java) ?: return
+        val employeeGrossSalary =  Gson().fromJson( mPrefs.getString(EMPLOYEE_GROSS_SALARY,null)!!, EmployeesGrossSalary::class.java) ?: return
+        val checkInDate = (summary.checkIn["Time"] as Timestamp?)!!.toDate()
+        //check if the check in date is today
+        calendar.time = checkInDate
+        if (calendar.get(Calendar.DAY_OF_MONTH) != Calendar.getInstance().get(Calendar.DAY_OF_MONTH)) return
+        val path = currEmployee!!.id
+        SUMMARY_COL.document(path).collection("$year-$month").document(day).get().addOnSuccessListener { document ->
+                if (document.exists()) return@addOnSuccessListener
+                if(document.metadata.isFromCache) return@addOnSuccessListener
+                SUMMARY_COL.document(path).collection("$year-$month").document(day).set(summary,SetOptions.merge())
+                EMPLOYEE_GROSS_SALARY_COL.document(path).collection(year).document(month).set(employeeGrossSalary, SetOptions.merge())
+                mPrefs.edit().remove(CHECK_IN).apply()
+                mPrefs.edit().remove(EMPLOYEE_GROSS_SALARY).apply()
+            }
+    }
+    private fun updateCheckOutChanges(){
+        val mPrefs: SharedPreferences = getPreferences(MODE_PRIVATE)
+        val calendar = Calendar.getInstance()
+        updateDate()
+        val summary: Summary = Gson().fromJson( mPrefs.getString(CHECK_OUT,null)!!, Summary::class.java) ?: return
+        val checkOutDate = (summary.checkOut["Time"] as Timestamp?)!!.toDate()
+        calendar.time = checkOutDate
+        if (calendar.get(Calendar.DAY_OF_MONTH) != Calendar.getInstance().get(Calendar.DAY_OF_MONTH)) return
+        val path = currEmployee!!.id
+        SUMMARY_COL.document(path).collection("$year-$month").document(day).get().addOnSuccessListener { document ->
+            if (document.exists()) return@addOnSuccessListener
+            if(document.metadata.isFromCache) return@addOnSuccessListener
+            SUMMARY_COL.document(path).collection("$year-$month").document(day).set(summary,SetOptions.merge())
+            mPrefs.edit().remove(CHECK_OUT).apply()
+        }
+    }
+    private fun updateReCheckInChanges(){
+        val mPrefs: SharedPreferences = getPreferences(MODE_PRIVATE)
+        val calendar = Calendar.getInstance()
+        updateDate()
+        val summary: Summary = Gson().fromJson( mPrefs.getString(CHECK_IN,null)!!, Summary::class.java) ?: return
+        val checkInDate = (summary.checkIn["Time"] as Timestamp?)!!.toDate()
+        calendar.time = checkInDate
+        if (calendar.get(Calendar.DAY_OF_MONTH) != Calendar.getInstance().get(Calendar.DAY_OF_MONTH)) return
+        val path = currEmployee!!.id
+        SUMMARY_COL.document(path).collection("$year-$month").document(day).get().addOnSuccessListener { document ->
+            if (document.exists()) return@addOnSuccessListener
+            if(document.metadata.isFromCache) return@addOnSuccessListener
+            SUMMARY_COL.document(path).collection("$year-$month").document(day).set(summary,SetOptions.merge())
+            mPrefs.edit().remove(CHECK_IN).apply()
+        }
+    }
+
+    private fun updateDate() {
+        val calendar = java.util.Calendar.getInstance()
+        year = calendar[java.util.Calendar.YEAR].toString()
+        month = String.format("%02d", calendar[java.util.Calendar.MONTH] + 1)
+        day = String.format("%02d", calendar[java.util.Calendar.DAY_OF_MONTH])
+        if (day.toInt() > 25) {
+            if (month.toInt() + 1 == 13) {
+                month = "01"
+                year = String.format("%d", year.toInt() + 1)
+            } else {
+                month = String.format("%02d", month.toInt() + 1)
+            }
+        }
     }
 
 }

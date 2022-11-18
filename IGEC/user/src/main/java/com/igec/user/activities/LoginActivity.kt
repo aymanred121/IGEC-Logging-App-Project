@@ -20,6 +20,7 @@ import com.google.gson.Gson
 import com.igec.common.CONSTANTS
 import com.igec.common.cryptography.RSAUtil
 import com.igec.common.firebase.Employee
+import com.igec.common.firebase.EmployeesGrossSalary
 import com.igec.common.firebase.Project
 import com.igec.user.CacheDirectory
 import com.igec.user.databinding.ActivityLoginBinding
@@ -187,23 +188,29 @@ class LoginActivity : AppCompatActivity() {
                                 val gson = Gson()
                                 val json = gson.toJson(projects)
                                 CacheDirectory.writeAllCachedText(this, "projects.json", json)
-                                val intent: Intent = when (currEmployee.managerID) {
-                                    CONSTANTS.ADMIN -> {
-                                        Intent(this@LoginActivity, MDashboard::class.java)
+                                CONSTANTS.EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.id).get().addOnSuccessListener{ doc ->
+                                   val grossSalary = doc.toObject(EmployeesGrossSalary::class.java)
+                                    CacheDirectory.writeAllCachedText(this, "baseAllowances.json", gson.toJson(grossSalary))
+
+                                    val intent: Intent = when (currEmployee.managerID) {
+                                        CONSTANTS.ADMIN -> {
+                                            Intent(this@LoginActivity, MDashboard::class.java)
+                                        }
+                                        else -> {
+                                            Intent(this@LoginActivity, EDashboard::class.java)
+                                        }
                                     }
-                                    else -> {
-                                        Intent(this@LoginActivity, EDashboard::class.java)
-                                    }
+                                    intent.putExtra("user", currEmployee)
+                                    val sharedPreferences =
+                                        getSharedPreferences(CONSTANTS.IGEC, MODE_PRIVATE)
+                                    val editor = sharedPreferences.edit()
+                                    editor.putBoolean(CONSTANTS.LOGGED, true)
+                                    editor.putString(CONSTANTS.ID, currEmployee.id)
+                                    editor.apply()
+                                    startActivity(intent)
+                                    finish()
                                 }
-                                intent.putExtra("user", currEmployee)
-                                val sharedPreferences =
-                                    getSharedPreferences(CONSTANTS.IGEC, MODE_PRIVATE)
-                                val editor = sharedPreferences.edit()
-                                editor.putBoolean(CONSTANTS.LOGGED, true)
-                                editor.putString(CONSTANTS.ID, currEmployee.id)
-                                editor.apply()
-                                startActivity(intent)
-                                finish()
+
                             }
 
                         }

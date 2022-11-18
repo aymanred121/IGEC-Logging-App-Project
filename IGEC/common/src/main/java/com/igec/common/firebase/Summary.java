@@ -16,20 +16,10 @@ public class Summary {
     private HashMap<String, Object> geoMap = new HashMap<>();
     private HashMap<String, Object> checkIn;
     private HashMap<String, Object> checkOut;
-    private Employee employee;
-    private HashMap<String,Object> WorkingTime;
+    private HashMap<String,Long> WorkingTime = new HashMap<>();
     private Timestamp lastCheckInTime;
-    private String lastDayPath;
     private String lastProjectId;
     private HashMap<String, String> projectIds = new HashMap<>();
-
-    public Employee getEmployee() {
-        return employee;
-    }
-
-    public void setEmployee(Employee employee) {
-        this.employee = employee;
-    }
 
     public HashMap<String, Object> getCheckIn() {
         return checkIn;
@@ -60,11 +50,11 @@ public class Summary {
         geoMap.put("lng", lng);
     }
 
-    public HashMap<String, Object> getWorkingTime() {
+    public HashMap<String, Long> getWorkingTime() {
         return WorkingTime;
     }
 
-    public void setWorkingTime(HashMap<String, Object> workingTime) {
+    public void setWorkingTime(HashMap<String, Long> workingTime) {
         WorkingTime = workingTime;
     }
 
@@ -117,13 +107,6 @@ public class Summary {
         this.lastCheckInTime = lastCheckInTime;
     }
 
-    public String getLastDayPath() {
-        return lastDayPath;
-    }
-
-    public void setLastDayPath(String lastDayPath) {
-        this.lastDayPath = lastDayPath;
-    }
 
     public HashMap<String, String> getProjectIds() {
         return projectIds;

@@ -1,12 +1,12 @@
 package com.igec.user.activities
 
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.graphics.Color
 import android.icu.util.Calendar
 import android.media.RingtoneManager
@@ -47,13 +47,12 @@ import com.igec.user.fragments.CheckInOutFragment
 import com.igec.user.fragments.GrossSalaryFragment
 import com.igec.user.fragments.SendVacationRequestFragment
 import java.util.*
-import kotlin.collections.HashMap
 
 private var VACATION_NOTIFICATION_ID = 0
 private var TRANSFER_NOTIFICATION_ID = 0
 
 class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
-    private var currEmployee: Employee? = null
+    private var employee: Employee? = null
     private lateinit var year: String
     private lateinit var month: String
     private lateinit var day: String
@@ -64,12 +63,14 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
     private lateinit var vacationNotification: Notification
     private lateinit var transferNotification: Notification
     private lateinit var notificationManager: NotificationManagerCompat
+
+    @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityEdashboardBinding.inflate(layoutInflater)
         setContentView(binding.root)
         //validateDate(this)
-        currEmployee = intent.getSerializableExtra("user") as Employee?
+        employee = intent.getSerializableExtra("user") as Employee?
         setSupportActionBar(binding.toolbar)
 
         val drawerLayout: DrawerLayout = binding.drawerLayout
@@ -80,7 +81,7 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         val inflater = navHostFragment.navController.navInflater
         val graph = inflater.inflate(R.navigation.mobile_navigation_user)
         val args = Bundle()
-        args.putSerializable("user", currEmployee)
+        args.putSerializable("user", employee)
         navController.setGraph(graph, args)
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
@@ -94,13 +95,13 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         navView.setupWithNavController(navController)
         navView.setNavigationItemSelectedListener(this)
 
-        "${currEmployee?.firstName} ${currEmployee?.lastName}".also { employeeName ->
+        "${employee?.firstName} ${employee?.lastName}".also { employeeName ->
             binding.navView.getHeaderView(
                 0
             ).findViewById<TextView>(R.id.EmployeeName).text = employeeName
         }
         binding.navView.getHeaderView(0).findViewById<TextView>(R.id.EmployeeID).text =
-            currEmployee?.id
+            employee?.id
 
         createNotificationChannel(
             VACATION_STATUS_CHANNEL_ID,
@@ -116,7 +117,7 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         notificationManager = NotificationManagerCompat.from(this)
 
         val vacationRequests: MutableSet<String> = mutableSetOf()
-        CONSTANTS.VACATION_COL.whereEqualTo("employee.id", currEmployee!!.id)
+        CONSTANTS.VACATION_COL.whereEqualTo("employee.id", employee!!.id)
             .whereEqualTo("vacationNotification", 0)
             .whereNotEqualTo("vacationStatus", PENDING)
             .addSnapshotListener { values, error ->
@@ -152,7 +153,7 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
             }
         //check transfer request
         val transferRequests: MutableSet<String> = mutableSetOf()
-        CONSTANTS.TRANSFER_REQUESTS_COL.whereEqualTo("employee.id", currEmployee!!.id)
+        CONSTANTS.TRANSFER_REQUESTS_COL.whereEqualTo("employee.id", employee!!.id)
             .whereEqualTo("seenByEmp", false)
             .addSnapshotListener { values, error ->
                 run {
@@ -201,9 +202,7 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         connectivityManager.registerDefaultNetworkCallback(object :
             ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
-                updateCheckInChanges()
-                updateReCheckInChanges()
-                updateCheckOutChanges()
+                updateSummaryChanges()
             }
 
             override fun onLost(network: Network) {
@@ -281,7 +280,7 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                             supportFragmentManager.beginTransaction()
                                 .replace(
                                     R.id.nav_host_fragment_content_main,
-                                    CheckInOutFragment.newInstance(currEmployee)
+                                    CheckInOutFragment.newInstance(employee)
                                 )
                                 .addToBackStack(null)
                                 .commit()
@@ -291,7 +290,7 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                             supportFragmentManager.beginTransaction()
                                 .replace(
                                     R.id.nav_host_fragment_content_main,
-                                    ChangePasswordFragment.newInstance(currEmployee)
+                                    ChangePasswordFragment.newInstance(employee)
                                 )
                                 .addToBackStack(null)
                                 .commit()
@@ -301,7 +300,7 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                             supportFragmentManager.beginTransaction()
                                 .replace(
                                     R.id.nav_host_fragment_content_main,
-                                    GrossSalaryFragment.newInstance(currEmployee!!.id)
+                                    GrossSalaryFragment.newInstance(employee!!.id)
                                 )
                                 .addToBackStack(null)
                                 .commit()
@@ -312,7 +311,7 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                             supportFragmentManager.beginTransaction()
                                 .replace(
                                     R.id.nav_host_fragment_content_main,
-                                    SendVacationRequestFragment.newInstance(currEmployee)
+                                    SendVacationRequestFragment.newInstance(employee)
                                 )
                                 .addToBackStack(null)
                                 .commit()
@@ -322,7 +321,7 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                             supportFragmentManager.beginTransaction()
                                 .replace(
                                     R.id.nav_host_fragment_content_main,
-                                    VacationsLogFragment.newInstance(currEmployee)
+                                    VacationsLogFragment.newInstance(employee)
                                 )
                                 .addToBackStack(null)
                                 .commit()
@@ -350,108 +349,45 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
             finish()
     }
 
-    private fun updateCheckInChanges() {
+    private fun updateSummaryChanges() {
+        updateDate()
         val calendar = Calendar.getInstance()
         val cachedSummary = CacheDirectory.readAllCachedText(this, "summary.json")
         val cachedGrossSalary = CacheDirectory.readAllCachedText(this, "grossSalary.json")
-        updateDate()
-        val summary: Summary =
-            Gson().fromJson(cachedSummary, Summary::class.java) ?: return
-        val employeeGrossSalary = Gson().fromJson(
-            cachedGrossSalary,
-            EmployeesGrossSalary::class.java
-        ) ?: return
+        val summary: Summary = Gson().fromJson(cachedSummary, Summary::class.java) ?: return
+        val employeeGrossSalary = Gson().fromJson(cachedGrossSalary, EmployeesGrossSalary::class.java)
+        //fix Date in summary
         val checkInDate = ((summary.checkIn["Time"] as Map<*, *>)["seconds"] as Double).toLong()
-        //check if the check in date is today
         calendar.time = Date(checkInDate * 1000)
         summary.checkIn["Time"] = Timestamp(calendar.time)
-        if (calendar.get(Calendar.DAY_OF_MONTH) != Calendar.getInstance()
-                .get(Calendar.DAY_OF_MONTH)
-        ) return
-        val path = currEmployee!!.id
-        SUMMARY_COL.document(path).collection("$year-$month").document(day).get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) return@addOnSuccessListener
-                if (document.metadata.isFromCache) return@addOnSuccessListener
-                SUMMARY_COL.document(path).collection("$year-$month").document(day)
-                    .set(summary, SetOptions.merge())
-                EMPLOYEE_GROSS_SALARY_COL.document(path).collection(year).document(month)
-                    .set(employeeGrossSalary, SetOptions.merge())
-                CacheDirectory.writeAllCachedText(
-                    this,
-                    "summary.json",
-                    ""
-                )
-                CacheDirectory.writeAllCachedText(
-                    this,
-                    "grossSalary.json",
-                    ""
-                )
-            }
-    }
 
-    private fun updateCheckOutChanges() {
-        val cachedSummary = CacheDirectory.readAllCachedText(this, "summary.json")
-        val calendar = Calendar.getInstance()
-        updateDate()
-        val summary: Summary =
-            Gson().fromJson(cachedSummary, Summary::class.java) ?: return
-        val checkOutSeconds =
-            ((summary.checkOut["Time"] as Map<*, *>)["seconds"] as Double).toLong()
-        val checkInSeconds = ((summary.checkIn["Time"] as Map<*, *>)["seconds"] as Double).toLong()
-        calendar.time = Date((checkOutSeconds * 1000))
-        summary.checkOut["Time"] = Timestamp(calendar.time)
-        summary.checkIn["Time"] = Timestamp(Date(checkInSeconds * 1000))
-        if (calendar.get(Calendar.DAY_OF_MONTH) != Calendar.getInstance()
-                .get(Calendar.DAY_OF_MONTH)
-        ) return
-        val path = currEmployee!!.id
+        if(summary.checkOut!=null){
+            val checkOutDate = ((summary.checkOut["Time"] as Map<*, *>)["seconds"] as Double).toLong()
+            summary.checkOut["Time"] = Timestamp(Date(checkOutDate * 1000))
+        }
+        //check if the summary is for today
+        if (calendar.get(Calendar.DAY_OF_MONTH) != Calendar.getInstance().get(Calendar.DAY_OF_MONTH)) return
+        val path = employee!!.id
         SUMMARY_COL.document(path).collection("$year-$month").document(day).get()
             .addOnSuccessListener { document ->
                 if (document.exists()) return@addOnSuccessListener
                 if (document.metadata.isFromCache) return@addOnSuccessListener
-                SUMMARY_COL.document(path).collection("$year-$month").document(day)
+                SUMMARY_COL.document(path).collection("$year-$month")
+                    .document(day)
                     .set(summary, SetOptions.merge())
-                for (pid in summary.projectIds) {
-                    if (pid.value == CHECK_IN_FROM_SITE)
-                        PROJECT_COL.document(pid.key).update(
-                            "employeeWorkedTime." + currEmployee!!.id,
-                            FieldValue.increment(((summary.workingTime[pid.key] as Map<*, *>)["operand"] as Double).toLong())
-                        )
+                if(employeeGrossSalary != null){
+                    EMPLOYEE_GROSS_SALARY_COL.document(path).collection(year).document(month).set(employeeGrossSalary, SetOptions.merge())
                 }
-                CacheDirectory.writeAllCachedText(
-                    this,
-                    "summary.json",
-                    ""
-                )
-            }
-    }
-
-    private fun updateReCheckInChanges() {
-        val cachedSummary = CacheDirectory.readAllCachedText(this, "summary.json")
-        val calendar = Calendar.getInstance()
-        updateDate()
-        val summary: Summary =
-            Gson().fromJson(cachedSummary, Summary::class.java) ?: return
-        val checkInDate = ((summary.checkIn["Time"] as Map<*, *>)["seconds"] as Double).toLong()
-        //check if the check in date is today
-        calendar.time = Date(checkInDate * 1000)
-        summary.checkIn["Time"] = Timestamp(calendar.time)
-        if (calendar.get(Calendar.DAY_OF_MONTH) != Calendar.getInstance()
-                .get(Calendar.DAY_OF_MONTH)
-        ) return
-        val path = currEmployee!!.id
-        SUMMARY_COL.document(path).collection("$year-$month").document(day).get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) return@addOnSuccessListener
-                if (document.metadata.isFromCache) return@addOnSuccessListener
-                SUMMARY_COL.document(path).collection("$year-$month").document(day)
-                    .set(summary, SetOptions.merge())
-                CacheDirectory.writeAllCachedText(
-                    this,
-                    "summary.json",
-                    ""
-                )
+                if(summary.checkOut!=null){
+                    for (pid in summary.projectIds) {
+                        if (pid.value == CHECK_IN_FROM_SITE)
+                            PROJECT_COL.document(pid.key).update(
+                                "employeeWorkedTime." + employee!!.id,
+                                FieldValue.increment((summary.workingTime[pid.key]!!)))
+                    }
+                }
+                CacheDirectory.writeAllCachedText(this, "summary.json", "")
+                CacheDirectory.writeAllCachedText(this, "grossSalary.json", "")
             }
     }
 

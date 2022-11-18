@@ -1,20 +1,16 @@
 package com.igec.user.fragments;
 
-import static android.content.Context.MODE_PRIVATE;
 import static com.igec.common.CONSTANTS.CAMERA_REQUEST_CODE;
-import static com.igec.common.CONSTANTS.CHECK_IN;
 import static com.igec.common.CONSTANTS.CHECK_IN_FROM_HOME;
 import static com.igec.common.CONSTANTS.CHECK_IN_FROM_OFFICE;
 import static com.igec.common.CONSTANTS.CHECK_IN_FROM_SITE;
 import static com.igec.common.CONSTANTS.CHECK_IN_FROM_SUPPORT;
-import static com.igec.common.CONSTANTS.CHECK_OUT;
 import static com.igec.common.CONSTANTS.EMPLOYEE_GROSS_SALARY_COL;
 import static com.igec.common.CONSTANTS.LOCATION_REQUEST_CODE;
 import static com.igec.common.CONSTANTS.MACHINE_COL;
 import static com.igec.common.CONSTANTS.MACHINE_DEFECT_LOG_COL;
 import static com.igec.common.CONSTANTS.MACHINE_EMPLOYEE_COL;
 import static com.igec.common.CONSTANTS.OFFICE_REF;
-import static com.igec.common.CONSTANTS.PROJECTS;
 import static com.igec.common.CONSTANTS.PROJECT_COL;
 import static com.igec.common.CONSTANTS.SUMMARY_COL;
 
@@ -22,7 +18,6 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -294,18 +289,15 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     }
 
 
-    private void updateProjectsSharedPref(List<Project> projects) {
-        SharedPreferences.Editor editor = getActivity().getSharedPreferences(PROJECTS, MODE_PRIVATE).edit();
+    private void updateProjectsCache(List<Project> projects) {
         Gson gson = new Gson();
         String json = gson.toJson(projects);
-        editor.putString("projects", json);
-        editor.apply();
+        CacheDirectory.writeAllCachedText(getActivity(), "projects.json", json);
     }
 
-    private List<Project> getProjectsFromSharedPreferences() {
+    private List<Project> getProjectsFromCache() {
         List<Project> projects = new ArrayList<>();
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(PROJECTS, MODE_PRIVATE);
-        String projectsJson = sharedPreferences.getString(PROJECTS, null);
+        String projectsJson = CacheDirectory.readAllCachedText(getActivity(), "projects.json");
         if (projectsJson != null) {
             Type type = new TypeToken<List<Project>>() {
             }.getType();
@@ -379,19 +371,18 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         SUMMARY_COL.document(id)
                 .collection(year + "-" + month).document(day)
                 .get().addOnCompleteListener(task -> {
-                    if (!task.isSuccessful()) {
+                    if (!task.isSuccessful() || task.getResult().getMetadata().isFromCache()) {
                         //offline
-                        Summary checkIn = getCheckInSharedPref();
-                        if (checkIn == null) {
+                        Summary summaryCache = getSummaryCache();
+                        if (summaryCache == null) {
                             //checkIn
                             checkInAction(project, summary, checkOutDetails);
                         } else {
-                            Summary summaryCheckOut = getCheckOutSharedPref();
-                            if (summaryCheckOut.getCheckOut() == null) {
+                            if (summaryCache.getCheckOut() == null) {
                                 //checkOut
-                                checkOutAction(project, checkOutDetails, checkIn);
+                                checkOutAction(project, checkOutDetails, summaryCache);
                             } else {
-                                reCheckInAction(project, summaryCheckOut);
+                                reCheckInAction(project, summaryCache);
                             }
                         }
                     } else {
@@ -424,16 +415,6 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         ).show();
     }
 
-    private Summary getCheckOutSharedPref() {
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(CHECK_OUT, MODE_PRIVATE);
-        String checkOutJson = sharedPreferences.getString(CHECK_OUT, null);
-        if (checkOutJson != null) {
-            Type type = new TypeToken<Summary>() {
-            }.getType();
-            return new Gson().fromJson(checkOutJson, type);
-        }
-        return null;
-    }
 
     private void checkOutAction(Project project, HashMap<String, Object> checkOutDetails, Summary summary1) {
         showAlertOfTheCheckingInLocation(getString(R.string.you_are_checking_out_to_that_do_you_want_to_confirm_this_action, project.getName())).setPositiveButton("Yes", ((dialogInterface, i) -> {
@@ -558,7 +539,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                 "projectIds", summary.getProjectIds(),
                 "lastProjectId", project.getId());
         //delete checkout shared pref
-        setReCheckInCache(summary);
+        setSummaryCache(summary, null);
         Snackbar.make(binding.getRoot(), "Checked In successfully!", Toast.LENGTH_SHORT).show();
         binding.checkInOutFab.setEnabled(true);
     }
@@ -570,9 +551,9 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         long workingTime = (checkOutTime - checkInTime);
         //check if working time is greater than 8 hrs
         summary.setCheckOut(checkOut);
-        summary.setWorkingTime(new HashMap<String, Object>() {{
-            put(projectId, FieldValue.increment(workingTime));
-        }});
+        if (summary.getWorkingTime().containsKey(projectId))
+            summary.getWorkingTime().put(projectId, (long) summary.getWorkingTime().get(projectId) + workingTime);
+        else summary.getWorkingTime().put(projectId, workingTime);
         summary.setLastProjectId(null);
         lastProjectId = null;
         SUMMARY_COL.document(id).collection(year + "-" + month).document(day)
@@ -598,7 +579,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                     }
                 });
         //save summary into shared preferences
-        setCheckOutSharedCache(summary);
+        setSummaryCache(summary, null);
         Snackbar.make(binding.getRoot(), "Checked Out successfully!", Toast.LENGTH_SHORT).show();
     }
 
@@ -640,66 +621,58 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                 break;
         }
         SUMMARY_COL.document(id).collection(year + "-" + month).document(day).set(checkIn, SetOptions.merge());
-        EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId()).collection(year).document(month).get().addOnSuccessListener(doc -> {
-            if (!doc.exists()) {
-                //new month
-                EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId()).get().addOnSuccessListener(documentSnapshot -> {
-                    if (!documentSnapshot.exists()) return;
-                    EmployeesGrossSalary employeesGrossSalary = documentSnapshot.toObject(EmployeesGrossSalary.class);
-                    ArrayList<Allowance> allowances = employeesGrossSalary.getAllTypes().stream().filter(allowance -> allowance.getType() != AllowancesEnum.NETSALARY.ordinal()).collect(Collectors.toCollection(ArrayList::new));
-                    allowances.removeIf(allowance -> allowance.getType() == AllowancesEnum.PROJECT.ordinal() && !allowance.getProjectId().equals(project.getId()));
-                    employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() != AllowancesEnum.NETSALARY.ordinal());
-                    employeesGrossSalary.setBaseAllowances(allowances);
-                    if (checkInType == CheckInType.SITE) {
-                        for (Allowance allowance : employeesGrossSalary.getBaseAllowances()) {
-                            allowance.setNote(day);
-                            employeesGrossSalary.getAllTypes().add(allowance);
-                        }
-                    } else { //support
-                        for (Allowance allowance : employeesGrossSalary.getBaseAllowances()) {
-                            if (currEmployee.getProjectIds().contains(allowance.getProjectId()))
-                                continue;
-                            allowance.setNote(day);
-                            employeesGrossSalary.getAllTypes().add(allowance);
-                        }
-                        for (Allowance allowance1 : project.getAllowancesList()) {
-                            allowance1.setNote(day);
-                            employeesGrossSalary.getAllTypes().add(allowance1);
-                        }
-                    }
-                    db.document(doc.getReference().getPath()).set(employeesGrossSalary, SetOptions.merge());
-                    //create shared pref
-                    setCheckInSharedCache(summary, employeesGrossSalary);
-                });
-                return;
+        EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId()).get().addOnCompleteListener(task -> {
+            if (!task.isSuccessful() || task.getResult().getMetadata().isFromCache()) {
+                //offline
+                EmployeesGrossSalary employeesGrossSalary = getGrossSalaryFromCache();
+                updateMonthGrossSalary(summary,project,employeesGrossSalary);
+            } else {
+                //online
+                EmployeesGrossSalary employeesGrossSalary = task.getResult().toObject(EmployeesGrossSalary.class);
+                updateBaseGrossSalaryCache(employeesGrossSalary);
+                updateMonthGrossSalary(summary,project,employeesGrossSalary);
             }
-            EmployeesGrossSalary employeesGrossSalary = doc.toObject(EmployeesGrossSalary.class);
-            employeesGrossSalary.setEmployeeId(currEmployee.getId());
-            if (checkInType == CheckInType.SITE) {
-                for (Allowance allowance : employeesGrossSalary.getBaseAllowances()) {
-                    if (allowance.getType() == AllowancesEnum.PROJECT.ordinal() && !allowance.getProjectId().equals(project.getId()))
-                        continue;
-                    allowance.setNote(day);
-                    employeesGrossSalary.getAllTypes().add(allowance);
-                }
-            } else { //support
-                for (Allowance allowance : employeesGrossSalary.getBaseAllowances()) {
-                    if (currEmployee.getProjectIds().contains(allowance.getProjectId()))
-                        continue;
-                    allowance.setNote(day);
-                    employeesGrossSalary.getAllTypes().add(allowance);
-                }
-                for (Allowance allowance1 : project.getAllowancesList()) {
-                    allowance1.setNote(day);
-                    employeesGrossSalary.getAllTypes().add(allowance1);
-                }
-            }
-            EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId()).collection(year).document(month).set(employeesGrossSalary, SetOptions.merge());
-            //create shared pref
-            setCheckInSharedCache(summary, employeesGrossSalary);
-
         });
     }
+
+    private void updateBaseGrossSalaryCache(EmployeesGrossSalary employeesGrossSalary) {
+        Gson gson = new Gson();
+        String json = gson.toJson(employeesGrossSalary);
+        CacheDirectory.writeAllCachedText(getActivity(),"baseAllowances.json",json);
+    }
+
+    private EmployeesGrossSalary getGrossSalaryFromCache() {
+        Gson gson = new Gson();
+        String json = CacheDirectory.readAllCachedText(getActivity(),"baseAllowances.json");
+        return gson.fromJson(json,EmployeesGrossSalary.class);
+    }
+
+    private void updateMonthGrossSalary(Summary summary, Project project, EmployeesGrossSalary employeesGrossSalary) {
+        ArrayList<Allowance> allowances = employeesGrossSalary.getAllTypes().stream().filter(allowance -> allowance.getType() != AllowancesEnum.NETSALARY.ordinal()).collect(Collectors.toCollection(ArrayList::new));
+        allowances.removeIf(allowance -> allowance.getType() == AllowancesEnum.PROJECT.ordinal() && !allowance.getProjectId().equals(project.getId()));
+        employeesGrossSalary.getAllTypes().removeIf(allowance -> allowance.getType() != AllowancesEnum.NETSALARY.ordinal());
+        employeesGrossSalary.setBaseAllowances(allowances);
+        if (checkInType == CheckInType.SITE) {
+            for (Allowance allowance : employeesGrossSalary.getBaseAllowances()) {
+                allowance.setNote(day);
+                employeesGrossSalary.getAllTypes().add(allowance);
+            }
+        } else { //support
+            for (Allowance allowance : employeesGrossSalary.getBaseAllowances()) {
+                if (currEmployee.getProjectIds().contains(allowance.getProjectId()))
+                    continue;
+                allowance.setNote(day);
+                employeesGrossSalary.getAllTypes().add(allowance);
+            }
+            for (Allowance allowance1 : project.getAllowancesList()) {
+                allowance1.setNote(day);
+                employeesGrossSalary.getAllTypes().add(allowance1);
+            }
+        }
+        EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId()).collection(year).document(month).set(employeesGrossSalary, SetOptions.merge());
+        setSummaryCache(summary, employeesGrossSalary);
+    }
+
 
     private void updateOverTime(long overTime, String path, Timestamp time) {
 //        WriteBatch batch = db.batch();
@@ -730,30 +703,22 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     }
 
 
-    private void setReCheckInCache(Summary summary) {
+    private void setSummaryCache(Summary summary, EmployeesGrossSalary employeesGrossSalary) {
         Gson gson = new Gson();
         String summaryJson = gson.toJson(summary);
         CacheDirectory.writeAllCachedText(getActivity(), "summary.json", summaryJson);
+        if (employeesGrossSalary != null) {
+            String grossSalaryJson = gson.toJson(employeesGrossSalary);
+            CacheDirectory.writeAllCachedText(getActivity(), "grossSalary.json", grossSalaryJson);
+        }
     }
 
-    private void setCheckInSharedCache(Summary summary, EmployeesGrossSalary employeesGrossSalary) {
+
+    private Summary getSummaryCache() {
         Gson gson = new Gson();
-        String summaryJson = gson.toJson(summary);
-        CacheDirectory.writeAllCachedText(getActivity(), "summary.json", summaryJson);
-        String grossSalaryJson = gson.toJson(employeesGrossSalary);
-        CacheDirectory.writeAllCachedText(getActivity(), "grossSalary.json", grossSalaryJson);
-    }
-
-    private void setCheckOutSharedCache(Summary summary) {
-        Gson gson = new Gson();
-        String summaryJson = gson.toJson(summary);
-        CacheDirectory.writeAllCachedText(getActivity(), "summary.json", summaryJson);
-    }
-
-    private Summary getCheckInSharedPref() {
-        SharedPreferences prefs = getActivity().getPreferences(MODE_PRIVATE);
-        String json = prefs.getString(CHECK_IN, "");
-        return new Gson().fromJson(json, Summary.class);
+        String summaryJson = CacheDirectory.readAllCachedText(getActivity(), "summary.json");
+        if (summaryJson == null) return null;
+        return gson.fromJson(summaryJson, Summary.class);
     }
 
 
@@ -948,12 +913,12 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         PROJECT_COL.get().addOnSuccessListener(docs -> {
             // if there's network update cache
             if (!docs.getMetadata().isFromCache()) {
-                updateProjectsSharedPref(docs.toObjects(Project.class));
+                updateProjectsCache(docs.toObjects(Project.class));
             }
             final List<Project> projects = new ArrayList<>();
             projects.clear();
             if (docs.size() == 0) {
-                projects.addAll(getProjectsFromSharedPreferences());
+                projects.addAll(getProjectsFromCache());
             } else {
                 projects.addAll(docs.toObjects(Project.class));
             }

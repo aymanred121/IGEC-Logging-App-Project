@@ -43,6 +43,8 @@ import com.igec.user.fragments.ChangePasswordFragment
 import com.igec.user.fragments.CheckInOutFragment
 import com.igec.user.fragments.GrossSalaryFragment
 import com.igec.user.fragments.SendVacationRequestFragment
+import java.util.*
+import kotlin.collections.HashMap
 
 private var VACATION_NOTIFICATION_ID = 0
 private var TRANSFER_NOTIFICATION_ID = 0
@@ -190,6 +192,9 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                     }
                 }
             }
+        updateCheckInChanges()
+        updateReCheckInChanges()
+        updateCheckOutChanges()
     }
 
     private fun createNotificationChannel(CHANNEL_ID: String, channelName: Int, channelDesc: Int) {
@@ -334,57 +339,87 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         val mPrefs: SharedPreferences = getPreferences(MODE_PRIVATE)
         val calendar = Calendar.getInstance()
         updateDate()
-        val summary: Summary = Gson().fromJson( mPrefs.getString(CHECK_IN,null)!!, Summary::class.java) ?: return
-        val employeeGrossSalary =  Gson().fromJson( mPrefs.getString(EMPLOYEE_GROSS_SALARY,null)!!, EmployeesGrossSalary::class.java) ?: return
-        val checkInDate = (summary.checkIn["Time"] as Timestamp?)!!.toDate()
+        val summary: Summary =
+            Gson().fromJson(mPrefs.getString(CHECK_IN, "")!!, Summary::class.java) ?: return
+        val employeeGrossSalary = Gson().fromJson(
+            mPrefs.getString(EMPLOYEE_GROSS_SALARY, "")!!,
+            EmployeesGrossSalary::class.java
+        ) ?: return
+        val checkInDate = ((summary.checkIn["Time"]  as Map<*, *>)["seconds"] as Double).toLong()
         //check if the check in date is today
-        calendar.time = checkInDate
-        if (calendar.get(Calendar.DAY_OF_MONTH) != Calendar.getInstance().get(Calendar.DAY_OF_MONTH)) return
+        calendar.time = Date(checkInDate * 1000)
+        summary.checkIn["Time"] = Timestamp(calendar.time)
+        if (calendar.get(Calendar.DAY_OF_MONTH) != Calendar.getInstance()
+                .get(Calendar.DAY_OF_MONTH)
+        ) return
         val path = currEmployee!!.id
-        SUMMARY_COL.document(path).collection("$year-$month").document(day).get().addOnSuccessListener { document ->
+        SUMMARY_COL.document(path).collection("$year-$month").document(day).get()
+            .addOnSuccessListener { document ->
                 if (document.exists()) return@addOnSuccessListener
-                if(document.metadata.isFromCache) return@addOnSuccessListener
-                SUMMARY_COL.document(path).collection("$year-$month").document(day).set(summary,SetOptions.merge())
-                EMPLOYEE_GROSS_SALARY_COL.document(path).collection(year).document(month).set(employeeGrossSalary, SetOptions.merge())
+                if (document.metadata.isFromCache) return@addOnSuccessListener
+                SUMMARY_COL.document(path).collection("$year-$month").document(day)
+                    .set(summary, SetOptions.merge())
+                EMPLOYEE_GROSS_SALARY_COL.document(path).collection(year).document(month)
+                    .set(employeeGrossSalary, SetOptions.merge())
                 mPrefs.edit().remove(CHECK_IN).apply()
                 mPrefs.edit().remove(EMPLOYEE_GROSS_SALARY).apply()
             }
     }
-    private fun updateCheckOutChanges(){
+
+    private fun updateCheckOutChanges() {
         val mPrefs: SharedPreferences = getPreferences(MODE_PRIVATE)
         val calendar = Calendar.getInstance()
         updateDate()
-        val summary: Summary = Gson().fromJson( mPrefs.getString(CHECK_OUT,null)!!, Summary::class.java) ?: return
-        val checkOutDate = (summary.checkOut["Time"] as Timestamp?)!!.toDate()
-        calendar.time = checkOutDate
-        if (calendar.get(Calendar.DAY_OF_MONTH) != Calendar.getInstance().get(Calendar.DAY_OF_MONTH)) return
+        val summary: Summary =
+            Gson().fromJson(mPrefs.getString(CHECK_OUT, "")!!, Summary::class.java) ?: return
+        val checkOutSeconds = ((summary.checkOut["Time"] as Map<*, *>)["seconds"] as Double).toLong()
+        val checkInSeconds = ((summary.checkIn["Time"] as Map<*, *>)["seconds"] as Double).toLong()
+        calendar.time = Date((checkOutSeconds * 1000))
+        summary.checkOut["Time"] = Timestamp(calendar.time)
+        summary.checkIn["Time"] = Timestamp(Date(checkInSeconds * 1000))
+        if (calendar.get(Calendar.DAY_OF_MONTH) != Calendar.getInstance()
+                .get(Calendar.DAY_OF_MONTH)
+        ) return
         val path = currEmployee!!.id
-        SUMMARY_COL.document(path).collection("$year-$month").document(day).get().addOnSuccessListener { document ->
-            if (document.exists()) return@addOnSuccessListener
-            if(document.metadata.isFromCache) return@addOnSuccessListener
-            SUMMARY_COL.document(path).collection("$year-$month").document(day).set(summary,SetOptions.merge())
-            for(pid in summary.projectIds){
-                if(pid.value== CHECK_IN_FROM_SITE)
-                    PROJECT_COL.document(pid.key).update("employeeWorkedTime." + currEmployee!!.id, FieldValue.increment(summary.workingTime[pid.key] as Long))
+        SUMMARY_COL.document(path).collection("$year-$month").document(day).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) return@addOnSuccessListener
+                if (document.metadata.isFromCache) return@addOnSuccessListener
+                SUMMARY_COL.document(path).collection("$year-$month").document(day)
+                    .set(summary, SetOptions.merge())
+                for (pid in summary.projectIds) {
+                    if (pid.value == CHECK_IN_FROM_SITE)
+                        PROJECT_COL.document(pid.key).update(
+                            "employeeWorkedTime." + currEmployee!!.id,
+                            FieldValue.increment(((summary.workingTime[pid.key] as Map<*, *>)["operand"] as Double).toLong())
+                        )
+                }
+                mPrefs.edit().remove(CHECK_OUT).apply()
             }
-            mPrefs.edit().remove(CHECK_OUT).apply()
-        }
     }
-    private fun updateReCheckInChanges(){
+
+    private fun updateReCheckInChanges() {
         val mPrefs: SharedPreferences = getPreferences(MODE_PRIVATE)
         val calendar = Calendar.getInstance()
         updateDate()
-        val summary: Summary = Gson().fromJson( mPrefs.getString(CHECK_IN,null)!!, Summary::class.java) ?: return
-        val checkInDate = (summary.checkIn["Time"] as Timestamp?)!!.toDate()
-        calendar.time = checkInDate
-        if (calendar.get(Calendar.DAY_OF_MONTH) != Calendar.getInstance().get(Calendar.DAY_OF_MONTH)) return
+        val summary: Summary =
+            Gson().fromJson(mPrefs.getString(CHECK_IN, "")!!, Summary::class.java) ?: return
+        val checkInDate = ((summary.checkIn["Time"]  as Map<*, *>)["seconds"] as Double).toLong()
+        //check if the check in date is today
+        calendar.time = Date(checkInDate * 1000)
+        summary.checkIn["Time"] = Timestamp(calendar.time)
+        if (calendar.get(Calendar.DAY_OF_MONTH) != Calendar.getInstance()
+                .get(Calendar.DAY_OF_MONTH)
+        ) return
         val path = currEmployee!!.id
-        SUMMARY_COL.document(path).collection("$year-$month").document(day).get().addOnSuccessListener { document ->
-            if (document.exists()) return@addOnSuccessListener
-            if(document.metadata.isFromCache) return@addOnSuccessListener
-            SUMMARY_COL.document(path).collection("$year-$month").document(day).set(summary,SetOptions.merge())
-            mPrefs.edit().remove(CHECK_IN).apply()
-        }
+        SUMMARY_COL.document(path).collection("$year-$month").document(day).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) return@addOnSuccessListener
+                if (document.metadata.isFromCache) return@addOnSuccessListener
+                SUMMARY_COL.document(path).collection("$year-$month").document(day)
+                    .set(summary, SetOptions.merge())
+                mPrefs.edit().remove(CHECK_IN).apply()
+            }
     }
 
     private fun updateDate() {

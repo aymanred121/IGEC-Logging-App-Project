@@ -9,6 +9,8 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -28,7 +30,7 @@ public class CONSTANTS {
     public static final String VACATION_REQUEST_CHANNEL_ID = "VACATION_REQUEST";
     public static final String TRANSFER_REQUEST_CHANNEL_ID = "TRANSFER_REQUEST";
     public static final String CHECK_IN_FROM_OFFICE = "office";
-    public static final String CHECK_IN_FROM_SITE = "site";
+    public static final String  CHECK_IN_FROM_SITE = "site";
     public static final String CHECK_IN_FROM_HOME = "from home";
     public static final String CHECK_IN_FROM_SUPPORT = "support";
     public static final String CHECK_IN = "checkIn";
@@ -49,6 +51,7 @@ public class CONSTANTS {
     public static final CollectionReference MACHINE_DEFECT_LOG_COL = db.collection("MachineDefectsLog");
     public static final CollectionReference SUMMARY_COL = db.collection("summary");
     public static final CollectionReference HOLIDAYS_COL = db.collection("Holidays");
+    public static final String PROJECTS = "projects";
 
     public static String convertDateToString(long selection) {
         @SuppressLint("SimpleDateFormat") SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");

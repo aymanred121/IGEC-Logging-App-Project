@@ -1,5 +1,6 @@
 package com.igec.user.fragments;
 
+import static android.content.Context.MODE_PRIVATE;
 import static com.igec.common.CONSTANTS.CAMERA_REQUEST_CODE;
 import static com.igec.common.CONSTANTS.CHECK_IN;
 import static com.igec.common.CONSTANTS.CHECK_IN_FROM_HOME;
@@ -14,6 +15,7 @@ import static com.igec.common.CONSTANTS.MACHINE_COL;
 import static com.igec.common.CONSTANTS.MACHINE_DEFECT_LOG_COL;
 import static com.igec.common.CONSTANTS.MACHINE_EMPLOYEE_COL;
 import static com.igec.common.CONSTANTS.OFFICE_REF;
+import static com.igec.common.CONSTANTS.PROJECTS;
 import static com.igec.common.CONSTANTS.PROJECT_COL;
 import static com.igec.common.CONSTANTS.SUMMARY_COL;
 
@@ -50,6 +52,7 @@ import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.igec.common.firebase.Allowance;
 import com.igec.common.firebase.Client;
 import com.igec.common.firebase.Employee;
@@ -67,6 +70,7 @@ import com.igec.user.dialogs.AccessoriesDialog;
 import com.igec.user.dialogs.ClientInfoDialog;
 import com.igec.user.dialogs.MachineCheckInOutDialog;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -294,9 +298,16 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     private final View.OnClickListener oclCheckInOut = v -> {
         binding.checkInOutFab.setEnabled(false);
         PROJECT_COL.get().addOnSuccessListener(docs -> {
-            if (docs.size() == 0)
-                return;
-            List<Project> projects = docs.toObjects(Project.class);
+            if (!docs.getMetadata().isFromCache()) {
+                updateProjectsSharedPref(docs.toObjects(Project.class));
+            }
+            final List<Project> projects = new ArrayList<>();
+            projects.clear();
+            if (docs.size() == 0) {
+                projects.addAll(getProjectsFromSharedPreferences());
+            } else {
+                projects.addAll(docs.toObjects(Project.class));
+            }
             Locus.INSTANCE.getCurrentLocation(getActivity(), result -> {
                         if (result.getError() != null) {
                             Snackbar.make(binding.getRoot(), "can't complete the operation.", Snackbar.LENGTH_SHORT).show();
@@ -352,6 +363,26 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
             );
         });
     };
+
+    private void updateProjectsSharedPref(List<Project> projects) {
+        SharedPreferences.Editor editor = getActivity().getSharedPreferences(PROJECTS, MODE_PRIVATE).edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(projects);
+        editor.putString("projects", json);
+        editor.apply();
+    }
+
+    private List<Project> getProjectsFromSharedPreferences() {
+        List<Project> projects = new ArrayList<>();
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(PROJECTS, MODE_PRIVATE);
+        String projectsJson = sharedPreferences.getString(PROJECTS, null);
+        if (projectsJson != null) {
+            Type type = new TypeToken<List<Project>>() {
+            }.getType();
+            projects = new Gson().fromJson(projectsJson, type);
+        }
+        return projects;
+    }
 
     private void notifyLocation() {
         switch (checkInType) {
@@ -417,47 +448,89 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         checkOutDetails.put("Time", Timestamp.now());
         SUMMARY_COL.document(id)
                 .collection(year + "-" + month).document(day)
-                .get().addOnSuccessListener(documentSnapshot -> {
-                    if (!documentSnapshot.exists() || documentSnapshot.getData().size() == 0) {
-                        //check in
-                        showAlertOfTheCheckingInLocation(getString(R.string.you_are_checking_in_to_that_do_you_want_to_confirm_this_action, checkInType == CheckInType.HOME ? "Home" : project.getName())).setPositiveButton("Yes", (dialogInterface1, i1) -> {
-                            canCheckFromHome = false;
-                            employeeCheckIn(summary, project);
-                            if (checkInType == CheckInType.HOME) {
-                                employeeCheckOut(summary, checkOutDetails, "HOME");
-                                binding.checkInOutFab.setEnabled(false);
-                                binding.checkInOutFab.setText("HOME");
-                                binding.checkInOutFab.setBackgroundColor(Color.GRAY);
-                                Snackbar.make(binding.getRoot(), "You are at home", Snackbar.LENGTH_SHORT).show();
-                            } else
-                                binding.greetingText.setText(project.getId() != null ? String.format("you are currently \n In %s", project.getName()) : binding.greetingText.getText());
-                            updateCheckInOutBtn();
-                            notifyLocation();
-                        }).show();
-                    } else {
-                        Summary summary1 = documentSnapshot.toObject(Summary.class);
-                        if (summary1.getCheckOut() == null) {
-                            //check out
-                            showAlertOfTheCheckingInLocation(getString(R.string.you_are_checking_out_to_that_do_you_want_to_confirm_this_action, project.getName())).setPositiveButton("Yes", ((dialogInterface, i) -> {
-                                employeeCheckOut(summary1, checkOutDetails, project.getId());
-                                binding.greetingText.setText(String.format("%s\n%s", getString(R.string.good_morning), currEmployee.getFirstName()));
-                                updateCheckInOutBtn();
-                            })).show();
+                .get().addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        //offline
+                        Summary checkIn = getCheckInSharedPref();
+                        if (checkIn == null) {
+                            //checkIn
+                            checkInAction(project, summary, checkOutDetails);
                         } else {
-                            //re check in
-                            showAlertOfTheCheckingInLocation(getString(R.string.you_are_rechecking_in_to_that_do_you_want_to_confirm_this_action, project.getName())).setPositiveButton("Yes", (dialogInterface1, i1) -> {
-                                        employeeReCheckIn(summary1, project, documentSnapshot);
-                                        binding.greetingText.setText(String.format("you are currently \n In %s", project.getName()));
-                                        updateCheckInOutBtn();
-                                        notifyLocation();
-                                    }
-                            ).show();
+                            Summary summaryCheckOut = getCheckOutSharedPref();
+                            if (summaryCheckOut.getCheckOut() == null) {
+                                //checkOut
+                                checkOutAction(project, checkOutDetails, checkIn);
+                            } else {
+                                reCheckInAction(project, summaryCheckOut);
+                            }
+                        }
+                    } else {
+                        //get the result
+                        DocumentSnapshot documentSnapshot = task.getResult();
+                        if (!documentSnapshot.exists() || documentSnapshot.getData().size() == 0) {
+                            //check in
+                            checkInAction(project, summary, checkOutDetails);
+                        } else {
+                            Summary summary1 = documentSnapshot.toObject(Summary.class);
+                            if (summary1.getCheckOut() == null) {
+                                //check out
+                                checkOutAction(project, checkOutDetails, summary1);
+                            } else {
+                                //re check in
+                                reCheckInAction(project, summary1);
+                            }
                         }
                     }
                 });
     }
 
-    private void employeeReCheckIn(Summary summary, Project project, DocumentSnapshot documentSnapshot) {
+    private void reCheckInAction(Project project, Summary summary1) {
+        showAlertOfTheCheckingInLocation(getString(R.string.you_are_rechecking_in_to_that_do_you_want_to_confirm_this_action, project.getName())).setPositiveButton("Yes", (dialogInterface1, i1) -> {
+                    employeeReCheckIn(summary1, project);
+                    binding.greetingText.setText(String.format("you are currently \n In %s", project.getName()));
+                    updateCheckInOutBtn();
+                    notifyLocation();
+                }
+        ).show();
+    }
+
+    private Summary getCheckOutSharedPref() {
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences(CHECK_OUT, MODE_PRIVATE);
+        String checkOutJson = sharedPreferences.getString(CHECK_OUT, null);
+        if (checkOutJson != null) {
+            Type type = new TypeToken<Summary>() {
+            }.getType();
+            return new Gson().fromJson(checkOutJson, type);
+        }
+        return null;
+    }
+
+    private void checkOutAction(Project project, HashMap<String, Object> checkOutDetails, Summary summary1) {
+        showAlertOfTheCheckingInLocation(getString(R.string.you_are_checking_out_to_that_do_you_want_to_confirm_this_action, project.getName())).setPositiveButton("Yes", ((dialogInterface, i) -> {
+            employeeCheckOut(summary1, checkOutDetails, project.getId());
+            binding.greetingText.setText(String.format("%s\n%s", getString(R.string.good_morning), currEmployee.getFirstName()));
+            updateCheckInOutBtn();
+        })).show();
+    }
+
+    private void checkInAction(Project project, Summary summary, HashMap<String, Object> checkOutDetails) {
+        showAlertOfTheCheckingInLocation(getString(R.string.you_are_checking_in_to_that_do_you_want_to_confirm_this_action, checkInType == CheckInType.HOME ? "Home" : project.getName())).setPositiveButton("Yes", (dialogInterface1, i1) -> {
+            canCheckFromHome = false;
+            employeeCheckIn(summary, project);
+            if (checkInType == CheckInType.HOME) {
+                employeeCheckOut(summary, checkOutDetails, "HOME");
+                binding.checkInOutFab.setEnabled(false);
+                binding.checkInOutFab.setText("HOME");
+                binding.checkInOutFab.setBackgroundColor(Color.GRAY);
+                Snackbar.make(binding.getRoot(), "You are at home", Snackbar.LENGTH_SHORT).show();
+            } else
+                binding.greetingText.setText(project.getId() != null ? String.format("you are currently \n In %s", project.getName()) : binding.greetingText.getText());
+            updateCheckInOutBtn();
+            notifyLocation();
+        }).show();
+    }
+
+    private void employeeReCheckIn(Summary summary, Project project) {
         summary.setLastCheckInTime(Timestamp.now());
         if (!summary.getProjectIds().keySet().contains(project.getId())) {
             switch (checkInType) {
@@ -550,7 +623,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         lastProjectId = project.getId();
         summary.setCheckOut(null);
         summary.setLastProjectId(project.getId());
-        db.document(documentSnapshot.getReference().getPath()).update("lastCheckInTime", summary.getLastCheckInTime(),
+        SUMMARY_COL.document(id).collection(year + "-" + month).document(day).update("lastCheckInTime", summary.getLastCheckInTime(),
                 "checkOut", null,
                 "projectIds", summary.getProjectIds(),
                 "lastProjectId", project.getId());
@@ -728,24 +801,31 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
 
 
     private void setReCheckInPref(Summary summary) {
-        SharedPreferences.Editor editor = getActivity().getPreferences(Context.MODE_PRIVATE).edit();
+        SharedPreferences.Editor editor = getActivity().getPreferences(MODE_PRIVATE).edit();
         editor.remove(CHECK_OUT);
         editor.putString(CHECK_IN, new Gson().toJson(summary));
         editor.apply();
     }
 
     private void setCheckInSharedPref(Summary checkIn, EmployeesGrossSalary employeesGrossSalary) {
-        SharedPreferences.Editor editor = getActivity().getPreferences(Context.MODE_PRIVATE).edit();
+        SharedPreferences.Editor editor = getActivity().getPreferences(MODE_PRIVATE).edit();
         editor.putString(CHECK_IN, new Gson().toJson(checkIn));
         editor.putString(EMPLOYEE_GROSS_SALARY, new Gson().toJson(employeesGrossSalary));
         editor.apply();
     }
 
     private void setCheckOutSharedPref(Summary summary) {
-        SharedPreferences.Editor editor = getActivity().getPreferences(Context.MODE_PRIVATE).edit();
+        SharedPreferences.Editor editor = getActivity().getPreferences(MODE_PRIVATE).edit();
         editor.putString(CHECK_OUT, new Gson().toJson(summary));
         editor.apply();
     }
+
+    private Summary getCheckInSharedPref() {
+        SharedPreferences prefs = getActivity().getPreferences(MODE_PRIVATE);
+        String json = prefs.getString(CHECK_IN, "");
+        return new Gson().fromJson(json, Summary.class);
+    }
+
 
     private void machineCheckInOut(Client client, String note) {
         MACHINE_EMPLOYEE_COL.document(machineEmpId).get().addOnSuccessListener(documentSnapshot -> {

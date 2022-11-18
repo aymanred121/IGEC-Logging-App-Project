@@ -12,17 +12,18 @@ import android.view.View
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
-import pub.devrel.easypermissions.AfterPermissionGranted
-import com.igec.common.CONSTANTS
-import pub.devrel.easypermissions.EasyPermissions
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.firestore.QuerySnapshot
 import com.google.firebase.firestore.SetOptions
+import com.google.gson.Gson
+import com.igec.common.CONSTANTS
 import com.igec.common.cryptography.RSAUtil
 import com.igec.common.firebase.Employee
+import com.igec.common.firebase.Project
 import com.igec.user.databinding.ActivityLoginBinding
-import java.lang.Exception
+import pub.devrel.easypermissions.AfterPermissionGranted
+import pub.devrel.easypermissions.EasyPermissions
 import java.util.regex.Pattern
 
 class LoginActivity : AppCompatActivity() {
@@ -180,23 +181,34 @@ class LoginActivity : AppCompatActivity() {
                     CONSTANTS.EMPLOYEE_COL.document(currEmployee.id)
                         .set(currEmployee, SetOptions.merge())
                         .addOnSuccessListener EmployeeColListener@{
-                            val intent: Intent = when (currEmployee.managerID) {
-                                CONSTANTS.ADMIN -> {
-                                    Intent(this@LoginActivity, MDashboard::class.java)
+                            CONSTANTS.PROJECT_COL.get().addOnSuccessListener { doc ->
+                                val projects = doc.toObjects(Project::class.java)
+                                //save projects to shared preference
+                                val gson = Gson()
+                                val json = gson.toJson(projects)
+                                getSharedPreferences(
+                                    CONSTANTS.PROJECTS,
+                                    Context.MODE_PRIVATE
+                                ).edit().putString(CONSTANTS.PROJECTS, json).apply()
+                                val intent: Intent = when (currEmployee.managerID) {
+                                    CONSTANTS.ADMIN -> {
+                                        Intent(this@LoginActivity, MDashboard::class.java)
+                                    }
+                                    else -> {
+                                        Intent(this@LoginActivity, EDashboard::class.java)
+                                    }
                                 }
-                                else -> {
-                                    Intent(this@LoginActivity, EDashboard::class.java)
-                                }
+                                intent.putExtra("user", currEmployee)
+                                val sharedPreferences =
+                                    getSharedPreferences(CONSTANTS.IGEC, MODE_PRIVATE)
+                                val editor = sharedPreferences.edit()
+                                editor.putBoolean(CONSTANTS.LOGGED, true)
+                                editor.putString(CONSTANTS.ID, currEmployee.id)
+                                editor.apply()
+                                startActivity(intent)
+                                finish()
                             }
-                            intent.putExtra("user", currEmployee)
-                            val sharedPreferences =
-                                getSharedPreferences(CONSTANTS.IGEC, MODE_PRIVATE)
-                            val editor = sharedPreferences.edit()
-                            editor.putBoolean(CONSTANTS.LOGGED, true)
-                            editor.putString(CONSTANTS.ID, currEmployee.id)
-                            editor.apply()
-                            startActivity(intent)
-                            finish()
+
                         }
                 }
             }

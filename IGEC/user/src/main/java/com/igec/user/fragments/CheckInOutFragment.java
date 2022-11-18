@@ -535,7 +535,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                 "projectIds", summary.getProjectIds(),
                 "lastProjectId", project.getId());
         //delete checkout shared pref
-        setSummaryCache(summary, null);
+        setSummaryCache(summary);
         Snackbar.make(binding.getRoot(), "Checked In successfully!", Toast.LENGTH_SHORT).show();
         binding.checkInOutFab.setEnabled(true);
     }
@@ -575,7 +575,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                     }
                 });
         //save summary into shared preferences
-        setSummaryCache(summary, null);
+        setSummaryCache(summary);
         Snackbar.make(binding.getRoot(), "Checked Out successfully!", Toast.LENGTH_SHORT).show();
     }
 
@@ -621,21 +621,20 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
             if (!task.isSuccessful() || task.getResult().getMetadata().isFromCache()) {
                 //offline
                 EmployeesGrossSalary employeesGrossSalary = getGrossSalaryFromCache();
-                updateMonthGrossSalary(summary,project,employeesGrossSalary);
+                updateMonthGrossSalary(summary, project, employeesGrossSalary);
             } else {
                 //online
                 EmployeesGrossSalary employeesGrossSalary = task.getResult().toObject(EmployeesGrossSalary.class);
-                updateMonthGrossSalary(summary,project,employeesGrossSalary);
+                updateMonthGrossSalary(summary, project, employeesGrossSalary);
             }
         });
     }
 
 
-
     private EmployeesGrossSalary getGrossSalaryFromCache() {
         Gson gson = new Gson();
-        String json = CacheDirectory.readAllCachedText(getActivity(),"baseAllowances.json");
-        return gson.fromJson(json,EmployeesGrossSalary.class);
+        String json = CacheDirectory.readAllCachedText(getActivity(), "baseAllowances.json");
+        return gson.fromJson(json, EmployeesGrossSalary.class);
     }
 
     private void updateMonthGrossSalary(Summary summary, Project project, EmployeesGrossSalary employeesGrossSalary) {
@@ -698,10 +697,15 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         Gson gson = new Gson();
         String summaryJson = gson.toJson(summary);
         CacheDirectory.writeAllCachedText(getActivity(), "summary.json", summaryJson);
-        if (employeesGrossSalary != null) {
-            String grossSalaryJson = gson.toJson(employeesGrossSalary);
-            CacheDirectory.writeAllCachedText(getActivity(), "grossSalary.json", grossSalaryJson);
-        }
+        String grossSalaryJson = gson.toJson(employeesGrossSalary);
+        CacheDirectory.writeAllCachedText(getActivity(), "grossSalary.json", grossSalaryJson);
+
+    }
+
+    private void setSummaryCache(Summary summary) {
+        Gson gson = new Gson();
+        String summaryJson = gson.toJson(summary);
+        CacheDirectory.writeAllCachedText(getActivity(), "summary.json", summaryJson);
     }
 
 

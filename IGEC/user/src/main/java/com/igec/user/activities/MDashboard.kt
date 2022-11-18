@@ -280,6 +280,8 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         connectivityManager.registerDefaultNetworkCallback(object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
                 updateSummaryChanges()
+                updateBaseGrossSalaryCache()
+                updateProjectsCache()
             }
 
             override fun onLost(network: Network) {
@@ -518,6 +520,24 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
             } else {
                 month = String.format("%02d", month.toInt() + 1)
             }
+        }
+    }
+    private fun updateBaseGrossSalaryCache() {
+        EMPLOYEE_GROSS_SALARY_COL.document(employee?.id!!).get().addOnSuccessListener { doc->{
+            if(doc.exists()){
+                CacheDirectory.writeAllCachedText(this, "baseAllowances.json", Gson().toJson(doc.toObject(EmployeesGrossSalary::class.java)))
+
+            }
+        } }
+    }
+    private fun updateProjectsCache() {
+        PROJECT_COL.get().addOnSuccessListener { docs->
+            val gson = Gson()
+            CacheDirectory.writeAllCachedText(
+                this,
+                "projects.json",
+                gson.toJson(docs.toObjects(Project::class.java))
+            )
         }
     }
 }

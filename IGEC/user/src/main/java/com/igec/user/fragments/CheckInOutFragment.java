@@ -289,11 +289,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     }
 
 
-    private void updateProjectsCache(List<Project> projects) {
-        Gson gson = new Gson();
-        String json = gson.toJson(projects);
-        CacheDirectory.writeAllCachedText(getActivity(), "projects.json", json);
-    }
+
 
     private List<Project> getProjectsFromCache() {
         List<Project> projects = new ArrayList<>();
@@ -629,17 +625,12 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
             } else {
                 //online
                 EmployeesGrossSalary employeesGrossSalary = task.getResult().toObject(EmployeesGrossSalary.class);
-                updateBaseGrossSalaryCache(employeesGrossSalary);
                 updateMonthGrossSalary(summary,project,employeesGrossSalary);
             }
         });
     }
 
-    private void updateBaseGrossSalaryCache(EmployeesGrossSalary employeesGrossSalary) {
-        Gson gson = new Gson();
-        String json = gson.toJson(employeesGrossSalary);
-        CacheDirectory.writeAllCachedText(getActivity(),"baseAllowances.json",json);
-    }
+
 
     private EmployeesGrossSalary getGrossSalaryFromCache() {
         Gson gson = new Gson();
@@ -911,10 +902,6 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     private final View.OnClickListener oclCheckInOut = v -> {
         binding.checkInOutFab.setEnabled(false);
         PROJECT_COL.get().addOnSuccessListener(docs -> {
-            // if there's network update cache
-            if (!docs.getMetadata().isFromCache()) {
-                updateProjectsCache(docs.toObjects(Project.class));
-            }
             final List<Project> projects = new ArrayList<>();
             projects.clear();
             if (docs.size() == 0) {

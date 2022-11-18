@@ -40,6 +40,7 @@ import com.igec.common.CONSTANTS.*
 import com.igec.common.firebase.*
 import com.igec.common.fragments.VacationsLogFragment
 import com.igec.user.CacheDirectory
+import com.igec.user.CacheDirectory.writeAllCachedText
 import com.igec.user.R
 import com.igec.user.databinding.ActivityEdashboardBinding
 import com.igec.user.fragments.ChangePasswordFragment
@@ -203,6 +204,8 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
             ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
                 updateSummaryChanges()
+                updateBaseGrossSalaryCache()
+                updateProjectsCache()
             }
 
             override fun onLost(network: Network) {
@@ -403,6 +406,20 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
             } else {
                 month = String.format("%02d", month.toInt() + 1)
             }
+        }
+    }
+    private fun updateBaseGrossSalaryCache() {
+        EMPLOYEE_GROSS_SALARY_COL.document(employee?.id!!).get().addOnSuccessListener { doc->{
+            if(doc.exists()){
+                CacheDirectory.writeAllCachedText(this, "baseAllowances.json", Gson().toJson(doc.toObject(EmployeesGrossSalary::class.java)))
+
+            }
+        } }
+        }
+    private fun updateProjectsCache() {
+        PROJECT_COL.get().addOnSuccessListener { docs->
+            val gson = Gson()
+            writeAllCachedText(this, "projects.json", gson.toJson(docs.toObjects(Project::class.java)))
         }
     }
 

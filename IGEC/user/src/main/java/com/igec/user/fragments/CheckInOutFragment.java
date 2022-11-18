@@ -8,7 +8,6 @@ import static com.igec.common.CONSTANTS.CHECK_IN_FROM_OFFICE;
 import static com.igec.common.CONSTANTS.CHECK_IN_FROM_SITE;
 import static com.igec.common.CONSTANTS.CHECK_IN_FROM_SUPPORT;
 import static com.igec.common.CONSTANTS.CHECK_OUT;
-import static com.igec.common.CONSTANTS.EMPLOYEE_GROSS_SALARY;
 import static com.igec.common.CONSTANTS.EMPLOYEE_GROSS_SALARY_COL;
 import static com.igec.common.CONSTANTS.LOCATION_REQUEST_CODE;
 import static com.igec.common.CONSTANTS.MACHINE_COL;
@@ -63,6 +62,7 @@ import com.igec.common.firebase.Machine_Employee;
 import com.igec.common.firebase.Project;
 import com.igec.common.firebase.Summary;
 import com.igec.common.utilities.AllowancesEnum;
+import com.igec.user.CacheDirectory;
 import com.igec.user.R;
 import com.igec.user.activities.DateInaccurate;
 import com.igec.user.databinding.FragmentCheckInOutBinding;
@@ -293,76 +293,6 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         }
     }
 
-    // Listeners
-    @SuppressLint("MissingPermission")
-    private final View.OnClickListener oclCheckInOut = v -> {
-        binding.checkInOutFab.setEnabled(false);
-        PROJECT_COL.get().addOnSuccessListener(docs -> {
-            if (!docs.getMetadata().isFromCache()) {
-                updateProjectsSharedPref(docs.toObjects(Project.class));
-            }
-            final List<Project> projects = new ArrayList<>();
-            projects.clear();
-            if (docs.size() == 0) {
-                projects.addAll(getProjectsFromSharedPreferences());
-            } else {
-                projects.addAll(docs.toObjects(Project.class));
-            }
-            Locus.INSTANCE.getCurrentLocation(getActivity(), result -> {
-                        if (result.getError() != null) {
-                            Snackbar.make(binding.getRoot(), "can't complete the operation.", Snackbar.LENGTH_SHORT).show();
-                            binding.checkInOutFab.setEnabled(true);
-                            return null;
-                        }
-                        Location location = result.getLocation();
-                        longitude = location.getLongitude();
-                        latitude = location.getLatitude();
-                        checkInType = CheckInType.HOME;
-                        /*
-                         *
-                         * check-in given lastProjectId == null
-                         * employee -> home / project / office
-                         * manager -> home/ project / office / support
-                         * check-out given lastProjectId != null && canCheckFromHome == false
-                         * employee or manager -> same Project only
-                         * recheck in given lastProjectId == null && canCheckFromHome == false
-                         * employee -> project/ office
-                         * manager --> project /office /support
-                         * */
-                        for (Project project : projects) {
-                            if ((lastProjectId != null && !project.getId().equals(lastProjectId))) {
-                                // if the user is not in the last project
-                                // to prevent user from checking out from another project
-                                continue;
-                            }
-                            double distance;
-                            float[] results = new float[3];
-                            Location.distanceBetween(latitude, longitude, project.getLat(), project.getLng(), results);
-                            distance = results[0];
-                            if (distance > project.getArea()) {
-                                continue;
-                            } else if (currEmployee.getProjectIds().contains(project.getId())) {
-                                checkInType = CheckInType.SITE;
-                            } else if (currEmployee.isManager()) {
-                                if (project.getReference().equals(OFFICE_REF))
-                                    checkInType = CheckInType.OFFICE;
-                                else
-                                    checkInType = CheckInType.SUPPORT;
-                            } else {
-                                // inside a project but not in the employee's project list
-                                continue;
-                            }
-                            updateEmployeeSummary(latitude, longitude, project);
-                            break;
-                        }
-                        if (checkInType == CheckInType.HOME) {
-                            notifyLocation();
-                        }
-                        return null;
-                    }
-            );
-        });
-    };
 
     private void updateProjectsSharedPref(List<Project> projects) {
         SharedPreferences.Editor editor = getActivity().getSharedPreferences(PROJECTS, MODE_PRIVATE).edit();
@@ -628,7 +558,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                 "projectIds", summary.getProjectIds(),
                 "lastProjectId", project.getId());
         //delete checkout shared pref
-        setReCheckInPref(summary);
+        setReCheckInCache(summary);
         Snackbar.make(binding.getRoot(), "Checked In successfully!", Toast.LENGTH_SHORT).show();
         binding.checkInOutFab.setEnabled(true);
     }
@@ -668,7 +598,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                     }
                 });
         //save summary into shared preferences
-        setCheckOutSharedPref(summary);
+        setCheckOutSharedCache(summary);
         Snackbar.make(binding.getRoot(), "Checked Out successfully!", Toast.LENGTH_SHORT).show();
     }
 
@@ -739,7 +669,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                     }
                     db.document(doc.getReference().getPath()).set(employeesGrossSalary, SetOptions.merge());
                     //create shared pref
-                    setCheckInSharedPref(summary, employeesGrossSalary);
+                    setCheckInSharedCache(summary, employeesGrossSalary);
                 });
                 return;
             }
@@ -766,7 +696,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
             }
             EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId()).collection(year).document(month).set(employeesGrossSalary, SetOptions.merge());
             //create shared pref
-            setCheckInSharedPref(summary, employeesGrossSalary);
+            setCheckInSharedCache(summary, employeesGrossSalary);
 
         });
     }
@@ -800,24 +730,24 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     }
 
 
-    private void setReCheckInPref(Summary summary) {
-        SharedPreferences.Editor editor = getActivity().getPreferences(MODE_PRIVATE).edit();
-        editor.remove(CHECK_OUT);
-        editor.putString(CHECK_IN, new Gson().toJson(summary));
-        editor.apply();
+    private void setReCheckInCache(Summary summary) {
+        Gson gson = new Gson();
+        String summaryJson = gson.toJson(summary);
+        CacheDirectory.writeAllCachedText(getActivity(), "summary.json", summaryJson);
     }
 
-    private void setCheckInSharedPref(Summary checkIn, EmployeesGrossSalary employeesGrossSalary) {
-        SharedPreferences.Editor editor = getActivity().getPreferences(MODE_PRIVATE).edit();
-        editor.putString(CHECK_IN, new Gson().toJson(checkIn));
-        editor.putString(EMPLOYEE_GROSS_SALARY, new Gson().toJson(employeesGrossSalary));
-        editor.apply();
+    private void setCheckInSharedCache(Summary summary, EmployeesGrossSalary employeesGrossSalary) {
+        Gson gson = new Gson();
+        String summaryJson = gson.toJson(summary);
+        CacheDirectory.writeAllCachedText(getActivity(), "summary.json", summaryJson);
+        String grossSalaryJson = gson.toJson(employeesGrossSalary);
+        CacheDirectory.writeAllCachedText(getActivity(), "grossSalary.json", grossSalaryJson);
     }
 
-    private void setCheckOutSharedPref(Summary summary) {
-        SharedPreferences.Editor editor = getActivity().getPreferences(MODE_PRIVATE).edit();
-        editor.putString(CHECK_OUT, new Gson().toJson(summary));
-        editor.apply();
+    private void setCheckOutSharedCache(Summary summary) {
+        Gson gson = new Gson();
+        String summaryJson = gson.toJson(summary);
+        CacheDirectory.writeAllCachedText(getActivity(), "summary.json", summaryJson);
     }
 
     private Summary getCheckInSharedPref() {
@@ -1011,6 +941,77 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         }
     }
 
+    // Listeners
+    @SuppressLint("MissingPermission")
+    private final View.OnClickListener oclCheckInOut = v -> {
+        binding.checkInOutFab.setEnabled(false);
+        PROJECT_COL.get().addOnSuccessListener(docs -> {
+            // if there's network update cache
+            if (!docs.getMetadata().isFromCache()) {
+                updateProjectsSharedPref(docs.toObjects(Project.class));
+            }
+            final List<Project> projects = new ArrayList<>();
+            projects.clear();
+            if (docs.size() == 0) {
+                projects.addAll(getProjectsFromSharedPreferences());
+            } else {
+                projects.addAll(docs.toObjects(Project.class));
+            }
+            Locus.INSTANCE.getCurrentLocation(getActivity(), result -> {
+                        if (result.getError() != null) {
+                            Snackbar.make(binding.getRoot(), "can't complete the operation.", Snackbar.LENGTH_SHORT).show();
+                            binding.checkInOutFab.setEnabled(true);
+                            return null;
+                        }
+                        Location location = result.getLocation();
+                        longitude = location.getLongitude();
+                        latitude = location.getLatitude();
+                        checkInType = CheckInType.HOME;
+                        /*
+                         *
+                         * check-in given lastProjectId == null
+                         * employee -> home / project / office
+                         * manager -> home/ project / office / support
+                         * check-out given lastProjectId != null && canCheckFromHome == false
+                         * employee or manager -> same Project only
+                         * recheck in given lastProjectId == null && canCheckFromHome == false
+                         * employee -> project/ office
+                         * manager --> project /office /support
+                         * */
+                        for (Project project : projects) {
+                            if ((lastProjectId != null && !project.getId().equals(lastProjectId))) {
+                                // if the user is not in the last project
+                                // to prevent user from checking out from another project
+                                continue;
+                            }
+                            double distance;
+                            float[] results = new float[3];
+                            Location.distanceBetween(latitude, longitude, project.getLat(), project.getLng(), results);
+                            distance = results[0];
+                            if (distance > project.getArea()) {
+                                continue;
+                            } else if (currEmployee.getProjectIds().contains(project.getId())) {
+                                checkInType = CheckInType.SITE;
+                            } else if (currEmployee.isManager()) {
+                                if (project.getReference().equals(OFFICE_REF))
+                                    checkInType = CheckInType.OFFICE;
+                                else
+                                    checkInType = CheckInType.SUPPORT;
+                            } else {
+                                // inside a project but not in the employee's project list
+                                continue;
+                            }
+                            updateEmployeeSummary(latitude, longitude, project);
+                            break;
+                        }
+                        if (checkInType == CheckInType.HOME) {
+                            notifyLocation();
+                        }
+                        return null;
+                    }
+            );
+        });
+    };
     private final View.OnClickListener oclInside = view -> {
         if (!getCameraPermission()) {
             Snackbar.make(binding.getRoot(), "Please, Enable camera permission !", Snackbar.LENGTH_SHORT).show();

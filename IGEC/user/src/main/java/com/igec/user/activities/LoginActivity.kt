@@ -21,6 +21,7 @@ import com.igec.common.CONSTANTS
 import com.igec.common.cryptography.RSAUtil
 import com.igec.common.firebase.Employee
 import com.igec.common.firebase.Project
+import com.igec.user.CacheDirectory
 import com.igec.user.databinding.ActivityLoginBinding
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
@@ -183,13 +184,9 @@ class LoginActivity : AppCompatActivity() {
                         .addOnSuccessListener EmployeeColListener@{
                             CONSTANTS.PROJECT_COL.get().addOnSuccessListener { doc ->
                                 val projects = doc.toObjects(Project::class.java)
-                                //save projects to shared preference
                                 val gson = Gson()
                                 val json = gson.toJson(projects)
-                                getSharedPreferences(
-                                    CONSTANTS.PROJECTS,
-                                    Context.MODE_PRIVATE
-                                ).edit().putString(CONSTANTS.PROJECTS, json).apply()
+                                CacheDirectory.writeAllCachedText(this, "projects.json", json)
                                 val intent: Intent = when (currEmployee.managerID) {
                                     CONSTANTS.ADMIN -> {
                                         Intent(this@LoginActivity, MDashboard::class.java)

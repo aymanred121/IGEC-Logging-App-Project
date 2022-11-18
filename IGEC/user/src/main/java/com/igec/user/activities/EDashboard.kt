@@ -10,6 +10,8 @@ import android.content.SharedPreferences
 import android.graphics.Color
 import android.icu.util.Calendar
 import android.media.RingtoneManager
+import android.net.ConnectivityManager
+import android.net.Network
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
@@ -37,6 +39,7 @@ import com.igec.common.CONSTANTS
 import com.igec.common.CONSTANTS.*
 import com.igec.common.firebase.*
 import com.igec.common.fragments.VacationsLogFragment
+import com.igec.user.CacheDirectory
 import com.igec.user.R
 import com.igec.user.databinding.ActivityEdashboardBinding
 import com.igec.user.fragments.ChangePasswordFragment
@@ -192,9 +195,21 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                     }
                 }
             }
-        updateCheckInChanges()
-        updateReCheckInChanges()
-        updateCheckOutChanges()
+
+        val connectivityManager =
+            applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        connectivityManager.registerDefaultNetworkCallback(object :
+            ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                updateCheckInChanges()
+                updateReCheckInChanges()
+                updateCheckOutChanges()
+            }
+
+            override fun onLost(network: Network) {
+
+            }
+        })
     }
 
     private fun createNotificationChannel(CHANNEL_ID: String, channelName: Int, channelDesc: Int) {
@@ -336,16 +351,17 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
     }
 
     private fun updateCheckInChanges() {
-        val mPrefs: SharedPreferences = getPreferences(MODE_PRIVATE)
         val calendar = Calendar.getInstance()
+        val cachedSummary = CacheDirectory.readAllCachedText(this, "summary.json")
+        val cachedGrossSalary = CacheDirectory.readAllCachedText(this, "grossSalary.json")
         updateDate()
         val summary: Summary =
-            Gson().fromJson(mPrefs.getString(CHECK_IN, "")!!, Summary::class.java) ?: return
+            Gson().fromJson(cachedSummary, Summary::class.java) ?: return
         val employeeGrossSalary = Gson().fromJson(
-            mPrefs.getString(EMPLOYEE_GROSS_SALARY, "")!!,
+            cachedGrossSalary,
             EmployeesGrossSalary::class.java
         ) ?: return
-        val checkInDate = ((summary.checkIn["Time"]  as Map<*, *>)["seconds"] as Double).toLong()
+        val checkInDate = ((summary.checkIn["Time"] as Map<*, *>)["seconds"] as Double).toLong()
         //check if the check in date is today
         calendar.time = Date(checkInDate * 1000)
         summary.checkIn["Time"] = Timestamp(calendar.time)
@@ -361,18 +377,27 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                     .set(summary, SetOptions.merge())
                 EMPLOYEE_GROSS_SALARY_COL.document(path).collection(year).document(month)
                     .set(employeeGrossSalary, SetOptions.merge())
-                mPrefs.edit().remove(CHECK_IN).apply()
-                mPrefs.edit().remove(EMPLOYEE_GROSS_SALARY).apply()
+                CacheDirectory.writeAllCachedText(
+                    this,
+                    "summary.json",
+                    ""
+                )
+                CacheDirectory.writeAllCachedText(
+                    this,
+                    "grossSalary.json",
+                    ""
+                )
             }
     }
 
     private fun updateCheckOutChanges() {
-        val mPrefs: SharedPreferences = getPreferences(MODE_PRIVATE)
+        val cachedSummary = CacheDirectory.readAllCachedText(this, "summary.json")
         val calendar = Calendar.getInstance()
         updateDate()
         val summary: Summary =
-            Gson().fromJson(mPrefs.getString(CHECK_OUT, "")!!, Summary::class.java) ?: return
-        val checkOutSeconds = ((summary.checkOut["Time"] as Map<*, *>)["seconds"] as Double).toLong()
+            Gson().fromJson(cachedSummary, Summary::class.java) ?: return
+        val checkOutSeconds =
+            ((summary.checkOut["Time"] as Map<*, *>)["seconds"] as Double).toLong()
         val checkInSeconds = ((summary.checkIn["Time"] as Map<*, *>)["seconds"] as Double).toLong()
         calendar.time = Date((checkOutSeconds * 1000))
         summary.checkOut["Time"] = Timestamp(calendar.time)
@@ -394,17 +419,21 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                             FieldValue.increment(((summary.workingTime[pid.key] as Map<*, *>)["operand"] as Double).toLong())
                         )
                 }
-                mPrefs.edit().remove(CHECK_OUT).apply()
+                CacheDirectory.writeAllCachedText(
+                    this,
+                    "summary.json",
+                    ""
+                )
             }
     }
 
     private fun updateReCheckInChanges() {
-        val mPrefs: SharedPreferences = getPreferences(MODE_PRIVATE)
+        val cachedSummary = CacheDirectory.readAllCachedText(this, "summary.json")
         val calendar = Calendar.getInstance()
         updateDate()
         val summary: Summary =
-            Gson().fromJson(mPrefs.getString(CHECK_IN, "")!!, Summary::class.java) ?: return
-        val checkInDate = ((summary.checkIn["Time"]  as Map<*, *>)["seconds"] as Double).toLong()
+            Gson().fromJson(cachedSummary, Summary::class.java) ?: return
+        val checkInDate = ((summary.checkIn["Time"] as Map<*, *>)["seconds"] as Double).toLong()
         //check if the check in date is today
         calendar.time = Date(checkInDate * 1000)
         summary.checkIn["Time"] = Timestamp(calendar.time)
@@ -418,7 +447,11 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                 if (document.metadata.isFromCache) return@addOnSuccessListener
                 SUMMARY_COL.document(path).collection("$year-$month").document(day)
                     .set(summary, SetOptions.merge())
-                mPrefs.edit().remove(CHECK_IN).apply()
+                CacheDirectory.writeAllCachedText(
+                    this,
+                    "summary.json",
+                    ""
+                )
             }
     }
 

@@ -63,20 +63,18 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         super.onCreate(savedInstanceState)
         val connectivityManager =
             applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        connectivityManager.let {
-            it.registerDefaultNetworkCallback(object : ConnectivityManager.NetworkCallback() {
-                override fun onAvailable(network: Network) {
-                    //take action when network connection is gained
-                }
+        connectivityManager.registerDefaultNetworkCallback(object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                //take action when network connection is gained
+            }
 
-                override fun onLost(network: Network) {
-                    //take action when network connection is lost
-                    val intent = Intent(this@MainActivity, InternetConnection::class.java)
-                    startActivity(intent)
-                    finish()
-                }
-            })
-        }
+            override fun onLost(network: Network) {
+                //take action when network connection is lost
+                val intent = Intent(this@MainActivity, InternetConnection::class.java)
+                startActivity(intent)
+                finish()
+            }
+        })
         if (!checkStoragePermission())
             requestStoragePermission()
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -104,7 +102,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
 
         binding.navView.getHeaderView(0).findViewById<TextView>(R.id.contact_info)
-            .setOnClickListener { view: View? ->
+            .setOnClickListener {
                 val intent = Intent(
                     Intent.ACTION_VIEW,
                     Uri.parse("https://" + getString(R.string.nav_header_subtitle))
@@ -123,12 +121,12 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                         return@run
                     }
                     values!!.documents.forEach { documentSnapshot ->
-                        val vacation = documentSnapshot.toObject(VacationRequest::class.java);
+                        val vacation = documentSnapshot.toObject(VacationRequest::class.java)
                         if (vacationRequests.contains(vacation!!.id))
                             return@forEach
                         vacationRequests.add(vacation.id)
                         val msg =
-                            "${vacation!!.employee.firstName} has requested ${vacation.requestedDaysString} days, starting from ${
+                            "${vacation.employee.firstName} has requested ${vacation.requestedDaysString} days, starting from ${
                                 vacation.formattedStartDate()
                             }"
                         setupNotification(
@@ -137,9 +135,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                             R.drawable.ic_stat_name
                         )
                         notificationManager.notify(NOTIFICATION_ID++, notification)
-                        VACATION_COL.document(vacation.id).update("vacationNotification", PENDING);
+                        VACATION_COL.document(vacation.id).update("vacationNotification", PENDING)
 
-                    };
+                    }
                 }
             }
 
@@ -194,9 +192,6 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         notificationManager = NotificationManagerCompat.from(this)
     }
 
-    override fun onStop() {
-        super.onStop()
-    }
 
     //Functions
     private fun checkStoragePermission(): Boolean {

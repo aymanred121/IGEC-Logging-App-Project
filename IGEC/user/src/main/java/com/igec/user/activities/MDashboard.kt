@@ -10,6 +10,8 @@ import android.content.SharedPreferences
 import android.graphics.Color
 import android.icu.util.Calendar
 import android.media.RingtoneManager
+import android.net.ConnectivityManager
+import android.net.Network
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
@@ -271,10 +273,19 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                 }
         }
 
-        //update from shared preferences
-        updateCheckInChanges()
-        updateReCheckInChanges()
-        updateCheckOutChanges()
+        val connectivityManager =
+            applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        connectivityManager.registerDefaultNetworkCallback(object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                updateCheckInChanges()
+                updateReCheckInChanges()
+                updateCheckOutChanges()
+            }
+
+            override fun onLost(network: Network) {
+
+            }
+        })
     }
 
     private fun createNotificationChannel(CHANNEL_ID: String, channelName: Int, channelDesc: Int) {

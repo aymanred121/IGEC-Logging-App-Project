@@ -25,6 +25,7 @@ class DateInaccurate : AppCompatActivity() {
     private fun validateTime(c: Context) {
         if (Settings.Global.getInt(c.contentResolver, Settings.Global.AUTO_TIME, 0) == 1) {
             val intent = Intent(this@DateInaccurate, LauncherActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
             startActivity(intent)
             finish()
         }

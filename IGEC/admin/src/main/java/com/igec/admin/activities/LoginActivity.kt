@@ -36,6 +36,7 @@ class LoginActivity : AppCompatActivity() {
                 override fun onLost(network: Network) {
                     //take action when network connection is lost
                     val intent = Intent(this@LoginActivity, InternetConnection::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                     startActivity(intent)
                     finish()
                 }
@@ -151,6 +152,7 @@ class LoginActivity : AppCompatActivity() {
                     val intent: Intent
                     if (currEmployee != null && currEmployee.isAdmin) {
                         intent = Intent(this@LoginActivity, MainActivity::class.java)
+                        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                         val sharedPreferences = getSharedPreferences(CONSTANTS.IGEC, MODE_PRIVATE)
                         val editor = sharedPreferences.edit()
                         editor.putString(CONSTANTS.ID, currEmployee.id)

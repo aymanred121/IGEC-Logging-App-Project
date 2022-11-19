@@ -53,6 +53,7 @@ class LoginActivity : AppCompatActivity() {
     private fun validateDate(c: Context) {
         if (Settings.Global.getInt(c.contentResolver, Settings.Global.AUTO_TIME, 0) != 1) {
             val intent = Intent(this@LoginActivity, DateInaccurate::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
             startActivity(intent)
             finish()
         }
@@ -207,6 +208,7 @@ class LoginActivity : AppCompatActivity() {
                                     editor.putBoolean(CONSTANTS.LOGGED, true)
                                     editor.putString(CONSTANTS.ID, currEmployee.id)
                                     editor.apply()
+                                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                                     startActivity(intent)
                                     finish()
                                 }

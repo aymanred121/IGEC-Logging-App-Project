@@ -29,12 +29,14 @@ class LauncherActivity : Activity() {
                                         startActivity(intent)
                                     } else {
                                         val intent = Intent(this@LauncherActivity, MainActivity::class.java)
+                                        intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                                         startActivity(intent)
                                     }
                                     finish()
                                 }
                         } else {
                             val intent = Intent(this@LauncherActivity, MainActivity::class.java)
+                            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                             startActivity(intent)
                             finish()
                         }
@@ -44,6 +46,7 @@ class LauncherActivity : Activity() {
                 override fun onLost(network: Network) {
                     //take action when network connection is lost
                     val intent = Intent(this@LauncherActivity, InternetConnection::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                     startActivity(intent)
                     finish()
                 }

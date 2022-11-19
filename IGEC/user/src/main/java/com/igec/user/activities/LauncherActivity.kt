@@ -11,9 +11,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.provider.Settings
 import android.widget.Toast
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.FirebaseFirestoreException
 import com.igec.common.CONSTANTS
+import com.google.firebase.firestore.DocumentSnapshot
 import com.igec.common.firebase.Employee
 import com.igec.user.AlarmReceiver
 import com.igec.user.R
@@ -41,7 +40,7 @@ class LauncherActivity : Activity() {
             val intent = Intent(this, AlarmReceiver::class.java)
             pendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_MUTABLE)
-            } else {
+            }else{
                 PendingIntent.getBroadcast(this, 0, intent, 0)
             }
             alarmManager?.setInexactRepeating(
@@ -57,6 +56,7 @@ class LauncherActivity : Activity() {
             val preferences = getSharedPreferences(CONSTANTS.IGEC, MODE_PRIVATE)
             logged = preferences.getBoolean(CONSTANTS.LOGGED, false)
 
+
             /*
              *
              * not logged before -> Open  login Activity [x]
@@ -67,27 +67,23 @@ class LauncherActivity : Activity() {
              *          the account is locked => open suitable dashboard [x]
              * */if (!logged) {
             val intent = Intent(this@LauncherActivity, LoginActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
             startActivity(intent)
             finish()
         } else {
             val savedID = preferences.getString(CONSTANTS.ID, "")
-            CONSTANTS.EMPLOYEE_COL.document(savedID!!).addSnapshotListener { documentSnapshot: DocumentSnapshot?, error:FirebaseFirestoreException? ->
-                if(error !=null || documentSnapshot == null){
-                    Toast.makeText(this@LauncherActivity, "Error: $error", Toast.LENGTH_SHORT).show()
-                    return@addSnapshotListener
-                }
-                    if (!documentSnapshot.exists()) return@addSnapshotListener
+            CONSTANTS.EMPLOYEE_COL.document(savedID!!).get()
+                .addOnSuccessListener { documentSnapshot: DocumentSnapshot ->
+                    if (!documentSnapshot.exists()) return@addOnSuccessListener
                     val employee = documentSnapshot.toObject(Employee::class.java)
                     val intent: Intent
                     // not used by another device but still logged here
                     // meaning that the account has been unlocked while the account is still open in a device
-                    if (!employee!!.isLocked || employee.projectIds == null || employee.projectIds.isEmpty()) {
-                        val msg =
-                            if (!employee.isLocked) "Account is unlocked, login is required" else "You are not assigned to any project"
+                    if (!employee!!.isLocked) {
                         intent = Intent(this@LauncherActivity, LoginActivity::class.java)
                         Toast.makeText(
                             this@LauncherActivity,
-                            msg,
+                            "Account is unlocked, login is required",
                             Toast.LENGTH_SHORT
                         ).show()
                     } else {
@@ -98,9 +94,7 @@ class LauncherActivity : Activity() {
                         ) else Intent(this@LauncherActivity, EDashboard::class.java)
                     }
                     intent.putExtra("user", employee)
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                     startActivity(intent)
                     finish()
                 }
@@ -116,6 +110,7 @@ class LauncherActivity : Activity() {
     private fun validateDate(c: Context) {
         if (Settings.Global.getInt(c.contentResolver, Settings.Global.AUTO_TIME, 0) != 1) {
             val intent = Intent(this@LauncherActivity, DateInaccurate::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
             startActivity(intent)
             finish()
         }

@@ -198,6 +198,18 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                 }
             }
         //delete summary.json if it's belongs to another day
+        EMPLOYEE_COL.document(employee!!.id).addSnapshotListener { value, error ->
+            if (error != null || value == null || !value.exists()) return@addSnapshotListener
+            employee = value.toObject(Employee::class.java)
+            val intent:Intent
+            if(!employee!!.isLocked)
+            {
+                intent = Intent(this, LoginActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                startActivity(intent)
+                this@EDashboard.finish()
+            }
+        }
         updateSummaryCacheStatus()
         val connectivityManager =
             applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -263,6 +275,7 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
     private fun validateDate(c: Context) {
         if (Settings.Global.getInt(c.contentResolver, Settings.Global.AUTO_TIME, 0) != 1) {
             val intent = Intent(this@EDashboard, DateInaccurate::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
             startActivity(intent)
             finish()
         }

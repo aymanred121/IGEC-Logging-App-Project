@@ -17,6 +17,7 @@ class InternetConnection : AppCompatActivity() {
                 override fun onAvailable(network: Network) {
                     //take action when network connection is gained
                     val intent = Intent(this@InternetConnection, LauncherActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                     startActivity(intent)
                     finish()
                 }

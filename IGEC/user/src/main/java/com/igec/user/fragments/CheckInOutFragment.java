@@ -197,46 +197,51 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
         SUMMARY_COL.document(id)
                 .collection(year + "-" + month)
                 .document(day)
-                .get().addOnSuccessListener((value) -> {
-                    if (!value.exists() || value.getData().size() == 0)
-                        isHere = false;
-                    else {
-                        isHere = value.getData().get("checkOut") == null;
-                    }
-                    Summary summary = value.toObject(Summary.class);
-                    lastProjectId = summary != null ? summary.getLastProjectId() : null;
-                    /*
-                     * summary == null --> canCheckFromHome = true
-                     * summary != null --> summary.getProjectIds().size() == 0 ==> canCheckFromHome
-                     * */
-                    if (summary == null)
-                        canCheckFromHome = true;
-                    else
-                        canCheckFromHome = summary.getProjectIds().size() == 0;
-                    if (lastProjectId != null) {
-                        PROJECT_COL.document(lastProjectId).get().addOnSuccessListener((value1) -> {
-                            Project project = value1.toObject(Project.class);
-                            if (project != null) {
-                                binding.greetingText.setText(String.format("you are currently \n In %s", project.getName()));
-                            }
-                        });
-                    }
-                    //need project id
-                    if (summary != null && summary.getProjectIds().containsKey("HOME")) {
-                        //disable check-In btn
-                        binding.checkInOutFab.setEnabled(false);
-                        binding.checkInOutFab.setText("HOME");
-                        binding.checkInOutFab.setBackgroundColor(Color.GRAY);
+                .get().addOnCompleteListener((task) -> {
+                    if (!task.isSuccessful() || task.getResult().getMetadata().isFromCache()) {
+                        //update from offline data
+                        Gson gson = new Gson();
+                        Summary summary = gson.fromJson(CacheDirectory.readAllCachedText(getActivity(), "summary.json"), Summary.class);
+                        isHere = summary != null && summary.getCheckOut() == null;
+                        updateCheckInOutBtn(summary);
                     } else {
-                        binding.checkInOutFab.setBackgroundColor((isHere) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
-                        binding.checkInOutFab.setText(isHere ? "Out" : "In");
-                        binding.addMachineFab.setClickable(isHere);
-                        if (isHere)
-                            binding.addMachineFab.startAnimation(show);
+                        DocumentSnapshot value = task.getResult();
+                        isHere = value.exists() && value.getData().size() != 0 && value.getData().get("checkOut") == null;
+                        Summary summary = value.toObject(Summary.class);
+                        updateCheckInOutBtn(summary);
                     }
                 });
     }
 
+    private void updateCheckInOutBtn(Summary summary) {
+        lastProjectId = summary != null ? summary.getLastProjectId() : null;
+        /*
+         * summary == null --> canCheckFromHome = true
+         * summary != null --> summary.getProjectIds().size() == 0 ==> canCheckFromHome
+         * */
+        canCheckFromHome = summary == null || summary.getProjectIds().size() == 0;
+        if (lastProjectId != null) {
+            PROJECT_COL.document(lastProjectId).get().addOnSuccessListener((value1) -> {
+                Project project = value1.toObject(Project.class);
+                if (project != null) {
+                    binding.greetingText.setText(String.format("you are currently \n In %s", project.getName()));
+                }
+            });
+        }
+        //need project id
+        if (summary != null && summary.getProjectIds().containsKey("HOME")) {
+            //disable check-In btn
+            binding.checkInOutFab.setEnabled(false);
+            binding.checkInOutFab.setText("HOME");
+            binding.checkInOutFab.setBackgroundColor(Color.GRAY);
+        } else {
+            binding.checkInOutFab.setBackgroundColor((isHere) ? Color.rgb(153, 0, 0) : Color.rgb(0, 153, 0));
+            binding.checkInOutFab.setText(isHere ? "Out" : "In");
+            binding.addMachineFab.setClickable(isHere);
+            if (isHere)
+                binding.addMachineFab.startAnimation(show);
+        }
+    }
 
     private void animationFab() {
         if (isOpen) {
@@ -287,8 +292,6 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
             return false;
         }
     }
-
-
 
 
     private List<Project> getProjectsFromCache() {

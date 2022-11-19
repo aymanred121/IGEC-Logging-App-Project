@@ -274,7 +274,7 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                     }
                 }
         }
-
+        updateSummaryCacheStatus()
         val connectivityManager =
             applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         connectivityManager.registerDefaultNetworkCallback(object : ConnectivityManager.NetworkCallback() {
@@ -467,47 +467,63 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         binding.drawerLayout.closeDrawer(GravityCompat.START)
         return true
     }
+    private fun updateSummaryCacheStatus() {
+        val calendar = Calendar.getInstance()
+        val cachedSummary = CacheDirectory.readAllCachedText(this, "summary.json")
+        val summary: Summary = Gson().fromJson(cachedSummary, Summary::class.java) ?: return
+        val checkInDate = ((summary.checkIn["Time"] as Map<*, *>)["seconds"] as Double).toLong()
+        calendar.time = Date(checkInDate * 1000)
+        summary.checkIn["Time"] = Timestamp(calendar.time)
+        if (calendar.get(Calendar.DAY_OF_MONTH) != Calendar.getInstance()
+                .get(Calendar.DAY_OF_MONTH)
+        ) {
+            CacheDirectory.writeAllCachedText(this, "summary.json", "")
+        }
+    }
     private fun updateSummaryChanges() {
         updateDate()
         val calendar = Calendar.getInstance()
         val cachedSummary = CacheDirectory.readAllCachedText(this, "summary.json")
         val cachedGrossSalary = CacheDirectory.readAllCachedText(this, "grossSalary.json")
         val summary: Summary = Gson().fromJson(cachedSummary, Summary::class.java) ?: return
-        val employeeGrossSalary = Gson().fromJson(cachedGrossSalary, EmployeesGrossSalary::class.java)
+        val employeeGrossSalary =
+            Gson().fromJson(cachedGrossSalary, EmployeesGrossSalary::class.java)
         //fix Date in summary
         val checkInDate = ((summary.checkIn["Time"] as Map<*, *>)["seconds"] as Double).toLong()
         calendar.time = Date(checkInDate * 1000)
         summary.checkIn["Time"] = Timestamp(calendar.time)
 
-        if(summary.checkOut!=null){
-            val checkOutDate = ((summary.checkOut["Time"] as Map<*, *>)["seconds"] as Double).toLong()
+        if (summary.checkOut != null) {
+            val checkOutDate =
+                ((summary.checkOut["Time"] as Map<*, *>)["seconds"] as Double).toLong()
             summary.checkOut["Time"] = Timestamp(Date(checkOutDate * 1000))
         }
         //check if the summary is for today
-        if (calendar.get(Calendar.DAY_OF_MONTH) != Calendar.getInstance().get(Calendar.DAY_OF_MONTH)) return
+        if (calendar.get(Calendar.DAY_OF_MONTH) != Calendar.getInstance()
+                .get(Calendar.DAY_OF_MONTH)
+        ) return
         val path = employee!!.id
         SUMMARY_COL.document(path).collection("$year-$month").document(day).get()
             .addOnSuccessListener { document ->
-                if (document.exists()) return@addOnSuccessListener
                 if (document.metadata.isFromCache) return@addOnSuccessListener
                 SUMMARY_COL.document(path).collection("$year-$month")
                     .document(day)
                     .set(summary, SetOptions.merge())
-                if(employeeGrossSalary != null){
-                    EMPLOYEE_GROSS_SALARY_COL.document(path).collection(year).document(month).set(employeeGrossSalary, SetOptions.merge())
+                if (employeeGrossSalary != null) {
+                    EMPLOYEE_GROSS_SALARY_COL.document(path).collection(year).document(month)
+                        .set(employeeGrossSalary, SetOptions.merge()).addOnSuccessListener {
+                            CacheDirectory.writeAllCachedText(this, "grossSalary.json", "")
+                        }
                 }
-                if(summary.checkOut!=null){
+                if (summary.checkOut != null) {
                     for (pid in summary.projectIds) {
                         if (pid.value == CHECK_IN_FROM_SITE)
-                            PROJECT_COL.document(pid.key).update(
-                                "employeeWorkedTime." + employee!!.id,
-                                FieldValue.increment((summary.workingTime[pid.key]!!)))
+                            PROJECT_COL.document(pid.key).update("employeeWorkedTime." + employee!!.id, FieldValue.increment((summary.workingTime[pid.key]!!)))
                     }
                 }
-                CacheDirectory.writeAllCachedText(this, "summary.json", "")
-                CacheDirectory.writeAllCachedText(this, "grossSalary.json", "")
             }
     }
+
     private fun updateDate() {
         val calendar = java.util.Calendar.getInstance()
         year = calendar[java.util.Calendar.YEAR].toString()
@@ -522,16 +538,24 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
             }
         }
     }
-    private fun updateBaseGrossSalaryCache() {
-        EMPLOYEE_GROSS_SALARY_COL.document(employee?.id!!).get().addOnSuccessListener { doc->{
-            if(doc.exists()){
-                CacheDirectory.writeAllCachedText(this, "baseAllowances.json", Gson().toJson(doc.toObject(EmployeesGrossSalary::class.java)))
 
+    private fun updateBaseGrossSalaryCache() {
+        EMPLOYEE_GROSS_SALARY_COL.document(employee?.id!!).get().addOnSuccessListener { doc ->
+            {
+                if (doc.exists()) {
+                    CacheDirectory.writeAllCachedText(
+                        this,
+                        "baseAllowances.json",
+                        Gson().toJson(doc.toObject(EmployeesGrossSalary::class.java))
+                    )
+
+                }
             }
-        } }
+        }
     }
+
     private fun updateProjectsCache() {
-        PROJECT_COL.get().addOnSuccessListener { docs->
+        PROJECT_COL.get().addOnSuccessListener { docs ->
             val gson = Gson()
             CacheDirectory.writeAllCachedText(
                 this,

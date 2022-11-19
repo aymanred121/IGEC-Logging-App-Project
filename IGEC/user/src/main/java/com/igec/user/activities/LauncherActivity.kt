@@ -6,6 +6,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.media.RingtoneManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.provider.Settings
@@ -37,7 +38,11 @@ class LauncherActivity : Activity() {
             )
             alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
             val intent = Intent(this, AlarmReceiver::class.java)
-            pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
+            pendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_MUTABLE)
+            }else{
+                PendingIntent.getBroadcast(this, 0, intent, 0)
+            }
             alarmManager?.setInexactRepeating(
                 AlarmManager.RTC_WAKEUP,
                 calendar.timeInMillis,

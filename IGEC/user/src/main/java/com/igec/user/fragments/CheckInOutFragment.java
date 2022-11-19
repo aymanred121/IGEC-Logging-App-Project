@@ -16,11 +16,18 @@ import static com.igec.common.CONSTANTS.SUMMARY_COL;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
+import android.media.RingtoneManager;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.LayoutInflater;
@@ -57,6 +64,7 @@ import com.igec.common.firebase.Machine_Employee;
 import com.igec.common.firebase.Project;
 import com.igec.common.firebase.Summary;
 import com.igec.common.utilities.AllowancesEnum;
+import com.igec.user.AlarmReceiver;
 import com.igec.user.CacheDirectory;
 import com.igec.user.R;
 import com.igec.user.activities.DateInaccurate;
@@ -90,6 +98,8 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     private String machineEmpId;
     private String year, month, day;
     private String lastProjectId;
+    private AlarmManager alarmManager = null;
+    private PendingIntent pendingIntent = null;
 
     private enum CheckInType {
         HOME,
@@ -405,6 +415,64 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                 });
     }
 
+    private void createNotificationChannel(String CHANNEL_ID, int channelName, int channelDesc) {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        String name = getString(channelName);
+        String descriptionText = getString(channelDesc);
+        int importance = NotificationManager.IMPORTANCE_DEFAULT;
+        Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+        channel.setDescription(descriptionText);
+        channel.enableLights(true);
+        channel.setLightColor(Color.GREEN);
+        channel.setSound(alarmSound, null);
+
+        // Register the channel with the system
+        NotificationManager notificationManager =
+                (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.createNotificationChannel(channel);
+    }
+
+    private void setUpAlarm(int hours, int minutes) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        // set to 4:30 pm
+        calendar.set(Calendar.HOUR_OF_DAY, hours + 12);
+        calendar.set(Calendar.MINUTE, minutes);
+        calendar.set(Calendar.SECOND, 0);
+        if (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.FRIDAY) {
+            createNotificationChannel(
+                    "shift-notification",
+                    R.string.shift_notification,
+                    R.string.shift_notification_channel_description
+            );
+            alarmManager = (AlarmManager) getActivity().getSystemService(Context.ALARM_SERVICE);
+            Intent intent = new Intent(getActivity(), AlarmReceiver.class);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                pendingIntent = PendingIntent.getBroadcast(
+                        getActivity(),
+                        0,
+                        intent,
+                        PendingIntent.FLAG_MUTABLE
+                );
+            } else {
+                pendingIntent = PendingIntent.getBroadcast(
+                        getActivity(),
+                        0,
+                        intent,
+                        0
+                );
+            }
+            alarmManager.setInexactRepeating(
+                    AlarmManager.RTC_WAKEUP,
+                    calendar.getTimeInMillis(),
+                    AlarmManager.INTERVAL_DAY,
+                    pendingIntent
+            );
+        }
+    }
+
     private void reCheckInAction(Project project, Summary summary1) {
         showAlertOfTheCheckingInLocation(getString(R.string.you_are_rechecking_in_to_that_do_you_want_to_confirm_this_action, project.getName())).setPositiveButton("Yes", (dialogInterface1, i1) -> {
                     employeeReCheckIn(summary1, project);
@@ -427,6 +495,8 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
     private void checkInAction(Project project, Summary summary, HashMap<String, Object> checkOutDetails) {
         showAlertOfTheCheckingInLocation(getString(R.string.you_are_checking_in_to_that_do_you_want_to_confirm_this_action, checkInType == CheckInType.HOME ? "Home" : project.getName())).setPositiveButton("Yes", (dialogInterface1, i1) -> {
             canCheckFromHome = false;
+            // if possible set time based on when he checked in
+            setUpAlarm(4, 30);
             employeeCheckIn(summary, project);
             if (checkInType == CheckInType.HOME) {
                 employeeCheckOut(summary, checkOutDetails, "HOME");

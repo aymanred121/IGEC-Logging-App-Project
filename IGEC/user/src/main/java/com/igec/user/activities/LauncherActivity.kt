@@ -1,6 +1,7 @@
 package com.igec.user.activities
 
 import android.app.*
+import android.app.PendingIntent.FLAG_UPDATE_CURRENT
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -20,36 +21,8 @@ import java.util.*
 
 class LauncherActivity : Activity() {
     private var logged = false
-    private var alarmManager: AlarmManager? = null
-    private var pendingIntent: PendingIntent? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val calendar = Calendar.getInstance()
-        calendar.timeInMillis = System.currentTimeMillis()
-        // set to 4:30 pm
-        calendar.set(Calendar.HOUR_OF_DAY, 16)
-        calendar.set(Calendar.MINUTE, 30)
-        calendar.set(Calendar.SECOND, 0)
-        if (calendar.get(Calendar.DAY_OF_WEEK) != Calendar.FRIDAY) {
-            createNotificationChannel(
-                "shift-notification",
-                R.string.shift_notification,
-                R.string.shift_notification_channel_description
-            )
-            alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
-            val intent = Intent(this, AlarmReceiver::class.java)
-            pendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_MUTABLE)
-            }else{
-                PendingIntent.getBroadcast(this, 0, intent, 0)
-            }
-            alarmManager?.setInexactRepeating(
-                AlarmManager.RTC_WAKEUP,
-                calendar.timeInMillis,
-                AlarmManager.INTERVAL_DAY,
-                pendingIntent
-            )
-        }
         //validateDate(this)
         // for splash screen
         Handler().postDelayed({
@@ -114,24 +87,5 @@ class LauncherActivity : Activity() {
             startActivity(intent)
             finish()
         }
-    }
-
-    private fun createNotificationChannel(CHANNEL_ID: String, channelName: Int, channelDesc: Int) {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is new and not in the support library
-        val name = getString(channelName)
-        val descriptionText = getString(channelDesc)
-        val importance = NotificationManager.IMPORTANCE_DEFAULT
-        val alarmSound: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-        val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
-            description = descriptionText
-            enableLights(true)
-            lightColor = Color.GREEN
-            setSound(alarmSound, null)
-        }
-        // Register the channel with the system
-        val notificationManager: NotificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        notificationManager.createNotificationChannel(channel)
     }
 }

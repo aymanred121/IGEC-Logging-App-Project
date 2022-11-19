@@ -71,18 +71,23 @@ class LauncherActivity : Activity() {
             finish()
         } else {
             val savedID = preferences.getString(CONSTANTS.ID, "")
-            CONSTANTS.EMPLOYEE_COL.document(savedID!!).get()
-                .addOnSuccessListener { documentSnapshot: DocumentSnapshot ->
-                    if (!documentSnapshot.exists()) return@addOnSuccessListener
+            CONSTANTS.EMPLOYEE_COL.document(savedID!!).addSnapshotListener { documentSnapshot: DocumentSnapshot?, error:FirebaseFirestoreException? ->
+                if(error !=null || documentSnapshot == null){
+                    Toast.makeText(this@LauncherActivity, "Error: $error", Toast.LENGTH_SHORT).show()
+                    return@addSnapshotListener
+                }
+                    if (!documentSnapshot.exists()) return@addSnapshotListener
                     val employee = documentSnapshot.toObject(Employee::class.java)
                     val intent: Intent
                     // not used by another device but still logged here
                     // meaning that the account has been unlocked while the account is still open in a device
-                    if (!employee!!.isLocked) {
+                    if (!employee!!.isLocked || employee.projectIds == null || employee.projectIds.isEmpty()) {
+                        val msg =
+                            if (!employee.isLocked) "Account is unlocked, login is required" else "You are not assigned to any project"
                         intent = Intent(this@LauncherActivity, LoginActivity::class.java)
                         Toast.makeText(
                             this@LauncherActivity,
-                            "Account is unlocked, login is required",
+                            msg,
                             Toast.LENGTH_SHORT
                         ).show()
                     } else {
@@ -93,27 +98,11 @@ class LauncherActivity : Activity() {
                         ) else Intent(this@LauncherActivity, EDashboard::class.java)
                     }
                     intent.putExtra("user", employee)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
                     startActivity(intent)
                     finish()
-                }
-            CONSTANTS.EMPLOYEE_COL.document(savedID!!)
-                .addSnapshotListener { documentSnapshot: DocumentSnapshot?, error: FirebaseFirestoreException? ->
-                    if (error != null || documentSnapshot == null) return@addSnapshotListener
-                    val employee = documentSnapshot.toObject(Employee::class.java)
-                    if (!employee!!.isLocked || employee.projectIds == null || employee.projectIds.isEmpty()) {
-                        val msg =
-                            if (!employee.isLocked) "Account is unlocked, login is required" else "You are not assigned to any project"
-                        val intent = Intent(this@LauncherActivity, LoginActivity::class.java)
-                        Toast.makeText(
-                            this@LauncherActivity,
-                            msg,
-                            Toast.LENGTH_SHORT
-                        ).show()
-                        intent.putExtra("user", employee)
-                        startActivity(intent)
-                        finish()
-                    }
-
                 }
         }
         }, 0)

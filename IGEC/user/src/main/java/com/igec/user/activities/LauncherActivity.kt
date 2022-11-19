@@ -11,8 +11,9 @@ import android.os.Bundle
 import android.os.Handler
 import android.provider.Settings
 import android.widget.Toast
-import com.igec.common.CONSTANTS
 import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestoreException
+import com.igec.common.CONSTANTS
 import com.igec.common.firebase.Employee
 import com.igec.user.AlarmReceiver
 import com.igec.user.R
@@ -40,7 +41,7 @@ class LauncherActivity : Activity() {
             val intent = Intent(this, AlarmReceiver::class.java)
             pendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_MUTABLE)
-            }else{
+            } else {
                 PendingIntent.getBroadcast(this, 0, intent, 0)
             }
             alarmManager?.setInexactRepeating(
@@ -55,7 +56,6 @@ class LauncherActivity : Activity() {
         Handler().postDelayed({
             val preferences = getSharedPreferences(CONSTANTS.IGEC, MODE_PRIVATE)
             logged = preferences.getBoolean(CONSTANTS.LOGGED, false)
-
 
             /*
              *
@@ -95,6 +95,25 @@ class LauncherActivity : Activity() {
                     intent.putExtra("user", employee)
                     startActivity(intent)
                     finish()
+                }
+            CONSTANTS.EMPLOYEE_COL.document(savedID!!)
+                .addSnapshotListener { documentSnapshot: DocumentSnapshot?, error: FirebaseFirestoreException? ->
+                    if (error != null || documentSnapshot == null) return@addSnapshotListener
+                    val employee = documentSnapshot.toObject(Employee::class.java)
+                    if (!employee!!.isLocked || employee.projectIds == null || employee.projectIds.isEmpty()) {
+                        val msg =
+                            if (!employee.isLocked) "Account is unlocked, login is required" else "You are not assigned to any project"
+                        val intent = Intent(this@LauncherActivity, LoginActivity::class.java)
+                        Toast.makeText(
+                            this@LauncherActivity,
+                            msg,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        intent.putExtra("user", employee)
+                        startActivity(intent)
+                        finish()
+                    }
+
                 }
         }
         }, 0)

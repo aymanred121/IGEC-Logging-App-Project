@@ -1,771 +1,865 @@
-package com.igec.admin.fragments;
+package com.igec.admin.fragments
 
-import static android.content.ContentValues.TAG;
-import static com.igec.common.CONSTANTS.ABSENT;
-import static com.igec.common.CONSTANTS.EMPLOYEE_COL;
-import static com.igec.common.CONSTANTS.EMPLOYEE_GROSS_SALARY_COL;
-import static com.igec.common.CONSTANTS.EMPLOYEE_OVERVIEW_REF;
-import static com.igec.common.CONSTANTS.HOLIDAYS;
-import static com.igec.common.CONSTANTS.HOLIDAYS_COL;
-import static com.igec.common.CONSTANTS.PROJECT_COL;
-import static com.igec.common.CONSTANTS.SUMMARY_COL;
-import static com.igec.common.CONSTANTS.VACATION_COL;
+import android.annotation.SuppressLint
+import android.content.ContentValues
+import android.os.Bundle
+import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.RecyclerView
+import com.igec.common.utilities.CsvWriter
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.igec.common.utilities.WorkingDay
+import com.igec.common.CONSTANTS
+import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.FirebaseFirestoreException
+import com.google.firebase.firestore.QuerySnapshot
+import com.igec.admin.adapters.EmployeeAdapter
+import com.igec.admin.databinding.FragmentSummaryBinding
+import com.igec.common.utilities.LocationDetails
+import com.igec.admin.dialogs.MonthSummaryDialog
+import com.igec.common.firebase.*
+import com.whiteelephant.monthpicker.MonthPickerDialog
+import com.igec.common.utilities.AllowancesEnum
+import kotlinx.coroutines.*
+import kotlinx.coroutines.tasks.await
+import java.io.IOException
+import java.util.*
+import java.util.function.Consumer
+import java.util.stream.IntStream
+import kotlin.collections.ArrayList
 
-import android.annotation.SuppressLint;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.igec.admin.adapters.EmployeeAdapter;
-import com.igec.admin.databinding.FragmentSummaryBinding;
-import com.igec.admin.dialogs.MonthSummaryDialog;
-import com.igec.common.firebase.Allowance;
-import com.igec.common.firebase.Employee;
-import com.igec.common.firebase.EmployeeOverview;
-import com.igec.common.firebase.EmployeesGrossSalary;
-import com.igec.common.firebase.Holiday;
-import com.igec.common.firebase.Project;
-import com.igec.common.firebase.Summary;
-import com.igec.common.firebase.VacationRequest;
-import com.igec.common.utilities.AllowancesEnum;
-import com.igec.common.utilities.CsvWriter;
-import com.igec.common.utilities.LocationDetails;
-import com.igec.common.utilities.WorkingDay;
-import com.whiteelephant.monthpicker.MonthPickerDialog;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.StringJoiner;
-import java.util.stream.IntStream;
-
-public class SummaryFragment extends Fragment {
+class SummaryFragment : Fragment() {
     // Vars
-    private EmployeeAdapter adapter;
-    private RecyclerView.LayoutManager layoutManager;
-    private String year, month, prevMonth, prevYear;
-    private ArrayList<EmployeeOverview> employees;
-    private boolean opened = false;
-    private final long EIGHT_HOURS = 28800;
-    private CsvWriter csvWriter;
-    private String[] dataRow;
-    private int dataRowSize = 0;
-    int counter = 0;
-    final Calendar selected = Calendar.getInstance();
-
-
-    public void setOpened(boolean opened) {
-        this.opened = opened;
+    private val job = Job()
+    private val uiScope = CoroutineScope(Dispatchers.IO + job)
+    private var adapter: EmployeeAdapter? = null
+    private var layoutManager: RecyclerView.LayoutManager? = null
+    private var year: String? = null
+    private var month: String? = null
+    private var prevMonth: String? = null
+    private var prevYear: String? = null
+    private var employees: ArrayList<EmployeeOverview>? = null
+    private var opened = false
+    private val EIGHT_HOURS: Long = 28800
+    private var csvWriter: CsvWriter? = null
+    private lateinit var dataRow: Array<String>
+    private var dataRowSize = 0
+    val selected = Calendar.getInstance()
+    fun setOpened(opened: Boolean) {
+        this.opened = opened
     }
 
-    private FragmentSummaryBinding binding;
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        binding = FragmentSummaryBinding.inflate(inflater, container, false);
-        return binding.getRoot();
+    private var binding: FragmentSummaryBinding? = null
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        binding = FragmentSummaryBinding.inflate(inflater, container, false)
+        return binding!!.root
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        binding = null;
+    override fun onDestroy() {
+        job.cancel()
+        super.onDestroy()
+        binding = null
+
     }
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        initialize();
-        binding.monthLayout.setEndIconOnClickListener(oclMonthPicker);
-        binding.monthLayout.setErrorIconOnClickListener(oclMonthPicker);
-        adapter.setOnItemClickListener(oclEmployee);
-        binding.createFab.setOnClickListener(oclCSV);
-        binding.allFab.setOnClickListener(oclAll);
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        initialize()
+        binding!!.monthLayout.setEndIconOnClickListener(oclMonthPicker)
+        binding!!.monthLayout.setErrorIconOnClickListener(oclMonthPicker)
+        adapter!!.setOnItemClickListener(oclEmployee)
+        binding!!.createFab.setOnClickListener(oclCSV)
+        binding!!.allFab.setOnClickListener(oclAll)
     }
 
     // Functions
-    private void initialize() {
-        employees = new ArrayList<>();
-        binding.recyclerView.setHasFixedSize(true);
-        layoutManager = new LinearLayoutManager(getActivity());
-        adapter = new EmployeeAdapter(employees, EmployeeAdapter.Type.none);
-        binding.recyclerView.setLayoutManager(layoutManager);
-        binding.recyclerView.setAdapter(adapter);
-        getEmployees();
+    private fun initialize() {
+        employees = ArrayList()
+        binding!!.recyclerView.setHasFixedSize(true)
+        layoutManager = LinearLayoutManager(activity)
+        adapter = EmployeeAdapter(employees, EmployeeAdapter.Type.none)
+        binding!!.recyclerView.layoutManager = layoutManager
+        binding!!.recyclerView.adapter = adapter
+        getEmployees()
+    }
+
+    private suspend fun UpdateCSV(workingDays: ArrayList<WorkingDay>, empName: String, id: String) {
+
+
+        val holidaysDoc = CONSTANTS.HOLIDAYS_COL.document(CONSTANTS.HOLIDAYS).get().await()
+        val vacationsDoc = CONSTANTS.VACATION_COL
+            .whereEqualTo("vacationStatus", 1)
+            .whereEqualTo("employee.id", id).get().await()
+
+
+        dataRow = Array(dataRowSize) { "" }
+        dataRow[0] = empName
+        for (w in workingDays) {
+            dataRow[w.day.toInt()] = w.hours.toString()
+        }
+        IntStream.range(1, dataRow.size).filter { i: Int -> dataRow[i] == "" }
+            .forEach { i: Int -> dataRow[i] = CONSTANTS.ABSENT }
+        val vacationRequests = ArrayList<VacationRequest>()
+        val holidays = ArrayList<Holiday>()
+        addFridays()
+        addHolidays(holidaysDoc, holidays)
+        addVacations(vacationsDoc, vacationRequests)
+        var temp = ArrayList<String>()
+        temp.add(dataRow[0])
+        temp.addAll(Arrays.asList(*dataRow).subList(26, dataRow.size))
+        temp.addAll(Arrays.asList(*dataRow).subList(1, 26))
+        dataRow = temp.toTypedArray()
+        csvWriter!!.addDataRow(*dataRow)
+        dataRow = Array(dataRowSize) { "" }
+        dataRow[0] = "project name"
+        for (w in workingDays) {
+            dataRow[w.day.toInt()] = w.projectName.toString()
+        }
+        IntStream.range(1, dataRow.size).filter { i: Int -> dataRow[i] == "" }
+            .forEach { i: Int -> dataRow[i] = "---" }
+        temp = ArrayList()
+        temp.add(dataRow[0])
+        temp.addAll(Arrays.asList(*dataRow).subList(26, dataRow.size))
+        temp.addAll(Arrays.asList(*dataRow).subList(1, 26))
+        dataRow = temp.toTypedArray()
+        csvWriter!!.addDataRow(*dataRow)
 
     }
 
-    private void UpdateCSV(ArrayList<WorkingDay> workingDays, String empName, String id) {
-        HOLIDAYS_COL.document(HOLIDAYS).get().addOnSuccessListener(doc -> {
-            VACATION_COL
-                    .whereEqualTo("vacationStatus", 1)
-                    .whereEqualTo("employee.id", id).get().addOnSuccessListener(queryDocumentSnapshots -> {
-                        dataRow = new String[dataRowSize];
-                        dataRow[0] = empName;
-                        for (WorkingDay w : workingDays) {
-                            dataRow[Integer.parseInt(w.getDay())] = String.valueOf(w.getHours());
-                        }
-                        IntStream.range(1, dataRow.length).filter(i -> dataRow[i] == null).forEach(i -> dataRow[i] = ABSENT);
-                        ArrayList<VacationRequest> vacationRequests = new ArrayList<>();
-                        ArrayList<Holiday> holidays = new ArrayList<>();
-                        addFridays();
-                        addHolidays(doc, holidays);
-                        addVacations(queryDocumentSnapshots, vacationRequests);
-
-
-                        ArrayList<String> temp = new ArrayList<>();
-                        temp.add(dataRow[0]);
-                        temp.addAll(Arrays.asList(dataRow).subList(26, dataRow.length));
-                        temp.addAll(Arrays.asList(dataRow).subList(1, 26));
-                        dataRow = temp.toArray(new String[dataRowSize]);
-
-                        csvWriter.addDataRow(dataRow);
-                        dataRow = new String[dataRowSize];
-                        dataRow[0] = "project name";
-                        for (WorkingDay w : workingDays) {
-                            dataRow[Integer.parseInt(w.getDay())] = String.valueOf(w.getProjectName());
-                        }
-                        IntStream.range(1, dataRow.length).filter(i -> dataRow[i] == null).forEach(i -> dataRow[i] = "---");
-                        temp = new ArrayList<>();
-                        temp.add(dataRow[0]);
-                        temp.addAll(Arrays.asList(dataRow).subList(26, dataRow.length));
-                        temp.addAll(Arrays.asList(dataRow).subList(1, 26));
-                        dataRow = temp.toArray(new String[dataRowSize]);
-                        csvWriter.addDataRow(dataRow);
-                        counter++;
-                        if (counter == employees.size()) {
-                            try {
-                                csvWriter.build("all_emp-" + year + "-" + month);
-                                Snackbar.make(binding.getRoot(), "csv Saved!", Snackbar.LENGTH_SHORT).show();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    });
-
-        });
-
-
-    }
-
-    private void addVacations(QuerySnapshot queryDocumentSnapshots, ArrayList<VacationRequest> vacationRequests) {
-        if (queryDocumentSnapshots.getDocuments().size() != 0) {
-            for (QueryDocumentSnapshot d : queryDocumentSnapshots) {
-                vacationRequests.add(d.toObject(VacationRequest.class));
+    private fun addVacations(
+        queryDocumentSnapshots: QuerySnapshot,
+        vacationRequests: ArrayList<VacationRequest>
+    ) {
+        if (queryDocumentSnapshots.documents.size != 0) {
+            for (d in queryDocumentSnapshots) {
+                vacationRequests.add(d.toObject(VacationRequest::class.java))
             }
-            Calendar it = Calendar.getInstance();
-            Calendar end = Calendar.getInstance();
-            for (VacationRequest v : vacationRequests) {
-                String vacationLabels[] = new String[(int) v.getRequestedDays()];
-                addVacationLabels(v.getVacationDays(), vacationLabels, "vacation");
-                addVacationLabels(v.getSickDays(), vacationLabels, "sick leave");
-                addVacationLabels(v.getUnpaidDays(), vacationLabels, "unpaid");
-                int labelIndex = 0;
+            val it = Calendar.getInstance()
+            val end = Calendar.getInstance()
+            for (v in vacationRequests) {
+                val vacationLabels = Array<String>(v.requestedDays.toInt()) { "" }
+                addVacationLabels(v.vacationDays, vacationLabels, "vacation")
+                addVacationLabels(v.sickDays, vacationLabels, "sick leave")
+                addVacationLabels(v.unpaidDays, vacationLabels, "unpaid")
+                var labelIndex = 0
 
                 // acceptable bounds
-                Calendar thisMonthCalendar = Calendar.getInstance();
-                Calendar prevMonthCalendar = Calendar.getInstance();
-                if (Integer.parseInt(month) == 1) {
-                    thisMonthCalendar.set(Integer.parseInt(year), 0, 25);
-                    prevMonthCalendar.set(Integer.parseInt(prevYear), 11, 26);
+                val thisMonthCalendar = Calendar.getInstance()
+                val prevMonthCalendar = Calendar.getInstance()
+                if (month!!.toInt() == 1) {
+                    thisMonthCalendar[year!!.toInt(), 0] = 25
+                    prevMonthCalendar[prevYear!!.toInt(), 11] = 26
                 } else {
-                    thisMonthCalendar.set(Integer.parseInt(year), Integer.parseInt(month) - 1, 25);
-                    prevMonthCalendar.set(Integer.parseInt(year), Integer.parseInt(prevMonth) - 1, 26);
+                    thisMonthCalendar[year!!.toInt(), month!!.toInt() - 1] = 25
+                    prevMonthCalendar[year!!.toInt(), prevMonth!!.toInt() - 1] = 26
                 }
-
-                Calendar vacationStart = Calendar.getInstance();
-                vacationStart.setTime(v.getStartDate());
-                Calendar vacationEnd = Calendar.getInstance();
-                vacationEnd.setTime(v.getEndDate());
+                val vacationStart = Calendar.getInstance()
+                vacationStart.time = v.startDate
+                val vacationEnd = Calendar.getInstance()
+                vacationEnd.time = v.endDate
                 // exits in the acceptable bounds
                 // vacations that start and end on that range 26/prev - 25/this
-                if (isEqualOrLater(vacationStart, prevMonthCalendar) && isEqualOrEarlier(vacationEnd, thisMonthCalendar)) {
-                    it.setTime(v.getStartDate());
-                    end.setTime(v.getEndDate());
+                if (isEqualOrLater(
+                        vacationStart,
+                        prevMonthCalendar
+                    ) && isEqualOrEarlier(vacationEnd, thisMonthCalendar)
+                ) {
+                    it.time = v.startDate
+                    end.time = v.endDate
                     while (isEqualOrEarlier(it, end)) {
                         // skip if it's friday
-                        int index = Integer.parseInt(String.valueOf(it.get(Calendar.DAY_OF_MONTH)));
-                        if (it.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
-                            it.add(Calendar.DAY_OF_MONTH, 1);
-                            continue;
+                        val index = it[Calendar.DAY_OF_MONTH].toString().toInt()
+                        if (it[Calendar.DAY_OF_WEEK] == Calendar.FRIDAY) {
+                            it.add(Calendar.DAY_OF_MONTH, 1)
+                            continue
                         }
-                        dataRow[index] = vacationLabels[labelIndex];
-                        labelIndex++;
-                        it.add(Calendar.DAY_OF_MONTH, 1);
+                        dataRow[index] = vacationLabels[labelIndex]
+                        labelIndex++
+                        it.add(Calendar.DAY_OF_MONTH, 1)
                     }
-                }
-                // intersects with the start of acceptable bounds
-                // vacations that start on 26/prev or earlier and end on 25/this
-                else if (isEqualOrEarlier(vacationStart, prevMonthCalendar) && isEqualOrEarlier(vacationEnd, thisMonthCalendar)) {
+                } else if (isEqualOrEarlier(vacationStart, prevMonthCalendar) && isEqualOrEarlier(
+                        vacationEnd,
+                        thisMonthCalendar
+                    )
+                ) {
                     // cut the vacation to the acceptable bounds
-                    it.setTime(prevMonthCalendar.getTime());
+                    it.time = prevMonthCalendar.time
                     // add difference between prev month and vacation start to the label index
-                    labelIndex += (int) (prevMonthCalendar.getTimeInMillis() - vacationStart.getTimeInMillis()) / (86400000);
-                    end.setTime(v.getEndDate());
+                    labelIndex += (prevMonthCalendar.timeInMillis - vacationStart.timeInMillis).toInt() / 86400000
+                    end.time = v.endDate
                     while (isEqualOrEarlier(it, end)) {
                         // skip if it's friday
-                        int index = Integer.parseInt(String.valueOf(it.get(Calendar.DAY_OF_MONTH)));
-                        if (it.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
-                            it.add(Calendar.DAY_OF_MONTH, 1);
-                            continue;
+                        val index = it[Calendar.DAY_OF_MONTH].toString().toInt()
+                        if (it[Calendar.DAY_OF_WEEK] == Calendar.FRIDAY) {
+                            it.add(Calendar.DAY_OF_MONTH, 1)
+                            continue
                         }
-                        dataRow[index] = vacationLabels[labelIndex];
-                        labelIndex++;
-                        it.add(Calendar.DAY_OF_MONTH, 1);
+                        dataRow[index] = vacationLabels[labelIndex]
+                        labelIndex++
+                        it.add(Calendar.DAY_OF_MONTH, 1)
                     }
-                }
-                // intersects with the end of acceptable bounds
-                // vacations that start on 25/this or earlier and end after that
-                else if (isEqualOrEarlier(vacationStart, thisMonthCalendar) && isEqualOrLater(vacationEnd, thisMonthCalendar)) {
-                    it.setTime(v.getStartDate());
-                    end.setTime(thisMonthCalendar.getTime());
+                } else if (isEqualOrEarlier(vacationStart, thisMonthCalendar) && isEqualOrLater(
+                        vacationEnd,
+                        thisMonthCalendar
+                    )
+                ) {
+                    it.time = v.startDate
+                    end.time = thisMonthCalendar.time
                     while (isEqualOrEarlier(it, end)) {
                         // skip if it's friday
-                        int index = Integer.parseInt(String.valueOf(it.get(Calendar.DAY_OF_MONTH)));
-                        if (it.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
-                            it.add(Calendar.DAY_OF_MONTH, 1);
-                            continue;
+                        val index = it[Calendar.DAY_OF_MONTH].toString().toInt()
+                        if (it[Calendar.DAY_OF_WEEK] == Calendar.FRIDAY) {
+                            it.add(Calendar.DAY_OF_MONTH, 1)
+                            continue
                         }
-                        dataRow[index] = vacationLabels[labelIndex];
-                        labelIndex++;
-                        it.add(Calendar.DAY_OF_MONTH, 1);
+                        dataRow[index] = vacationLabels[labelIndex]
+                        labelIndex++
+                        it.add(Calendar.DAY_OF_MONTH, 1)
                     }
                 }
             }
         }
     }
 
-    private void addHolidays(DocumentSnapshot doc, ArrayList<Holiday> holidays) {
-        holidays.clear();
-        prevYear = String.valueOf(Integer.parseInt(year) - 1);
-        prevMonth = String.valueOf(Integer.parseInt(month) - 1);
-        if (doc.exists() && (doc.contains(year) || doc.contains(prevYear))) {
-            if (doc.getData().get(year) != null) {
+    private fun addHolidays(doc: DocumentSnapshot, holidays: ArrayList<Holiday>) {
+        holidays.clear()
+        prevYear = (year!!.toInt() - 1).toString()
+        prevMonth = (month!!.toInt() - 1).toString()
+        if (doc.exists() && (doc.contains(year!!) || doc.contains(prevYear!!))) {
+            if (doc.data!![year] != null) {
                 // loop over hashmap
-                for (Object o : ((ArrayList<Object>) doc.getData().get(year))) {
-                    holidays.add(new Holiday((HashMap) o));
+                for (o in (doc.data!![year] as ArrayList<*>?)!!) {
+                    holidays.add(Holiday(o as HashMap<*, *>))
                 }
-                if (doc.getData().get(prevYear) != null) {
-                    for (Object o : ((ArrayList<Object>) doc.getData().get(prevYear))) {
-                        holidays.add(new Holiday((HashMap) o));
+                if (doc.data!![prevYear] != null) {
+                    for (o in (doc.data!![prevYear] as ArrayList<*>?)!!) {
+                        holidays.add(Holiday(o as HashMap<*, *>))
                     }
                 }
-                for (int i = 1; i < dataRow.length; i++) {
-                    Calendar thisMonthCalendar = Calendar.getInstance();
-                    Calendar prevMonthCalendar = Calendar.getInstance();
-                    if (Integer.parseInt(month) == 1) {
-                        thisMonthCalendar.set(Integer.parseInt(year), 0, i);
-                        prevMonthCalendar.set(Integer.parseInt(prevYear), 11, i);
+                for (i in 1 until dataRow.size) {
+                    val thisMonthCalendar = Calendar.getInstance()
+                    val prevMonthCalendar = Calendar.getInstance()
+                    if (month!!.toInt() == 1) {
+                        thisMonthCalendar[year!!.toInt(), 0] = i
+                        prevMonthCalendar[prevYear!!.toInt(), 11] = i
                     } else {
-                        thisMonthCalendar.set(Integer.parseInt(year), Integer.parseInt(month) - 1, i);
-                        prevMonthCalendar.set(Integer.parseInt(year), Integer.parseInt(prevMonth) - 1, i);
+                        thisMonthCalendar[year!!.toInt(), month!!.toInt() - 1] = i
+                        prevMonthCalendar[year!!.toInt(), prevMonth!!.toInt() - 1] = i
                     }
                     if (i < 26) {
                         if (isHoliday(holidays, thisMonthCalendar)) {
-                            if (dataRow[i].equals(ABSENT) || dataRow[i].equals("Home")) {
-                                dataRow[i] = "holiday";
+                            if (dataRow[i] == CONSTANTS.ABSENT || dataRow[i] == "Home") {
+                                dataRow[i] = "holiday"
                             } else {
-                                dataRow[i] = dataRow[i] + " (holiday)";
+                                dataRow[i] = dataRow[i] + " (holiday)"
                             }
                         }
                     } else {
                         if (isHoliday(holidays, prevMonthCalendar)) {
-                            if (dataRow[i].equals(ABSENT) || dataRow[i].equals("Home") || dataRow[i].equals("off")) {
-                                dataRow[i] = "holiday";
+                            if (dataRow[i] == CONSTANTS.ABSENT || dataRow[i] == "Home" || dataRow[i] == "off") {
+                                dataRow[i] = "holiday"
                             } else {
-                                dataRow[i] = dataRow[i] + " (holiday)";
+                                dataRow[i] = dataRow[i] + " (holiday)"
                             }
                         }
                     }
-
                 }
-
             }
         }
     }
 
-    private boolean isHoliday(ArrayList<Holiday> holidays, Calendar day) {
-        boolean isHoliday = false;
-        for (Holiday holiday : holidays) {
-            if (isEqualOrLater(day, holiday.getStartCalendar()) && isEqualOrEarlier(day, holiday.getEndCalendar())) {
-                isHoliday = true;
+    private fun isHoliday(holidays: ArrayList<Holiday>, day: Calendar): Boolean {
+        var isHoliday = false
+        for (holiday in holidays) {
+            if (isEqualOrLater(day, holiday.startCalendar) && isEqualOrEarlier(
+                    day,
+                    holiday.endCalendar
+                )
+            ) {
+                isHoliday = true
             }
         }
-
-        return isHoliday;
+        return isHoliday
     }
 
-    private boolean isEqualOrLater(Calendar first, Calendar second) {
-        if (first.get(Calendar.YEAR) > second.get(Calendar.YEAR))
-            return true;
-        else if (first.get(Calendar.YEAR) == second.get(Calendar.YEAR)) {
-            if (first.get(Calendar.MONTH) > second.get(Calendar.MONTH))
-                return true;
-            else if (first.get(Calendar.MONTH) == second.get(Calendar.MONTH)) {
-                return first.get(Calendar.DAY_OF_MONTH) >= second.get(Calendar.DAY_OF_MONTH);
+    private fun isEqualOrLater(first: Calendar, second: Calendar): Boolean {
+        if (first[Calendar.YEAR] > second[Calendar.YEAR]) return true else if (first[Calendar.YEAR] == second[Calendar.YEAR]) {
+            if (first[Calendar.MONTH] > second[Calendar.MONTH]) return true else if (first[Calendar.MONTH] == second[Calendar.MONTH]) {
+                return first[Calendar.DAY_OF_MONTH] >= second[Calendar.DAY_OF_MONTH]
             }
         }
-        return false;
+        return false
     }
 
-    private boolean isEqualOrEarlier(Calendar first, Calendar second) {
-        if (first.get(Calendar.YEAR) < second.get(Calendar.YEAR))
-            return true;
-        else if (first.get(Calendar.YEAR) == second.get(Calendar.YEAR)) {
-            if (first.get(Calendar.MONTH) < second.get(Calendar.MONTH))
-                return true;
-            else if (first.get(Calendar.MONTH) == second.get(Calendar.MONTH)) {
-                return first.get(Calendar.DAY_OF_MONTH) <= second.get(Calendar.DAY_OF_MONTH);
+    private fun isEqualOrEarlier(first: Calendar, second: Calendar): Boolean {
+        if (first[Calendar.YEAR] < second[Calendar.YEAR]) return true else if (first[Calendar.YEAR] == second[Calendar.YEAR]) {
+            if (first[Calendar.MONTH] < second[Calendar.MONTH]) return true else if (first[Calendar.MONTH] == second[Calendar.MONTH]) {
+                return first[Calendar.DAY_OF_MONTH] <= second[Calendar.DAY_OF_MONTH]
             }
         }
-        return false;
+        return false
     }
 
-
-    private void addFridays() {
-        Calendar it = Calendar.getInstance();
+    private fun addFridays() {
+        val it = Calendar.getInstance()
         // set it to be the start of the month
-        it.set(Integer.parseInt(year), Integer.parseInt(month) - 1, 1);
-        for (int i = 1; i < dataRow.length; i++) {
-            if (it.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY) {
-                if (dataRow[i].equals(ABSENT) || dataRow[i].equals("Home")) {
-                    dataRow[i] = "off";
+        it[year!!.toInt(), month!!.toInt() - 1] = 1
+        for (i in 1 until dataRow.size) {
+            if (it[Calendar.DAY_OF_WEEK] == Calendar.FRIDAY) {
+                if (dataRow[i] == CONSTANTS.ABSENT || dataRow[i] == "Home") {
+                    dataRow[i] = "off"
                 } else {
-                    dataRow[i] = dataRow[i] + " (off)";
+                    dataRow[i] = dataRow[i] + " (off)"
                 }
             }
-            it.add(Calendar.DAY_OF_MONTH, 1);
-            if (it.get(Calendar.DAY_OF_MONTH) == 26) {
-                if (month.equals("1"))
-                    it.set(Integer.parseInt(prevYear), Integer.parseInt(month) - 1, 1);
-                else
-                    it.set(Integer.parseInt(year), Integer.parseInt(prevMonth) - 1, 26);
+            it.add(Calendar.DAY_OF_MONTH, 1)
+            if (it[Calendar.DAY_OF_MONTH] == 26) {
+                if (month == "1") it[prevYear!!.toInt(), month!!.toInt() - 1] =
+                    1 else it[year!!.toInt(), prevMonth!!.toInt() - 1] = 26
             }
         }
     }
 
-    private void addVacationLabels(int days, String[] vacationLabels, String label) {
-        int index = 0;
-        for (int i = 0; i < vacationLabels.length; i++) {
-            if (vacationLabels[i] != null)
-                index++;
-            else
-                break;
+    private fun addVacationLabels(days: Int, vacationLabels: Array<String>, label: String) {
+        var index = 0
+        for (i in vacationLabels.indices) {
+            if (vacationLabels[i] != "") index++ else break
         }
-        for (int i = index; i < index + days; i++) {
-            vacationLabels[i] = label;
+        for (i in index until index + days) {
+            vacationLabels[i] = label
         }
     }
 
-    private void loadWorkingDays(EmployeeOverview employee, String empName) {
-        ArrayList<WorkingDay> workingDays = new ArrayList<>();
-        SUMMARY_COL.document(employee.getId()).collection(year + "-" + month)
-                .get().addOnSuccessListener(docs -> {
-                    if (docs.size() == 0) {
-                        UpdateCSV(workingDays, empName, employee.getId());
-                        return;
+    private suspend fun loadWorkingDays(employee: EmployeeOverview, empName: String) {
+        val workingDays = ArrayList<WorkingDay>()
+        val summaryDoc = CONSTANTS.SUMMARY_COL.document(employee.id).collection("$year-$month")
+            .get().await()
+
+        if (summaryDoc.size() == 0) {
+            UpdateCSV(workingDays, empName, employee.id)
+            return
+        }
+        for (q in summaryDoc) {
+            val day = q.id
+            val summary = q.toObject(
+                Summary::class.java
+            )
+            if (summary.checkOut == null) {
+                if (Calendar.getInstance()[Calendar.DAY_OF_MONTH] == day.toInt()) {
+                    Snackbar.make(
+                        binding!!.root,
+                        "this Employee is still working",
+                        Snackbar.LENGTH_SHORT
+                    ).show()
+                    // continue;
+                }
+                /*
+                * if the employee forgot to checkout
+                * check the time spent on all projects
+                * add the remainder of 8 hrs to the lastProjectId
+                * set checkOut to checkIn
+                */
+                summary.checkOut = summary.checkIn
+                var workingTimeInSeconds =
+                    if (summary.workingTime != null) summary.workingTime.values.stream()
+                        .mapToLong { v: Long -> v }
+                        .sum() else 0
+                workingTimeInSeconds =
+                    if (EIGHT_HOURS - workingTimeInSeconds < 0) 0 else EIGHT_HOURS - workingTimeInSeconds
+                if (summary.workingTime != null) {
+                    summary.workingTime.merge(
+                        summary.lastProjectId,
+                        workingTimeInSeconds
+                    ) { a: Long, b: Long -> a + b }
+                } else {
+                    summary.workingTime = HashMap()
+                    summary.workingTime[summary.lastProjectId] = workingTimeInSeconds
+                }
+            }
+
+            for ((key, value) in summary.projectIds) {
+                val projectsDoc = CONSTANTS.PROJECT_COL.document(key).get().await()
+                var project: Project? = Project()
+                if (!projectsDoc.exists()) {
+                    if (key != "HOME") return
+                    project!!.name = "Home"
+                    project.reference = ""
+                    project.locationArea = ""
+                    project.locationCity = ""
+                    project.locationStreet = ""
+                } else {
+                    project = projectsDoc.toObject(Project::class.java)
+                }
+                val hours =
+                    if (summary.workingTime == null || !summary.workingTime.containsKey(
+                            key
+                        )
+                    ) 0.0 else summary.workingTime[key]!! / 3600.0
+                val checkInGeoHash = summary.checkIn["geohash"] as String?
+                val checkInLat = summary.checkIn["lat"] as Double
+                val checkInLng = summary.checkIn["lng"] as Double
+                val checkOutGeoHash = summary.checkOut["geohash"] as String?
+                val checkOutLat = summary.checkOut["lat"] as Double
+                val checkOutLng = summary.checkOut["lng"] as Double
+                val checkInLocation =
+                    LocationDetails(checkInGeoHash, checkInLat, checkInLng)
+                val checkOutLocation =
+                    LocationDetails(checkOutGeoHash, checkOutLat, checkOutLng)
+                val projectLocation = String.format(
+                    "%s, %s, %s",
+                    project!!.locationCity,
+                    project.locationArea,
+                    project.locationStreet
+                )
+                val projectName: String = if (summary.projectIds[key] == "office") {
+                    "office"
+                } else project.name
+                workingDays.add(
+                    WorkingDay(
+                        day,
+                        month,
+                        year,
+                        hours,
+                        empName,
+                        checkInLocation,
+                        checkOutLocation,
+                        projectName,
+                        project.reference,
+                        projectLocation,
+                        summary.projectIds[key]
+                    )
+                )
+                if (summaryDoc.documents.lastIndexOf(q) == summaryDoc.documents.size - 1) {
+                    //sort working days by date
+                    workingDays.sortWith { o1: WorkingDay, o2: WorkingDay ->
+                        val o1Day = o1.day.toInt()
+                        val o2Day = o2.day.toInt()
+                        o1Day - o2Day
                     }
-                    for (QueryDocumentSnapshot q : docs) {
-                        String day = q.getId();
-                        Summary summary = q.toObject(Summary.class);
-                        if (summary.getCheckOut() == null) {
-                            if (Calendar.getInstance().get(Calendar.DAY_OF_MONTH) == Integer.parseInt(day)) {
-                                Snackbar.make(binding.getRoot(), "this Employee is still working", Snackbar.LENGTH_SHORT).show();
-                                // continue;
-                            }
-                            /*
+                    UpdateCSV(
+                        workingDays.clone() as ArrayList<WorkingDay>,
+                        empName,
+                        employee.id
+                    )
+                }
+            }
+        }
+
+    }
+
+    private fun openMonthSummaryDialog(position: Int) {
+        val employee = employees!![position]
+        val workingDays = ArrayList<WorkingDay>()
+        val empName = employee.firstName + " " + employee.lastName
+        CONSTANTS.SUMMARY_COL.document(employee.id).collection("$year-$month")
+            .get().addOnSuccessListener { docs: QuerySnapshot ->
+                if (docs.size() == 0) {
+                    Snackbar.make(binding!!.root, "No Work is registered", Snackbar.LENGTH_SHORT)
+                        .show()
+                    return@addOnSuccessListener
+                }
+                for (q in docs) {
+                    val day = q.id
+                    val summary = q.toObject(
+                        Summary::class.java
+                    )
+                    if (summary.checkOut == null) {
+                        if (Calendar.getInstance()[Calendar.DAY_OF_MONTH] == day.toInt()) {
+                            Snackbar.make(
+                                binding!!.root,
+                                "this Employee is still working",
+                                Snackbar.LENGTH_SHORT
+                            ).show()
+                            // continue;
+                        }
+                        /*
                              * if the employee forgot to checkout
                              * check the time spent on all projects
                              * add the remainder of 8 hrs to the lastProjectId
                              * set checkOut to checkIn
-                             */
-                            summary.setCheckOut(summary.getCheckIn());
-                            long workingTimeInSeconds = summary.getWorkingTime() != null ? summary.getWorkingTime().values().stream().mapToLong(v -> (long) v).sum() : 0;
-                            workingTimeInSeconds = EIGHT_HOURS - workingTimeInSeconds < 0 ? 0 : EIGHT_HOURS - workingTimeInSeconds;
-                            if (summary.getWorkingTime() != null) {
-                                summary.getWorkingTime().merge(summary.getLastProjectId(), workingTimeInSeconds, (a, b) -> (long) a + (long) b);
-                            } else {
-                                summary.setWorkingTime(new HashMap<>());
-                                summary.getWorkingTime().put(summary.getLastProjectId(), workingTimeInSeconds);
-                            }
+                             */summary.checkOut = summary.checkIn
+                        var workingTimeInSeconds =
+                            if (summary.workingTime != null) summary.workingTime.values.stream()
+                                .mapToLong { v: Long -> v }
+                                .sum() else 0
+                        workingTimeInSeconds =
+                            if (EIGHT_HOURS - workingTimeInSeconds < 0) 0 else EIGHT_HOURS - workingTimeInSeconds
+                        if (summary.workingTime != null) {
+                            summary.workingTime.merge(
+                                summary.lastProjectId,
+                                workingTimeInSeconds
+                            ) { a: Long, b: Long -> a + b }
+                        } else {
+                            summary.workingTime = HashMap()
+                            summary.workingTime[summary.lastProjectId] = workingTimeInSeconds
                         }
-                        summary.getProjectIds().keySet().forEach(pid -> PROJECT_COL.document(pid).get().addOnSuccessListener(doc -> {
-                            Project project = new Project();
-                            if (!doc.exists()) {
-                                if (!pid.equals("HOME"))
-                                    return;
-                                project.setName("Home");
-                                project.setReference("");
-                                project.setLocationArea("");
-                                project.setLocationCity("");
-                                project.setLocationStreet("");
-                            } else {
-                                project = doc.toObject(Project.class);
-                            }
-                            double hours = summary.getWorkingTime() == null || !summary.getWorkingTime().containsKey(pid) ? 0.0 : (Long) summary.getWorkingTime().get(pid) / 3600.0;
-                            String checkInGeoHash = (String) summary.getCheckIn().get("geohash");
-                            double checkInLat = (double) summary.getCheckIn().get("lat");
-                            double checkInLng = (double) summary.getCheckIn().get("lng");
-                            String checkOutGeoHash = (String) summary.getCheckOut().get("geohash");
-                            double checkOutLat = (double) summary.getCheckOut().get("lat");
-                            double checkOutLng = (double) summary.getCheckOut().get("lng");
-                            LocationDetails checkInLocation = new LocationDetails(checkInGeoHash, checkInLat, checkInLng);
-                            LocationDetails checkOutLocation = new LocationDetails(checkOutGeoHash, checkOutLat, checkOutLng);
-                            String projectLocation = String.format("%s, %s, %s", project.getLocationCity(), project.getLocationArea(), project.getLocationStreet());
-//                            if (Calendar.getInstance().get(Calendar.DAY_OF_MONTH) != Integer.parseInt(day))
-                            String projectName;
-                            if (summary.getProjectIds().get(pid).equals("office")) {
-                                projectName = "office";
-                            } else
-                                projectName = project.getName();
-                            workingDays.add(new WorkingDay(day, month, year, hours, empName, checkInLocation, checkOutLocation, projectName, project.getReference(), projectLocation, summary.getProjectIds().get(pid)));
-                            if (docs.getDocuments().lastIndexOf(q) == docs.getDocuments().size() - 1) {
-                                //sort working days by date
-                                workingDays.sort((o1, o2) -> {
-                                    int o1Day = Integer.parseInt(o1.getDay());
-                                    int o2Day = Integer.parseInt(o2.getDay());
-                                    return o1Day - o2Day;
-                                });
-                                UpdateCSV((ArrayList<WorkingDay>) workingDays.clone(), empName, employee.getId());
-                            }
-                        }));
-
                     }
-                });
+                    summary.projectIds.keys.forEach(Consumer { pid: String ->
+                        CONSTANTS.PROJECT_COL.document(pid).get()
+                            .addOnSuccessListener PROJECT@{ doc: DocumentSnapshot ->
+                                var project: Project? = Project()
+                                if (!doc.exists()) {
+                                    if (pid != "HOME") return@PROJECT
+                                    project!!.name = "Home"
+                                    project.reference = ""
+                                    project.locationArea = ""
+                                    project.locationCity = ""
+                                    project.locationStreet = ""
+                                } else {
+                                    project = doc.toObject(Project::class.java)
+                                }
+                                val hours =
+                                    if (summary.workingTime == null || !summary.workingTime.containsKey(
+                                            pid
+                                        )
+                                    ) 0.0 else summary.workingTime[pid]!! / 3600.0
+                                val checkInGeoHash = summary.checkIn["geohash"] as String?
+                                val checkInLat = summary.checkIn["lat"] as Double
+                                val checkInLng = summary.checkIn["lng"] as Double
+                                val checkOutGeoHash = summary.checkOut["geohash"] as String?
+                                val checkOutLat = summary.checkOut["lat"] as Double
+                                val checkOutLng = summary.checkOut["lng"] as Double
+                                val checkInLocation =
+                                    LocationDetails(checkInGeoHash, checkInLat, checkInLng)
+                                val checkOutLocation =
+                                    LocationDetails(checkOutGeoHash, checkOutLat, checkOutLng)
+                                val projectLocation = String.format(
+                                    "%s, %s, %s",
+                                    project!!.locationCity,
+                                    project.locationArea,
+                                    project.locationStreet
+                                )
+                                if (Calendar.getInstance()[Calendar.DAY_OF_MONTH] != day.toInt()) workingDays.add(
+                                    WorkingDay(
+                                        day,
+                                        month,
+                                        year,
+                                        hours,
+                                        empName,
+                                        checkInLocation,
+                                        checkOutLocation,
+                                        project.name,
+                                        project.reference,
+                                        projectLocation,
+                                        summary.projectIds[pid]
+                                    )
+                                )
+                                if (docs.documents.lastIndexOf(q) == docs.documents.size - 1) {
+                                    if (opened) return@PROJECT
+                                    opened = true
+                                    //sort working days by date
+                                    workingDays.sortWith({ o1: WorkingDay, o2: WorkingDay ->
+                                        val o1Day = o1.day.toInt()
+                                        val o2Day = o2.day.toInt()
+                                        o1Day - o2Day
+                                    })
+                                    val monthSummaryDialog = MonthSummaryDialog(workingDays)
+                                    monthSummaryDialog.show(parentFragmentManager, "")
+                                }
+                            }
+                    })
+                }
+            }
     }
 
-    private void openMonthSummaryDialog(int position) {
-        EmployeeOverview employee = employees.get(position);
-        ArrayList<WorkingDay> workingDays = new ArrayList<>();
-        String empName = employee.getFirstName() + " " + employee.getLastName();
-        SUMMARY_COL.document(employee.getId()).collection(year + "-" + month)
-                .get().addOnSuccessListener(docs -> {
-                    if (docs.size() == 0) {
-                        Snackbar.make(binding.getRoot(), "No Work is registered", Snackbar.LENGTH_SHORT).show();
-                        return;
-                    }
-                    for (QueryDocumentSnapshot q : docs) {
-                        String day = q.getId();
-                        Summary summary = q.toObject(Summary.class);
-                        if (summary.getCheckOut() == null) {
-                            if (Calendar.getInstance().get(Calendar.DAY_OF_MONTH) == Integer.parseInt(day)) {
-                                Snackbar.make(binding.getRoot(), "this Employee is still working", Snackbar.LENGTH_SHORT).show();
-                                // continue;
-                            }
-                            /*
-                             * if the employee forgot to checkout
-                             * check the time spent on all projects
-                             * add the remainder of 8 hrs to the lastProjectId
-                             * set checkOut to checkIn
-                             */
-                            summary.setCheckOut(summary.getCheckIn());
-                            long workingTimeInSeconds = summary.getWorkingTime() != null ? summary.getWorkingTime().values().stream().mapToLong(v -> (long) v).sum() : 0;
-                            workingTimeInSeconds = EIGHT_HOURS - workingTimeInSeconds < 0 ? 0 : EIGHT_HOURS - workingTimeInSeconds;
-                            if (summary.getWorkingTime() != null) {
-                                summary.getWorkingTime().merge(summary.getLastProjectId(), workingTimeInSeconds, (a, b) -> (long) a + (long) b);
-                            } else {
-                                summary.setWorkingTime(new HashMap<>());
-                                summary.getWorkingTime().put(summary.getLastProjectId(), workingTimeInSeconds);
-                            }
-                        }
-                        summary.getProjectIds().keySet().forEach(pid -> PROJECT_COL.document(pid).get().addOnSuccessListener(doc -> {
-                            Project project = new Project();
-                            if (!doc.exists()) {
-                                if (!pid.equals("HOME"))
-                                    return;
-                                project.setName("Home");
-                                project.setReference("");
-                                project.setLocationArea("");
-                                project.setLocationCity("");
-                                project.setLocationStreet("");
-                            } else {
-                                project = doc.toObject(Project.class);
-                            }
-                            double hours = summary.getWorkingTime() == null || !summary.getWorkingTime().containsKey(pid) ? 0.0 : (Long) summary.getWorkingTime().get(pid) / 3600.0;
-                            String checkInGeoHash = (String) summary.getCheckIn().get("geohash");
-                            double checkInLat = (double) summary.getCheckIn().get("lat");
-                            double checkInLng = (double) summary.getCheckIn().get("lng");
-                            String checkOutGeoHash = (String) summary.getCheckOut().get("geohash");
-                            double checkOutLat = (double) summary.getCheckOut().get("lat");
-                            double checkOutLng = (double) summary.getCheckOut().get("lng");
-                            LocationDetails checkInLocation = new LocationDetails(checkInGeoHash, checkInLat, checkInLng);
-                            LocationDetails checkOutLocation = new LocationDetails(checkOutGeoHash, checkOutLat, checkOutLng);
-                            String projectLocation = String.format("%s, %s, %s", project.getLocationCity(), project.getLocationArea(), project.getLocationStreet());
-                            if (Calendar.getInstance().get(Calendar.DAY_OF_MONTH) != Integer.parseInt(day))
-                                workingDays.add(new WorkingDay(day, month, year, hours, empName, checkInLocation, checkOutLocation, project.getName(), project.getReference(), projectLocation, summary.getProjectIds().get(pid)));
-                            if (docs.getDocuments().lastIndexOf(q) == docs.getDocuments().size() - 1) {
-                                if (opened) return;
-                                opened = true;
-                                //sort working days by date
-                                workingDays.sort((o1, o2) -> {
-                                    int o1Day = Integer.parseInt(o1.getDay());
-                                    int o2Day = Integer.parseInt(o2.getDay());
-                                    return o1Day - o2Day;
-                                });
-                                MonthSummaryDialog monthSummaryDialog = new MonthSummaryDialog(workingDays);
-                                monthSummaryDialog.show(getParentFragmentManager(), "");
-                            }
-                        }));
-
-                    }
-                });
-    }
-
-    void getEmployees() {
-        EMPLOYEE_OVERVIEW_REF.addSnapshotListener((documentSnapshot, e) -> {
-            HashMap empMap;
+    fun getEmployees() {
+        CONSTANTS.EMPLOYEE_OVERVIEW_REF.addSnapshotListener { documentSnapshot: DocumentSnapshot?, e: FirebaseFirestoreException? ->
+            val empMap: Map<String, ArrayList<String>>?
             if (e != null) {
-                Log.w(TAG, "Listen failed.", e);
-                return;
+                Log.w(ContentValues.TAG, "Listen failed.", e)
+                return@addSnapshotListener
             }
             if (documentSnapshot != null && documentSnapshot.exists()) {
-                empMap = (HashMap) documentSnapshot.getData();
-                retrieveEmployees(empMap);
+                empMap = documentSnapshot.data as Map<String, ArrayList<String>>?
+                retrieveEmployees(empMap)
             } else {
-                return;
+                return@addSnapshotListener
             }
-        });
+        }
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    private void retrieveEmployees(Map<String, ArrayList<String>> empMap) {
-        employees.clear();
-        for (String key : empMap.keySet()) {
-            String firstName = empMap.get(key).get(0);
-            String lastName = empMap.get(key).get(1);
-            String title = empMap.get(key).get(2);
-            String id = (key);
-            employees.add(new EmployeeOverview(firstName, lastName, title, id));
+    private fun retrieveEmployees(empMap: Map<String, ArrayList<String>>?) {
+        employees!!.clear()
+        for (key in empMap!!.keys) {
+            val firstName = empMap[key]!![0]
+            val lastName = empMap[key]!![1]
+            val title = empMap[key]!![2]
+            employees!!.add(EmployeeOverview(firstName, lastName, title, key))
         }
-        employees.sort(Comparator.comparing(EmployeeOverview::getId));
-        adapter.setEmployeeOverviewsList(employees);
-        adapter.notifyDataSetChanged();
+        employees!!.sortWith(Comparator.comparing { obj: EmployeeOverview -> obj.id })
+        adapter!!.employeeOverviewsList = employees
+        adapter!!.notifyDataSetChanged()
     }
 
-    private final View.OnClickListener oclMonthPicker = v -> {
-        final Calendar today = Calendar.getInstance();
-        MonthPickerDialog.Builder builder = new MonthPickerDialog.Builder(getActivity(),
-                (selectedMonth, selectedYear) -> {
-                    selectedMonth += 1;
-                    binding.monthLayout.setError(null);
-                    binding.monthLayout.setErrorEnabled(false);
-                    binding.monthEdit.setText(String.format("%d/%d", selectedMonth, selectedYear));
-                    year = String.format("%d", selectedYear);
-                    month = String.format("%02d", selectedMonth);
+    private val oclMonthPicker = View.OnClickListener { v: View? ->
+        val today = Calendar.getInstance()
+        val builder = MonthPickerDialog.Builder(
+            activity,
+            { sMonth: Int, selectedYear: Int ->
+                val selectedMonth = sMonth + 1
+                binding!!.monthLayout.error = null
+                binding!!.monthLayout.isErrorEnabled = false
+                binding!!.monthEdit.setText(String.format("%d/%d", selectedMonth, selectedYear))
+                year = String.format("%d", selectedYear)
+                month = String.format("%02d", selectedMonth)
+                if (selectedMonth - 1 == 0) {
+                    prevMonth = "12"
+                    prevYear = String.format("%d", selectedYear - 1)
+                } else {
+                    prevMonth = String.format("%02d", selectedMonth - 1)
+                    prevYear = year
+                }
+                selected[selectedYear, selectedMonth - 1] = 1
+            }, today[Calendar.YEAR], today[Calendar.MONTH]
+        )
+        builder.setActivatedMonth(selected[Calendar.MONTH])
+            .setActivatedYear(selected[Calendar.YEAR])
+            .setMaxYear(today[Calendar.YEAR])
+            .setTitle("Select Month")
+            .build().show()
+    }
+    private val oclAll = View.OnClickListener { v: View? ->
+        uiScope.launch {
+            if (binding!!.monthEdit.text.toString().isEmpty()) {
+                binding!!.monthLayout.error = "Please select a month"
+            } else {
+                val header = StringJoiner(",")
+                header.add("Day")
+                var yearNumber = year!!.toInt()
+                var monthNumber = month!!.toInt() - 1
+                val calendar = Calendar.getInstance()
+                //check if month is february using calendar
+                if (monthNumber == 0) {
+                    monthNumber = 12
+                    yearNumber--
+                }
+                calendar[yearNumber, monthNumber - 1] = 1
+                dataRowSize = calendar.getActualMaximum(Calendar.DAY_OF_MONTH) + 1
+                for (i in 26 until dataRowSize) {
+                    header.add(String.format("%d", i))
+                }
+                for (i in 1..25) {
+                    header.add(String.format("%d", i))
+                }
+                dataRow = Array(dataRowSize) { "" }
+                csvWriter = CsvWriter(*header.toString().split(",").toTypedArray())
+                for (emp in employees!!) {
+                    val empName = emp.firstName + " " + emp.lastName
+                    dataRow[0] = empName
+                    loadWorkingDays(emp, empName)
+                }
+                try {
+                    csvWriter!!.build("all_emp-$year-$month")
+                    Snackbar.make(binding!!.root, "csv Saved!", Snackbar.LENGTH_SHORT)
+                        .show()
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+            }
+        }
+    }
+    private val oclCSV = View.OnClickListener { v: View? ->
 
-                    if (selectedMonth - 1 == 0) {
-                        prevMonth = "12";
-                        prevYear = String.format("%d", selectedYear - 1);
-                    } else {
-                        prevMonth = String.format("%02d", selectedMonth - 1);
-                        prevYear = year;
+        uiScope.launch(Dispatchers.IO)
+        {
+            if (binding!!.monthEdit.text.toString().isEmpty()) {
+                binding!!.monthLayout.error = "Please select a month"
+            } else {
+
+                val header = arrayOf(
+                    "Name",
+                    "Basic",
+                    "over time",
+                    "Cuts",
+                    "Transportation",
+                    "accommodation",
+                    "site",
+                    "remote",
+                    "food",
+                    "other",
+                    "personal",
+                    "Next month",
+                    "current month",
+                    "previous month"
+                )
+                val csvWriter = CsvWriter(*header)
+                month = String.format(Locale.getDefault(), "%02d", month!!.toInt())
+                val employees = CONSTANTS.EMPLOYEE_COL
+                    .get().await()
+                for (i in 0 until employees.documents.size) {
+                    val emp = employees.documents[i].toObject(Employee::class.java)!!
+                    val prevGrossSalaryDoc = CONSTANTS.EMPLOYEE_GROSS_SALARY_COL
+                        .document(emp.id)
+                        .collection(prevYear!!)
+                        .document(prevMonth!!)
+                        .get()
+                        .await()
+                    val currentGrossSalaryDoc = CONSTANTS.EMPLOYEE_GROSS_SALARY_COL
+                        .document(emp.id)
+                        .collection(year!!)
+                        .document(month!!)
+                        .get()
+                        .await()
+                    var currentGrossSalary = EmployeesGrossSalary()
+                    if (currentGrossSalaryDoc.exists())
+                        currentGrossSalary =
+                            currentGrossSalaryDoc.toObject(EmployeesGrossSalary::class.java)!!
+
+                    if (!currentGrossSalaryDoc.exists()) continue
+                    var cuts = 0.0
+                    var transportation = 0.0
+                    var accommodation = 0.0
+                    var site = 0.0
+                    var remote = 0.0
+                    var food = 0.0
+                    var other = 0.0
+                    var overTime = 0.0
+                    var personal = 0.0
+                    var previousMonth = 0.0
+                    for (allowance in currentGrossSalary.allTypes) {
+                        if (allowance.type != AllowancesEnum.NETSALARY.ordinal) {
+                            if (allowance.name.trim { it <= ' ' }
+                                    .equals(
+                                        "Transportation",
+                                        ignoreCase = true
+                                    )) {
+                                transportation += allowance.amount
+                            } else if (allowance.name.trim { it <= ' ' }
+                                    .equals(
+                                        "accommodation",
+                                        ignoreCase = true
+                                    )) {
+                                accommodation += allowance.amount
+                            } else if (allowance.name.trim { it <= ' ' }
+                                    .equals("site", ignoreCase = true)) {
+                                site += allowance.amount
+                            } else if (allowance.name.trim { it <= ' ' }
+                                    .equals("remote", ignoreCase = true)) {
+                                remote += allowance.amount
+                            } else if (allowance.name.trim { it <= ' ' }
+                                    .equals("food", ignoreCase = true)) {
+                                food += allowance.amount
+                            } else if (allowance.type == AllowancesEnum.RETENTION.ordinal) {
+                                cuts += allowance.amount
+                            } else if (allowance.type == AllowancesEnum.BONUS.ordinal) {
+                                personal += allowance.amount
+                            } else if (allowance.type == AllowancesEnum.OVERTIME.ordinal) {
+                                overTime += allowance.amount
+                            } else {
+                                other += allowance.amount
+                            }
+                        }
                     }
-                    selected.set(selectedYear, selectedMonth - 1, 1);
-                }, today.get(Calendar.YEAR), today.get(Calendar.MONTH));
-        builder.setActivatedMonth(selected.get(Calendar.MONTH))
-                .setActivatedYear(selected.get(Calendar.YEAR))
-                .setMaxYear(today.get(Calendar.YEAR))
-                .setTitle("Select Month")
-                .build().show();
+                    val nextMonth: Double =
+                        other + personal + accommodation + site + remote + food
+                    val currentMonth: Double =
+                        transportation + emp.salary + cuts + overTime
 
-    };
-
-
-    private View.OnClickListener oclAll = v -> {
-        counter = 0;
-        if (binding.monthEdit.getText().toString().isEmpty()) {
-            binding.monthLayout.setError("Please select a month");
-        } else {
-            StringJoiner header = new StringJoiner(",");
-            header.add("Day");
-            int yearNumber = Integer.parseInt(year);
-            int monthNumber = Integer.parseInt(month) - 1;
-            Calendar calendar = Calendar.getInstance();
-            //check if month is february using calendar
-            if (monthNumber == 0) {
-                monthNumber = 12;
-                yearNumber--;
-            }
-            calendar.set(yearNumber, monthNumber - 1, 1);
-            dataRowSize = calendar.getActualMaximum(Calendar.DAY_OF_MONTH) + 1;
-            for (int i = 26; i < dataRowSize; i++) {
-                header.add(String.format("%d", i));
-            }
-            for (int i = 1; i <= 25; i++) {
-                header.add(String.format("%d", i));
-            }
-
-            dataRow = new String[dataRowSize];
-            csvWriter = new CsvWriter(header.toString().split(","));
-            for (EmployeeOverview emp : employees) {
-                String empName = emp.getFirstName() + " " + emp.getLastName();
-                dataRow[0] = empName;
-                loadWorkingDays(emp, empName);
-            }
-
-        }
-
-    };
-    private final View.OnClickListener oclCSV = v -> {
-        if (binding.monthEdit.getText().toString().isEmpty()) {
-            binding.monthLayout.setError("Please select a month");
-        } else {
-            EMPLOYEE_COL
-                    .get()
-                    .addOnSuccessListener(queryDocumentSnapshots -> {
-                        final String[] header = {"Name", "Basic", "over time", "Cuts", "Transportation", "accommodation", "site", "remote", "food", "other", "personal", "Next month", "current month", "previous month"};
-                        CsvWriter csvWriter = new CsvWriter(header);
-                        final int[] counter = new int[1];
-                        for (QueryDocumentSnapshot queryDocumentSnapshot : queryDocumentSnapshots) {
-                            month = String.format(Locale.getDefault(), "%02d", Integer.parseInt(month));
-                            EMPLOYEE_GROSS_SALARY_COL.document(queryDocumentSnapshot.getId()).collection(prevYear).document(prevMonth).get().addOnSuccessListener(doc -> {
-                                EMPLOYEE_GROSS_SALARY_COL.document(queryDocumentSnapshot.getId()).collection(year).document(month).get().addOnSuccessListener(documentSnapshot1 -> {
-                                    if (!documentSnapshot1.exists()) {
-                                        if (counter[0] == queryDocumentSnapshots.size() - 1) {
-                                            try {
-                                                csvWriter.build(year + "-" + month);
-                                                Snackbar.make(binding.getRoot(), "CSV file created", Snackbar.LENGTH_SHORT).show();
-
-                                            } catch (IOException e) {
-                                                e.printStackTrace();
-                                            }
-                                        }
-                                        counter[0]++;
-                                        return;
-                                    }
-                                    Employee emp = queryDocumentSnapshot.toObject(Employee.class);
-                                    double cuts = 0;
-                                    double transportation = 0;
-                                    double accommodation = 0;
-                                    double site = 0;
-                                    double remote = 0;
-                                    double food = 0;
-                                    double other = 0;
-                                    double overTime = 0;
-                                    double personal = 0;
-                                    double nextMonth = 0;
-                                    double currentMonth = 0;
-                                    double previousMonth = 0;
-                                    for (Allowance allowance : documentSnapshot1.toObject(EmployeesGrossSalary.class).getAllTypes()) {
-                                        if (allowance.getType() != AllowancesEnum.NETSALARY.ordinal()) {
-                                            if (allowance.getName().trim().equalsIgnoreCase("Transportation")) {
-                                                transportation += allowance.getAmount();
-                                            } else if (allowance.getName().trim().equalsIgnoreCase("accommodation")) {
-                                                accommodation += allowance.getAmount();
-                                            } else if (allowance.getName().trim().equalsIgnoreCase("site")) {
-                                                site += allowance.getAmount();
-                                            } else if (allowance.getName().trim().equalsIgnoreCase("remote")) {
-                                                remote += allowance.getAmount();
-                                            } else if (allowance.getName().trim().equalsIgnoreCase("food")) {
-                                                food += allowance.getAmount();
-                                            } else if (allowance.getType() == AllowancesEnum.RETENTION.ordinal()) {
-                                                cuts += allowance.getAmount();
-                                            } else if (allowance.getType() == AllowancesEnum.BONUS.ordinal()) {
-                                                personal += allowance.getAmount();
-                                            } else if (allowance.getType() == AllowancesEnum.OVERTIME.ordinal()) {
-                                                overTime += allowance.getAmount();
-                                            } else {
-                                                other += allowance.getAmount();
-                                            }
-                                        }
-                                    }
-                                    nextMonth = other + personal + accommodation + site + remote + food;
-                                    currentMonth = transportation + emp.getSalary() + cuts + overTime;
-                                    if (!doc.exists())
-                                        previousMonth = 0;
-                                    else {
-                                        for (Allowance allowance : doc.toObject(EmployeesGrossSalary.class).getAllTypes()) {
-                                            if (allowance.getType() != AllowancesEnum.NETSALARY.ordinal()) {
-                                                if (allowance.getName().trim().equalsIgnoreCase("Transportation"))
-                                                    continue;
-                                                if (allowance.getType() == AllowancesEnum.RETENTION.ordinal()) {
-                                                    continue;
-                                                } else if (allowance.getType() == AllowancesEnum.OVERTIME.ordinal()) {
-                                                    continue;
-                                                } else {
-                                                    previousMonth += allowance.getAmount();
-                                                }
-                                            }
-                                        }
-                                    }
-                                    csvWriter.addDataRow(String.format("%s %s", emp.getFirstName(), emp.getLastName()), String.valueOf(emp.getSalary()), String.valueOf(overTime), String.valueOf(cuts), String.valueOf(transportation), String.valueOf(accommodation), String.valueOf(site), String.valueOf(remote), String.valueOf(food), String.valueOf(other), String.valueOf(personal), String.valueOf(nextMonth), String.valueOf(currentMonth), String.valueOf(previousMonth));
-                                    if (counter[0] == queryDocumentSnapshots.size() - 1) {
-                                        try {
-                                            csvWriter.build(year + "-" + month);
-                                            Snackbar.make(binding.getRoot(), "CSV file created", Snackbar.LENGTH_SHORT).show();
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                    counter[0]++;
-                                });
-
-                            });
-
+                    if (!prevGrossSalaryDoc.exists()) previousMonth = 0.0 else {
+                        for (allowance in prevGrossSalaryDoc.toObject(
+                            EmployeesGrossSalary::class.java
+                        )!!.allTypes) {
+                            if (allowance.type != AllowancesEnum.NETSALARY.ordinal) {
+                                if (allowance.name.trim { it <= ' ' }
+                                        .equals(
+                                            "Transportation",
+                                            ignoreCase = true
+                                        )
+                                ) continue
+                                previousMonth += if (allowance.type == AllowancesEnum.RETENTION.ordinal) {
+                                    continue
+                                } else if (allowance.type == AllowancesEnum.OVERTIME.ordinal) {
+                                    continue
+                                } else {
+                                    allowance.amount
+                                }
+                            }
                         }
-                    });
-        }
-    };
-    private EmployeeAdapter.OnItemClickListener oclEmployee = new EmployeeAdapter.OnItemClickListener() {
-        @Override
-        public void onItemClick(int position) {
-            final Calendar today = Calendar.getInstance();
-            @SuppressLint("DefaultLocale")
-            MonthPickerDialog.Builder builder = new MonthPickerDialog.Builder(getActivity(),
-                    (selectedMonth, selectedYear) -> {
-                        selectedMonth += 1;
-                        binding.monthLayout.setError(null);
-                        binding.monthLayout.setErrorEnabled(false);
-                        binding.monthEdit.setText(String.format("%d/%d", selectedMonth, selectedYear));
-                        String[] selectedDate = binding.monthEdit.getText().toString().split("/");
-                        year = selectedDate[1];
-                        month = selectedDate[0];
-                        month = String.format("%02d", Integer.parseInt(month));
-                        if ((Integer.parseInt(month) - 1) < 1) {
-                            prevMonth = "12";
-                            prevYear = Integer.parseInt(year) - 1 + "";
-                        } else {
-                            prevMonth = (Integer.parseInt(month) - 1) + "";
-                            prevYear = year;
-                        }
-                        prevMonth = String.format("%02d", Integer.parseInt(prevMonth));
-                        openMonthSummaryDialog(position);
-
-                    }, today.get(Calendar.YEAR), today.get(Calendar.MONTH));
-            MonthPickerDialog monthPickerDialog = builder.setActivatedMonth(today.get(Calendar.MONTH))
-                    .setMinYear(today.get(Calendar.YEAR) - 1)
-                    .setActivatedYear(today.get(Calendar.YEAR))
-                    .setMaxYear(today.get(Calendar.YEAR) + 1)
-                    .setTitle("Select Month")
-                    .build();
-            if (binding.monthEdit.getText().toString().isEmpty())
-                monthPickerDialog.show();
-            else {
-                String[] selectedDate = binding.monthEdit.getText().toString().split("/");
-                year = selectedDate[1];
-                month = selectedDate[0];
-                month = String.format("%02d", Integer.parseInt(month));
-                openMonthSummaryDialog(position);
+                    }
+                    csvWriter.addDataRow(
+                        String.format(
+                            "%s %s",
+                            emp.firstName,
+                            emp.lastName
+                        ),
+                        emp.salary.toString(),
+                        overTime.toString(),
+                        cuts.toString(),
+                        transportation.toString(),
+                        accommodation.toString(),
+                        site.toString(),
+                        remote.toString(),
+                        food.toString(),
+                        other.toString(),
+                        personal.toString(),
+                        nextMonth.toString(),
+                        currentMonth.toString(),
+                        previousMonth.toString()
+                    )
+                }
+                createCSV(csvWriter)
             }
-
         }
-    };
+    }
+
+
+    private fun createCSV(csvWriter: CsvWriter) {
+        try {
+            csvWriter.build("$year-$month")
+            Snackbar.make(
+                binding!!.root,
+                "CSV file created",
+                Snackbar.LENGTH_SHORT
+            ).show()
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+
+    private val oclEmployee = EmployeeAdapter.OnItemClickListener { position ->
+        val today = Calendar.getInstance()
+        @SuppressLint("DefaultLocale") val builder = MonthPickerDialog.Builder(
+            activity,
+            { sMonth: Int, selectedYear: Int ->
+                val selectedMonth = sMonth + 1
+                binding!!.monthLayout.error = null
+                binding!!.monthLayout.isErrorEnabled = false
+                binding!!.monthEdit.setText(String.format("%d/%d", selectedMonth, selectedYear))
+                val selectedDate = binding!!.monthEdit.text.toString().split("/").toTypedArray()
+                year = selectedDate[1]
+                month = selectedDate[0]
+                month = String.format("%02d", month!!.toInt())
+                if (month!!.toInt() - 1 < 1) {
+                    prevMonth = "12"
+                    prevYear = (year!!.toInt() - 1).toString()
+                } else {
+                    prevMonth = (month!!.toInt() - 1).toString()
+                    prevYear = year
+                }
+                prevMonth = String.format("%02d", prevMonth!!.toInt())
+                openMonthSummaryDialog(position)
+            }, today[Calendar.YEAR], today[Calendar.MONTH]
+        )
+        val monthPickerDialog = builder.setActivatedMonth(today[Calendar.MONTH])
+            .setMinYear(today[Calendar.YEAR] - 1)
+            .setActivatedYear(today[Calendar.YEAR])
+            .setMaxYear(today[Calendar.YEAR] + 1)
+            .setTitle("Select Month")
+            .build()
+        if (binding!!.monthEdit.text.toString().isEmpty()) monthPickerDialog.show() else {
+            val selectedDate = binding!!.monthEdit.text.toString().split("/").toTypedArray()
+            year = selectedDate[1]
+            month = selectedDate[0]
+            month = String.format("%02d", month!!.toInt())
+            openMonthSummaryDialog(position)
+        }
+    }
 }

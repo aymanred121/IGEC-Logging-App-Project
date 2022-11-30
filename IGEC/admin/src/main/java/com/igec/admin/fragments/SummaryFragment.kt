@@ -1,6 +1,7 @@
 package com.igec.admin.fragments
 
 import android.annotation.SuppressLint
+import androidx.appcompat.app.AlertDialog
 import android.content.ContentValues
 import android.os.Bundle
 import android.util.Log
@@ -8,29 +9,29 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.recyclerview.widget.RecyclerView
-import com.igec.common.utilities.CsvWriter
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.igec.common.utilities.WorkingDay
-import com.igec.common.CONSTANTS
+import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.QuerySnapshot
 import com.igec.admin.adapters.EmployeeAdapter
 import com.igec.admin.databinding.FragmentSummaryBinding
-import com.igec.common.utilities.LocationDetails
 import com.igec.admin.dialogs.MonthSummaryDialog
+import com.igec.common.CONSTANTS
 import com.igec.common.firebase.*
-import com.whiteelephant.monthpicker.MonthPickerDialog
 import com.igec.common.utilities.AllowancesEnum
+import com.igec.common.utilities.CsvWriter
+import com.igec.common.utilities.LocationDetails
+import com.igec.common.utilities.WorkingDay
+import com.whiteelephant.monthpicker.MonthPickerDialog
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
 import java.io.IOException
 import java.util.*
 import java.util.function.Consumer
 import java.util.stream.IntStream
-import kotlin.collections.ArrayList
 
 class SummaryFragment : Fragment() {
     // Vars
@@ -47,6 +48,7 @@ class SummaryFragment : Fragment() {
     private val EIGHT_HOURS: Long = 28800
     private var csvWriter: CsvWriter? = null
     private lateinit var dataRow: Array<String>
+    private lateinit var alertDialog: AlertDialog
     private var dataRowSize = 0
     val selected = Calendar.getInstance()
     fun setOpened(opened: Boolean) {
@@ -87,6 +89,13 @@ class SummaryFragment : Fragment() {
         adapter = EmployeeAdapter(employees, EmployeeAdapter.Type.none)
         binding!!.recyclerView.layoutManager = layoutManager
         binding!!.recyclerView.adapter = adapter
+        val builder = MaterialAlertDialogBuilder(
+            requireActivity()
+        )
+        builder.setTitle("Creating CSV")
+            .setMessage("creating CSV file, please wait...")
+            .setCancelable(false)
+        alertDialog = builder.create()
         getEmployees()
     }
 
@@ -555,11 +564,11 @@ class SummaryFragment : Fragment() {
                                     if (opened) return@PROJECT
                                     opened = true
                                     //sort working days by date
-                                    workingDays.sortWith({ o1: WorkingDay, o2: WorkingDay ->
+                                    workingDays.sortWith { o1: WorkingDay, o2: WorkingDay ->
                                         val o1Day = o1.day.toInt()
                                         val o2Day = o2.day.toInt()
                                         o1Day - o2Day
-                                    })
+                                    }
                                     val monthSummaryDialog = MonthSummaryDialog(workingDays)
                                     monthSummaryDialog.show(parentFragmentManager, "")
                                 }
@@ -627,10 +636,11 @@ class SummaryFragment : Fragment() {
             .build().show()
     }
     private val oclAll = View.OnClickListener { v: View? ->
-        uiScope.launch {
-            if (binding!!.monthEdit.text.toString().isEmpty()) {
-                binding!!.monthLayout.error = "Please select a month"
-            } else {
+        if (binding!!.monthEdit.text.toString().isEmpty()) {
+            binding!!.monthLayout.error = "Please select a month"
+        } else {
+            alertDialog.show()
+            uiScope.launch {
                 val header = StringJoiner(",")
                 header.add("Day")
                 var yearNumber = year!!.toInt()
@@ -658,8 +668,9 @@ class SummaryFragment : Fragment() {
                 }
                 try {
                     csvWriter!!.build("all_emp-$year-$month")
-                    Snackbar.make(binding!!.root, "csv Saved!", Snackbar.LENGTH_SHORT)
+                    Snackbar.make(binding!!.root, "CSV file created", Snackbar.LENGTH_SHORT)
                         .show()
+                    alertDialog.dismiss()
                 } catch (e: IOException) {
                     e.printStackTrace()
                 }
@@ -667,12 +678,12 @@ class SummaryFragment : Fragment() {
         }
     }
     private val oclCSV = View.OnClickListener { v: View? ->
-
-        uiScope.launch(Dispatchers.IO)
-        {
-            if (binding!!.monthEdit.text.toString().isEmpty()) {
-                binding!!.monthLayout.error = "Please select a month"
-            } else {
+        alertDialog.show()
+        if (binding!!.monthEdit.text.toString().isEmpty()) {
+            binding!!.monthLayout.error = "Please select a month"
+        } else {
+            uiScope.launch(Dispatchers.IO)
+            {
 
                 val header = arrayOf(
                     "Name",
@@ -819,6 +830,7 @@ class SummaryFragment : Fragment() {
                 "CSV file created",
                 Snackbar.LENGTH_SHORT
             ).show()
+            alertDialog.dismiss()
         } catch (e: IOException) {
             e.printStackTrace()
         }

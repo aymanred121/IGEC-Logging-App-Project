@@ -78,7 +78,7 @@ public class VacationsLogFragment extends Fragment {
         adapter.setOnItemClickListener(itclVacationAdapter);
 
         if (user == null)// admin
-            loadVacations("manager", null);
+            loadVacations();
         else if (ADMIN.equals(user.getManagerID())) // manager
         {
             loadOwn = true;
@@ -89,6 +89,24 @@ public class VacationsLogFragment extends Fragment {
         }
     }
 
+
+    private void loadVacations() {
+        VACATION_COL
+                .addSnapshotListener((queryDocumentSnapshots, e) -> {
+                    if (e != null) {
+                        Log.w(TAG, "Listen failed.", e);
+                        return;
+                    }
+                    vacations.clear();
+                    assert queryDocumentSnapshots != null;
+                    for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                        if (Objects.requireNonNull(doc.toObject(VacationRequest.class)).getVacationStatus() != 0)
+                            vacations.add(doc.toObject(VacationRequest.class));
+                    }
+                    vacations.sort(Comparator.comparing(VacationRequest::getRequestDate));
+                    adapter.notifyDataSetChanged();
+                });
+    }
 
     @SuppressLint("NotifyDataSetChanged")
     private void loadVacations(String who, String id) {

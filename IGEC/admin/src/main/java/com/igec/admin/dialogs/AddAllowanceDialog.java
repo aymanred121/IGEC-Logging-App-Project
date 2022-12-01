@@ -28,7 +28,11 @@ public class AddAllowanceDialog extends DialogFragment {
     private ArrayList<Allowance> allowances;
     private AllowanceAdapter adapter;
     private RecyclerView.LayoutManager layoutManager;
+    private double salary;
+    private String currency;
+    private boolean canGivePenalty;
 
+    // for project
     public AddAllowanceDialog(ArrayList<Allowance> allowances) {
         this.allowances = new ArrayList<>();
         allowances.forEach(allowance -> {
@@ -39,6 +43,21 @@ public class AddAllowanceDialog extends DialogFragment {
             }
         });
 
+    }
+
+    // for employee
+    public AddAllowanceDialog(ArrayList<Allowance> allowances, double salary, String currency) {
+        this.allowances = new ArrayList<>();
+        allowances.forEach(allowance -> {
+            try {
+                this.allowances.add((Allowance) allowance.clone());
+            } catch (CloneNotSupportedException e) {
+                e.printStackTrace();
+            }
+        });
+        this.salary = salary;   // employee salary
+        this.currency = currency;   // employee currency
+        this.canGivePenalty = true;
     }
 
     @NonNull
@@ -125,12 +144,18 @@ public class AddAllowanceDialog extends DialogFragment {
     };
     private View.OnClickListener oclAddAllowance = v -> {
         AllowanceInfoDialog allowanceInfoDialog = new AllowanceInfoDialog(-1);
+        allowanceInfoDialog.setEmployeeCurrency(currency);
+        allowanceInfoDialog.setEmployeeSalary(salary);
+        allowanceInfoDialog.canGivePenalty(canGivePenalty);
         allowanceInfoDialog.show(getParentFragmentManager(), "");
     };
     private AllowanceAdapter.OnItemClickListener oclItemClickListener = new AllowanceAdapter.OnItemClickListener() {
         @Override
         public void onItemClick(int position) {
             AllowanceInfoDialog allowanceInfoDialog = new AllowanceInfoDialog(position, allowances.get(position));
+            allowanceInfoDialog.setEmployeeCurrency(currency);
+            allowanceInfoDialog.setEmployeeSalary(salary);
+            allowanceInfoDialog.canGivePenalty(canGivePenalty);
             allowanceInfoDialog.show(getParentFragmentManager(), "");
         }
 

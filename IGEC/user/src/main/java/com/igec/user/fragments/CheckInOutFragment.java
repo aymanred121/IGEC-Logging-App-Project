@@ -690,6 +690,7 @@ public class CheckInOutFragment extends Fragment implements EasyPermissions.Perm
                 }});
                 break;
         }
+        summary.setProjectIds((HashMap<String, String>) checkIn.get("projectIds"));
         SUMMARY_COL.document(id).collection(year + "-" + month).document(day).set(checkIn, SetOptions.merge());
         EMPLOYEE_GROSS_SALARY_COL.document(currEmployee.getId()).get().addOnCompleteListener(task -> {
             if (!task.isSuccessful() || task.getResult().getMetadata().isFromCache()) {

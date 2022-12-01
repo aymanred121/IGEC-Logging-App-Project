@@ -65,6 +65,7 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
     private lateinit var transferStatusNotification: Notification
     private lateinit var transferRequestNotification: Notification
     private lateinit var notificationManager: NotificationManagerCompat
+
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -277,9 +278,8 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         EMPLOYEE_COL.document(employee!!.id).addSnapshotListener { value, error ->
             if (error != null || value == null || !value.exists()) return@addSnapshotListener
             employee = value.toObject(Employee::class.java)
-            val intent:Intent
-            if(!employee!!.isLocked)
-            {
+            val intent: Intent
+            if (!employee!!.isLocked) {
                 intent = Intent(this, LoginActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                 startActivity(intent)
@@ -289,7 +289,8 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         updateSummaryCacheStatus()
         val connectivityManager =
             applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        connectivityManager.registerDefaultNetworkCallback(object : ConnectivityManager.NetworkCallback() {
+        connectivityManager.registerDefaultNetworkCallback(object :
+            ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
                 updateSummaryChanges()
                 updateBaseGrossSalaryCache()
@@ -480,6 +481,7 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         binding.drawerLayout.closeDrawer(GravityCompat.START)
         return true
     }
+
     private fun updateSummaryCacheStatus() {
         val calendar = Calendar.getInstance()
         val cachedSummary = CacheDirectory.readAllCachedText(this, "summary.json")
@@ -493,6 +495,7 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
             CacheDirectory.writeAllCachedText(this, "summary.json", "")
         }
     }
+
     private fun updateSummaryChanges() {
         updateDate()
         val calendar = Calendar.getInstance()
@@ -531,7 +534,10 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                 if (summary.checkOut != null) {
                     for (pid in summary.projectIds) {
                         if (pid.value == CHECK_IN_FROM_SITE)
-                            PROJECT_COL.document(pid.key).update("employeeWorkedTime." + employee!!.id, FieldValue.increment((summary.workingTime[pid.key]!!)))
+                            PROJECT_COL.document(pid.key).update(
+                                "employeeWorkedTime." + employee!!.id,
+                                FieldValue.increment((summary.workingTime[pid.key]!!))
+                            )
                     }
                 }
             }
@@ -554,15 +560,13 @@ class MDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
 
     private fun updateBaseGrossSalaryCache() {
         EMPLOYEE_GROSS_SALARY_COL.document(employee?.id!!).get().addOnSuccessListener { doc ->
-            {
-                if (doc.exists()) {
-                    CacheDirectory.writeAllCachedText(
-                        this,
-                        "baseAllowances.json",
-                        Gson().toJson(doc.toObject(EmployeesGrossSalary::class.java))
-                    )
+            if (doc.exists()) {
+                CacheDirectory.writeAllCachedText(
+                    this,
+                    "baseAllowances.json",
+                    Gson().toJson(doc.toObject(EmployeesGrossSalary::class.java))
+                )
 
-                }
             }
         }
     }

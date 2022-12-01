@@ -201,9 +201,8 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         EMPLOYEE_COL.document(employee!!.id).addSnapshotListener { value, error ->
             if (error != null || value == null || !value.exists()) return@addSnapshotListener
             employee = value.toObject(Employee::class.java)
-            val intent:Intent
-            if(!employee!!.isLocked)
-            {
+            val intent: Intent
+            if (!employee!!.isLocked) {
                 intent = Intent(this, LoginActivity::class.java)
                 intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                 startActivity(intent)
@@ -227,7 +226,6 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         })
 
     }
-
 
 
     private fun createNotificationChannel(CHANNEL_ID: String, channelName: Int, channelDesc: Int) {
@@ -368,6 +366,7 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
         else
             finish()
     }
+
     private fun updateSummaryCacheStatus() {
         val calendar = Calendar.getInstance()
         val cachedSummary = CacheDirectory.readAllCachedText(this, "summary.json")
@@ -381,6 +380,7 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
             writeAllCachedText(this, "summary.json", "")
         }
     }
+
     private fun updateSummaryChanges() {
         updateDate()
         val calendar = Calendar.getInstance()
@@ -413,13 +413,16 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
                 if (employeeGrossSalary != null) {
                     EMPLOYEE_GROSS_SALARY_COL.document(path).collection(year).document(month)
                         .set(employeeGrossSalary, SetOptions.merge()).addOnSuccessListener {
-                        writeAllCachedText(this, "grossSalary.json", "")
-                    }
+                            writeAllCachedText(this, "grossSalary.json", "")
+                        }
                 }
                 if (summary.checkOut != null) {
                     for (pid in summary.projectIds) {
                         if (pid.value == CHECK_IN_FROM_SITE)
-                            PROJECT_COL.document(pid.key).update("employeeWorkedTime." + employee!!.id, FieldValue.increment((summary.workingTime[pid.key]!!)))
+                            PROJECT_COL.document(pid.key).update(
+                                "employeeWorkedTime." + employee!!.id,
+                                FieldValue.increment((summary.workingTime[pid.key]!!))
+                            )
                     }
                 }
             }
@@ -442,15 +445,13 @@ class EDashboard : AppCompatActivity(), NavigationView.OnNavigationItemSelectedL
 
     private fun updateBaseGrossSalaryCache() {
         EMPLOYEE_GROSS_SALARY_COL.document(employee?.id!!).get().addOnSuccessListener { doc ->
-            {
-                if (doc.exists()) {
-                    writeAllCachedText(
-                        this,
-                        "baseAllowances.json",
-                        Gson().toJson(doc.toObject(EmployeesGrossSalary::class.java))
-                    )
+            if (doc.exists()) {
+                writeAllCachedText(
+                    this,
+                    "baseAllowances.json",
+                    Gson().toJson(doc.toObject(EmployeesGrossSalary::class.java))
+                )
 
-                }
             }
         }
     }

@@ -719,12 +719,6 @@ class SummaryFragment : Fragment() {
                         .document(month!!)
                         .get()
                         .await()
-                    var currentGrossSalary = EmployeesGrossSalary()
-                    if (currentGrossSalaryDoc.exists())
-                        currentGrossSalary =
-                            currentGrossSalaryDoc.toObject(EmployeesGrossSalary::class.java)!!
-
-                    if (!currentGrossSalaryDoc.exists()) continue
                     var cuts = 0.0
                     var transportation = 0.0
                     var accommodation = 0.0
@@ -735,37 +729,42 @@ class SummaryFragment : Fragment() {
                     var overTime = 0.0
                     var personal = 0.0
                     var previousMonth = 0.0
-                    for (allowance in currentGrossSalary.allTypes) {
-                        if (allowance.type != AllowancesEnum.NETSALARY.ordinal) {
-                            if (allowance.name.trim { it <= ' ' }
-                                    .equals(
-                                        "Transportation",
-                                        ignoreCase = true
-                                    )) {
-                                transportation += allowance.amount
-                            } else if (allowance.name.trim { it <= ' ' }
-                                    .equals(
-                                        "accommodation",
-                                        ignoreCase = true
-                                    )) {
-                                accommodation += allowance.amount
-                            } else if (allowance.name.trim { it <= ' ' }
-                                    .equals("site", ignoreCase = true)) {
-                                site += allowance.amount
-                            } else if (allowance.name.trim { it <= ' ' }
-                                    .equals("remote", ignoreCase = true)) {
-                                remote += allowance.amount
-                            } else if (allowance.name.trim { it <= ' ' }
-                                    .equals("food", ignoreCase = true)) {
-                                food += allowance.amount
-                            } else if (allowance.type == AllowancesEnum.RETENTION.ordinal) {
-                                cuts += allowance.amount
-                            } else if (allowance.type == AllowancesEnum.BONUS.ordinal) {
-                                personal += allowance.amount
-                            } else if (allowance.type == AllowancesEnum.OVERTIME.ordinal) {
-                                overTime += allowance.amount
-                            } else {
-                                other += allowance.amount
+                    if (currentGrossSalaryDoc.exists()) {
+                        val currentGrossSalary =
+                            currentGrossSalaryDoc.toObject(EmployeesGrossSalary::class.java)!!
+
+                        for (allowance in currentGrossSalary.allTypes) {
+                            if (allowance.type != AllowancesEnum.NETSALARY.ordinal) {
+                                if (allowance.name.trim { it <= ' ' }
+                                        .equals(
+                                            "Transportation",
+                                            ignoreCase = true
+                                        )) {
+                                    transportation += allowance.amount
+                                } else if (allowance.name.trim { it <= ' ' }
+                                        .equals(
+                                            "accommodation",
+                                            ignoreCase = true
+                                        )) {
+                                    accommodation += allowance.amount
+                                } else if (allowance.name.trim { it <= ' ' }
+                                        .equals("site", ignoreCase = true)) {
+                                    site += allowance.amount
+                                } else if (allowance.name.trim { it <= ' ' }
+                                        .equals("remote", ignoreCase = true)) {
+                                    remote += allowance.amount
+                                } else if (allowance.name.trim { it <= ' ' }
+                                        .equals("food", ignoreCase = true)) {
+                                    food += allowance.amount
+                                } else if (allowance.type == AllowancesEnum.RETENTION.ordinal) {
+                                    cuts += allowance.amount
+                                } else if (allowance.type == AllowancesEnum.BONUS.ordinal) {
+                                    personal += allowance.amount
+                                } else if (allowance.type == AllowancesEnum.OVERTIME.ordinal) {
+                                    overTime += allowance.amount
+                                } else {
+                                    other += allowance.amount
+                                }
                             }
                         }
                     }
